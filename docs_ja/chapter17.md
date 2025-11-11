@@ -30,7 +30,7 @@
 
 | <a id="fig-17-01"></a>[]()                                                                                                             |
 | -------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="images/chapter17/fig-17-01.svg" onerror="this.src='images/chapter17/fig-17-01.png'; this.onerror=null;" alt="Figure 17.1" /> |
+| <img src="docs/images/chapter17/fig-17-01.svg" onerror="this.src='docs/images/chapter17/fig-17-01.png'; this.onerror=null;" alt="Figure 17.1" /> |
 | **図17.1：立方体**                                                                                                                          |
 
 解釈に到達する前に、まず候補が何であるかを明確にしておく必要がある。
@@ -81,7 +81,7 @@
 
 | <a id="fig-17-02"></a>[]()                                                                                                             |
 | -------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="images/chapter17/fig-17-02.svg" onerror="this.src='images/chapter17/fig-17-02.png'; this.onerror=null;" alt="Figure 17.2" /> |
+| <img src="docs/images/chapter17/fig-17-02.svg" onerror="this.src='docs/images/chapter17/fig-17-02.png'; this.onerror=null;" alt="Figure 17.2" /> |
 | **図17.2：ラベル付けされた立方体**                                                                                                                  |
 
 ---
@@ -99,7 +99,7 @@ Y 頂点と W 頂点は、それぞれ **フォーク（fork）** と **アロ�
 
 | <a id="fig-17-03"></a>[]()                                                                                                             |
 | -------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="images/chapter17/fig-17-03.svg" onerror="this.src='images/chapter17/fig-17-03.png'; this.onerror=null;" alt="Figure 17.3" /> |
+| <img src="docs/images/chapter17/fig-17-03.svg" onerror="this.src='docs/images/chapter17/fig-17-03.png'; this.onerror=null;" alt="Figure 17.3" /> |
 | **図17.3：可能な頂点とラベルの種類**                                                                                                                 |
 
 ---
@@ -148,7 +148,7 @@ Y 頂点と W 頂点は、それぞれ **フォーク（fork）** と **アロ�
 
 | <a id="fig-17-04"></a>[]()                                                                                                             |
 | -------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="images/chapter17/fig-17-04.svg" onerror="this.src='images/chapter17/fig-17-04.png'; this.onerror=null;" alt="Figure 17.4" /> |
+| <img src="docs/images/chapter17/fig-17-04.svg" onerror="this.src='docs/images/chapter17/fig-17-04.png'; this.onerror=null;" alt="Figure 17.4" /> |
 | **図17.4：制約の伝播（Propagating Constraints）**                                                                                               |
 
 ---
@@ -168,7 +168,7 @@ Y 頂点と W 頂点は、それぞれ **フォーク（fork）** と **アロ�
 
 | []()                                   |
 | -------------------------------------- |
-| ![f17-05](images/chapter17/f17-05.jpg) |
+| ![f17-05](docs/images/chapter17/f17-05.jpg) |
 | **図17.5：線ラベリング・プログラムの用語集**             |
 
 > *(編注：ここは本来 Markdown の表として整形されるべき箇所である)*
@@ -520,7 +520,7 @@ Y 頂点と W 頂点は、それぞれ **フォーク（fork）** と **アロ�
 
 | <a id="fig-17-06"></a>[]()                                                                                                             |
 | -------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="images/chapter17/fig-17-01.svg" onerror="this.src='images/chapter17/fig-17-01.png'; this.onerror=null;" alt="Figure 17.6" /> |
+| <img src="docs/images/chapter17/fig-17-01.svg" onerror="this.src='docs/images/chapter17/fig-17-01.png'; this.onerror=null;" alt="Figure 17.6" /> |
 | **図17.6：立方体（A Cube）**                                                                                                                  |
 
 ```lisp
@@ -710,7 +710,7 @@ Diagram:
 
 | <a id="fig-17-07"></a>[]()                                                                                                             |
 | -------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="images/chapter17/fig-17-07.svg" onerror="this.src='images/chapter17/fig-17-07.png'; this.onerror=null;" alt="Figure 17.7" /> |
+| <img src="docs/images/chapter17/fig-17-07.svg" onerror="this.src='docs/images/chapter17/fig-17-07.png'; this.onerror=null;" alt="Figure 17.7" /> |
 | **図17.7：立方体の4つの解釈（Four Interpretations of the Cube）**                                                                                  |
 
 ---
@@ -779,12 +779,12 @@ After constraint propagation the diagram is:
 
 | <a id="fig-17-08"></a>[]()                                                                                                             |
 | -------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="images/chapter17/fig-17-08.svg" onerror="this.src='images/chapter17/fig-17-08.png'; this.onerror=null;" alt="Figure 17.8" /> |
+| <img src="docs/images/chapter17/fig-17-08.svg" onerror="this.src='docs/images/chapter17/fig-17-08.png'; this.onerror=null;" alt="Figure 17.8" /> |
 | **図17.8：プレート上の立方体（Cube on a Plate）**                                                                                                   |
 
 | <a id="fig-17-09"></a>[]()                                                                                                             |
 | -------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="images/chapter17/fig-17-09.svg" onerror="this.src='images/chapter17/fig-17-09.png'; this.onerror=null;" alt="Figure 17.9" /> |
+| <img src="docs/images/chapter17/fig-17-09.svg" onerror="this.src='docs/images/chapter17/fig-17-09.png'; this.onerror=null;" alt="Figure 17.9" /> |
 | **図17.9：ラベル付きプレート上の立方体（Labeled Cube on a Plate）**                                                                                      |
 
 ---
@@ -1039,17 +1039,17 @@ poiuyt 図を**錯視（illusion）として興味深いものにしている**�
 
 | <a id="fig-17-10"></a>[]()                                                                                                              |
 | --------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="images/chapter17/fig-17-10.svg" onerror="this.src='images/chapter17/fig-17-10.png'; this.onerror=null;" alt="Figure 17.10" /> |
+| <img src="docs/images/chapter17/fig-17-10.svg" onerror="this.src='docs/images/chapter17/fig-17-10.png'; this.onerror=null;" alt="Figure 17.10" /> |
 | **図17.10：不可能図形（A Poiuyt）**                                                                                                              |
 
 | <a id="fig-17-11"></a>[]()                                                                                                              |
 | --------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="images/chapter17/fig-17-11.svg" onerror="this.src='images/chapter17/fig-17-11.png'; this.onerror=null;" alt="Figure 17.11" /> |
+| <img src="docs/images/chapter17/fig-17-11.svg" onerror="this.src='docs/images/chapter17/fig-17-11.png'; this.onerror=null;" alt="Figure 17.11" /> |
 | **図17.11：塔（A Tower）**                                                                                                                   |
 
 | <a id="fig-17-12"></a>[]()                                                                                                              |
 | --------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="images/chapter17/fig-17-12.svg" onerror="this.src='images/chapter17/fig-17-12.png'; this.onerror=null;" alt="Figure 17.12" /> |
+| <img src="docs/images/chapter17/fig-17-12.svg" onerror="this.src='docs/images/chapter17/fig-17-12.png'; this.onerror=null;" alt="Figure 17.12" /> |
 | **図17.12：アーチの図（Diagram of an arch）**                                                                                                    |
 
 ```lisp
