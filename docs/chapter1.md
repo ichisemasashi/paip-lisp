@@ -1,51 +1,51 @@
-# Chapter 1
-## Introduction to Lisp
+# 第1章
+## Lisp入門
 
-> You think you know when you learn, are more sure when you can write, even more when you can teach, but certain when you can program.
+> 学べば分かった気になり、書ければより確かになり、教えられればさらに確かになる。だが本当に確信できるのは、プログラムが書けたときだ。
 >
 > -Alan Perlis \
-> Yale University computer scientist
+> エール大学の計算機科学者
 
-This chapter is for people with little or no experience in Lisp.
-Readers who feel confident in their Lisp programming ability can quickly skim the chapter or skip it entirely.
-This chapter necessarily moves quickly, so those with little programming experience, or any reader who finds this chapter tough going, should seek out a supplementary introductory text.
-My recommendations are in the preface.
+この章は、Lispの経験がほとんど、あるいはまったくない方のためのものです。
+Lispでのプログラミングに自信のある読者は、ざっと目を通すか、丸ごと飛ばしてもらって構いません。
+この章はどうしても駆け足になるので、プログラミングの経験が浅い方や、読み進めるのがつらいと感じた方は、補助となる入門書を手に取ってください。
+私の推薦はまえがきにあります。
 
-Computers allow one to carry out computations.
-A word processing program deals with words while a calculator deals with numbers, but the principles are the same.
-In both cases, you provide the input (words or numbers) and specify the operations (such as deleting a word or adding two numbers) to yield a result (a completed document or calculation).
+計算機は計算を実行させてくれる道具です。
+ワープロは語を扱い、電卓は数を扱いますが、原理は同じです。
+どちらの場合も、入力（語や数）を与え、操作（語を消す、2つの数を足すなど）を指定して、結果（仕上がった文書や計算結果）を得ます。
 
-We will refer to anything that can be represented in the memory of a computer as a *computational object,* or just an *object.*
-So, words, paragraphs, and numbers can be objects.
-And because the operations (deleting and adding) must be represented somewhere in the computer's memory, they are objects, too.
+計算機のメモリ上に表せるものすべてを、*計算対象*（computational object）、あるいは単に*オブジェクト*と呼ぶことにします。
+ですから、語も段落も数もオブジェクトになりえます。
+そして操作（消すこと、足すこと）も計算機のメモリのどこかに表されていなければならないので、これもまたオブジェクトです。
 
-Normally, the distinction between a computer "user" and a computer "programmer" is that the user provides new input, or data (words or numbers), while the programmer defines new *operations*, or programs, as well as new *types* of data.
-Every new object, be it datum or operation, must be defined in terms of previously defined objects.
-The bad news is that it can be quite tedious to get these definitions right.
-The good news is that each new object can in turn be used in the definition of future objects.
-Thus, even complex programs can be built out of smaller, simpler objects.
-This book covers a number of typical AI problems, showing how each problem can be broken down into manageable pieces, and also how each piece can be described in the programming language Common Lisp.
-Ideally, readers will learn enough through studying these examples to attack new AI problems with style, grace, and success.
+ふつう、計算機の「利用者」と「プログラマ」の違いは、利用者が新しい入力すなわちデータ（語や数）を与えるのに対し、プログラマは新しい*操作*すなわちプログラムを、そして新しいデータの*型*を定義する、という点にあります。
+新しいオブジェクトは、それがデータであれ操作であれ、すでに定義されたオブジェクトを使って定義しなければなりません。
+よくない知らせは、この定義を正しく仕上げるのがかなり骨の折れる作業だということです。
+よい知らせは、新しく作ったオブジェクトが、こんどは次のオブジェクトを定義するのに使えるということです。
+こうして、複雑なプログラムも、より小さく単純なオブジェクトから組み上げられます。
+本書は典型的なAIの問題をいくつも扱い、それぞれの問題を手に負える部品へ分解する方法と、その部品をCommon Lispというプログラミング言語で記述する方法を示します。
+願わくは、読者がこれらの例を通じて、新しいAIの問題に流儀をもって、優雅に、そして首尾よく取り組めるだけの力を得られますように。
 
-Let's consider a simple example of a computation: finding the sum of two numbers, let's say 2 and 2.
-If we had a calculator handy, we would type "2 + 2 =" and see the answer displayed.
-On a calculator using reverse Polish notation, we would have to type "2 2 +" to see the same answer.
-In Lisp, as with the calculator, the user carries out an interactive dialog with the computer by typing in an expression and seeing the computer print the value of that expression.
-This interactive mode is different from many other programming languages that only offer a batch mode, wherein an entire program is compiled and run before any output can be seen.
+簡単な計算の例を考えましょう。2つの数、たとえば2と2の和を求めることにします。
+手元に電卓があれば、「2 + 2 =」と打てば答えが表示されます。
+逆ポーランド記法の電卓なら、同じ答えを得るのに「2 2 +」と打つことになります。
+Lispでも電卓と同じように、利用者は式を打ち込み、計算機がその式の値を表示するのを見る、という対話を計算機と交わします。
+この対話的なやり方は、一括処理の方式しか提供しない多くの言語とは違います。一括処理では、プログラム全体をコンパイルして実行するまで出力を見ることができません。
 
-We start up a pocket calculator by flipping the on/off switch.
-The Lisp program must also be started, but the details vary from one computer to another, so I can't explain how your Lisp will work.
-Assuming we have managed to start up Lisp, we are likely to see a *prompt* of some kind.
-On my computer, Lisp types "`>`" to indicate it is ready to accept the next computation.
-So we are faced with a screen that looks like this:
+電卓は電源スイッチを入れれば動き出します。
+Lispもまた起動しなければなりませんが、その手順は計算機ごとに違うので、あなたのLispがどう動くかを私が説明することはできません。
+どうにかLispを起動できたとしましょう。おそらく何らかの*プロンプト*が現れるはずです。
+私の計算機では、Lispは次の計算を受け付ける用意ができたことを示すのに「`>`」と表示します。
+つまり、こんな画面に向かうことになります。
 
 ```lisp
 >
 ```
 
-We may now type in our computation and see the result displayed.
-It turns out that the Lisp convention for arithmetic expressions is slightly different: a computation consists of a parenthesized list with the operation name first, followed by any number of operands, or arguments.
-This is called *prefix notation.*
+さあ、計算を打ち込んで結果が表示されるのを見てみましょう。
+算術式についてのLispの流儀は少し違っています。計算は、括弧でくくったリストとして書き、先頭に操作の名前を置き、そのあとに任意個の被演算子すなわち引数を並べます。
+これを*前置記法*と呼びます。
 
 ```lisp
 > (+ 2 2)
@@ -53,94 +53,94 @@ This is called *prefix notation.*
 >
 ```
 
-We see that Lisp has printed the answer, 4, and then another prompt, >, to indicate it is ready for the next computation.
-Throughout this book, all Lisp expressions will be displayed in `typewriter` font.
-Text on the same line as the ">" prompt is input typed by the user, and text following it is output printed by the computer.
-Usually, input that is typed by the programmer will be in `lowercase` letters, while output that is printed back by the computer will be in `UPPERCASE` letters.
-Of course, with symbols like + and 4 there is no difference.
+Lispが答えの4を表示し、続いて次の計算の用意ができたことを示すプロンプト > を出したのが分かります。
+本書を通じて、Lispの式はすべて `タイプライタ体` で示します。
+「>」プロンプトと同じ行にある文字列は利用者が打ち込んだ入力で、それに続く文字列は計算機が表示した出力です。
+ふつう、プログラマが打ち込む入力は `小文字` で、計算機が返す出力は `大文字` で表されます。
+もちろん + や 4 のような記号には違いはありません。
 
-To save space on the page, the output will sometimes be shown on the same line as the input, separated by an arrow (=>), which can be read as "evaluates to," and can also be thought of as standing for the return or enter key that the user presses to complete the input:
+紙面を節約するため、出力を入力と同じ行に、矢印（=>）で区切って示すことがあります。この矢印は「〜に評価される」と読めますし、入力を確定するために利用者が押すreturnキーやenterキーを表していると考えることもできます。
 
 ```lisp
 > (+ 2 2) => 4
 ```
 
-One advantage of parenthesized prefix notation is that the parentheses clearly mark the beginning and end of an expression.
-If we want, we can give + more than two arguments, and it will still add them all:
+括弧を使った前置記法の利点の1つは、括弧が式の始まりと終わりをはっきり示してくれることです。
+望むなら + に3つ以上の引数を与えることもでき、そのすべてを足してくれます。
 
 ```lisp
 > (+ 1 2 3 4 5 6 7 8 9 10) => 55
 ```
 
-This time we try (9000 + 900 + 90 + 9) - (5000 + 500 + 50 + 5):
+こんどは (9000 + 900 + 90 + 9) - (5000 + 500 + 50 + 5) を試してみます。
 
 ```lisp
 > (- (+ 9000 900 90 9) (+ 5000 500 50 5)) => 4444
 ```
 
-This example shows that expressions can be nested.
-The arguments to the - function are parenthesized lists, while the arguments to each `+` are atoms.
-The Lisp notation may look unusual compared to standard mathematical notation, but there are advantages to this notation; since Lisp expressions can consist of a function followed by any number of arguments, we don't have to keep repeating the "`+`". More important than the notation is the rule for evaluation.
-In Lisp, lists are evaluated by first evaluating all the arguments, then applying the function to the arguments, thereby computing the result.
-This rule is much simpler than the rule for evaluating normal mathematical expressions, where there are many conventions to remember, such as doing multiplications and divisions before sums and differences.
-We will see below that the actual Lisp evaluation rule is a little more complicated, but not much.
+この例は、式が入れ子にできることを示しています。
+`-` 関数の引数は括弧でくくったリストであり、それぞれの `+` の引数はアトムです。
+Lispの記法は通常の数学の記法に比べると風変わりに見えるかもしれませんが、利点もあります。Lispの式は関数のあとに任意個の引数を並べた形をとれるので、「`+`」を繰り返し書かずに済みます。記法より大事なのは評価の規則です。
+Lispでは、リストはまず引数をすべて評価し、次にその引数に関数を適用して結果を計算する、という手順で評価されます。
+この規則は、通常の数式を評価する規則よりずっと単純です。数式には、和や差より先に積や商を計算するといった、覚えておくべき約束事が数多くあります。
+のちほど見るように、実際のLispの評価規則はもう少しだけ複雑ですが、たいした差ではありません。
 
-Sometimes programmers who are familiar with other languages have preconceptions that make it difficult for them to learn Lisp.
-For them, three points are worth stressing here.
-First, many other languages make a distinction between statements and expressions.
-An expression, like `2 + 2`, has a value, but a statement, like `x = 2 + 2`, does not.
-Statements have effects, but they do not return values.
-In Lisp, there is no such distinction: every expression returns a value.
-It is true that some expressions have effects, but even those expressions also return values.
+他の言語に慣れたプログラマは、先入観のせいでLispを学びにくく感じることがあります。
+そうした方のために、ここで3つの点を強調しておきます。
+第一に、他の多くの言語は文と式を区別します。
+`2 + 2` のような式は値を持ちますが、`x = 2 + 2` のような文は値を持ちません。
+文は作用を持ちますが、値は返しません。
+Lispにこの区別はありません。あらゆる式が値を返します。
+作用を持つ式があるのは確かですが、そうした式もやはり値を返します。
 
-Second, the lexical rules for Lisp are much simpler than the rules for other languages.
-In particular, there are fewer punctuation characters: only parentheses, quote marks (single, double, and backward), spaces, and the comma serve to separate symbols from each other.
-Thus, while the statement `y=a*x+3` is analyzed as seven separate tokens in other languages, in Lisp it would be treated as a single symbol.
+第二に、Lispの字句の規則は他の言語よりずっと単純です。
+とくに区切り記号が少なく、シンボルどうしを区切るのは、括弧、引用符（単一引用符、二重引用符、逆引用符）、空白、そしてカンマだけです。
+ですから、`y=a*x+3` という文は他の言語では7つの字句に分解されますが、Lispでは1つのシンボルとして扱われます。
 <a id="tfn01-1"></a>
-To get a list of tokens, we would have to insert spaces: `(y = a * x + 3)`.<sup>[1](#fn01-1)</sup>
+字句の並びを得るには空白を入れる必要があります。`(y = a * x + 3)` のように。<sup>[1](#fn01-1)</sup>
 
-Third, while many languages use semicolons to delimit statements, Lisp has no need of semicolons, since expressions are delimited by parentheses.
-Lisp chooses to use semicolons for another purpose—to mark the beginning of a comment, which lasts until the end of the line:
+第三に、多くの言語がセミコロンで文を区切るのに対し、Lispでは式が括弧で区切られているのでセミコロンは要りません。
+Lispはセミコロンを別の用途に充てています。行末まで続くコメントの始まりを示すためです。
 
 ```lisp
 > (+ 2 2) ; this is a comment
 4
 ```
 
-## 1.1 Symbolic Computation
+## 1.1 記号計算
 
-All we've done so far is manipulate numbers in the same way a simple pocket calculator would.
-Lisp is more useful than a calculator for two main reasons.
-First, it allows us to manipulate objects other than numbers, and second, it allows us to define new objects that might be useful in subsequent computations.
-We will examine these two important properties in turn.
+ここまでにやったのは、簡単な電卓と同じように数を操作することだけです。
+Lispが電卓より役に立つ理由は、主に2つあります。
+1つは数以外のオブジェクトを操作できること、もう1つは、あとの計算で役立つかもしれない新しいオブジェクトを定義できることです。
+この2つの大事な性質を順に見ていきましょう。
 
-Besides numbers, Lisp can represent characters (letters), strings of characters, and arbitrary symbols, where we are free to interpret these symbols as referring to things outside the world of mathematics.
-Lisp can also build nonatomic objects by combining several objects into a list.
-This capability is fundamental and well supported in the language; in fact, the name Lisp is short for LISt Processing.
+数のほかに、Lispは文字、文字列、そして任意のシンボルを表せます。シンボルは、数学の外の世界にあるものを指していると自由に解釈して構いません。
+Lispはまた、いくつかのオブジェクトをリストにまとめて、アトムでないオブジェクトを組み立てられます。
+この能力は言語の根幹をなし、十分に支えられています。実際、Lispという名は LISt Processing（リスト処理）の略です。
 
-Here's an example of a computation on lists:
+リストに対する計算の例を挙げます。
 
 ```lisp
 > (append '(Pat Kim) '(Robin Sandy)) => (PAT KIM ROBIN SANDY)
 ```
 
-This expression appends together two lists of names.
-The rule for evaluating this expression is the same as the rule for numeric calculations: apply the function (in this case append) to the value of the arguments.
+この式は、名前からなる2つのリストを連結します。
+この式を評価する規則は数値計算のときと同じです。引数の値に関数（ここでは append）を適用します。
 
-The unusual part is the quote mark `(')`, which serves to block the evaluation of the following expression, returning it literally.
-If we just had the expression `(Pat Kim)`, it would be evaluated by considering `Pat` as a function and applying it to the value of the expression `Kim`.
-This is not what we had in mind.
-The quote mark instructs Lisp to treat the list as a piece of data rather than as a function call:
+見慣れないのは引用符 `(')` でしょう。これは続く式の評価を止め、それをそのまま返す働きをします。
+もし単に `(Pat Kim)` という式だったら、`Pat` を関数とみなして、式 `Kim` の値に適用することになってしまいます。
+それは意図したことではありません。
+引用符は、このリストを関数呼び出しではなくデータとして扱うようLispに指示します。
 
 ```lisp
 > '(Pat Kim) => (PAT KIM)
 ```
 
-In other computer languages (and in English), quotes usually come in pairs: one to mark the beginning, and one to mark the end.
-In Lisp, a single quote is used to mark the beginning of an expression.
-Since we always know how long a single expression is—either to the end of an atom or to the matching parenthesis of a list—we don't need an explicit punctuation mark to tell us where the expression ends.
-Quotes can be used on lists, as in `'(Pat Kim)`, on symbols as in `'Robin`, and in fact on anything else.
-Here are some examples:
+他のプログラミング言語（そして英語）では、引用符はふつう対で使い、始まりと終わりを示します。
+Lispでは、1つの引用符で式の始まりを示します。
+1つの式がどこまで続くかは常に分かる — アトムの終わりまでか、リストの対応する閉じ括弧までか — ので、式の終わりを示す記号は要りません。
+引用符は `'(Pat Kim)` のようにリストにも、`'Robin` のようにシンボルにも、実際その他何にでも使えます。
+例をいくつか挙げます。
 
 ```lisp
 > 'John => JOHN
@@ -160,13 +160,13 @@ Here are some examples:
 > (John Q Public) => *Error: JOHN is not a function*
 ```
 
-Note that `'2` evaluates to `2` because it is a quoted expression, and `2` evaluates to `2` because numbers evaluate to themselves.
-Same result, different reason.
-In contrast, `'John` evaluates to `John` because it is a quoted expression, but evaluating `John` leads to an error, because evaluating a symbol means getting the value of the symbol, and no value has been assigned to `John`.
+`'2` が `2` に評価されるのは引用された式だからであり、`2` が `2` に評価されるのは数が自分自身に評価されるからだ、という点に注意してください。
+結果は同じでも理由は違います。
+これに対し、`'John` が `John` に評価されるのは引用された式だからですが、`John` を評価するとエラーになります。シンボルの評価とはそのシンボルの値を得ることであり、`John` には値が割り当てられていないからです。
 
-Symbolic computations can be nested and even mixed with numeric computations.
-The following expression builds a list of names in a slightly different way than we saw before, using the built-in function `list`.
-We then see how to find the number of elements in the list, using the built-in function `length`:
+記号計算は入れ子にでき、数値計算と混ぜることさえできます。
+次の式は、組み込み関数 `list` を使って、これまでとは少し違うやり方で名前のリストを作ります。
+続いて、組み込み関数 `length` でリストの要素数を求める方法を見ます。
 
 ```lisp
 > (append '(Pat Kim) (list '(John Q Public) 'Sandy))
@@ -176,35 +176,35 @@ We then see how to find the number of elements in the list, using the built-in f
 4
 ```
 
-There are four important points to make about symbols:
+シンボルについて、大事な点が4つあります。
 
-*   First, it is important to remember that Lisp does not attach any external significance to the objects it manipulates.
-For example, we naturally think of (`Robin Sandy`) as a list of two first names, and (`John Q Public`) as a list of one person's first name, middle initial, and last name.
-Lisp has no such preconceptions.
-To Lisp, both `Robin` and `xyzzy` are perfectly good symbols.
+*   第一に、Lispは自分が扱うオブジェクトに外的な意味を一切与えない、ということを覚えておくのが大事です。
+たとえば私たちは (`Robin Sandy`) を2つの名からなるリストと、(`John Q Public`) を1人の名・ミドルネームの頭文字・姓からなるリストと、自然に受け取ります。
+Lispにそんな先入観はありません。
+Lispにとって `Robin` も `xyzzy` も、まったく申し分のないシンボルです。
 
-*   Second, to do the computations above, we had to know that `append`, `length`, and `+` are defined functions in Common Lisp.
-Learning a language involves remembering vocabulary items (or knowing where to look them up) as well as learning the basic rules for forming expressions and determining what they mean.
-Common Lisp provides over 700 built-in functions.
-At some point the reader should flip through a reference text to see what's there, but most of the important functions are presented in part I of this book.
+*   第二に、上の計算を行うには、`append`、`length`、`+` がCommon Lispで定義された関数だと知っている必要がありました。
+言語を学ぶには、式の作り方とその意味を決める基本の規則を学ぶだけでなく、語彙を覚える（あるいはどこで引けばよいかを知る）ことも必要です。
+Common Lispは700を超える組み込み関数を備えています。
+どこかの時点で参考書をめくって何があるかを眺めておくとよいでしょう。ただ、重要な関数の大半は本書の第I部で紹介します。
 
-*   Third, note that symbols in Common Lisp are not case sensitive.
+*   第三に、Common Lispのシンボルは大文字と小文字を区別しません。
 <a id="tfn01-2"></a>
-By that I mean that the inputs `John`, `john`, and `jOhN` all refer to the same symbol, which is normally printed as `JOHN`.<sup>[2](#fn01-2)</sup>
+つまり、`John`、`john`、`jOhN` という入力はどれも同じシンボルを指し、ふつう `JOHN` と表示されます。<sup>[2](#fn01-2)</sup>
 
-*   Fourth, note that a wide variety of characters are allowed in symbols: numbers, letters, and other punctuation marks like `'+'` or `'!'`
-The exact rules for what constitutes a symbol are a little complicated, but the normal convention is to use symbols consisting mostly of letters, with words separated by a dash `(-)`, and perhaps with a number at the end.
-Some programmers are more liberal in naming variables, and include characters like `'?!$/<=>'`.
-For example, a function to convert dollars to yen might be named with the symbol `$-to-yen` or `$->yen` in Lisp, while one would use something like `DollarsToYen, dollars_to_yen` or `dol2yen` in Pascal or C.
-There are a few exceptions to these naming conventions, which will be dealt with as they come up.
+*   第四に、シンボルには実にさまざまな文字が使えます。数字、英字、そして `'+'` や `'!'` のような記号もです。
+何がシンボルになるかの厳密な規則はやや込み入っていますが、ふつうの流儀は、おおむね英字からなり、語をダッシュ `(-)` で区切り、必要なら末尾に数字を付けたシンボルを使うことです。
+変数の命名にもっと大胆で、`'?!$/<=>'` のような文字を混ぜるプログラマもいます。
+たとえばドルを円に変換する関数は、Lispでは `$-to-yen` や `$->yen` というシンボルで名づけられるかもしれませんが、PascalやCなら `DollarsToYen`、`dollars_to_yen`、`dol2yen` のようにするでしょう。
+この命名の流儀にはいくつか例外があり、出てきたところで扱います。
 
-## 1.2 Variables
+## 1.2 変数
 
-We have seen some of the basics of symbolic computation.
-Now we move on to perhaps the most important characteristic of a programming language: the ability to define new objects in terms of others, and to name these objects for future use.
-Here symbols again play an important role-they are used to name variables.
-A variable can take on a value, which can be any Lisp object.
-One way to give a value to a variable is with `setf`:
+記号計算の基礎をいくらか見てきました。
+次は、おそらくプログラミング言語で最も重要な特徴 — 既存のものを使って新しいオブジェクトを定義し、あとで使えるように名前を付ける能力 — に進みます。
+ここでもシンボルが重要な役目を果たします。変数に名前を付けるのに使われるのです。
+変数は値を持てます。値はどんなLispオブジェクトでも構いません。
+変数に値を与える方法の1つが `setf` です。
 
 ```lisp
 > (setf p '(John Q Public)) => (JOHN Q PUBLIC)
@@ -214,59 +214,59 @@ One way to give a value to a variable is with `setf`:
 > (+ x (length p)) => 13
 ```
 
-After assigning the value (`John Q Public`) to the variable named `p`, we can refer to the value with the name `p`.
-Similarly, after assigning a value to the variable named `x`, we can refer to both `x` and `p`.
+`p` という名の変数に値 (`John Q Public`) を割り当てたあとは、その値を `p` という名前で参照できます。
+同様に、`x` という名の変数に値を割り当てたあとは、`x` と `p` の両方を参照できます。
 
-Symbols are also used to name functions in Common Lisp.
-Every symbol can be used as the name of a variable or a function, or both, although it is rare (and potentially confusing) to have symbols name both.
-For example, `append` and `length` are symbols that name functions but have no values as variables, and `pi` does not name a function but is a variable whose value is 3.1415926535897936 (or thereabout).
+Common Lispでは、シンボルは関数に名前を付けるのにも使われます。
+どのシンボルも変数の名前にも関数の名前にも、あるいは両方にも使えます。もっとも、両方に使うのは稀ですし、混乱のもとになりかねません。
+たとえば `append` と `length` は関数の名前であるシンボルですが、変数としての値は持ちません。`pi` は関数の名前ではありませんが、値が 3.1415926535897936（かその程度）の変数です。
 
-## 1.3 Special Forms
+## 1.3 特殊形式
 
-The careful reader will note that `setf` violates the evaluation rule.
-We said earlier that functions like `+`, `-` and `append` work by first evaluating all their arguments and then applying the function to the result.
-But `setf` doesn't follow that rule, because `setf` is not a function at all.
-Rather, it is part of the basic syntax of Lisp.
-Besides the syntax of atoms and function calls, Lisp has a small number of syntactic expressions.
-They are known as *special forms.*
-They serve the same purpose as statements in other programming languages, and indeed have some of the same syntactic markers, such as `if` and `loop`.
-There are two main differences between Lisp's syntax and other languages.
-First, Lisp's syntactic forms are always lists in which the first element is one of a small number of privileged symbols.
-`setf` is one of these symbols, so (`setf x 10`) is a special form.
-Second, special forms are expressions that return a value.
-This is in contrast to statements in most languages, which have an effect but do not return a value.
+注意深い読者は、`setf` が評価規則に違反していることに気づくでしょう。
+先ほど、`+`、`-`、`append` のような関数は、まず引数をすべて評価し、その結果に関数を適用する、と述べました。
+しかし `setf` はこの規則に従いません。そもそも `setf` は関数ではないからです。
+むしろ、Lispの基本的な構文の一部です。
+アトムと関数呼び出しの構文のほかに、Lispには少数の構文的な式があります。
+これらは*特殊形式*と呼ばれます。
+他の言語の文と同じ役目を果たし、実際 `if` や `loop` のように同じ構文上の目印を持つものもあります。
+Lispの構文と他の言語との主な違いは2つです。
+第一に、Lispの構文形式は常にリストであり、その先頭要素は少数の特権的なシンボルのいずれかです。
+`setf` はそのシンボルの1つなので、(`setf x 10`) は特殊形式です。
+第二に、特殊形式は値を返す式です。
+これは、作用は持つが値を返さない、たいていの言語の文とは対照的です。
 
-In evaluating an expression like `(setf x (+ 1 2)`), we set the variable named by the symbol `x` to the value of `(+ 1 2)`, which is `3`.
-If `setf` were a normal function, we would evaluate both the symbol `x` and the expression `(+ 1 2)` and do something with these two values, which is not what we want at all.
-`setf` is called a special form because it does something special: if it did not exist, it would be impossible to write a function that assigns a value to a variable.
-The philosophy of Lisp is to provide a small number of special forms to do the things that could not otherwise be done, and then to expect the user to write everything else as functions.
+`(setf x (+ 1 2)`) のような式を評価すると、シンボル `x` が名づける変数を `(+ 1 2)` の値、すなわち `3` に設定します。
+もし `setf` がふつうの関数だったら、シンボル `x` と式 `(+ 1 2)` の両方を評価し、その2つの値で何かをすることになりますが、それは望むところではありません。
+`setf` が特殊形式と呼ばれるのは、特別なことをするからです。もしこれがなければ、変数に値を割り当てる関数を書くことは不可能でしょう。
+Lispの哲学は、他の方法では実現できないことのために少数の特殊形式を用意し、それ以外はすべて利用者が関数として書くことを期待する、というものです。
 
-The term *special form* is used confusingly to refer both to symbols like `setf` and expressions that start with them, like `(setf x 3)`.
-In the book *Common LISPcraft,* Wilensky resolves the ambiguity by calling `setf` a *special function,* and reserving the term *special form* for (`setf x 3`).
-This terminology implies that `setf` is just another function, but a special one in that its first argument is not evaluated.
-Such a view made sense in the days when Lisp was primarily an interpreted language.
-The modern view is that `setf` should not be considered some kind of abnormal function but rather a marker of special syntax that will be handled specially by the compiler.
-Thus, the special form `(setf x (+ 2 1))` should be considered the equivalent of `x = 2 + 1` in `C`.
-When there is risk of confusion, we will call `setf` a *special form operator* and `(setf x 3)` a *special form expression.*
+*特殊形式*という語は、`setf` のようなシンボルと、それで始まる `(setf x 3)` のような式の両方を指すのに使われ、紛らわしいところがあります。
+*Common LISPcraft* において、Wilenskyは `setf` を*特殊関数*と呼び、*特殊形式*という語は (`setf x 3`) のほうに充てることで、この曖昧さを解消しています。
+この用語法は、`setf` も関数の一種だが、第1引数が評価されない点で特別なのだ、ということを含意します。
+この見方は、Lispが主に解釈実行される言語だった時代には意味がありました。
+現代的な見方では、`setf` は変則的な関数の一種ではなく、コンパイラが特別に扱う特殊な構文の目印だと考えます。
+ですから、特殊形式 `(setf x (+ 2 1))` は `C` の `x = 2 + 1` に相当すると考えるべきです。
+紛らわしいおそれがあるときは、`setf` を*特殊形式演算子*、`(setf x 3)` を*特殊形式の式*と呼ぶことにします。
 
-It turns out that the quote mark is just an abbreviation for another special form.
-The expression '*x* is equivalent to `(quote` *x*`)`, a special form expression that evaluates to *x*.
-The special form operators used in this chapter are:
+実は引用符も、別の特殊形式の略記にすぎません。
+式 '*x* は `(quote` *x*`)` と等価で、これは *x* に評価される特殊形式の式です。
+この章で使う特殊形式演算子は次のとおりです。
 
 | []()            |                                              |
 |-----------------|----------------------------------------------|
-| `defun`         | define function                              |
-| `defparameter`  | define special variable                      |
-| `setf`          | set variable or field to new value           |
-| `let`           | bind local variable(s)                       |
-| `case`          | choose one of several alternatives           |
-| `if`            | do one thing or another, depending on a test |
-| `function (#')` | refer to a function                          |
-| `quote (')`     | introduce constant data                      |
+| `defun`         | 関数を定義する                               |
+| `defparameter`  | スペシャル変数を定義する                     |
+| `setf`          | 変数やフィールドに新しい値を設定する         |
+| `let`           | 局所変数を束縛する                           |
+| `case`          | いくつかの選択肢から1つを選ぶ                |
+| `if`            | 判定に応じて一方または他方を行う             |
+| `function (#')` | 関数を参照する                               |
+| `quote (')`     | 定数データを導入する                         |
 
-## 1.4 Lists
+## 1.4 リスト
 
-So far we have seen two functions that operate on lists: `append` and `length`. Since lists are important, let's look at some more list processing functions:
+ここまでにリストを扱う関数を2つ見ました。`append` と `length` です。リストは重要なので、リスト処理の関数をもう少し見てみましょう。
 
 ```lisp
 > p => (JOHN Q PUBLIC)
@@ -284,11 +284,11 @@ So far we have seen two functions that operate on lists: `append` and `length`. 
 > (length p) => 3
 ```
 
-The functions `first`, `second`, `third`, and `fourth` are aptly named: `first` returns the first element of a list, `second` gives you the second element, and so on.
-The function `rest` is not as obvious; its name stands for "the rest of the list after the first element." The symbol `nil` and the form `()` are completely synonymous; they are both representations of the empty list.
-`nil` is also used to denote the "false" value in Lisp.
-Thus, `(fourth p)` is `nil` because there is no fourth element of `p`.
-Note that lists need not be composed only of atoms, but can contain sublists as elements:
+`first`、`second`、`third`、`fourth` という関数は名は体を表しています。`first` はリストの最初の要素を返し、`second` は2番目の要素を返す、という具合です。
+`rest` という関数はそこまで自明ではありません。この名は「最初の要素より後ろの、リストの残り」を表します。シンボル `nil` と形 `()` はまったく同義で、どちらも空リストの表現です。
+`nil` はLispで「偽」の値を表すのにも使われます。
+ですから `(fourth p)` は `nil` です。`p` に4番目の要素がないからです。
+リストはアトムだけで構成される必要はなく、部分リストを要素として含められることに注意してください。
 
 ```lisp
 > (setf x '((1st element) 2 (element 3) ((4)) 5))
@@ -315,8 +315,8 @@ Note that lists need not be composed only of atoms, but can contain sublists as 
 > (second (first x)) => ELEMENT
 ```
 
-So far we have seen how to access parts of lists.
-It is also possible to build up new lists, as these examples show:
+ここまで、リストの一部を取り出す方法を見てきました。
+次の例が示すように、新しいリストを組み立てることもできます。
 
 ```lisp
 > p => (JOHN Q PUBLIC)
@@ -336,20 +336,20 @@ It is also possible to build up new lists, as these examples show:
 > p => (JOHN Q PUBLIC)
 ```
 
-The function cons stands for "construct."
+cons という関数は「construct（構築する）」を表します。
 <a id="tfn01-3"></a>
-It takes as arguments an element and a list,<sup>[3](#fn01-3)</sup> and constructs a new list whose first is the element and whose rest is the original list.
-`list` takes any number of elements as arguments and returns a new list containing those elements in order.
-We've already seen `append`, which is similar to `list`; it takes as arguments any number of lists and appends them all together, forming one big list.
-Thus, the arguments to `append` must be lists, while the arguments to `list` may be lists or atoms.
-It is important to note that these functions create new lists; they don't modify old ones.
-When we say `(append p q)`, the effect is to create a brand new list that starts with the same elements that were in `p`.
-`p` itself remains unchanged.
+要素とリストを引数にとり、<sup>[3](#fn01-3)</sup> 先頭がその要素、残りが元のリストであるような新しいリストを構築します。
+`list` は任意個の要素を引数にとり、それらを順に含む新しいリストを返します。
+`append` はすでに見ました。`list` に似ていますが、任意個のリストを引数にとり、それらをすべてつなげて1つの大きなリストを作ります。
+ですから `append` の引数はリストでなければなりませんが、`list` の引数はリストでもアトムでも構いません。
+これらの関数は新しいリストを作るのであって、元のリストを書き換えるのではない、という点が重要です。
+`(append p q)` と書いたときの働きは、`p` にあったのと同じ要素で始まる、まったく新しいリストを作ることです。
+`p` そのものは変わりません。
 
-Now let's move away from abstract functions on lists, and consider a simple problem: given a person's name in the form of a list, how might we extract the family name?
-For `(JOHN Q PUBLIC)` we could just use the function `third`, but that wouldn't work for someone with no middle name.
-There is a function called `last` in Common Lisp; perhaps that would work.
-We can experiment:
+さて、リストに対する抽象的な関数から離れて、簡単な問題を考えましょう。人の名前がリストの形で与えられたとき、姓をどう取り出せばよいでしょうか。
+`(JOHN Q PUBLIC)` なら `third` を使えば済みますが、ミドルネームのない人には通用しません。
+Common Lispには `last` という関数があります。これなら使えるかもしれません。
+試してみましょう。
 
 ```lisp
 > (last p) => (PUBLIC)
@@ -358,17 +358,17 @@ We can experiment:
 ```
 
 <a id="tfn01-4"></a>
-It turns out that `last` perversely returns a list of the last element, rather than the last element itself.<sup>[4](#fn01-4)</sup>
-Thus we need to combine `first` and `last` to pick out the actual last element.
-We would like to be able to save the work we've done, and give it a proper description, like `last-name`.
-We could use `setf` to save the last name of `p`, but that wouldn't help determine any other last name.
-Instead we want to define a new function that computes the last name of *any* name that is represented as a list.
-The next section does just that.
+ところが `last` は、意地悪なことに最後の要素そのものではなく、最後の要素だけからなるリストを返します。<sup>[4](#fn01-4)</sup>
+ですから、実際の最後の要素を取り出すには `first` と `last` を組み合わせる必要があります。
+この手間を残しておいて、`last-name` のようなふさわしい名前を付けられるとよいでしょう。
+`setf` で `p` の姓を保存することはできますが、それでは他の人の姓を求める役には立ちません。
+そうではなく、リストで表された*どんな*名前についても姓を計算する新しい関数を定義したいのです。
+次の節でまさにそれを行います。
 
-## 1.5 Defining New Functions
+## 1.5 新しい関数を定義する
 
-The special form `defun` stands for "define function."
-It is used here to define a new function called `last-name`:
+特殊形式 `defun` は「define function（関数を定義する）」を表します。
+ここでは `last-name` という新しい関数を定義するのに使います。
 
 ```lisp
 (defun last-name (name)
@@ -376,23 +376,23 @@ It is used here to define a new function called `last-name`:
   (first (last name)))
 ```
 
-We give our new function the name `last-name`. It has a *parameter list* consisting of a single parameter: (`name`).
-This means that the function takes one argument, which we will refer to as `name`.
-It also has a *documentation string* that states what the function does.
-This is not used in any computation, but documentation strings are crucial tools for debugging and understanding large systems.
-The body of the definition is `(first (last name))`, which is what we used before to pick out the last name of `p`.
-The difference is that here we want to pick out the last name of any `name`, not just of the particular name `p`.
+新しい関数に `last-name` という名を与えました。この関数は引数1つからなる*引数リスト* (`name`) を持ちます。
+つまりこの関数は引数を1つとり、それを `name` と呼ぶ、ということです。
+また、その関数が何をするかを述べた*ドキュメント文字列*も持っています。
+これは計算には使われませんが、ドキュメント文字列は大きなシステムのデバッグと理解に欠かせない道具です。
+定義の本体は `(first (last name))` で、これは先ほど `p` の姓を取り出すのに使ったものです。
+違うのは、ここでは特定の名前 `p` だけでなく、任意の `name` の姓を取り出したい、という点です。
 
-In general, a function definition takes the following form (where the documentation string is optional, and all other parts are required):
+一般に、関数定義は次の形をとります（ドキュメント文字列は省略可能で、それ以外はすべて必須です）。
 
-`(defun` *function-name* (*parameter...*)
-&nbsp;&nbsp;&nbsp;&nbsp;"*documentation string*"
-&nbsp;&nbsp;&nbsp;&nbsp;*function-body...*)
+`(defun` *関数名* (*引数...*)
+&nbsp;&nbsp;&nbsp;&nbsp;"*ドキュメント文字列*"
+&nbsp;&nbsp;&nbsp;&nbsp;*関数の本体...*)
 
-The function name must be a symbol, the parameters are usually symbols (with some complications to be explained later), and the function body consists of one or more expressions that are evaluated when the function is called.
-The last expression is returned as the value of the function call.
+関数名はシンボルでなければならず、引数はふつうシンボルです（込み入った点はあとで説明します）。関数の本体は、関数が呼ばれたときに評価される1つ以上の式からなります。
+最後の式が関数呼び出しの値として返されます。
 
-Once we have defined `last-name`, we can use it just like any other Lisp function:
+`last-name` を定義したら、他のLisp関数と同じように使えます。
 
 ```lisp
 > (last-name p) => PUBLIC
@@ -406,17 +406,17 @@ Once we have defined `last-name`, we can use it just like any other Lisp functio
 > (last-name '(Aristotle)) => ARISTOTLE
 ```
 
-The last three examples point out an inherent limitation of the programming enterprise.
-When we say `(defun last-name...)` we are not really defining what it means for a person to have a last name; we are just defining an operation on a representation of names in terms of lists.
-Our intuitions-that MD is a title, Spot is the first name of a dog, and Aristotle lived before the concept of last name was invented-are not represented in this operation.
-However, we could always change the definition of `last-name` to incorporate these problematic cases.
+最後の3つの例は、プログラミングという営みが本来的に抱える限界を示しています。
+`(defun last-name...)` と書くとき、私たちは人が姓を持つとはどういうことかを定義しているのではありません。リストによる名前の表現に対する操作を定義しているだけです。
+MDが称号であること、Spotが犬の名であること、アリストテレスが姓という概念の生まれる前に生きていたこと — こうした私たちの直観は、この操作には表現されていません。
+とはいえ、こうした厄介な場合を取り込むように `last-name` の定義を変えることは、いつでもできます。
 
-We can also define the function `first-name`.
-Even though the definition is trivial (it is the same as the function `first`), it is still good practice to define `first-name` explicitly.
-Then we can use the function `first-name` when we are dealing with names, and `first` when we are dealing with arbitrary lists.
-The computer will perform the same operation in each case, but we as programmers (and readers of programs) will be less confused.
-Another advantage of defining specific functions like `first-name` is that if we decide to change the representation of names we will only have to change the definition of `first-name`.
-This is a much easier task than hunting through a large program and changing the uses of `first` that refer to names, while leaving other uses alone.
+`first-name` という関数も定義できます。
+定義は自明（`first` という関数と同じ）ですが、それでも `first-name` を明示的に定義しておくのはよい習慣です。
+そうすれば、名前を扱うときは `first-name` を、任意のリストを扱うときは `first` を使えます。
+計算機はどちらの場合も同じ操作を行いますが、プログラマである私たち（そしてプログラムの読み手）は混乱せずに済みます。
+`first-name` のような個別の関数を定義するもう1つの利点は、名前の表現を変えることにしたとき、`first-name` の定義だけを変えれば済むことです。
+これは、大きなプログラムを探し回って、名前を指す `first` の使用箇所だけを変え、他はそのままにする作業よりずっと楽です。
 
 ```lisp
 (defun first-name (name)
@@ -441,24 +441,24 @@ This is a much easier task than hunting through a large program and changing the
 > (first-name (first names)) => JOHN
 ```
 
-In the last expression we used the function `first` to pick out the first element in a list of names, and then the function `first-name` to pick out the first name of that element.
-We could also have said `(first (first names))` or even `(first (first-name names))` and still have gotten `JOHN`, but we would not be accurately representing what is being considered a name and what is being considered a list of names.
+最後の式では、`first` で名前のリストの最初の要素を取り出し、次に `first-name` でその要素の名を取り出しました。
+`(first (first names))` や `(first (first-name names))` と書いても `JOHN` は得られますが、それでは何を名前とみなし何を名前のリストとみなしているのかを正確に表せません。
 
-## 1.6 Using Functions
+## 1.6 関数を使う
 
-One good thing about defining a list of names, as we did above, is that it makes it easier to test our functions.
-Consider the following expression, which can be used to test the `last-name` function:
+上でやったように名前のリストを定義しておくと、関数を試しやすくなるという利点があります。
+`last-name` 関数を試すのに使える、次の式を考えてみましょう。
 
 ```lisp
 > (mapcar #'last-name names)
 (PUBLIC X HOPPER SPOT ARISTOTLE MILNE TOP OLIVIER SCARLET)
 ```
 
-The funny `#'` notation maps from the name of a function to the function itself.
-This is analogous to `'x` notation.
-The built-in function `mapcar` is passed two arguments, a function and a list.
-It returns a list built by calling the function on every element of the input list.
-In other words, the `mapcar` call above is equivalent to:
+風変わりな `#'` という記法は、関数の名前から関数そのものへの対応を与えます。
+これは `'x` という記法に似ています。
+組み込み関数 `mapcar` には、関数とリストという2つの引数が渡されます。
+そして、入力リストの各要素にその関数を適用して作ったリストを返します。
+言い換えると、上の `mapcar` の呼び出しは次と等価です。
 
 ```lisp
 (list (last-name (first names))
@@ -467,15 +467,15 @@ In other words, the `mapcar` call above is equivalent to:
       ...)
 ```
 
-`mapcar`'s name comes from the fact that it "maps" the function across each of the arguments.
-The `car` part of the name refers to the Lisp function `car`, an old name for `first`.
-`cdr` is the old name for `rest`.
-The names stand for "contents of the address register" and "contents of the decrement register," the instructions that were used in the first implementation of Lisp on the IBM 704.
-I'm sure you'll agree that `first` and `rest` are much better names, and they will be used instead of `car` and `cdr` whenever we are talking about lists.
-However, we will continue to use `car` and `cdr` on occasion when we are considering a pair of values that are not considered as a list.
-Beware that some programmers still use `car` and `cdr` for lists as well.
+`mapcar` という名は、関数を各引数にわたって「写す（map）」ことに由来します。
+名前の `car` の部分は、Lispの関数 `car` を指します。これは `first` の古い名前です。
+`cdr` は `rest` の古い名前です。
+これらの名は「contents of the address register（アドレスレジスタの内容）」と「contents of the decrement register（デクリメントレジスタの内容）」を表し、IBM 704上での最初のLisp実装で使われた命令に由来します。
+`first` と `rest` のほうがずっとよい名前だと、きっと同意していただけるでしょう。リストの話をするときは `car` と `cdr` の代わりにこちらを使います。
+ただし、リストとみなさない値の対を考えるときには、折に触れて `car` と `cdr` を使い続けます。
+リストに対しても `car` と `cdr` を使い続けるプログラマがいることには気をつけてください。
 
-Here are some more examples of `mapcar`:
+`mapcar` の例をもう少し挙げます。
 
 ```lisp
 > (mapcar #'- '(1 2 3 4)) => (-1 -2 -3 -4)
@@ -483,22 +483,22 @@ Here are some more examples of `mapcar`:
 > (mapcar #'+ '(1 2 3 4) '(10 20 30 40)) => (11 22 33 44)
 ```
 
-This last example shows that `mapcar` can be passed three arguments, in which case the first argument should be a binary function, which will be applied to corresponding elements of the other two lists.
-In general, `mapcar` expects an *n*-ary function as its first argument, followed by *n* lists.
-It first applies the function to the argument list obtained by collecting the first element of each list.
-Then it applies the function to the second element of each list, and so on, until one of the lists is exhausted.
-It returns a list of all the function values it has computed.
+この最後の例は、`mapcar` に引数を3つ渡せることを示しています。その場合、第1引数は2引数の関数であるべきで、あとの2つのリストの対応する要素に適用されます。
+一般に `mapcar` は、第1引数として *n* 引数の関数を、続いて *n* 個のリストを期待します。
+まず各リストの最初の要素を集めた引数の並びに関数を適用します。
+次に各リストの2番目の要素に適用し、以下同様に、いずれかのリストが尽きるまで続けます。
+そして計算したすべての関数値からなるリストを返します。
 
-Now that we understand `mapcar`, let's use it to test the `first-name` function:
+`mapcar` が分かったところで、これを使って `first-name` 関数を試してみましょう。
 
 ```lisp
 > (mapcar #'first-name names)
 (JOHN MALCOLM ADMIRAL SPOT ARISTOTLE A Z SIR MISS)
 ```
 
-We might be disappointed with these results.
-Suppose we wanted a version of `first-name` which ignored titles like Admiral and Miss, and got to the "real" first name.
-We could proceed as follows:
+この結果には落胆するかもしれません。
+Admiral（提督）や Miss のような称号を無視して「本当の」名にたどり着く `first-name` が欲しいとしましょう。
+次のように進められます。
 
 ```lisp
 (defparameter *titles*
@@ -506,27 +506,27 @@ We could proceed as follows:
   "A list of titles that can appear at the start of a name.")
 ```
 
-We've introduced another new special form, `defparameter`, which defines a parameter-a variable that does not change over the course of a computation, but that might change when we think of new things to add (like the French Mme or the military Lt.).
-The `defparameter` form both gives a value to the variable and makes it possible to use the variable in subsequent function definitions.
-In this example we have exercised the option of providing a documentation string that describes the variable.
-It is a widely used convention among Lisp programmers to mark special variables by spelling their names with asterisks on either end.
-This is just a convention; in Lisp, the asterisk is just another character that has no particular meaning.
+ここでもう1つ新しい特殊形式 `defparameter` を導入しました。これはパラメータ、すなわち計算の途中では変わらないが、追加したいもの（フランス語の Mme や軍の Lt. など）を思いついたときには変わりうる変数を定義します。
+`defparameter` の形は、変数に値を与えると同時に、以降の関数定義でその変数を使えるようにします。
+この例では、変数を説明するドキュメント文字列を付ける選択肢を使いました。
+スペシャル変数の名前を両端にアスタリスクを付けて綴るのは、Lispプログラマのあいだで広く使われている流儀です。
+これは単なる流儀にすぎません。Lispにおいてアスタリスクは、とくに意味を持たないただの一文字です。
 
 <a id="tfn01-5"></a>
-We next give a new definition for `first-name`, which supersedes the previous definition.<sup>[5](#fn01-5)</sup>
-This definition says that if the first word of the name is a member of the list of titles, then we want to ignore that word and return the `first-name` of the rest of the words in the name.
-Otherwise, we use the first word, just as before.
-Another built-in function, `member`, tests to see if its first argument is an element of the list passed as the second argument.
+次に `first-name` の新しい定義を与えます。これは前の定義を置き換えます。<sup>[5](#fn01-5)</sup>
+この定義が言っているのは、名前の最初の語が称号のリストに含まれていれば、その語を無視して、名前の残りの語に対する `first-name` を返す、ということです。
+そうでなければ、これまでどおり最初の語を使います。
+もう1つの組み込み関数 `member` は、第1引数が第2引数として渡されたリストの要素かどうかを調べます。
 
-The special form `if` has the form `(if` *test then-part else-part*).
-There are many special forms for performing conditional tests in Lisp; `if` is the most appropriate for this example.
-An `if` form is evaluated by first evaluating the *test* expression.
-If it is true, the *then-part* is evaluated and returned as the value of the `if` form; otherwise the *else-part* is evaluated and returned.
-While some languages insist that the value of a conditional test must be either `true` or `false`, Lisp is much more forgiving.
-The test may legally evaluate to any value at all.
-Only the value `nil` is considered false; all other values are considered true.
-In the definition of `first-name` below, the function `member` will return a non-nil (hence true) value if the first element of the name is in the list of titles, and will return `nil` (hence false) if it is not.
-Although all non-nil values are considered true, by convention the constant `t` is usually used to represent truth.
+特殊形式 `if` は `(if` *判定 真の場合 偽の場合*) という形をとります。
+Lispには条件判定を行う特殊形式が数多くありますが、この例には `if` が最も適しています。
+`if` の形はまず*判定*の式を評価することで評価されます。
+それが真なら*真の場合*が評価されて `if` の値として返され、そうでなければ*偽の場合*が評価されて返されます。
+条件判定の値は `true` か `false` でなければならないと言い張る言語もありますが、Lispはずっと寛容です。
+判定はどんな値に評価されても構いません。
+偽とみなされるのは `nil` という値だけで、それ以外の値はすべて真とみなされます。
+下の `first-name` の定義では、名前の最初の要素が称号のリストにあれば `member` は nil でない（したがって真の）値を返し、なければ `nil`（したがって偽）を返します。
+nil でない値はすべて真とみなされますが、慣例として真を表すにはふつう定数 `t` を使います。
 
 ```lisp
 (defun first-name (name)
@@ -536,8 +536,8 @@ Although all non-nil values are considered true, by convention the constant `t` 
       (first name)))
 ```
 
-When we map the new `first-name` over the list of names, the results are more encouraging.
-In addition, the function gets the "right" result for `'(Madam Major General Paula Jones)` by dropping off titles one at a time.
+新しい `first-name` を名前のリストに写してみると、結果はもっと期待の持てるものになります。
+加えてこの関数は、称号を1つずつ落としていくことで `'(Madam Major General Paula Jones)` について「正しい」結果を得ます。
 
 ```lisp
 > (mapcar #'first-name names)
@@ -547,8 +547,8 @@ In addition, the function gets the "right" result for `'(Madam Major General Pau
 PAULA
 ```
 
-We can see how this works by *tracing* the execution of `first-name`, and seeing the values passed to and returned from the function.
-The special forms `trace` and `untrace` are used for this purpose.
+どう働くかは、`first-name` の実行を*追跡*して、関数に渡される値と返される値を見れば分かります。
+この目的には特殊形式 `trace` と `untrace` を使います。
 
 ```lisp
 > (trace first-name)
@@ -560,17 +560,17 @@ The special forms `trace` and `untrace` are used for this purpose.
 JOHN
 ```
 
-When `first-name` is called, the definition is entered with the single argument, `name`, taking on the value `(JOHN Q PUBLIC)`.
-The value returned is `JOHN`.
-Trace prints two lines indicating entry and exit from the function, and then Lisp, as usual, prints the final result, `JOHN`.
+`first-name` が呼ばれると、ただ1つの引数 `name` が値 `(JOHN Q PUBLIC)` をとった状態で定義に入ります。
+返る値は `JOHN` です。
+trace は関数への出入りを示す2行を表示し、そのあとLispがいつもどおり最終結果 `JOHN` を表示します。
 
-The next example is more complicated.
-The function `first-name` is used four times.
-First, it is entered with `name` bound to `(Madam Major General Paula Jones)`.
-The first element of this list is `Madam`, and since this is a member of the list of titles, the result is computed by calling `first-name` again on the rest of the name-`(Major General Paula Jones)`.
-This process repeats two more times, and we finally enter `first-name` with name bound to (`Paula Jones`).
-Since `Paula` is not a title, it becomes the result of this call to `first-name`, and thus the result of all four calls, as trace shows.
-Once we are happy with the workings of `first-name`, the special form `untrace` turns off tracing.
+次の例はもっと込み入っています。
+`first-name` が4回使われます。
+まず、`name` が `(Madam Major General Paula Jones)` に束縛された状態で入ります。
+このリストの最初の要素は `Madam` で、これは称号のリストに含まれるので、名前の残り `(Major General Paula Jones)` に対して再び `first-name` を呼ぶことで結果が計算されます。
+この手順があと2回繰り返され、最後に name が (`Paula Jones`) に束縛された状態で `first-name` に入ります。
+`Paula` は称号ではないので、これがこの `first-name` 呼び出しの結果となり、trace が示すとおり4回の呼び出しすべての結果になります。
+`first-name` の働きに満足したら、特殊形式 `untrace` で追跡を止めます。
 
 ```lisp
 > (first-name '(Madam Major General Paula Jones)) =>
@@ -589,47 +589,47 @@ PAULA
 > (first-name '(Mr Blue Jeans)) => BLUE
 ```
 
-The function `first-name` is said to be *recursive* because its definition includes a call to itself.
-Programmers who are new to the concept of recursion sometimes find it mysterious.
-But recursive functions are really no different from nonrecursive ones.
-Any function is required to return the correct value for the given input(s).
-Another way to look at this requirement is to break it into two parts: a function must return a value, and it must not return any incorrect values.
-This two-part requirement is equivalent to the first one, but it makes it easier to think about and design function definitions.
+`first-name` は定義の中に自分自身への呼び出しを含むので、*再帰的*だと言われます。
+再帰という概念に不慣れなプログラマは、これを不可解に感じることがあります。
+しかし再帰関数は、再帰でない関数と実のところ何も違いません。
+どんな関数も、与えられた入力に対して正しい値を返すことが求められます。
+この要求は2つに分けて見ることもできます。関数は値を返さねばならない、そして誤った値を返してはならない、の2つです。
+この2つに分けた要求は最初のものと等価ですが、関数定義について考え、設計するのを楽にしてくれます。
 
-Next I show an abstract description of the `first-name` problem, to emphasize the design of the function and the fact that recursive solutions are not tied to Lisp in any way:
-
-`function first-name(name):`
-&nbsp;&nbsp;&nbsp;&nbsp;`if` *the first element of name is a title*
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`then` *do something complicated to get the first-name*
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`else` *return the first element of the name*
-
-This breaks up the problem into two cases.
-In the second case, we return an answer, and it is in fact the correct answer.
-We have not yet specified what to do in the first case.
-But we do know that it has something to do with the rest of the name after the first element, and that what we want is to extract the first name out of those elements.
-The leap of faith is to go ahead and use `first-name`, even though it has not been fully defined yet:
+次に `first-name` の問題を抽象的に記述してみます。関数の設計を際立たせ、再帰による解法がLispに何ら縛られていないことを示すためです。
 
 `function first-name(name):`
-&nbsp;&nbsp;&nbsp;&nbsp;`if` *the first element of name is a title*
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`then` *return the* `first-name` *of the rest of the name*
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`else` *return the first element of the name*
+&nbsp;&nbsp;&nbsp;&nbsp;`if` *nameの最初の要素が称号である*
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`then` *名を得るために何か込み入ったことをする*
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`else` *nameの最初の要素を返す*
 
-Now the first case in `first-name` is recursive, and the second case remains unchanged.
-We already agreed that the second case returns the correct answer, and the first case only returns what `first-name` returns.
-So `first-name` as a whole can only return correct answers.
-Thus, we're halfway to showing that the function is correct; the other half is to show that it eventually returns some answer.
-But every recursive call chops off the first element and looks at the rest, so for an *n*-element list there can be at most *n* recursive calls.
-This completes the demonstration that the function is correct.
-Programmers who learn to think this way find recursion to be a valuable tool rather than a confusing mystery.
+これで問題は2つの場合に分かれます。
+2番目の場合には答えを返しており、それは実際に正しい答えです。
+最初の場合に何をするかは、まだ決めていません。
+しかし、それが最初の要素より後ろの名前の残りに関わること、そして求めているのはその要素群から名を取り出すことだ、というのは分かっています。
+ここでの思い切りは、まだ完全には定義されていない `first-name` を、そのまま使ってしまうことです。
 
-## 1.7 Higher-Order Functions
+`function first-name(name):`
+&nbsp;&nbsp;&nbsp;&nbsp;`if` *nameの最初の要素が称号である*
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`then` *nameの残りに対する* `first-name` *を返す*
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`else` *nameの最初の要素を返す*
 
-Functions in Lisp can not only be "called," or applied to arguments, they can also be manipulated just like any other kind of object.
-A function that takes another function as an argument is called a *higher-order function.*
-`mapcar` is an example.
-To demonstrate the higher-order-function style of programming, we will define a new function called `mappend`. It takes two arguments, a function and a list.
-`mappend` maps the function over each element of the list and appends together all the results.
-The first definition follows immediately from the description and the fact that the function `apply` can be used to apply a function to a list of arguments.
+これで `first-name` の最初の場合は再帰的になり、2番目の場合は変わりません。
+2番目の場合が正しい答えを返すことはすでに合意しており、最初の場合は `first-name` が返すものをそのまま返すだけです。
+ですから `first-name` は全体として正しい答えしか返しえません。
+これで関数が正しいことを示す道のりの半分まで来ました。残りの半分は、いずれ何らかの答えを返すことを示すことです。
+しかし再帰呼び出しのたびに最初の要素が削られて残りを見るので、*n* 要素のリストなら再帰呼び出しは高々 *n* 回です。
+これで関数が正しいことの説明は完結します。
+こう考える習慣を身につけたプログラマは、再帰を混乱の種ではなく価値ある道具だと感じるようになります。
+
+## 1.7 高階関数
+
+Lispの関数は「呼ぶ」こと、すなわち引数に適用することができるだけでなく、他の種類のオブジェクトと同じように操作することもできます。
+別の関数を引数にとる関数を*高階関数*と呼びます。
+`mapcar` がその例です。
+高階関数を使う流儀を示すために、`mappend` という新しい関数を定義しましょう。関数とリストの2つを引数にとります。
+`mappend` はリストの各要素に関数を写し、その結果をすべてつなげます。
+最初の定義は、この説明と、`apply` という関数を使えば関数を引数のリストに適用できるという事実から、ただちに導けます。
 
 ```lisp
 (defun mappend (fn the-list)
@@ -637,21 +637,21 @@ The first definition follows immediately from the description and the fact that 
   (apply #'append (mapcar fn the-list)))
 ```
 
-Now we experiment a little to see how `apply` and `mappend` work.
-The first example applies the addition function to a list of four numbers.
+`apply` と `mappend` がどう働くか、少し試してみましょう。
+最初の例は、4つの数からなるリストに加算関数を適用します。
 
 ```lisp
 > (apply #'+ '(1 2 3 4)) => 10
 ```
 
-The next example applies append to a list of two arguments, where each argument is a list.
-If the arguments were not lists, it would be an error.
+次の例は、2つの引数からなるリストに append を適用します。引数はそれぞれリストです。
+引数がリストでなければエラーになります。
 
 ```lisp
 > (apply #'append '((1 2 3) (a b c))) => (1 2 3 A B C)
 ```
 
-Now we define a new function, `self-and-double`, and apply it to a variety of arguments.
+ここで `self-and-double` という新しい関数を定義し、さまざまな引数に適用してみます。
 
 ```lisp
 > (defun self-and-double (x) (list x (+ x x)))
@@ -661,8 +661,8 @@ Now we define a new function, `self-and-double`, and apply it to a variety of ar
 > (apply #'self-and-double '(3)) => (3 6)
 ```
 
-If we had tried to apply `self-and-double` to a list of more than one argument, or to a list that did not contain a number, it would be an error, just as it would be an error to evaluate (`self-and-double 3 4`) or (`self-and-double 'Kim`).
-Now let's return to the mapping functions:
+`self-and-double` を2つ以上の引数からなるリストや、数を含まないリストに適用しようとすればエラーになります。(`self-and-double 3 4`) や (`self-and-double 'Kim`) を評価するとエラーになるのと同じです。
+では写像の関数に戻りましょう。
 
 ```lisp
 > (mapcar #'self-and-double '(1 10 300)) => ((1 2) (10 20) (300 600))
@@ -670,14 +670,14 @@ Now let's return to the mapping functions:
 > (mappend #'self-and-double '(1 10 300)) => (1 2 10 20 300 600)
 ```
 
-When `mapcar` is passed a function and a list of three arguments, it always returns a list of three values.
-Each value is the result of calling the function on the respective argument.
-In contrast, when `mappend` is called, it returns one big list, which is equal to all the values that `mapcar` would generate appended together.
-It would be an error to call `mappend` with a function that didn't return lists, because `append` expects to see lists as its arguments.
+`mapcar` に関数と3要素のリストを渡すと、常に3つの値からなるリストが返ります。
+各値は、対応する引数に関数を適用した結果です。
+これに対し `mappend` を呼ぶと、1つの大きなリストが返ります。これは `mapcar` が生成するはずの値をすべてつなげたものに等しくなります。
+リストを返さない関数で `mappend` を呼ぶとエラーになります。`append` は引数がリストであることを期待するからです。
 
-Now consider the following problem: given a list of elements, return a list consisting of all the numbers in the original list and the negation of those numbers.
-For example, given the list (`testing 1 2 3 test`), return (`1 -1 2 -2 3 -3`).
-This problem can be solved very easily using `mappend` as a component:
+では次の問題を考えましょう。要素のリストが与えられたとき、元のリストに含まれるすべての数と、その符号を反転した数からなるリストを返す、というものです。
+たとえばリスト (`testing 1 2 3 test`) が与えられたら (`1 -1 2 -2 3 -3`) を返します。
+この問題は `mappend` を部品として使えば、とても簡単に解けます。
 
 ```lisp
 (defun numbers-and-negations (input)
@@ -693,7 +693,7 @@ This problem can be solved very easily using `mappend` as a component:
 > (numbers-and-negations '(testing 1 2 3 test)) => (1 -1 2 -2 3 -3)
 ```
 
-The alternate definition of `mappend` shown in the following doesn't make use of `mapcar;` instead it builds up the list one element at a time:
+次に示す `mappend` の別の定義は `mapcar` を使わず、代わりにリストを1要素ずつ組み上げていきます。
 
 ```lisp
 (defun mappend (fn the-list)
@@ -704,7 +704,7 @@ The alternate definition of `mappend` shown in the following doesn't make use of
               (mappend fn (rest the-list)))))
 ```
 
-`funcall` is similar to `apply;` it too takes a function as its first argument and applies the function to a list of arguments, but in the case of `funcall`, the arguments are listed separately:
+`funcall` は `apply` に似ています。やはり第1引数に関数をとり、それを引数の並びに適用しますが、`funcall` の場合は引数を個別に並べます。
 
 ```lisp
 > (funcall #'+ 2 3) => 5
@@ -714,28 +714,28 @@ The alternate definition of `mappend` shown in the following doesn't make use of
 > (funcall #'+ '(2 3)) => *Error: (2 3) is not a number.*
 ```
 
-These are equivalent to `(+ 2 3)`, `(+ 2 3)`, and `(+ '(2 3))`, respectively.
+これらはそれぞれ `(+ 2 3)`、`(+ 2 3)`、`(+ '(2 3))` と等価です。
 
-So far, every function we have used has been either predefined in Common Lisp or introduced with a `defun`, which pairs a function with a name.
-It is also possible to introduce a function without giving it a name, using the special syntax `lambda`.
+ここまで使ってきた関数はすべて、Common Lispであらかじめ定義されているか、関数と名前を対応づける `defun` で導入したものでした。
+`lambda` という特殊な構文を使えば、名前を付けずに関数を導入することもできます。
 
-The name *lambda* comes from the mathematician Alonzo Church's notation for functions (Church 1941).
-Lisp usually prefers expressive names over terse Greek letters, but lambda is an exception.
-A better name would be `make-function`.
-Lambda derives from the notation in Russell and Whitehead's *Principia Mathematica,* which used a caret over bound variables: *x&#x302;*(*x + x*).
+*lambda* という名は、数学者Alonzo Churchの関数の記法（Church 1941）に由来します。
+Lispはふつう、そっけないギリシャ文字より意味の伝わる名前を好みますが、lambda は例外です。
+もっとよい名前は `make-function` でしょう。
+lambda はRussellとWhiteheadの *Principia Mathematica* の記法に由来します。そこでは束縛変数の上にキャレットを置いていました。*x&#x302;*(*x + x*) のように。
 
-Church wanted a one-dimensional string, so he moved the caret in front: *^x*(*x + x*).
-The caret looked funny with nothing below it, so Church switched to the closest thing, an uppercase lambda, *&Lambda;x*(*x + x*).
-The &Lambda; was easily confused with other symbols, so eventually the lowercase lambda was substituted: *&lambda;x*(*x + x*).
-John McCarthy was a student of Church's at Princeton, so when McCarthy invented Lisp in 1958, he adopted the lambda notation.
-There were no Greek letters on the keypunches of that era, so McCarthy used (`lambda (x) (+ x x)`), and it has survived to this day.
-In general, the form of a lambda expression is
+Churchは一次元の文字列にしたかったので、キャレットを前に移しました。*^x*(*x + x*) です。
+下に何もないキャレットは妙に見えたので、Churchは最も近いもの、大文字のラムダに切り替えました。*&Lambda;x*(*x + x*) です。
+&Lambda; は他の記号と紛れやすかったので、最終的に小文字のラムダに置き換えられました。*&lambda;x*(*x + x*) です。
+John McCarthyはプリンストンでChurchの学生だったので、1958年にLispを考案したときラムダ記法を採り入れました。
+当時のキーパンチにギリシャ文字はなかったので、McCarthyは (`lambda (x) (+ x x)`) と書きました。それが今日まで生き残っています。
+一般に、ラムダ式の形は次のとおりです。
 
-`(lambda` (*parameters...*) *body...*)
+`(lambda` (*引数...*) *本体...*)
 
-A lambda expression is just a nonatomic *name* for a function, just as `append` is an atomic name for a built-in function.
-As such, it is appropriate for use in the first position of a function call, but if we want to get at the actual function, rather than its name, we still have to use the `#'` notation.
-For example:
+ラムダ式は、`append` が組み込み関数のアトム的な名前であるのと同じように、関数のアトムでない*名前*にすぎません。
+ですから関数呼び出しの先頭の位置に置くのは適切ですが、名前ではなく関数そのものを得たいなら、やはり `#'` の記法を使わねばなりません。
+たとえば次のようになります。
 
 ```lisp
 > ((lambda (x) (+ x 2)) 4) => 6
@@ -743,19 +743,19 @@ For example:
 > (funcall #'(lambda (x) (+ x 2)) 4) => 6
 ```
 
-To understand the distinction we have to be clear on how expressions are evaluated in Lisp.
-The normal rule for evaluation states that symbols are evaluated by looking up the value of the variable that the symbol refers to.
-So the `x` in `(+ x 2)` is evaluated by looking up the value of the variable named `x`.
-A list is evaluated in one of two ways.
-If the first element of the list is a special form operator, then the list is evaluated according to the syntax rule for that special form.
-Otherwise, the list represents a function call.
-The first element is evaluated in a unique way, as a function.
-This means it can either be a symbol or a lambda expression.
-In either case, the function named by the first element is applied to the values of the remaining elements in the list.
-These values are determined by the normal evaluation rules.
-If we want to refer to a function in a position other than the first element of a function call, we have to use the `#'` notation.
-Otherwise, the expressions will be evaluated by the normal evaluation rule, and will not be treated as functions.
-For example:
+この違いを理解するには、Lispで式がどう評価されるかをはっきりさせておく必要があります。
+通常の評価規則によれば、シンボルは、それが指す変数の値を調べることで評価されます。
+ですから `(+ x 2)` の `x` は、`x` という名の変数の値を調べることで評価されます。
+リストは2通りのいずれかで評価されます。
+リストの最初の要素が特殊形式演算子なら、その特殊形式の構文規則に従って評価されます。
+そうでなければ、そのリストは関数呼び出しを表します。
+最初の要素は独特のやり方で、関数として評価されます。
+つまり、シンボルかラムダ式のいずれかでありえます。
+どちらの場合も、最初の要素が名づける関数が、リストの残りの要素の値に適用されます。
+これらの値は通常の評価規則で決まります。
+関数呼び出しの最初の要素以外の位置で関数を参照したければ、`#'` の記法を使わねばなりません。
+そうしないと、式は通常の評価規則で評価され、関数としては扱われません。
+たとえば次のようになります。
 
 ```lisp
 > append => *Error: APPEND is not a bound variable*
@@ -763,7 +763,7 @@ For example:
 > (lambda (x) (+ x 2)) => *Error: LAMBDA is not a function*
 ```
 
-Here are some more examples of the correct use of functions:
+関数の正しい使い方の例をもう少し挙げます。
 
 ```lisp
 > (mapcar #'(lambda (x) (+ x x))
@@ -775,24 +775,24 @@ Here are some more examples of the correct use of functions:
 ((1 2 3) (3 2 1) (A B C) (C B A))
 ```
 
-Programmers who are used to other languages sometimes fail to see the point of lambda expressions.
-There are two reasons why lambda expressions are very useful.
+他の言語に慣れたプログラマは、ラムダ式の意義を見落とすことがあります。
+ラムダ式がとても役に立つ理由は2つあります。
 
-First, it can be messy to clutter up a program with superfluous names.
-Just as it is clearer to write `(a+b)*(c+d)` rather than to invent variable names like `temp1` and `temp2` to hold `a+b` and `c+d`, so it can be clearer to define a function as a lambda expression rather than inventing a name for it.
+第一に、余計な名前でプログラムを散らかすのは煩わしいことです。
+`a+b` と `c+d` を入れておく `temp1`、`temp2` のような変数名をひねり出すより `(a+b)*(c+d)` と書くほうが明快なのと同じで、関数に名前をひねり出すよりラムダ式として定義するほうが明快なことがあります。
 
-Second, and more importantly, lambda expressions make it possible to create new functions at run time.
-This is a powerful technique that is not possible in most programming languages.
-These run-time functions, known as *closures,* will be covered in section 3.16.
+第二に、そしてより重要なことに、ラムダ式は実行時に新しい関数を作ることを可能にします。
+これは、たいていのプログラミング言語ではできない強力な技法です。
+*クロージャ*と呼ばれるこの実行時の関数は、3.16節で扱います。
 
-## 1.8 Other Data Types
+## 1.8 その他のデータ型
 
-So far we have seen just four kinds of Lisp objects: numbers, symbols, lists, and functions.
-Lisp actually defines about 25 different types of objects: vectors, arrays, structures, characters, streams, hash tables, and others.
-At this point we will introduce one more, the string.
-As you can see in the following, strings, like numbers, evaluate to themselves.
-Strings are used mainly for printing out messages, while symbols are used for their relationships to other objects, and to name variables.
-The printed representation of a string has a double quote mark `(")` at each end.
+ここまでに見たLispのオブジェクトは、数・シンボル・リスト・関数の4種類だけです。
+実際にはLispは25ほどの型を定義しています。ベクタ、配列、構造体、文字、ストリーム、ハッシュ表などです。
+ここではもう1つ、文字列を紹介します。
+次に見るとおり、文字列は数と同じく自分自身に評価されます。
+文字列は主にメッセージを表示するのに使い、シンボルは他のオブジェクトとの関係のために、また変数の名前として使います。
+文字列の表示上の表現は、両端に二重引用符 `(")` が付きます。
 
 ```lisp
 > "a string" => "a string"
@@ -802,21 +802,21 @@ The printed representation of a string has a double quote mark `(")` at each end
 > (length "") => 0
 ```
 
-## 1.9 Summary: The Lisp Evaluation Rule
+## 1.9 まとめ: Lispの評価規則
 
-We can now summarize the evaluation rule for Lisp.
+これでLispの評価規則をまとめられます。
 
-*   Every expression is either a *list* or an *atom.*
+*   あらゆる式は*リスト*か*アトム*のいずれかである。
 
-*   Every list to be evaluated is either a *special form expression* or a *function application*.
+*   評価されるリストはすべて、*特殊形式の式*か*関数適用*のいずれかである。
 
-*   A *special form expression* is defined to be a list whose first element is a special form operator.
-The expression is evaluated according to the operator's idiosyncratic evaluation rule.
-For example, the evaluation rule for `setf` is to evaluate the second argument according to the normal evaluation rule, set the first argument to that value, and return the value as the result.
-The rule for `defun` is to define a new function, and return the name of the function.
-The rule for quote is to return the first argument unevaluated.
-The notation `'x` is actually an abbreviation for the special form expression `(quote x)`.
-Similarly, the notation `#'f` is an abbreviation for the special form expression `(function f)`.
+*   *特殊形式の式*とは、最初の要素が特殊形式演算子であるリストと定義される。
+式はその演算子固有の評価規則に従って評価される。
+たとえば `setf` の評価規則は、第2引数を通常の評価規則で評価し、第1引数をその値に設定し、その値を結果として返す、というものである。
+`defun` の規則は、新しい関数を定義してその関数の名前を返す、というものである。
+quote の規則は、第1引数を評価せずに返す、というものである。
+`'x` という記法は、実際には特殊形式の式 `(quote x)` の略記である。
+同様に `#'f` という記法は、特殊形式の式 `(function f)` の略記である。
 
 ```lisp
 'John ≡ (quote John) => JOHN
@@ -828,21 +828,21 @@ Similarly, the notation `#'f` is an abbreviation for the special form expression
 (if (= 2 3) (error) (+ 5 6)) => 11
 ```
 
-*   A *function application* is evaluated by first evaluating the arguments (the rest of the list) and then finding the function named by the first element of the list and applying it to the list of evaluated arguments.
+*   *関数適用*は、まず引数（リストの残り）を評価し、次にリストの最初の要素が名づける関数を見つけて、評価済みの引数の並びに適用することで評価される。
 
 ```lisp
 (+ 2 3) => 5
 (- (+ 90 9) (+ 50 5 (length '(Pat Kim)))) => 42
 ```
 
-Note that if `'(Pat Kim)` did not have the quote, it would be treated as a function application of the function `pat` to the value of the variable `kim`.
+`'(Pat Kim)` に引用符がなければ、関数 `pat` を変数 `kim` の値に適用する関数適用として扱われることに注意。
 
-*   Every atom is either a *symbol* or a *nonsymbol.*
+*   あらゆるアトムは*シンボル*か*シンボルでないもの*のいずれかである。
 
-*   A *symbol* evaluates to the most recent value that has been assigned to the variable named by that symbol.
-Symbols are composed of letters, and possibly digits and, rarely, punctuation characters.
+*   *シンボル*は、そのシンボルが名づける変数に最後に割り当てられた値に評価される。
+シンボルは英字と、場合によっては数字、まれに記号からなる。
 <a id="tfn01-6"></a>
-To avoid confusion, we will use symbols composed mostly of the letters `a-z` and the `'-'` character, with a few exceptions.<sup>[6](#fn01-6)</sup>
+紛れを避けるため、本書ではおおむね `a-z` の英字と `'-'` からなるシンボルを使う。若干の例外はある。<sup>[6](#fn01-6)</sup>
 
 ```lisp
 names
@@ -850,11 +850,11 @@ p
 *print-pretty*
 ```
 
-*   A *nonsymbol atom* evaluates to itself.
-For now, numbers and strings are the only such non-symbol atoms we know of.
-Numbers are composed of digits, and possibly a decimal point and sign.
-There are also provisions for scientific notation, rational and complex numbers, and numbers with different bases, but we won't describe the details here.
-Strings are delimited by double quote marks on both sides.
+*   *シンボルでないアトム*は自分自身に評価される。
+今のところ、私たちが知っているそうしたアトムは数と文字列だけである。
+数は数字と、場合によっては小数点と符号からなる。
+指数表記、有理数と複素数、異なる基数の数についての定めもあるが、ここでは詳細に触れない。
+文字列は両側を二重引用符で区切る。
 
 ```lisp
 42 => 42
@@ -862,72 +862,72 @@ Strings are delimited by double quote marks on both sides.
 "a string" => "a string"
 ```
 
-There are some minor details of Common Lisp that complicate the evaluation rules, but this definition will suffice for now.
+評価規則を複雑にするCommon Lispの細かな点はいくつかありますが、今のところこの定義で十分です。
 
-One complication that causes confusion for beginning Lispers is the difference between *reading* and *evaluating* an expression.
-Beginners often imagine that when they type an expression, such as
+Lispを始めた人を混乱させる込み入った点の1つが、式を*読む*ことと*評価する*ことの違いです。
+初心者はしばしば、次のような式を打ち込むと、
 
 ```lisp
 > (+ (* 3 4) (* 5 6))
 ```
 
-the Lisp system first reads the (`+`, then fetches the addition function, then reads `(* 3 4)` and computes `12`, then reads `(* 5 6)` and computes 30, and finally computes 42.
-In fact, what actually happens is that the system first reads the entire expression, the list `(+ (* 3 4) (* 5 6))`.
-Only after it has been read does the system begin to evaluate it.
-This evaluation can be done by an interpreter that looks at the list directly, or it can be done by a compiler that translates the list into machine language instructions and then executes those instructions.
+Lispシステムはまず (`+` を読んで加算関数を取ってきて、次に `(* 3 4)` を読んで `12` を計算し、次に `(* 5 6)` を読んで30を計算し、最後に42を計算する、と思い描きます。
+実際に起きているのは、システムがまず式全体、すなわちリスト `(+ (* 3 4) (* 5 6))` を読む、ということです。
+読み終えてはじめて、システムは評価を始めます。
+この評価は、リストを直接見るインタプリタが行うこともあれば、リストを機械語命令に翻訳してその命令を実行するコンパイラが行うこともあります。
 
-We can see now that it was a little imprecise to say, "Numbers are composed of digits, and possibly a decimal point and sign." It would be more precise to say that the printed representation of a number, as expected by the function read and as produced by the function print, is composed of digits, and possibly a decimal point and sign.
-The internal representation of a number varies from one computer to another, but you can be sure that it will be a bit pattern in a particular memory location, and it will no longer contain the original characters used to represent the number in decimal notation.
-Similarly, it is the printed representation of a string that is surrounded by double quote marks; the internal representation is a memory location marking the beginning of a vector of characters.
+ここまで来ると、「数は数字と、場合によっては小数点と符号からなる」という言い方が少し不正確だったと分かります。より正確には、read 関数が期待し print 関数が生み出す数の表示上の表現が、数字と、場合によっては小数点と符号からなる、と言うべきでした。
+数の内部表現は計算機ごとに異なりますが、それが特定のメモリ位置にあるビット列であり、その数を十進法で表すのに使われた元の文字はもはや含まれていない、というのは確かです。
+同様に、二重引用符で囲まれるのは文字列の表示上の表現です。内部表現は、文字のベクタの先頭を示すメモリ位置です。
 
-Beginners who fail to grasp the distinction between reading and evaluating may have a good model of what expressions evaluate to, but they usually have a terrible model of the efficiency of evaluating expressions.
-One student used only one-letter variable names, because he felt that it would be faster for the computer to look up a one-letter name than a multiletter name.
-While it may be true that shorter names can save a microsecond at read time, this makes no difference at all at evaluation time.
-Every variable, regardless of its name, is just a memory location, and the time to access the location does not depend on the name of the variable.
+読むことと評価することの違いをつかみそこねた初心者は、式が何に評価されるかについてはよい見取り図を持っていても、式の評価の効率についてはひどい見取り図しか持っていないことが多いものです。
+ある学生は変数名を一文字だけにしていました。一文字の名前のほうが複数文字より計算機が速く引けると思っていたからです。
+短い名前が読み込み時に数マイクロ秒を節約するのは事実かもしれませんが、評価時にはまったく違いを生みません。
+どの変数も、名前がどうであれ単なるメモリ位置であり、そこにアクセスする時間は変数の名前に左右されません。
 
-## 1.10 What Makes Lisp Different?
+## 1.10 Lispは何が違うのか
 
-What is it that sets Lisp apart from other languages?
-Why is it a good language for AI applications?
-There are at least eight important factors:
+Lispを他の言語から際立たせているものは何でしょうか。
+なぜAIの応用によい言語なのでしょうか。
+少なくとも8つの大事な要素があります。
 
-*   Built-in Support for Lists
-*   Automatic Storage Management
-*   Dynamic Typing
-*   First-Class Functions
-*   Uniform Syntax
-*   Interactive Environment
-*   Extensibility
-*   History
+*   リストへの組み込みの支援
+*   記憶領域の自動管理
+*   動的な型付け
+*   第一級の関数
+*   一様な構文
+*   対話的な環境
+*   拡張性
+*   歴史
 
-In sum, these factors allow a programmer to delay making decisions.
-In the example dealing with names, we were able to use the built-in list functions to construct and manipulate names without making a lot of explicit decisions about their representation.
-If we decided to change the representation, it would be easy to go back and alter parts of the program, leaving other parts unchanged.
+要するに、これらの要素はプログラマが決定を先送りすることを可能にします。
+名前を扱った例では、表現について明示的な決定を多く下すことなく、組み込みのリスト関数で名前を組み立て操作できました。
+表現を変えることにしても、プログラムの一部を戻って書き換え、他はそのままにしておくのが容易です。
 
-This ability to delay decisions-or more accurately, to make temporary, nonbinding decisions-is usually a good thing, because it means that irrelevant details can be ignored.
-There are also some negative points of delaying decisions.
-First, the less we tell the compiler, the greater the chance that it may have to produce inefficient code.
-Second, the less we tell the compiler, the less chance it has of noticing inconsistencies and warning us.
-Errors may not be detected until the program is run.
-Let's consider each factor in more depth, weighing the advantages and disadvantages:
+決定を先送りする — より正確には、暫定的で拘束力のない決定を下す — この能力は、たいていよいことです。関係のない細部を無視できることを意味するからです。
+決定を先送りすることには、よくない面もあります。
+第一に、コンパイラに伝えることが少ないほど、非効率なコードを生まざるをえない可能性が高まります。
+第二に、コンパイラに伝えることが少ないほど、矛盾に気づいて警告してくれる見込みが減ります。
+誤りがプログラムの実行時まで見つからないかもしれません。
+それぞれの要素を、利点と欠点を秤にかけながら、もう少し掘り下げましょう。
 
-*   *Built-in Support for Lists.*
-The list is a very versatile data structure, and while lists can be implemented in any language, Lisp makes it easy to use them.
-Many AI applications involve lists of constantly changing size, making fixed-length data structures like vectors harder to use.
-Early versions of Lisp used lists as their only aggregate data structure.
-Common Lisp provides other types as well, because lists are not always the most efficient choice.
+*   *リストへの組み込みの支援*
+リストは実に融通の利くデータ構造です。どんな言語でも実装できますが、Lispはそれを使いやすくしてくれます。
+AIの応用の多くは絶えず大きさの変わるリストを扱うので、ベクタのような固定長のデータ構造は使いにくくなります。
+初期のLispは、集約データ構造としてリストだけを使っていました。
+Common Lispは他の型も備えています。リストが常に最も効率のよい選択とは限らないからです。
 
-*   *Automatic Storage Management.*
-The Lisp programmer needn't keep track of memory allocation; it is all done automatically.
-This frees the programmer of a lot of effort, and makes it easy to use the functional style of programming.
-Other languages present programmers with a choice.
-Variables can be allocated on the stack, meaning that they are created when a procedure is entered, and disappear when the procedure is done.
-This is an efficient use of storage, but it rules out functions that return complex values.
-The other choice is for the programmer to explicitly allocate and free storage.
-This makes the functional style possible but can lead to errors.
+*   *記憶領域の自動管理*
+Lispプログラマはメモリの確保を管理する必要がありません。すべて自動で行われます。
+これはプログラマを多くの労から解放し、関数的な流儀のプログラミングを容易にします。
+他の言語はプログラマに選択を迫ります。
+変数をスタック上に確保することができます。手続きに入ったときに作られ、手続きが終われば消えるということです。
+これは記憶領域の効率的な使い方ですが、複雑な値を返す関数を締め出してしまいます。
+もう1つの選択は、プログラマが明示的に領域を確保し解放することです。
+これなら関数的な流儀は可能になりますが、誤りのもとになりえます。
 
-For example, consider the trivial problem of computing the expression *a* x (b + c), where *a*, *b*, and *c* are numbers.
-The code is trivial in any language; here it is in Pascal and in Lisp:
+たとえば、*a*、*b*、*c* が数であるとき、式 *a* x (b + c) を計算するという自明な問題を考えましょう。
+どの言語でもコードは自明です。PascalとLispで書いてみます。
 
 ```pascal
 /* Pascal */
@@ -939,12 +939,12 @@ a * (b + c)
 (* a (+ b c))
 ```
 
-The only difference is that Pascal uses infix notation and Lisp uses prefix.
-Now consider computing *a \* (b + c)* when *a*, *b*, and *c* are matrices.
-Assume we have procedures for matrix multiplication and addition.
-In Lisp the form is exactly the same; only the names of the functions are changed.
-In Pascal we have the choice of approaches mentioned before.
-We could declare temporary variables to hold intermediate results on the stack, and replace the functional expression with a series of procedure calls:
+違いは、Pascalが中置記法を、Lispが前置記法を使うことだけです。
+では *a*、*b*、*c* が行列であるときに *a \* (b + c)* を計算することを考えましょう。
+行列の乗算と加算の手続きはあるものとします。
+Lispでは形はまったく同じで、関数の名前が変わるだけです。
+Pascalでは、先ほど述べた方式の選択を迫られます。
+中間結果を保持する一時変数をスタック上に宣言し、関数的な式を一連の手続き呼び出しに置き換えることができます。
 
 ```pascal
 /* Pascal */
@@ -959,9 +959,9 @@ return(result);
 (mult a (add b c))
 ```
 
-The other choice is to write Pascal functions that allocate new matrices on the heap.
-Then one can write nice functional expressions like `mult(a,add(b,c))` even in Pascal.
-However, in practice it rarely works this nicely, because of the need to manage storage explicitly:
+もう1つの選択は、ヒープ上に新しい行列を確保するPascalの関数を書くことです。
+そうすれば、Pascalでも `mult(a,add(b,c))` のような気持ちのよい関数的な式が書けます。
+しかし実際には、領域を明示的に管理する必要があるため、そう気持ちよくは運びません。
 
 ```pascal
 /* Pascal */
@@ -977,97 +977,97 @@ return(y);
 (mult a (add b c))
 ```
 
-In general, deciding which structures to free is a difficult task for the Pascal programmer.
-If the programmer misses some, then the program may run out of memory.
-Worse, if the programmer frees a structure that is still being used, then strange errors can occur when that piece of memory is reallocated.
-Lisp automatically allocates and frees structures, so these two types of errors can *never* occur.
+一般に、どの構造を解放するかを決めるのは、Pascalのプログラマにとって難しい仕事です。
+いくつか見落とせば、プログラムはメモリを使い果たすかもしれません。
+もっと悪いことに、まだ使われている構造を解放してしまうと、そのメモリが再び確保されたときに奇妙な誤りが起こりえます。
+Lispは構造の確保と解放を自動で行うので、この2種類の誤りは*決して*起こりません。
 
-*   *Dynamic Typing.*
-Lisp programmers don't have to provide type declarations, because the language keeps track of the type of each object at run time, rather than figuring out all types at compile time.
-This makes Lisp programs shorter and hence faster to develop, and it also means that functions can often be extended to work for objects to which they were not originally intended to apply.
-In Pascal, we can write a procedure to sort an array of 100 integers, but we can't use that same procedure to sort 200 integers, or 100 strings.
-In Lisp, one `sort` fits all.
-One way to appreciate this kind of flexibility is to see how hard it is to achieve in other languages.
-It is impossible in Pascal; in fact, the language Modula was invented primarily to fix this problem in Pascal.
-The language Ada was designed to allow flexible generic functions, and a book by Musser and Stepanov (1989) describes an Ada package that gives some of the functionality of Common Lisp's sequence functions.
-But the Ada solution is less than ideal: it takes a 264-page book to duplicate only part of the functionality of the 20-page chapter 14 from [Steele (1990)](bibliography.md#bb1160), and Musser and Stepanov went through five Ada compilers before they found one that would correctly compile their package.
-Also, their package is considerably less powerful, since it does not handle vectors or optional keyword parameters.
-In Common Lisp, all this functionality comes for free, and it is easy to add more.
-On the other hand, dynamic typing means that some errors will go undetected until run time.
-The great advantage of strongly typed languages is that they are able to give error messages at compile time.
-The great frustration with strongly typed languages is that they are only able to warn about a small class of errors.
-They can tell you that you are mistakenly passing a string to a function that expects an integer, but they can't tell you that you are passing an odd number to a function that expects an even number.
+*   *動的な型付け*
+Lispプログラマは型宣言を書く必要がありません。言語がコンパイル時にすべての型を割り出すのではなく、実行時に各オブジェクトの型を把握しているからです。
+これによりLispのプログラムは短くなり、したがって速く開発でき、また、もともと適用するつもりのなかったオブジェクトにも働くよう関数を拡張できることが多くなります。
+Pascalでは、100個の整数の配列を整列する手続きは書けますが、同じ手続きで200個の整数や100個の文字列を整列することはできません。
+Lispなら `sort` 1つですべてに間に合います。
+この種の柔軟さのありがたみを知るには、他の言語でそれを実現するのがどれほど大変かを見るのがよいでしょう。
+Pascalでは不可能です。実際、Modulaという言語は主にPascalのこの問題を直すために考案されました。
+Adaという言語は柔軟な総称関数を許すように設計され、MusserとStepanovの本（1989）は、Common Lispの列関数の機能の一部を提供するAdaのパッケージを解説しています。
+しかしAdaによる解決は理想からほど遠いものです。[Steele (1990)](bibliography.md#bb1160) の20ページの第14章の機能の一部を再現するのに264ページの本を要し、MusserとStepanovは自分たちのパッケージを正しくコンパイルできるものに行き当たるまで、5つのAdaコンパイラを試しました。
+しかも彼らのパッケージはかなり非力です。ベクタも省略可能なキーワード引数も扱えないからです。
+Common Lispでは、これらの機能はすべて無償で手に入り、さらに追加するのも容易です。
+一方で、動的な型付けは、一部の誤りが実行時まで見つからないことを意味します。
+強く型付けされた言語の大きな利点は、コンパイル時にエラーを知らせられることです。
+強く型付けされた言語の大きなもどかしさは、ごく限られた種類の誤りしか警告できないことです。
+整数を期待する関数に誤って文字列を渡していることは教えてくれますが、偶数を期待する関数に奇数を渡していることは教えてくれません。
 
-*   *First-Class Functions.*
-A *first-class* object is one that can be used anywhere and can be manipulated in the same ways as any other kind of object.
-In Pascal or C, for example, functions can be passed as arguments to other functions, but they are not first-class, because it is not possible to create new functions while the program is running, nor is it possible to create an anonymous function without giving it a name.
-In Lisp we can do both those things using `lambda`.
-This is explained in section 3.16, page 92.
+*   *第一級の関数*
+*第一級*のオブジェクトとは、どこででも使え、他の種類のオブジェクトと同じやり方で操作できるもののことです。
+たとえばPascalやCでは、関数を他の関数の引数として渡せますが、第一級ではありません。プログラムの実行中に新しい関数を作ることも、名前を付けずに無名の関数を作ることもできないからです。
+Lispでは `lambda` を使ってその両方ができます。
+これは3.16節、92ページで説明します。
 
-*   *Uniform Syntax.*
-The syntax of Lisp programs is simple.
-This makes the language easy to learn, and very little time is wasted correcting typos.
-In addition, it is easy to write programs that manipulate other programs or define whole new languages-a very powerful technique.
-The simple syntax also makes it easy for text editing programs to parse Lisp.
-Your editor program should be able to indent expressions automatically and to show matching parentheses.
-This is harder to do for languages with complex syntax.
-On the other hand, some people object to all the parentheses.
-There are two answers to this objection.
-First, consider the alternative: in a language with "conventional" syntax, Lisp's parentheses pairs would be replaced either by an implicit operator precedence rule (in the case of arithmetic and logical expressions) or by a `begin/end` pair (in the case of control structures).
-But neither of these is necessarily an advantage.
-Implicit precedence is notoriously error-prone, and `begin/end` pairs clutter up the page without adding any content.
-Many languages are moving away from `begin/end`: `C` uses `{` and `}`, which are equivalent to parentheses, and several modern functional languages (such as Haskell) use horizontal blank space, with no explicit grouping at all.
-Second, many Lisp programmers *have* considered the alternative.
-There have been a number of preprocessors that translate from "conventional" syntax into Lisp.
-None of these has caught on.
-It is not that Lisp programmers find it *tolerable* to use all those parentheses, rather, they find it *advantageous.*
-With a little experience, you may too.
-It is also important that the syntax of Lisp data is the same as the syntax of programs.
-Obviously, this makes it easy to convert data to program.
-Less obvious is the time saved by having universal functions to handle input and output.
-The Lisp functions `read` and `print` will automatically handle any list, structure, string, or number.
-This makes it trivial to test individual functions while developing your program.
-In a traditional language like C or Pascal, you would have to write special-purpose functions to read and print each data type you wanted to debug, as well as a special-purpose driver to call the routines.
-Because this is time-consuming and error-prone, the temptation is to avoid testing altogether.
-Thus, Lisp encourages better-tested programs, and makes it easier to develop them faster.
+*   *一様な構文*
+Lispプログラムの構文は単純です。
+そのため言語は学びやすく、打ち間違いの訂正に費やす時間もごくわずかです。
+加えて、他のプログラムを操作したり、まったく新しい言語を定義したりするプログラムを書くのが容易です。これは実に強力な技法です。
+単純な構文はまた、テキストエディタがLispを解析するのも容易にします。
+お使いのエディタは、式を自動で字下げし、対応する括弧を示せるはずです。
+複雑な構文の言語では、これはもっと難しくなります。
+一方で、あの括弧の多さに異を唱える人もいます。
+この異議には2つの答えがあります。
+第一に、代わりを考えてみてください。「よくある」構文の言語では、Lispの括弧の対は、暗黙の演算子優先順位の規則（算術式や論理式の場合）か、`begin/end` の対（制御構造の場合）に置き換わります。
+しかしどちらも必ずしも利点とは言えません。
+暗黙の優先順位は誤りを招くことで悪名高く、`begin/end` の対は中身を増やさずに紙面を散らかします。
+多くの言語が `begin/end` から離れつつあります。`C` は括弧に相当する `{` と `}` を使い、現代的な関数型言語のいくつか（Haskellなど）は横方向の空白を使い、明示的なまとまりの表現をまったく持ちません。
+第二に、多くのLispプログラマは代わりを実際に検討*してきました*。
+「よくある」構文からLispへ変換する前処理系はいくつも作られてきました。
+どれも定着しませんでした。
+Lispプログラマがあの括弧の多さを*我慢している*のではありません。むしろ*有利だ*と考えているのです。
+少し経験を積めば、あなたもそう思うかもしれません。
+Lispのデータの構文がプログラムの構文と同じであることも重要です。
+明らかに、これはデータをプログラムに変換するのを容易にします。
+それほど明らかでないのは、入出力を扱う汎用の関数があることで節約される時間です。
+Lispの関数 `read` と `print` は、どんなリスト・構造体・文字列・数でも自動的に扱ってくれます。
+おかげで、プログラムの開発中に個々の関数を試すのが造作もなくなります。
+CやPascalのような伝統的な言語では、デバッグしたいデータ型ごとに読み書きの専用関数を書き、さらにそれを呼ぶ専用の駆動部も書かねばなりません。
+これは時間がかかり誤りも招きやすいので、試験そのものを避けたい誘惑にかられます。
+つまりLispは、よりよく試験されたプログラムを促し、それをより速く開発しやすくします。
 
-*   *Interactive Environment.*
-Traditionally, a programmer would write a complete program, compile it, correct any errors detected by the compiler, and then run and debug it.
-This is known as the *batch* mode of interaction.
-For long programs, waiting for the compiler occupied a large portion of the debugging time.
-In Lisp one normally writes a few small functions at a time, getting feedback from the Lisp system after evaluating each one.
-This is known as an *interactive* environment.
-When it comes time to make a change, only the changed functions need to be recompiled, so the wait is much shorter.
-In addition, the Lisp programmer can debug by typing in arbitrary expressions at any time.
-This is a big improvement over editing the program to introduce print statements and recompiling.
-Notice that the distinction between *interactive* and a *batch* languages is separate from the distinction between *interpreted* and *compiled* languages.
-It has often been stated, incorrectly, that Lisp has an advantage by virtue of being an interpreted language.
-Actually, experienced Common Lisp programmers tend to use the compiler almost exclusively.
-The important point is interaction, not interpretation.
-The idea of an interactive environment is such a good one that even traditional languages like C and Pascal are starting to offer interactive versions, so this is not an exclusive advantage of Lisp.
-However, Lisp still provides much better access to the interactive features.
-A C interpreter may allow the programmer to type in an expression and have it evaluated immediately, but it will not allow the programmer to write a program that, say, goes through the symbol table and finds all the user-defined functions and prints information on them.
-In C-even interpreted C-the symbol table is just a Cheshire-cat-like invention of the interpreter's imagination that disappears when the program is run.
+*   *対話的な環境*
+伝統的には、プログラマはプログラムを丸ごと書き、コンパイルし、コンパイラが見つけた誤りを直し、それから実行してデバッグしました。
+これは*一括処理*の方式として知られています。
+長いプログラムでは、コンパイラを待つ時間がデバッグ時間の大部分を占めました。
+Lispではふつう、小さな関数をいくつかずつ書き、1つ評価するごとにLispシステムから反応を得ます。
+これは*対話的*な環境として知られています。
+変更するときも、変えた関数だけを再コンパイルすればよいので、待ち時間はずっと短くて済みます。
+加えてLispプログラマは、いつでも任意の式を打ち込んでデバッグできます。
+これは、表示文を入れるためにプログラムを編集して再コンパイルするより大きな進歩です。
+*対話的*な言語と*一括処理*の言語の区別は、*解釈実行*される言語と*コンパイル*される言語の区別とは別物である点に注意してください。
+Lispは解釈実行される言語だから有利なのだ、としばしば誤って言われてきました。
+実際には、経験を積んだCommon Lispプログラマはほとんどコンパイラばかりを使う傾向にあります。
+大事なのは対話であって、解釈実行ではありません。
+対話的な環境という考えはとてもよいものなので、CやPascalのような伝統的な言語でさえ対話版を提供し始めています。ですからこれはLisp固有の利点ではありません。
+それでもLispは、対話的な機能へのはるかに優れた足がかりを与えてくれます。
+Cのインタプリタは、式を打ち込んで即座に評価させることは許すかもしれませんが、たとえばシンボル表をたどって利用者定義の関数をすべて見つけ、その情報を表示するようなプログラムを書くことは許しません。
+Cでは — 解釈実行されるCでさえ — シンボル表はインタプリタの想像が生んだチェシャ猫のようなもので、プログラムが走るときには消えてしまいます。
 <a id="tfn01-7"></a>
-In Lisp, the symbol table is a first-class object<sup>[7](#fn01-7)</sup> that can be accessed and modified with functions like `read, intern` and `do-symbols`.
-Common Lisp offers an unusually rich set of useful tools, including over 700 built-in functions (ANSI Common Lisp has over 900).
-Thus, writing a new program involves more gathering of existing pieces of code and less writing of new code from scratch.
-In addition to the standard functions, Common Lisp implementations usually provide extensions for interacting with the editor, debugger, and window system.
+Lispでは、シンボル表は第一級のオブジェクト<sup>[7](#fn01-7)</sup>であり、`read`、`intern`、`do-symbols` のような関数でアクセスし書き換えられます。
+Common Lispは、700を超える組み込み関数（ANSI Common Lispでは900以上）を含む、異例なほど豊かな道具立てを備えています。
+ですから新しいプログラムを書く作業は、既存のコード片を集めることが多く、一から新しいコードを書くことは少なくなります。
+標準の関数に加えて、Common Lispの処理系はふつう、エディタ・デバッガ・ウィンドウシステムとやりとりするための拡張も提供します。
 
-*   *Extensibility*.
-When Lisp was invented in 1958, nobody could have foreseen the advances in programming theory and language design that have taken place in the last thirty years.
-Other early languages have been discarded, replaced by ones based on newer ideas.
-However, Lisp has been able to survive, because it has been able to adapt.
-Because Lisp is extensible, it has been changed to incorporate the newest features as they become popular.
-The easiest way to extend the language is with macros.
-When so-called structured programming constructs such as *case* and *if-then-else* arose, they were incorporated into Lisp as macros.
-But the flexibility of Lisp goes beyond adding individual constructs.
-Brand new styles of programming can easily be implemented.
-Many AI applications are based on the idea of *rule-based* programming.
+*   *拡張性*
+1958年にLispが考案されたとき、この30年に起きたプログラミング理論と言語設計の進歩を見通せた人は誰もいませんでした。
+同時期の他の言語は捨て去られ、より新しい考えに基づくものに取って代わられました。
+しかしLispは生き延びることができました。適応できたからです。
+Lispは拡張可能なので、新しい機能が広まるたびにそれを取り込むよう変えられてきました。
+言語を拡張する最も手軽な方法はマクロです。
+いわゆる構造化プログラミングの構文、たとえば *case* や *if-then-else* が現れたとき、それらはマクロとしてLispに取り込まれました。
+しかしLispの柔軟さは、個々の構文を追加することにとどまりません。
+まったく新しいプログラミングの流儀も容易に実装できます。
+AIの応用の多くは*規則に基づく*プログラミングという考えに立脚しています。
 <a id="tfn01-8"></a>
-Another new style is *object-oriented* programming, which has been incorporated with the Common Lisp Object System (CLOS),<sup>[8](#fn01-8)</sup> a set of macros, functions, and data types that have been integrated into ANSI Common Lisp.
+もう1つの新しい流儀は*オブジェクト指向*プログラミングで、これはCommon Lisp Object System（CLOS）<sup>[8](#fn01-8)</sup>として取り込まれました。CLOSはANSI Common Lispに統合された、マクロ・関数・データ型の一式です。
 
-To show how far Lisp has come, here's the only sample program given in the *Lisp/MTS Programmer's Guide* (Hafner and Wilcox 1974):
+Lispがどれほど進んできたかを示すために、*Lisp/MTS Programmer's Guide*（Hafner and Wilcox 1974）に載っている唯一の見本プログラムを挙げます。
 
 ```lisp
 (PROG (LIST DEPTH TEMP RESTLIST)
@@ -1088,8 +1088,8 @@ A (COND
 (GO A))
 ```
 
-Note the use of the now-deprecated goto `(GO)` statement, and the lack of consistent indentation conventions.
-The manual also gives a recursive version of the same program:
+今では使われなくなった goto `(GO)` 文が使われていること、そして字下げの流儀が一貫していないことに注目してください。
+この手引きは同じプログラムの再帰版も載せています。
 
 ```lisp
 (PROG NIL (
@@ -1108,8 +1108,8 @@ The manual also gives a recursive version of the same program:
 (LIST (CONS (READ) 0))))
 ```
 
-Both versions are very difficult to read.
-With our modern insight (and text editors that automatically indent), a much simpler program is possible:
+どちらの版もとても読みにくいものです。
+現代の知見（と自動で字下げしてくれるエディタ）があれば、はるかに単純なプログラムが書けます。
 
 ```lisp
 (defun atomprint (exp &optional (depth 0))
@@ -1120,31 +1120,31 @@ With our modern insight (and text editors that automatically indent), a much sim
         (atomprint element (+ depth 1)))))
 ```
 
-## 1.11 Exercises
+## 1.11 練習問題
 
-&#9635; **Exercise  1.1 [m]** Define a version of `last-name` that handles "Rex Morgan MD," "Morton Downey, Jr.," and whatever other cases you can think of.
+&#9635; **練習問題 1.1 [m]** 「Rex Morgan MD」「Morton Downey, Jr.」、その他あなたが思いつくかぎりの場合を扱える `last-name` を定義せよ。
 
-&#9635; **Exercise  1.2 [m]** Write a function to exponentiate, or raise a number to an integer power.
-For example: `(power 3 2)` = 3<sup>2</sup> = 9.
+&#9635; **練習問題 1.2 [m]** べき乗を求める関数、すなわち数を整数乗する関数を書け。
+例: `(power 3 2)` = 3<sup>2</sup> = 9。
 
-&#9635; **Exercise  1.3 [m]** Write a function that counts the number of atoms in an expression.
-For example: `(count-atoms '(a (b) c)) = 3`.
-Notice that there is something of an ambiguity in this: should (`a nil c`) count as three atoms, or as two, because it is equivalent to (`a () c`)?
+&#9635; **練習問題 1.3 [m]** 式に含まれるアトムの個数を数える関数を書け。
+例: `(count-atoms '(a (b) c)) = 3`。
+ここには曖昧さがあることに注意せよ。(`a nil c`) はアトム3個と数えるべきか、それとも (`a () c`) と等価だから2個と数えるべきか。
 
-&#9635; **Exercise  1.4 [m]** Write a function that counts the number of times an expression occurs anywhere within another expression.
-Example: `(count-anywhere 'a '(a ((a) b) a)) => 3`.
+&#9635; **練習問題 1.4 [m]** ある式が別の式のどこかに現れる回数を数える関数を書け。
+例: `(count-anywhere 'a '(a ((a) b) a)) => 3`。
 
-&#9635; **Exercise  1.5 [m]** Write a function to compute the dot product of two sequences of numbers, represented as lists.
-The dot product is computed by multiplying corresponding elements and then adding up the resulting products.
-Example:
+&#9635; **練習問題 1.5 [m]** リストで表された2つの数の列の内積を計算する関数を書け。
+内積は、対応する要素どうしを掛け、その積を足し合わせて求める。
+例:
 
 ```lisp
 (dot-product '(10 20) '(3 4)) = 10 x 3 + 20 x 4 = 110
 ```
 
-## 1.12 Answers
+## 1.12 解答
 
-### Answer 1.2
+### 解答 1.2
 ```lisp
 (defun power (x n)
   "Power raises x to the nth power.  N must be an integer >= 0.
@@ -1154,7 +1154,7 @@ Example:
         (t (* x (power x (- n 1))))))
 ```
 
-### Answer 1.3
+### 解答 1.3
 
 ```lisp
 (defun count-atoms (exp)
@@ -1173,7 +1173,7 @@ Example:
               (count-all-atoms (rest exp) 0)))))
 ```
 
-### Answer 1.4
+### 解答 1.4
 
 ```lisp
 (defun count-anywhere (item tree)
@@ -1184,8 +1184,8 @@ Example:
               (count-anywhere item (rest tree))))))
 ```
 
-### Answer 1.5
-Here are three versions:
+### 解答 1.5
+3つの版を示します。
 
 
 ```lisp
@@ -1211,31 +1211,31 @@ Here are three versions:
 ----------------------
 
 <a id="fn01-1"></a><sup>[1](#tfn01-1)</sup>
-This list of symbols is not a legal Lisp assignment statement, but it is a Lisp data object.
+このシンボルの並びはLispの正しい代入文ではありませんが、Lispのデータオブジェクトではあります。
 
 <a id="fn01-2"></a><sup>[2](#tfn01-2)</sup>
-The variable `*print-case*` controls how symbols will be printed.
-By default, the value of this variable is `:upcase`, but it can be changed to `:downcase` or `:capitalize`.
+変数 `*print-case*` はシンボルの表示のしかたを制御します。
+既定ではこの変数の値は `:upcase` ですが、`:downcase` や `:capitalize` に変えられます。
 
 <a id="fn01-3"></a><sup>[3](#tfn01-3)</sup>
-Later we will see what happens when the second argument is not a list.
+第2引数がリストでない場合に何が起きるかは、のちほど見ます。
 
 <a id="fn01-4"></a><sup>[4](#tfn01-4)</sup>
-In ANSI Common Lisp, `last` is defined to return a list of the last *n* elements, where n defaults to 1.
-Thus `(last p) = (last p 1) = (PUBLIC)`,and `(last p 2) = (Q PUBLIC)`.
-This may make the definition of `last` seem less perverse.
+ANSI Common Lispでは、`last` は最後の *n* 個の要素からなるリストを返すと定義されており、n の既定値は1です。
+ですから `(last p) = (last p 1) = (PUBLIC)` であり、`(last p 2) = (Q PUBLIC)` です。
+こう見れば `last` の定義もそれほど意地悪には思えないかもしれません。
 
 <a id="fn01-5"></a><sup>[5](#tfn01-5)</sup>
-Just as we can change the value of a variable, we can also change the value of a function in Lisp.
-It is not necessary to recompile everything when a change is made, as it would be in other languages.
+変数の値を変えられるのと同じように、Lispでは関数の値も変えられます。
+他の言語のように、変更のたびにすべてを再コンパイルする必要はありません。
 
 <a id="fn01-6"></a><sup>[6](#tfn01-6)</sup>
-For example, symbols that denote so-called *special* variables usually begin and end in asterisks.
-Also, note that I did not hesitate to use the symbol `won!` on page 11.
+たとえば、いわゆる*スペシャル*変数を表すシンボルは、ふつう両端がアスタリスクで始まり終わります。
+また、11ページで `won!` というシンボルを使うのをためらわなかったことにも注意してください。
 
 <a id="fn01-7"></a><sup>[7](#tfn01-7)</sup>
-Actually, there can be several symbol tables.
-They are known as *packages* in Common Lisp.
+実のところ、シンボル表は複数存在しえます。
+Common Lispではそれらを*パッケージ*と呼びます。
 
 <a id="fn01-8"></a><sup>[8](#tfn01-8)</sup>
-Pronounced "see-loss." An alternate pronunciation, "klaus," seems to be losing favor.
+「シーロス」と発音します。別の発音「クロース」は支持を失いつつあるようです。
