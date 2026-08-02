@@ -1,83 +1,83 @@
-# Chapter 3
-## Overview of Lisp
+# 第3章
+## Lispの概観
 
-> No doubt about it.
-Common Lisp is a *big* language.
+> 疑いの余地はない。
+Common Lispは*大きな*言語だ。
 
 > -Guy L. Steele, Jr.
 
-> Foreword to Koschman 1990
+> Koschman 1990 への序文
 
-This chapter briefly covers the most important special forms and functions in Lisp.
-It can be safely skipped or skimmed by the experienced Common Lisp programmer but is required reading for the novice Lisp programmer, or one who is new to the Common Lisp dialect.
+この章では、Lispで最も重要な特殊形式と関数を手短に扱います。
+経験を積んだCommon Lispプログラマは飛ばすかざっと目を通すだけで構いませんが、Lispを始めたばかりの方や、Common Lispという方言に不慣れな方には必読です。
 
-This chapter can be used as a reference source, but the definitive reference is Steele's *Common Lisp the Language*, 2d edition, which should be consulted whenever there is any confusion.
-Since that book is 25 times longer than this chapter, it is clear that we can only touch on the important highlights here.
-More detailed coverage is given later in this book as each feature is used in a real program.
+この章は参照用にも使えますが、決定版の参照元はSteeleの *Common Lisp the Language* 第2版です。迷ったときはそちらを当たってください。
+あの本はこの章の25倍の長さがあるので、ここでは要点に触れるだけになるのは明らかです。
+より詳しい扱いは、それぞれの機能が実際のプログラムで使われるときに本書の後の部分で述べます。
 
-## 3.1 A Guide to Lisp Style
+## 3.1 Lispの作法の手引き
 
-The beginning Common Lisp programmer is often overwhelmed by the number of options that the language provides.
-In this chapter we show fourteen different ways to find the length of a list.
-How is the programmer to choose between them?
-One answer is by reading examples of good programs - as illustrated in this book - and copying that style.
-In general, there are six maxims that every programmer should follow:
+Common Lispを始めたプログラマは、この言語が用意している選択肢の多さに圧倒されがちです。
+この章では、リストの長さを求める方法を14通り示します。
+プログラマはどうやって選べばよいのでしょうか。
+1つの答えは、よいプログラムの例を読み — 本書がそれを示しています — その流儀をまねることです。
+一般に、すべてのプログラマが従うべき格率が6つあります。
 
-* Be specific.
-* Use abstractions.
-* Be concise.
-* Use the provided tools.
-* Don't be obscure.
-* Be consistent.
+* 具体的であれ。
+* 抽象を使え。
+* 簡潔であれ。
+* 用意された道具を使え。
+* 分かりにくくするな。
+* 一貫していよ。
 
-These require some explanation.
+少し説明が要ります。
 
-Using the most specific form possible makes it easier for your reader to understand your intent.
-For example, the conditional special form `when` is more specific than `if`.
-The reader who sees a `when` knows to look for only one thing: the clause to consider when the test is true.
-The reader who sees an `if` can rightfully expect two clauses: one for when the test is true, and one for when it is false.
-Even though it is possible to use `if` when there is only one clause, it is preferable to use `when,` because `when` is more specific.
+可能なかぎり具体的な形を使えば、読み手はあなたの意図をつかみやすくなります。
+たとえば条件分岐の特殊形式 `when` は `if` より具体的です。
+`when` を見た読者は、探すべきものが1つ — 判定が真のときに考える節 — だけだと分かります。
+`if` を見た読者は、当然2つの節 — 判定が真のときのものと偽のときのもの — を予期します。
+節が1つしかないときに `if` を使うこともできますが、`when` のほうが具体的なので、そちらが望ましいのです。
 
-One important way of being specific is using abstractions.
-Lisp provides very general data structures, such as lists and arrays.
-These can be used to implement specific data structures that your program will use, but you should not make the mistake of invoking primitive functions directly.
-If you define a list of names:
+具体的であるための大切な手立ての1つが、抽象を使うことです。
+Lispはリストや配列といった、きわめて汎用のデータ構造を備えています。
+これらを使ってプログラムが用いる個別のデータ構造を実装できますが、基本関数を直に呼ぶという間違いは犯さないでください。
+名前のリストを次のように定義したなら、
 
 ```lisp
 (defvar *names* '((Robert E. Lee) ...))
 ```
 
-then you should also define functions to get at the components of each name.
-To get at `Lee`, use `(last-name (first *names*))`, not `(caddar *names*)`.
+各名前の構成要素を取り出す関数も定義すべきです。
+`Lee` を取り出すには `(caddar *names*)` ではなく `(last-name (first *names*))` を使ってください。
 
-Often the maxims are in concord.
-For example, if your code is trying to find an element in a list, you should use `find` (or maybe `find-if`), not `loop` or `do`.
-`find` is more specific than the general constructs `loop` or `do,` it is an abstraction, it is more concise, it is a built-in tool, and it is simple to understand.
+格率どうしが一致することはよくあります。
+たとえばリストから要素を探すコードなら、`loop` や `do` ではなく `find`（あるいは `find-if`）を使うべきです。
+`find` は汎用の構文である `loop` や `do` より具体的で、抽象であり、簡潔で、組み込みの道具であり、理解も簡単です。
 
-Sometimes, however, the maxims are in conflict, and experience will tell you which one to prefer.
+しかし格率どうしがぶつかることもあり、どちらを取るかは経験が教えてくれます。
 <a id="tfn03-1"></a>
-Consider the following two ways of placing a new key/value pair on an association list:<sup>[1](#fn03-1)</sup>
+連想リストに新しいキーと値の組を置く、次の2通りのやり方を考えてみましょう。<sup>[1](#fn03-1)</sup>
 
 ```lisp
 (push (cons key val) a-list)
 (setf a-list (acons key val a-list))
 ```
 
-The first is more concise.
-But the second is more specific, as it uses the `acons` function, which is designed specifically for association lists.
-The decision between them probably hinges on obscurity: those who find `acons` to be a familiar function would prefer the second, and those who find it obscure would prefer the first.
+最初のほうが簡潔です。
+しかし2番目のほうが具体的です。連想リスト専用に設計された `acons` 関数を使っているからです。
+どちらを選ぶかは、おそらく分かりにくさで決まります。`acons` をなじみのある関数だと思う人は2番目を、分かりにくいと思う人は最初のほうを好むでしょう。
 
-A similar choice arises in the question of setting a variable to a value.
-Some prefer `(setq x val)` because it is most specific; others use `(setf x val)`, feeling that it is more consistent to use a single form, `setf`, for all updating.
-Whichever choice you make on such issues, remember the sixth maxim: be consistent.
+変数に値を設定するときにも、似た選択が生じます。
+最も具体的だからと `(setq x val)` を好む人もいれば、更新はすべて `setf` という1つの形で行うほうが一貫していると考えて `(setf x val)` を使う人もいます。
+こうした問題でどちらを選ぶにせよ、6番目の格率を忘れないでください。一貫していよ、です。
 
-## 3.2 Special Forms
+## 3.2 特殊形式
 
-As noted in [chapter 1](chapter1.md), "special form" is the term used to refer both to Common Lisp's syntactic constructs and the reserved words that mark these constructs.
+[第1章](chapter1.md)で述べたとおり、「特殊形式」という語は、Common Lispの構文構造と、その構造を示す予約語の両方を指すのに使われます。
 
-The most commonly used special forms are:
+よく使われる特殊形式は次のとおりです。
 
-| definitions    | conditional | variables | iteration | other      |
+| 定義           | 条件分岐    | 変数      | 繰り返し  | その他     |
 |----------------|-------------|-----------|-----------|------------|
 | `defun`        | `and`       | `let`     | `do`      | `declare`  |
 | `defstruct`    | `case`      | `let*`    | `do*`     | `function` |
@@ -87,40 +87,40 @@ The most commonly used special forms are:
 | `defmacro`     | `unless`    | `incf`    |           | `trace`    |
 | `labels`       | `when`      | `decf`    |           | `untrace`  |
 
-To be precise, only `declare`, `function`, `if`, `labels`, `let`, `let*`, `progn` and `quote` are true special forms.
-The others are actually defined as macros that expand into calls to more primitive special forms and functions.
-There is no real difference to the programmer, and Common Lisp implementations are free to implement macros as special forms and vice versa, so for simplicity we will continue to use "special form" as a blanket term for both true special forms and built-in macros.
+正確に言えば、本当の特殊形式は `declare`、`function`、`if`、`labels`、`let`、`let*`、`progn`、`quote` だけです。
+その他は実際には、より基本的な特殊形式や関数の呼び出しに展開されるマクロとして定義されています。
+プログラマにとって実質的な違いはありませんし、Common Lispの処理系はマクロを特殊形式として実装してもその逆でも構わないので、簡単のため、本当の特殊形式と組み込みマクロの両方をまとめて「特殊形式」と呼び続けます。
 
-### Special Forms for Definitions
+### 定義のための特殊形式
 
-In this section we survey the special forms that can be used to introduce new global functions, macros, variables, and structures.
-We have already seen the `defun` form for defining functions; the `defmacro` form is similar and is covered on [page 66](#p66).
+この節では、新しい大域的な関数・マクロ・変数・構造体を導入するのに使える特殊形式を概観します。
+関数を定義する `defun` はすでに見ました。`defmacro` も似たもので、[66ページ](#p66)で扱います。
 
-> `(defun` *function-name (parameter...) "optional documentation" body...*)
+> `(defun` *関数名 (引数...) "省略可能なドキュメント" 本体...*)
 >
-> `(defmacro` *macro-name (parameter...) "optional documentation" body...*)
+> `(defmacro` *マクロ名 (引数...) "省略可能なドキュメント" 本体...*)
 
-There are three forms for introducing special variables.
-`defvar` defines a special variable and can optionally be used to supply an initial value and a documentation string.
-The initial value is evaluated and assigned only if the variable does not yet have any value, `defparameter` is similar, except that the value is required, and it will be used to change any existing value, `defconstant` is used to declare that a symbol will always stand for a particular value.
+スペシャル変数を導入する形は3つあります。
+`defvar` はスペシャル変数を定義し、初期値とドキュメント文字列を任意で与えられます。
+初期値が評価されて割り当てられるのは、その変数がまだ値を持たない場合だけです。`defparameter` も似ていますが、値が必須で、既存の値があれば書き換えます。`defconstant` は、あるシンボルが常に特定の値を表すことを宣言するのに使います。
 
-> `(defvar` *variable-name initial-value "optional documentation"* )
+> `(defvar` *変数名 初期値 "省略可能なドキュメント"* )
 
-> `(defparameter` *variable-name value "optional documentation"*)
+> `(defparameter` *変数名 値 "省略可能なドキュメント"*)
 
-> `(defconstant` *variable-name value "optional documentation"*)
+> `(defconstant` *変数名 値 "省略可能なドキュメント"*)
 
-All the `def-` forms define global objects.
-It is also possible to define local variables with `let`, and to define local functions with `labels`, as we shall see.
+`def-` で始まる形はすべて大域的なオブジェクトを定義します。
+のちに見るように、`let` で局所変数を、`labels` で局所関数を定義することもできます。
 
-Most programming languages provide a way to group related data together into a structure.
-Common Lisp is no exception.
-The `defstruct` special form defines a structure type (known as a *record* type in Pascal) and automatically defines functions to get at components of the structure.
-The general syntax is:
+たいていのプログラミング言語は、関連するデータを1つの構造にまとめる手立てを備えています。
+Common Lispも例外ではありません。
+特殊形式 `defstruct` は構造体の型（Pascalでは*レコード*型と呼ばれるもの）を定義し、その構成要素を取り出す関数を自動的に定義します。
+一般の構文は次のとおりです。
 
-> `(defstruct` *structure-name "optional documentation" slot...*)
+> `(defstruct` *構造体名 "省略可能なドキュメント" スロット...*)
 
-As an example, we could define a structure for names:
+例として、名前のための構造体を定義してみましょう。
 
 ```lisp
 (defstruct name
@@ -129,9 +129,9 @@ As an example, we could define a structure for names:
   last)
 ```
 
-This automatically defines the constructor function `make-name,` the recognizer predicate `name-p,` and the accessor functions `name-first, name-middle` and `name-last`.
-The `(middle nil)` means that each new name built by `make-name` will have a middle name of `nil` by default.
-Here we create, access, and modify a structure:
+これにより、生成関数 `make-name`、判別述語 `name-p`、そしてアクセス関数 `name-first`、`name-middle`、`name-last` が自動的に定義されます。
+`(middle nil)` は、`make-name` で作られる新しい name のミドルネームが既定で `nil` になることを意味します。
+ここでは構造体を作り、アクセスし、書き換えてみます。
 
 ```lisp
 > (setf b (make-name :first 'Barney :last 'Rubble)) =>
@@ -152,30 +152,30 @@ Here we create, access, and modify a structure:
 > b => #S(NAME :FIRST BARNEY :MIDDLE Q :LAST RUBBLE)
 ```
 
-The printed representation of a structure starts with a `#S` and is followed by a list consisting of the type of the structure and alternating pairs of slot names and values.
-Do not let this representation fool you: it is a convenient way of printing the structure, but it is not an accurate picture of the way structures are represented internally.
-Structures are actually implemented much like vectors.
-For the `name` structure, the type would be in the zero element of the vector, the first name in the first element, middle in the second, and last in the third.
-This means structures are more efficient than lists: they take up less space, and any element can be accessed in a single step.
-In a list, it takes *n* steps to access the *n*th element.
+構造体の表示上の表現は `#S` で始まり、その後に構造体の型と、スロット名と値の対が交互に並んだリストが続きます。
+この表現に惑わされないでください。構造体を表示する便利なやり方であって、内部での表現のされ方を正確に写したものではありません。
+構造体は実際にはベクタによく似た形で実装されています。
+`name` 構造体なら、型がベクタの0番目、first が1番目、middle が2番目、last が3番目の要素に入ります。
+つまり構造体はリストより効率的です。占める領域が少なく、どの要素にも一手でアクセスできます。
+リストでは *n* 番目の要素にアクセスするのに *n* 手かかります。
 
-There are options that give more control over the structure itself and the individual slots.
-They will be covered later as they come up.
+構造体そのものや個々のスロットをより細かく制御する選択肢もあります。
+これらは出てきたところで扱います。
 
-### Special Forms for Conditionals
+### 条件分岐のための特殊形式
 
-We have seen the special form `if,` which has the form (`if` *test then-part else-part*), where either the *then-part* or the *else-part* is the value, depending on the success of the *test.*
-Remember that only `nil` counts as false; all other values are considered true for the purpose of conditionals.
-However, the constant `t` is the conventional value used to denote truth (unless there is a good reason for using some other value).
+特殊形式 `if` はすでに見ました。(`if` *判定 真の場合 偽の場合*) という形で、*判定*の成否に応じて*真の場合*か*偽の場合*が値になります。
+偽とみなされるのは `nil` だけで、条件分岐においてそれ以外の値はすべて真とみなされることを思い出してください。
+とはいえ、真を表すのに慣例的に使われる値は定数 `t` です（他の値を使うだけの理由がないかぎり）。
 
-There are actually quite a few special forms for doing conditional evaluation.
-Technically, `if` is defined as a special form, while the other conditionals are macros, so in some sense `if` is supposed to be the most basic.
-Some programmers prefer to use `if` for most of their conditionals; others prefer `cond` because it has been around the longest and is versatile (if not particularly pretty).
-Finally, some programmers opt for a style more like English prose, and freely use `when, unless, if,` and all the others.
+条件つきの評価を行う特殊形式は、実はかなりの数あります。
+厳密には `if` が特殊形式として定義され、他の条件分岐はマクロなので、ある意味では `if` が最も基本的だということになります。
+条件分岐のほとんどに `if` を使うのを好むプログラマもいれば、最も古くからあって融通が利く（見た目は美しくないにせよ）という理由で `cond` を好む人もいます。
+また、英語の散文に近い流儀を選び、`when`、`unless`、`if` その他を自由に使い分けるプログラマもいます。
 
-The following table shows how each conditional can be expressed in terms of `if` and `cond`.
-Actually, these translations are not quite right, because `or, case`, and `cond` take care not to evaluate any expression more than once, while the translations with `if` can lead to multiple evaluation of some expressions.
-The table also has translations to `cond.` The syntax of `cond` is a series of *cond-clauses,* each consisting of a test expression followed by any number of *result* expressions:
+次の表は、各条件分岐を `if` と `cond` でどう表せるかを示しています。
+実のところ、この対応は厳密には正しくありません。`or`、`case`、`cond` はどの式も2度以上評価しないよう気を配りますが、`if` による書き換えでは一部の式が複数回評価されうるからです。
+表には `cond` への書き換えも載せてあります。`cond` の構文は*cond節*の並びで、各節は判定の式と、それに続く任意個の*結果*の式からなります。
 
 ```
 (cond (test result...)
@@ -183,19 +183,19 @@ The table also has translations to `cond.` The syntax of `cond` is a series of *
       ...)
 ```
 
-`cond` goes through the cond-clauses one at a time, evaluating each test expression.
-As soon as a test expression evaluates non-nil, the result expressions for that clause are each evaluated, and the last expression in the clause is the value of the whole `cond.`
-In particular, if a cond-clause consists of just a test and no result expressions, then the value of the `cond` is the test expression itself, if it is non-nil.
-If all of the test expressions evaluate to nil, then nil is returned as the value of the `cond.` A common idiom is to make the last cond-clause be `(t` *result...*).
+`cond` はcond節を1つずつたどり、それぞれの判定の式を評価します。
+判定の式が nil 以外に評価された時点で、その節の結果の式が順に評価され、節の最後の式が `cond` 全体の値になります。
+とくに、cond節が判定だけで結果の式を持たない場合、それが nil でなければ判定の式そのものが `cond` の値になります。
+判定の式がすべて nil に評価された場合は、`cond` の値として nil が返ります。最後のcond節を `(t` *結果...*) にするのがよくある書き方です。
 
-The forms `when` and `unless` operate like a single `cond` clause.
-Both forms consist of a test followed by any number of consequents, which are evaluated if the test is satisfied - that is, if the test is true for `when` or false for `unless.`
+`when` と `unless` は、`cond` の節1つのように働きます。
+どちらも判定と、それに続く任意個の帰結からなり、判定が満たされたとき — `when` なら真、`unless` なら偽のとき — に帰結が評価されます。
 
-The `and` form tests whether every one of a list of conditions is true, and `or` tests whether any one is true.
-Both evaluate the arguments left to right, and stop as soon as the final result can be determined.
-Here is a table of equivalences:
+`and` は条件の並びのすべてが真かを調べ、`or` はいずれかが真かを調べます。
+どちらも引数を左から右へ評価し、最終結果が決まった時点で止まります。
+対応表を示します。
 
-| conditional                    | `if` form                           | `cond` form                        |
+| 条件分岐                       | `if` による形                       | `cond` による形                    |
 |--------------------------------|-------------------------------------|------------------------------------|
 | `(when` *test a b c*)          | `(if` *test* `(progn` *a  b c*))    | `(cond` (*test a b c*))            |
 | `(unless` *test x y*)          | `(if (not` *test*) `(progn` *x y*)) | `(cond ((not` *test*) *x y*))      |
@@ -203,8 +203,8 @@ Here is a table of equivalences:
 | `(or` *a b c*)                 | `(if` *a a* `(if` *b b c*))         | `(cond (a)` (*b*) (*c*))           |
 | `(case` *a* (*b c*) (`t` *x*)) | `(if (eql` *a 'b*) *c x*)           | `(cond ((eql` *a 'b*) *c*) (`t` *x*)) |
 
-It is considered poor style to use `and` and `or` for anything other than testing a logical condition, `when`, `unless,` and `if` can all be used for taking conditional action.
-For example:
+論理条件の判定以外に `and` や `or` を使うのは、よくない流儀とされます。条件つきの動作には `when`、`unless`、`if` のいずれもが使えます。
+たとえば次のようになります。
 
 ```lisp
 (and (> n 100)
@@ -217,7 +217,7 @@ For example:
   (princ "N is large."))      ; Good style.
 ```
 
-When the main purpose is to return a value rather than take action, `cond` and `if` (with explicit `nil` in the else case) are preferred over `when` and `unless`, which implicitly return `nil` in the else case, `when` and `unless` are preferred when there is only one possibility, `if` (or, for some people, `cond)` when there are two, and `cond` when there are more than two:
+主な目的が動作ではなく値を返すことなら、偽の場合に暗黙に `nil` を返す `when` や `unless` より、偽の場合に明示的に `nil` を書いた `cond` や `if` のほうが好まれます。可能性が1つなら `when` と `unless`、2つなら `if`（人によっては `cond`）、3つ以上なら `cond` が好まれます。
 
 ```lisp
 (defun tax-bracket (income)
@@ -229,25 +229,25 @@ When the main purpose is to return a value rather than take action, `cond` and `
         (t                   0.35)))
 ```
 
-If there are several tests comparing an expression to constants, then case is appropriate.
-A `case` form looks like:
+ある式を複数の定数と比べる判定が並ぶなら、case が適しています。
+`case` の形は次のようになります。
 
-> `(case` *expression* \
-      (*match result*...)...)
+> `(case` *式* \
+      (*照合対象 結果*...)...)
 
-The *expression* is evaluated and compared to each successive *match*.
-As soon as one is `eql`, the *result* expressions are evaluated and the last one is returned.
-Note that the *match* expressions are *not* evaluated.
-If a *match* expression is a list, then case tests if the *expression* is `eql` to any member of the list.
-If a *match* expression is the symbol `otherwise` (or the symbol `t`), then it matches anything.
-(It only makes sense for this `otherwise` clause to be the last one.)
+*式*が評価され、順に各*照合対象*と比べられます。
+`eql` になったものが見つかった時点で*結果*の式が評価され、最後のものが返ります。
+*照合対象*の式は評価され*ない*ことに注意してください。
+*照合対象*がリストなら、case は*式*がそのリストのいずれかの要素と `eql` かを調べます。
+*照合対象*がシンボル `otherwise`（あるいはシンボル `t`）なら、何にでも合致します。
+（この `otherwise` の節は最後に置いてこそ意味があります。）
 
-There is also another special form, `typecase`, which compares the type of an expression against several possibilities and, like `case`, chooses the first clause that matches.
-In addition, the special forms `ecase` and `etypecase` are just like `case` and `typecase` except that they signal an error if there is no match.
+もう1つ `typecase` という特殊形式もあり、式の型を複数の候補と比べて、`case` と同じく最初に合致した節を選びます。
+さらに `ecase` と `etypecase` という特殊形式は `case`、`typecase` と同じですが、合致するものがなければエラーを通知します。
 
-You can think of the `e` as standing for either "exhaustive" or "error."
-The forms `ccase` and `ctypecase` also signal errors, but they can be continuable errors (as opposed to fatal errors): the user is offered the chance to change the expression to something that satisfies one of the matches.
-Here are some examples of case forms and their `cond` equivalents:
+この `e` は「exhaustive（網羅的）」か「error（エラー）」のどちらかを表すと考えればよいでしょう。
+`ccase` と `ctypecase` もエラーを通知しますが、こちらは（致命的なエラーとは違って）継続可能なエラーにできます。利用者は、式をいずれかの照合対象に合うものへ変える機会を与えられます。
+case の形と、それに対応する `cond` の例をいくつか挙げます。
 
 | []()                 |                                    |
 |----------------------|------------------------------------|
@@ -269,11 +269,11 @@ Here are some examples of case forms and their `cond` equivalents:
 | `(list (length x)))` | `((typep x 'list) (length x))`     |
 |                      | `(t (error "no valid typecase")))` |
 
-### Special Forms for Dealing with Variables and Places
+### 変数と場所を扱う特殊形式
 
-The special form `setf` is used to assign a new value to a variable or *place,* much as an assignment statement with `=` or `:=` is used in other languages.
-A place, or *generalized variable* is a name for a location that can have a value stored in it.
-Here is a table of corresponding assignment forms in Lisp and Pascal:
+特殊形式 `setf` は、変数や*場所*に新しい値を割り当てるのに使います。他の言語で `=` や `:=` を使う代入文とよく似たものです。
+場所、すなわち*一般化変数*とは、値を格納できる位置に付けられた名前のことです。
+LispとPascalで対応する代入の形を表に示します。
 
 | []()                        |                      |
 |-----------------------------|----------------------|
@@ -283,28 +283,28 @@ Here is a table of corresponding assignment forms in Lisp and Pascal:
 | `(setf (rest list) nil)`    | `list^.rest := nil;` |
 | `(setf (name-middle b) 'Q)` | `b\middle := "Q";`   |
 
-`setf` can be used to set a component of a structure as well as to set a variable.
-In languages like Pascal, the expressions that can appear on the left-hand side of an assignment statement are limited by the syntax of the language.
-In Lisp, the user can extend the expressions that are allowed in a `setf` form using the special forms `defsetf` or `define-setf-method`.
-These are introduced on [pages 514](chapter15.md#p514) and [884](chapter25.md#p884) respectively.
+`setf` は変数だけでなく、構造体の構成要素を設定するのにも使えます。
+Pascalのような言語では、代入文の左辺に置ける式は言語の構文によって限られています。
+Lispでは、利用者が特殊形式 `defsetf` や `define-setf-method` を使って、`setf` に置ける式を拡張できます。
+これらはそれぞれ [514ページ](chapter15.md#p514) と [884ページ](chapter25.md#p884) で紹介します。
 
-There are also some built-in functions that modify places.
-For example, (`rplacd list nil`) has the same effect as (`setf` (`rest list`) `nil`), except that it returns `list` instead of `nil`.
-Most Common Lisp programmers prefer to use the `setf` forms rather than the specialized functions.
+場所を書き換える組み込み関数もいくつかあります。
+たとえば (`rplacd list nil`) は (`setf` (`rest list`) `nil`) と同じ働きをしますが、`nil` ではなく `list` を返します。
+たいていのCommon Lispプログラマは、こうした専用の関数より `setf` の形を好みます。
 
-If you only want to set a variable, the special form `setq` can be used instead.
-In this book I choose to use `setf` throughout, opting for consistency over specificity.
+変数を設定したいだけなら、代わりに特殊形式 `setq` が使えます。
+本書では、具体性より一貫性を取って、終始 `setf` を使うことにします。
 
-The discussion in this section makes it seem that variables (and slots of structures) are assigned new values all the time.
-Actually, many Lisp programs do no assignments whatsoever.
-It is very common to use Lisp in a functional style where new variables may be introduced, but once a new variable is established, it never changes.
-One way to introduce a new variable is as a parameter of a function.
-It is also possible to introduce local variables using the special form `let`.
-Following are the general `let` form, along with an example.
-Each variable is bound to the corresponding value, and then the body is evaluated:
+この節の議論を読むと、変数（や構造体のスロット）に絶えず新しい値が割り当てられているように思えるかもしれません。
+実際には、代入をまったく行わないLispプログラムも数多くあります。
+新しい変数を導入はするが、いったん確立したらもう変えない、という関数的な流儀でLispを使うのはごく普通のことです。
+新しい変数を導入する方法の1つが、関数の引数とすることです。
+特殊形式 `let` を使って局所変数を導入することもできます。
+以下に `let` の一般形と例を示します。
+各変数が対応する値に束縛され、それから本体が評価されます。
 
-> `(let` ((*variable value*)...) \
-> *body*...)
+> `(let` ((*変数 値*)...) \
+> *本体*...)
 
 ```lisp
 (let ((x 40)
@@ -312,14 +312,14 @@ Each variable is bound to the corresponding value, and then the body is evaluate
   (+ x y)) => 42
 ```
 
-Defining a local variable with a `let` form is really no different from defining parameters to an anonymous function.
-The former is equivalent to:
+`let` で局所変数を定義することは、無名関数の引数を定義することと実質的に変わりません。
+前者は次と等価です。
 
 | []()                        |
 |-----------------------------|
-| ((`lambda` (*variable*... ) |
-| `  ` *body*... )            |
-| *value*...)                 |
+| ((`lambda` (*変数*... ) |
+| `  ` *本体*... )            |
+| *値*...)                 |
 
 ```lisp
 ((lambda (x y)
@@ -328,11 +328,11 @@ The former is equivalent to:
 (+ 1 1))
 ```
 
-First, all the values are evaluated.
-Then they are bound to the variables (the parameters of the lambda expression), and finally the body is evaluated, using those bindings.
+まず値がすべて評価されます。
+次にそれらが変数（ラムダ式の引数）に束縛され、最後にその束縛のもとで本体が評価されます。
 
-The special form `let*` is appropriate when you want to use one of the newly introduced variables in a subsequent *value* computation.
-For example:
+新しく導入した変数を、後続の*値*の計算で使いたいときは、特殊形式 `let*` が適しています。
+たとえば次のようになります。
 
 ```lisp
 (let* ((x 6)
@@ -340,14 +340,14 @@ For example:
   (+ x y)) => 42
 ```
 
-We could not have used `let` here, because then the variable `x` would be unbound during the computation of `y`'s value.
+ここで `let` は使えません。それだと `y` の値を計算する間、変数 `x` が束縛されていないからです。
 
-&#9635; **Exercise 3.1 [m]** Show a `lambda` expression that is equivalent to the above `let*` expression.
-You may need more than one `lambda.`
+&#9635; **練習問題 3.1 [m]** 上の `let*` の式と等価な `lambda` の式を示せ。
+`lambda` が複数必要になるかもしれない。
 
-Because lists are so important to Lisp, there are special forms for adding and deleting elements from the front of a list - in other words, for treating a list as a stack.
-If `list` is the name of a location that holds a list, then (`push` *x* `list`) will change `list` to have *x* as its first element, and (`pop list`) will return the first element and, as a side-effect, change `list` to no longer contain the first element.
-`push` and `pop` are equivalent to the following expressions:
+リストはLispにとって非常に重要なので、リストの先頭に要素を加えたり取り除いたりする — 言い換えればリストをスタックとして扱う — 特殊形式が用意されています。
+`list` がリストを保持する場所の名前なら、(`push` *x* `list`) は `list` の最初の要素が *x* になるように変え、(`pop list`) は最初の要素を返すとともに、副作用として `list` からその要素を取り除きます。
+`push` と `pop` は次の式と等価です。
 
 ```lisp
 (push x list) ≡ (setf list (cons x list))
@@ -356,22 +356,22 @@ If `list` is the name of a location that holds a list, then (`push` *x* `list`) 
                  result)
 ```
 
-Just as a list can be used to accumulate elements, a running sum can be used to accumulate numbers.
-Lisp provides two more special forms, `incf` and `decf`, that can be used to increment or decrement a sum.
-For both forms the first argument must be a location (a variable or other `setf`-able form) and the second argument, which is optional, is the number to increment or decrement by.
-For those who know C, (`incf x`) is equivalent to `++x`, and (`incf x 2`) is equivalent to `x+=2`.
-In Lisp the equivalence is:
+リストで要素をためられるのと同じように、走行合計を使って数をためることができます。
+Lispはさらに `incf` と `decf` という2つの特殊形式を用意しており、合計を増やしたり減らしたりするのに使えます。
+どちらも第1引数は場所（変数か、その他 `setf` できる形）でなければならず、省略可能な第2引数は増減の量です。
+Cをご存じの方には、(`incf x`) が `++x` に、(`incf x 2`) が `x+=2` に相当すると言えば分かるでしょう。
+Lispでの対応は次のとおりです。
 
 ```lisp
 (incf x) ≡ (incf x 1) ≡ (setf x (+ x 1))
 (decf x) ≡ (decf x 1) ≡ (setf x (- x 1))
 ```
 
-When the location is a complex form rather than a variable, Lisp is careful to expand into code that does not evaluate any subform more than once.
-This holds for `push`, `pop`, `incf,` and `decf`.
-In the following example, we have a list of players and want to decide which player has the highest score, and thus has won the game.
-The structure `player` has slots for the player's score and number of wins, and the function `determine-winner` increments the winning player's `wins` field.
-The expansion of the `incf` form binds a temporary variable so that the sort is not done twice.
+場所が変数ではなく複雑な形の場合、Lispはどの部分式も2度以上評価しないコードに展開するよう気を配ります。
+これは `push`、`pop`、`incf`、`decf` のいずれにも当てはまります。
+次の例では、選手のリストがあり、誰の得点が最も高いか — つまり誰が勝ったか — を決めたいとします。
+構造体 `player` は選手の得点と勝利数のスロットを持ち、関数 `determine-winner` は勝った選手の `wins` の欄を増やします。
+`incf` の展開は一時変数を束縛するので、整列が2度行われることはありません。
 
 ```lisp
 (defstruct player (score 0) (wins 0))
@@ -388,36 +388,36 @@ The expansion of the `incf` form binds a temporary variable so that the sort is 
       (setf (player-wins temp) (+ (player-wins temp) 1))))
 ```
 
-### Functions and Special Forms for Repetition
+### 繰り返しのための関数と特殊形式
 
-Many languages have a small number of reserved words for forming iterative loops.
-For example, Pascal has `while, repeat,` and `for` statements.
-In contrast, Common Lisp has an almost bewildering range of possibilities, as summarized below:
+多くの言語は、繰り返しのループを作るための予約語を少数だけ持っています。
+たとえばPascalには `while`、`repeat`、`for` という文があります。
+これに対しCommon Lispは、以下にまとめるとおり、当惑するほど多彩な選択肢を持っています。
 
 | []()                  |                                 |
 |-----------------------|---------------------------------|
-| `dolist`              | loop over elements of a list    |
-| `dotimes`             | loop over successive integers   |
-| `do, do*`             | general loop, sparse syntax     |
-| `loop`                | general loop, verbose syntax    |
-| `mapc, mapcar`        | loop over elements of lists(s)  |
-| `some, every`         | loop over list until condition  |
-| `find, reduce,`*etc.* | more specific looping functions |
-| *recursion*           | general repetition              |
+| `dolist`              | リストの要素にわたって回す      |
+| `dotimes`             | 連続する整数にわたって回す      |
+| `do, do*`             | 汎用のループ、簡素な構文        |
+| `loop`                | 汎用のループ、冗長な構文        |
+| `mapc, mapcar`        | リストの要素にわたって回す      |
+| `some, every`         | 条件が成るまでリストを回す      |
+| `find, reduce,`*など* | より個別の繰り返し関数          |
+| *再帰*                | 汎用の繰り返し                  |
 
-To explain each possibility we will present versions of the function `length`, which returns the number of elements in a list.
-First, the special form `dolist` can be used to iterate over the elements of a list.
-The syntax is:
+それぞれの選択肢を説明するために、リストの要素数を返す `length` 関数を何通りにも書いてみます。
+まず、特殊形式 `dolist` はリストの要素にわたって繰り返すのに使えます。
+構文は次のとおりです。
 
-> `(dolist (`*variable list optional-result*) *body...*)
+> `(dolist (`*変数 リスト 省略可能な結果*) *本体...*)
 
-This means that the body is executed once for each element of the list, with *variable* bound to the first element, then the second element, and so on.
-At the end, `dolist` evaluates and returns the *optional-result* expression, or nil if there is no result expression.
+これは、*変数*を最初の要素、次に2番目の要素、というように束縛しながら、リストの要素ごとに本体を1回実行するという意味です。
+最後に `dolist` は*省略可能な結果*の式を評価して返します。結果の式がなければ nil を返します。
 
-Below is a version of `length` using `dolist`.
-The `let` form introduces a new variable, `len`, which is initially bound to zero.
-The `dolist` form then executes the body once for each element of the list, with the body incrementing `len` by one each time.
-This use is unusual in that the loop iteration variable, `element`, is not used in the body.
+以下は `dolist` を使った `length` です。
+`let` は新しい変数 `len` を導入し、最初は0に束縛します。
+次に `dolist` がリストの要素ごとに本体を1回実行し、本体は毎回 `len` を1つ増やします。
+この使い方は、ループの繰り返し変数 `element` が本体で使われていない点で変わっています。
 
 ```lisp
 (defun length1 (list)
@@ -427,8 +427,8 @@ This use is unusual in that the loop iteration variable, `element`, is not used 
     len))                   ; and return LEN
 ```
 
-It is also possible to use the optional result of `dolist`, as shown below.
-While many programmers use this style, I find that it is too easy to lose track of the result, and so I prefer to place the result last explicitly.
+以下に示すとおり、`dolist` の省略可能な結果を使うこともできます。
+この流儀を使うプログラマは多いのですが、私は結果を見失いやすいと感じるので、結果は最後に明示的に置くほうを好みます。
 
 ```lisp
 (defun length1.1 (list)         ; alternate version:
@@ -437,10 +437,10 @@ While many programmers use this style, I find that it is too easy to lose track 
       (incf len))))
 ```
 
-The function `mapc` performs much the same operation as the special form `dolist`.
-In the simplest case, `mapc` takes two arguments, the first a function, the second a list.
-It applies the function to each element of the list.
-Here is `length` using `mapc`:
+関数 `mapc` は特殊形式 `dolist` とほぼ同じ働きをします。
+最も単純な場合、`mapc` は引数を2つとります。第1引数が関数、第2引数がリストです。
+そしてリストの各要素にその関数を適用します。
+`mapc` を使った `length` を示します。
 
 ```lisp
 (defun length2 (list)
@@ -451,18 +451,18 @@ Here is `length` using `mapc`:
     len))                           ; and return LEN
 ```
 
-There are seven different mapping functions, of which the most useful are `mapc` and `mapcar`.
-`mapcar` executes the same function calls as `mapc,` but then returns the results in a list.
+写像の関数は7種類あり、そのうち最も役に立つのが `mapc` と `mapcar` です。
+`mapcar` は `mapc` と同じ関数呼び出しを行いますが、その結果をリストにして返します。
 
-There is also a `dotimes` form, which has the syntax:
+`dotimes` という形もあり、構文は次のとおりです。
 
-> (`dotimes` (*variable number optional-result*) *body...*)
+> (`dotimes` (*変数 回数 省略可能な結果*) *本体...*)
 
-and executes the body with *variable* bound first to zero, then one, all the way up to *number*-1 (for a total of *number* times).
-Of course, `dotimes` is not appropriate for implementing `length`, since we don't know the number of iterations ahead of time.
+これは*変数*をまず0、次に1、というように*回数*-1まで束縛しながら本体を実行します（合計*回数*回）。
+もちろん `dotimes` は `length` の実装には向きません。繰り返しの回数が前もって分からないからです。
 
-There are two very general looping forms, `do` and `loop`.
-The syntax of `do` is as follows:
+きわめて汎用のループの形が2つあります。`do` と `loop` です。
+`do` の構文は次のとおりです。
 
 ```lisp
 (do ((variable initial next)...)
@@ -470,18 +470,18 @@ The syntax of `do` is as follows:
   body...)
 ```
 
-Each *variable* is initially bound to the *initial* value.
-If *exit-test* is true, then *result* is returned.
-Otherwise, the body is executed and each *variable* is set to the corresponding *next* value and *exit-test* is tried again.
-The loop repeats until *exit-test* is true.
-If a *next* value is omitted, then the corresponding variable is not updated each time through the loop.
-Rather, it is treated as if it had been bound with a `let` form.
+各*変数*はまず*初期値*に束縛されます。
+*終了判定*が真なら*結果*が返ります。
+そうでなければ本体が実行され、各*変数*が対応する*次の値*に設定されて、再び*終了判定*が試されます。
+ループは*終了判定*が真になるまで繰り返します。
+*次の値*が省かれた場合、その変数はループのたびに更新されません。
+むしろ `let` で束縛されたかのように扱われます。
 
-Here is `length` implemented with `do`, using two variables, `len` to count the number of elements, and `l` to go down the list.
-This is often referred to as *cdr-ing down a list,* because on each operation we apply the function `cdr` to the list.
-(Actually, here we have used the more mnemonic name `rest` instead of `cdr`.)
-Note that the `do` loop has no body!
-All the computation is done in the variable initialization and stepping, and in the end test.
+`do` で実装した `length` を示します。変数は2つ、要素数を数える `len` と、リストをたどる `l` です。
+これは*リストをcdrで下る*としばしば呼ばれます。操作のたびにリストに `cdr` を適用するからです。
+（実際にはここでは `cdr` ではなく、より覚えやすい名前 `rest` を使っています。）
+この `do` ループには本体がないことに注目してください。
+計算はすべて変数の初期化と更新、そして終了判定の中で行われています。
 
 ```lisp
 (defun length3 (list)
@@ -490,17 +490,17 @@ All the computation is done in the variable initialization and stepping, and in 
       ((null l) len)))     ; (until the end of the list)
 ```
 
-I find the `do` form a little confusing, because it does not clearly say that we are looping through a list.
-To see that it is indeed iterating over the list requires looking at both the variable `l` and the end test.
-Worse, there is no variable that stands for the current element of the list; we would need to say (`first l`) to get at it.
-Both `dolist` and `mapc` take care of stepping, end testing, and variable naming automatically.
-They are examples of the "be specific" principle.
-Because it is so unspecific, `do` will not be used much in this book.
-However, many good programmers use it, so it is important to know how to read `do` loops, even if you decide never to write one.
+私は `do` を少し分かりにくいと感じます。リストをたどっているのだということがはっきり示されないからです。
+実際にリストにわたって繰り返しているのだと知るには、変数 `l` と終了判定の両方を見る必要があります。
+さらに悪いことに、リストの現在の要素を表す変数がありません。取り出すには (`first l`) と書かねばなりません。
+`dolist` も `mapc` も、更新・終了判定・変数の命名を自動で引き受けてくれます。
+これらは「具体的であれ」という原則の例です。
+あまりに具体性を欠くので、本書で `do` はあまり使いません。
+とはいえ優れたプログラマの多くが使うので、自分では決して書かないと決めたとしても、`do` のループを読めることは大切です。
 
-The syntax of `loop` is an entire language by itself, and a decidedly non-Lisp-like language it is.
-Rather than list all the possibilities for `loop`, we will just give examples here, and refer the reader to *Common Lisp the Language*, 2d edition, or chapter 24.5 for more details.
-Here are three versions of `length` using `loop`:
+`loop` の構文はそれ自体が1つの言語であり、しかも明らかにLispらしくない言語です。
+`loop` の可能性をすべて列挙するのではなく、ここでは例だけを挙げ、詳細は *Common Lisp the Language* 第2版か24.5節に譲ります。
+`loop` を使った `length` を3通り示します。
 
 ```lisp
 (defun length4 (list)
@@ -519,21 +519,21 @@ Here are three versions of `length` using `loop`:
         finally (return len)))   ; and return LEN
 ```
 
-Every programmer learns that there are certain kinds of loops that are used again and again.
-These are often called *programming idioms* or *cliches.* An example is going through the elements of a list or array and doing some operation to each element.
-In most languages, these idioms do not have an explicit syntactic marker.
-Instead, they are implemented with a general loop construct, and it is up to the reader of the program to recognize what the programmer is doing.
+どのプログラマも、何度も繰り返し使われる決まった種類のループがあることを学びます。
+これらはしばしば*プログラミングの慣用句*、あるいは*決まり文句*と呼ばれます。リストや配列の要素をたどって各要素に何か操作をする、というのがその例です。
+たいていの言語では、こうした慣用句に明示的な構文上の目印はありません。
+代わりに汎用のループ構文で実装され、プログラマが何をしているのかを見抜くのは読み手に委ねられます。
 
-Lisp is unusual in that it provides ways to explicitly encapsulate such idioms, and refer to them with explicit syntactic and functional forms.
-`dolist` and `dotimes` are two examples of this - they both follow the "be specific" principle.
-Most programmers prefer to use a `dolist` rather than an equivalent `do,` because it cries out "this loop iterates over the elements of a list."
-Of course, the corresponding `do` form also says the same thing - but it takes more work for the reader to discover this.
+Lispが変わっているのは、そうした慣用句を明示的に包み込み、明示的な構文や関数の形で参照する手立てを備えている点です。
+`dolist` と `dotimes` がその2つの例です。どちらも「具体的であれ」の原則に従っています。
+たいていのプログラマは、等価な `do` より `dolist` を好みます。「このループはリストの要素にわたって回るのだ」と声高に告げてくれるからです。
+もちろん対応する `do` も同じことを言ってはいます。しかし読み手がそれに気づくには、より多くの手間がかかります。
 
-In addition to special forms like `dolist` and `dotimes,` there are quite a few functions that are designed to handle common idioms.
-Two examples are `count-if,` which counts the number of elements of a sequence that satisfy a predicate, and `position-if,` which returns the index of an element satisfying a predicate.
-Both can be used to implement `length.`
-In `length7` below, `count-if` gives the number of elements in `list` that satisfy the predicate `true.`
-Since `true` is defined to be always true, this gives the length of the list.
+`dolist` や `dotimes` のような特殊形式に加えて、よくある慣用句を扱うために設計された関数もかなりの数あります。
+例を2つ挙げると、述語を満たす列の要素数を数える `count-if` と、述語を満たす要素の位置を返す `position-if` です。
+どちらも `length` の実装に使えます。
+下の `length7` では、`count-if` が述語 `true` を満たす `list` の要素数を返します。
+`true` は常に真になるよう定義されているので、これがリストの長さになります。
 
 ```lisp
 (defun length7 (list)
@@ -542,9 +542,9 @@ Since `true` is defined to be always true, this gives the length of the list.
 (defun true (x) t)
 ```
 
-In `length8,` the function `position-if` finds the position of an element that satisfies the predicate true, starting from the end of the list.
-This will be the very last element of the list, and since indexing is zero-based, we add one to get the length.
-Admittedly, this is not the most straightforward implementation of `length.`
+`length8` では、関数 `position-if` がリストの末尾から始めて、述語 true を満たす要素の位置を見つけます。
+それはリストの最後の要素になり、添字は0から始まるので、1を足して長さを得ます。
+正直なところ、これは `length` の最も素直な実装ではありません。
 
 ```lisp
 (defun length8 (list)
@@ -553,10 +553,10 @@ Admittedly, this is not the most straightforward implementation of `length.`
       (+ 1 (position-if #'true list :from-end t))))
 ```
 
-A partial table of functions that implement looping idioms is given below.
-These functions are designed to be flexible enough to handle almost all operations on sequences.
-The flexibility comes in three forms.
-First, functions like `mapcar` can apply to an arbitrary number of lists, not just one:
+繰り返しの慣用句を実装する関数の一部を、下の表に示します。
+これらの関数は、列に対するほぼすべての操作を扱えるだけの柔軟さを備えるよう設計されています。
+柔軟さは3つの形で現れます。
+第一に、`mapcar` のような関数は1つだけでなく任意個のリストに適用できます。
 
 ```lisp
 > (mapcar #'- '(1 2 3)) => (-1 -2 -3)
@@ -564,7 +564,7 @@ First, functions like `mapcar` can apply to an arbitrary number of lists, not ju
 > (mapcar #'+ '(1 2) '(10 20) '(100 200)) => (111 222)
 ```
 
-Second, many of the functions accept keywords that allow the user to vary the test for comparing elements, or to only consider part of the sequence.
+第二に、多くの関数はキーワードを受け付け、要素を比べる判定を変えたり、列の一部だけを対象にしたりできます。
 
 ```lisp
 > (remove 1 '(1 2 3 2 1 0 -1)) => (2 3 2 0 -1)
@@ -576,7 +576,7 @@ Second, many of the functions accept keywords that allow the user to vary the te
 > (remove 1 '(1 2 3 2 1 0 -1) :start 4) => (1 2 3 2 0 -1)
 ```
 
-Third, some have corresponding functions ending in `-if` or `-if-not` that take a predicate rather than an element to match against:
+第三に、一部の関数には `-if` や `-if-not` で終わる対応物があり、照合する要素ではなく述語をとります。
 
 ```lisp
 > (remove-if #'oddp '(1 2 3 2 1 0 -1)) => (2 2 0)
@@ -586,41 +586,41 @@ Third, some have corresponding functions ending in `-if` or `-if-not` that take 
 > (find-if #'evenp '(1 2 3 2 1 0 -1)) => 2
 ```
 
-The following two tables assume these two values:
+次の2つの表は、この2つの値を前提としています。
 
 ```lisp
 (setf x '(a b c))
 (setf y '(1 2 3))
 ```
 
-The first table lists functions that work on any number of lists but do not accept keywords:
+最初の表は、任意個のリストに働くがキーワードを受け付けない関数を挙げます。
 
 | []()                |                  |                                                  |
 |---------------------|------------------|--------------------------------------------------|
-| `(every #'oddp y)` | => `nil`         | test if every element satisfies a predicate      |
-| `(some #'oddp y)`  | => `t`           | test if some element satisfies predicate         |
-| `(mapcar #'- y)`    | => `(-1 -2 -3)`  | apply function to each element and return result |
-| `(mapc #'print y)`  | *prints* `1 2 3` | perform operation on each element                |
+| `(every #'oddp y)` | => `nil`         | すべての要素が述語を満たすか調べる               |
+| `(some #'oddp y)`  | => `t`           | いずれかの要素が述語を満たすか調べる             |
+| `(mapcar #'- y)`    | => `(-1 -2 -3)`  | 各要素に関数を適用して結果を返す                 |
+| `(mapc #'print y)`  | *表示* `1 2 3` | 各要素に操作を行う                               |
 
-The second table lists functions that have `-if` and `-if-not` versions and also accept keyword arguments:
+2つ目の表は、`-if` と `-if-not` の版を持ち、キーワード引数も受け付ける関数を挙げます。
 
 | []()                 |              |                                       |
 |----------------------|--------------|---------------------------------------|
-| `(member 2 y)`       | =>`(2 3)`    | see if element is in list             |
-| `(count 'b x)`       | => 1         | count the number of matching elements |
-| `(delete 1 y)`       | => `(2 3)`   | omit matching elements                |
-| `(find 2 y)`         | => `2`       | find first element that matches       |
-| `(position 'a x)`    | => 0         | find index of element in sequence     |
-| `(reduce #'+ y)`     | => `6`       | apply function to successive elements |
-| `(remove 2 y)`       | => `(1 3)`   | like `delete`, but makes a new copy   |
-| `(substitute 4 2 y)` | => `(1 4 3)` | replace elements with new ones        |
+| `(member 2 y)`       | =>`(2 3)`    | 要素がリストにあるか調べる            |
+| `(count 'b x)`       | => 1         | 合致する要素の個数を数える            |
+| `(delete 1 y)`       | => `(2 3)`   | 合致する要素を取り除く                |
+| `(find 2 y)`         | => `2`       | 合致する最初の要素を見つける          |
+| `(position 'a x)`    | => 0         | 列における要素の位置を見つける        |
+| `(reduce #'+ y)`     | => `6`       | 連続する要素に関数を適用する          |
+| `(remove 2 y)`       | => `(1 3)`   | `delete` と同様だが新しい複製を作る   |
+| `(substitute 4 2 y)` | => `(1 4 3)` | 要素を新しいものに置き換える          |
 
-### Repetition through Recursion
-Lisp has gained a reputation as a "recursive" language, meaning that Lisp encourages programmers to write functions that call themselves.
-As we have seen above, there is a dizzying number of functions and special forms for writing loops in Common Lisp, but it is also true that many programs handle repetition through recursion rather than with a syntactic loop.
+### 再帰による繰り返し
+Lispは「再帰的な」言語という評判を得てきました。つまり、自分自身を呼ぶ関数を書くようプログラマに促す言語だ、ということです。
+上で見たとおり、Common Lispにはループを書くための関数と特殊形式が目もくらむほどありますが、多くのプログラムが構文上のループではなく再帰で繰り返しを扱っているのも事実です。
 
-One simple definition of `length` is "the empty list has length 0, and any other list has a length which is one more than the length of the rest of the list (after the first element)."
-This translates directly into a recursive function:
+`length` の単純な定義の1つはこうです。「空リストの長さは0であり、それ以外のリストの長さは、（最初の要素より後ろの）残りのリストの長さより1つ大きい。」
+これはそのまま再帰関数に写せます。
 
 ```lisp
 (defun length9 (list)
@@ -629,20 +629,20 @@ This translates directly into a recursive function:
       (+ 1 (length9 (rest list)))))
 ```
 
-This version of `length` arises naturally from the recursive definition of a list: "a list is either the empty list or an element `cons`ed onto another list."
-In general, most recursive functions derive from the recursive nature of the data they are operating on.
-Some kinds of data, like binary trees, are hard to deal with in anything but a recursive fashion.
-Others, like lists and integers, can be defined either recursively (leading to recursive functions) or as a sequence (leading to iterative functions).
-In this book, I tend to use the "list-as-sequence" view rather than the "list-as-first-and-rest" view.
-The reason is that defining a list as a first and a rest is an arbitrary and artificial distinction that is based on the implementation of lists that Lisp happens to use.
-But there are many other ways to decompose a list.
-We could break it into the last element and all-but-the-last elements, for example, or the first half and the second half.
-The "list-as-sequence" view makes no such artificial distinction.
-It treats all elements identically.
+この版の `length` は、リストの再帰的な定義「リストとは、空リストか、あるいはある要素が別のリストに `cons` されたものである」から自然に導かれます。
+一般に、再帰関数の大半は、扱っているデータの再帰的な性質に由来します。
+二分木のように、再帰的なやり方以外では扱いにくいデータもあります。
+リストや整数のように、再帰的にも（再帰関数につながる）、列としても（繰り返しの関数につながる）定義できるものもあります。
+本書では、「first と rest としてのリスト」より「列としてのリスト」という見方を採ることが多くなります。
+理由は、リストを first と rest として定義するのが、Lispがたまたま採用しているリストの実装に基づく、恣意的で人為的な区別だからです。
+しかしリストを分解する方法は他にもたくさんあります。
+たとえば最後の要素とそれ以外に分けることも、前半と後半に分けることもできます。
+「列としてのリスト」という見方は、そうした人為的な区別をしません。
+すべての要素を同じように扱います。
 
-One objection to the use of recursive functions is that they are inefficient, because the compiler has to allocate memory for each recursive call.
-This may be true for the function `length9`, but it is not necessarily true for all recursive calls.
-Consider the following definition:
+再帰関数を使うことへの1つの反論は、コンパイラが再帰呼び出しのたびにメモリを確保せねばならないので非効率だ、というものです。
+これは `length9` という関数には当てはまるかもしれませんが、すべての再帰呼び出しに当てはまるとはかぎりません。
+次の定義を考えてみましょう。
 
 ```lisp
 (defun length10 (list)
@@ -654,24 +654,24 @@ Consider the following definition:
       (length10-aux (rest sublist) (+ 1 len-so-far))))
 ```
 
-`length10` uses `length10-aux` as an auxiliary function, passing it 0 as the length of the list so far.
-`length10-aux` then goes down the list to the end, adding 1 for each element.
-The invariant relation is that the length of the sublist plus `len-so-far` always equals the length of the original list.
-Thus, when the sublist is nil, then `len-so-far` is the length of the original list.
-Variables like `len-so-far` that keep track of partial results are called *accumulators.*
-Other examples of functions that use accumulators include `flatten-all` on page 329; `one-unknown` on page 237; the Prolog predicates discussed on page 686; and `anonymous-variables-in` on pages 400 and 433, which uses two accumulators.
+`length10` は `length10-aux` を補助関数として使い、ここまでのリストの長さとして0を渡します。
+`length10-aux` はリストを末尾までたどり、要素ごとに1を足していきます。
+不変な関係は、部分リストの長さと `len-so-far` の和が、常に元のリストの長さに等しいということです。
+ですから部分リストが nil になったとき、`len-so-far` が元のリストの長さになります。
+`len-so-far` のように途中の結果を持ち回る変数を*累算器*と呼びます。
+累算器を使う関数の例には、329ページの `flatten-all`、237ページの `one-unknown`、686ページで論じるPrologの述語、そして累算器を2つ使う400ページと433ページの `anonymous-variables-in` があります。
 
-The important difference between `length9` and `length10` is *when* the addition is done.
-In `length9`, the function calls itself, then returns, and then adds 1.
-In `length10-aux`, the function adds 1, then calls itself, then returns.
-There are no pending operations to do after the recursive call returns, so the compiler is free to release any memory allocated for the original call before making the recursive call.
-`length10-aux` is called a *tail-recursive* function, because the recursive call appears as the last thing the function does (the tail).
-Many compilers will optimize tail-recursive calls, although not all do.
-([Chapter 22](chapter22.md) treats tail-recursion in more detail, and points out that Scheme compilers guarantee that tail-recursive calls will be optimized.)
+`length9` と `length10` の大事な違いは、加算を*いつ*行うかです。
+`length9` では、関数が自分自身を呼び、戻ってから1を足します。
+`length10-aux` では、1を足してから自分自身を呼び、そして戻ります。
+再帰呼び出しが戻ったあとに残る処理がないので、コンパイラは再帰呼び出しを行う前に、元の呼び出しのために確保したメモリを解放して構いません。
+`length10-aux` は*末尾再帰*の関数と呼ばれます。再帰呼び出しが関数の最後の仕事（末尾）として現れるからです。
+多くのコンパイラは末尾再帰の呼び出しを最適化しますが、すべてがそうするわけではありません。
+（[第22章](chapter22.md)で末尾再帰をより詳しく扱い、Schemeのコンパイラが末尾再帰の最適化を保証することにも触れます。）
 
-Some find it ugly to introduce `length10-aux`.
-For them, there are two alternatives.
-First, we could combine `length10` and `length10-aux` into a single function with an optional parameter:
+`length10-aux` を導入するのは不格好だと感じる人もいるでしょう。
+そういう方には2つの代案があります。
+第一に、`length10` と `length10-aux` を、省略可能な引数を持つ1つの関数にまとめられます。
 
 ```lisp
 (defun length11 (list &optional (len-so-far 0))
@@ -680,8 +680,8 @@ First, we could combine `length10` and `length10-aux` into a single function wit
       (length11 (rest list) (+ 1 len-so-far))))
 ```
 
-Second, we could introduce a *local* function inside the definition of the main function.
-This is done with the special form `labels`:
+第二に、主となる関数の定義の中に*局所*関数を導入できます。
+これは特殊形式 `labels` で行います。
 
 ```lisp
 (defun length12 (the-list)
@@ -693,31 +693,31 @@ This is done with the special form `labels`:
     (length13 the-list 0)))
 ```
 
-In general, a `labels` form (or the similar `flet` form) can be used to introduce one or more local functions.
-It has the following syntax:
+一般に `labels`（あるいは似た形の `flet`）は、1つ以上の局所関数を導入するのに使えます。
+構文は次のとおりです。
 
 `(labels`
-&nbsp;&nbsp;&nbsp;&nbsp;((*function-name* (*parameter...*) *function-body*)...)
-&nbsp;&nbsp;&nbsp;&nbsp;*body-of-labels*)
+&nbsp;&nbsp;&nbsp;&nbsp;((*関数名* (*引数...*) *関数の本体*)...)
+&nbsp;&nbsp;&nbsp;&nbsp;*labelsの本体*)
 
-### Other Special Forms
+### その他の特殊形式
 
-A few more special forms do not fit neatly into any category.
-We have already seen the two special forms for creating constants and functions, `quote` and `function.`
-These are so common that they have abbreviations: `'x` for `(quote x`) and `#'f` for `(function f).`
+どの分類にもうまく収まらない特殊形式がいくつかあります。
+定数と関数を作る2つの特殊形式 `quote` と `function` はすでに見ました。
+これらはあまりによく使われるので略記があります。`(quote x`) には `'x`、`(function f)` には `#'f` です。
 
-The special form `progn` can be used to evaluate a sequence of forms and return the value of the last one:
+特殊形式 `progn` は、一連の形を評価して最後のものの値を返すのに使えます。
 
 ```lisp
 (progn (setf x 0) (setf x (+ x 1)) x) => 1
 ```
 
-`progn` is the equivalent of a `begin...end` block in other languages, but it is used very infrequently in Lisp.
-There are two reasons for this.
-First, programs written in a functional style never need a sequence of actions, because they don't have side effects.
-Second, even when side effects are used, many special forms allow for a body which is a sequence - an implicit `progn.`
-I can only think of three places where a `progn` is justified.
-First, to implement side effects in a branch of a two-branched conditional, one could use either an `if` with a `progn,` or a `cond`:
+`progn` は他の言語の `begin...end` の区画に相当しますが、Lispではめったに使われません。
+理由は2つあります。
+第一に、関数的な流儀で書かれたプログラムは副作用を持たないので、動作の並びを必要としません。
+第二に、副作用を使う場合でも、多くの特殊形式は本体を並びとして受け付けます — 暗黙の `progn` です。
+`progn` が正当化される場面は3つしか思いつきません。
+第一に、2分岐の条件分岐の一方で副作用を実装するには、`progn` を伴う `if` か、`cond` を使えます。
 
 ```lisp
 (if (> x 100)
@@ -731,14 +731,14 @@ First, to implement side effects in a branch of a two-branched conditional, one 
       (t x))
 ```
 
-If the conditional had only one branch, then `when` or `unless` should be used, since they allow an implicit `progn`.
-If there are more than two branches, then `cond` should be used.
+条件分岐が1分岐しかないなら、暗黙の `progn` を許す `when` か `unless` を使うべきです。
+分岐が3つ以上なら `cond` を使うべきです。
 
-Second, `progn` is sometimes needed in macros that expand into more than one top-level form, as in the `defun*` macro on page 326, [section 10.3](chapter10.md#s0020).
-Third, a progn is sometimes needed in an `unwind-protect`, an advanced macro.
-An example of this is the `with-resource` macro on [page 338](chapter10.md#p338), [section 10.4](chapter10.md#s0025).
+第二に、326ページ・[10.3節](chapter10.md#s0020)の `defun*` マクロのように、複数のトップレベルの形に展開するマクロでは `progn` が必要になることがあります。
+第三に、進んだマクロである `unwind-protect` の中で progn が必要になることがあります。
+その例が [338ページ](chapter10.md#p338)・[10.4節](chapter10.md#s0025)の `with-resource` マクロです。
 
-The forms `trace` and `untrace` are used to control debugging information about entry and exit to a function:
+`trace` と `untrace` は、関数への出入りに関するデバッグ情報を制御するのに使います。
 
 ```lisp
 > (trace length9) => (LENGTH9)
@@ -758,11 +758,11 @@ The forms `trace` and `untrace` are used to control debugging information about 
 > (length9 '(a b c)) => 3
 ```
 
-Finally, the special form `return` can be used to break out of a block of code.
-Blocks are set up by the special form `block`, or by the looping forms `(do, do*, dolist, dotimes`, or `loop`).
-For example, the following function computes the product of a list of numbers, but if any number is zero, then the whole product must be zero, so we immediately return zero from the `dolist` loop.
-Note that this returns from the `dolist` only, not from the function itself (although in this case, the value returned by `dolist` becomes the value returned by the function, because it is the last expression in the function).
-I have used uppercase letters in `RETURN` to emphasize the fact that it is an unusual step to exit from a loop.
+最後に、特殊形式 `return` はコードの区画から抜け出すのに使えます。
+区画は特殊形式 `block` か、ループの形 `(do, do*, dolist, dotimes`、`loop`) によって設けられます。
+たとえば次の関数は数のリストの積を計算しますが、いずれかの数が0なら積全体が0になるはずなので、`dolist` のループから即座に0を返します。
+これが抜け出すのは `dolist` からだけで、関数そのものからではないことに注意してください（もっともこの場合、`dolist` が返す値は関数の最後の式なので、そのまま関数の返り値になります）。
+`RETURN` を大文字で書いたのは、ループから抜けるのが例外的な手立てだと強調するためです。
 
 ```lisp
 (defun product (numbers)
@@ -774,38 +774,38 @@ I have used uppercase letters in `RETURN` to emphasize the fact that it is an un
           (setf prod (* n prod))))))
 ```
 
-### Macros
+### マクロ
 
-The preceding discussion has been somewhat cavalier with the term "special form."
-Actually, some of these special forms are really *macros*, forms that the compiler expands into some other code.
-Common Lisp provides a number of built-in macros and allows the user to extend the language by defining new macros.
-(There is no way for the user to define new special forms, however.)
+ここまでの議論では「特殊形式」という語をやや無造作に使ってきました。
+実のところ、これらの特殊形式のいくつかは本当は*マクロ*、つまりコンパイラが別のコードに展開する形です。
+Common Lispは多くの組み込みマクロを備え、利用者が新しいマクロを定義して言語を拡張することを許しています。
+（ただし利用者が新しい特殊形式を定義する手立てはありません。）
 
-Macros are defined with the special form `defmacro`.
-Suppose we wanted to define a macro, `while`, that would act like the `while` loop statement of Pascal.
-Writing a macro is a four-step process:
+マクロは特殊形式 `defmacro` で定義します。
+Pascalの `while` 文のように振る舞うマクロ `while` を定義したいとしましょう。
+マクロを書く作業は4段階です。
 
-* Decide if the macro is really necessary.
-* Write down the syntax of the macro.
-* Figure out what the macro should expand into.
-* Use `defmacro` to implement the syntax/expansion correspondence.
+* そのマクロが本当に必要かを判断する。
+* マクロの構文を書き出す。
+* マクロが何に展開されるべきかを見定める。
+* `defmacro` で構文と展開の対応を実装する。
 
-The first step in writing a macro is to recognize that every time you write one, you are defining a new language that is just like Lisp except for your new macro.
-The programmer who thinks that way will rightfully be extremely frugal in defining macros.
-(Besides, when someone asks, "What did you get done today?" it sounds more impressive to say "I defined a new language and wrote a compiler for it" than to say "I just hacked up a couple of macros.")
-Introducing a macro puts much more memory strain on the reader of your program than does introducing a function, variable or data type, so it should not be taken lightly.
-Introduce macros only when there is a clear need, and when the macro fits in well with your existing system.
-As C.A.R. Hoare put it, "One thing the language designer should not do is to include untried ideas of his own."
+マクロを書く第一歩は、マクロを1つ書くたびに、その新しいマクロだけがLispと違う新しい言語を定義しているのだ、と認識することです。
+そう考えるプログラマは、当然ながらマクロの定義にきわめて倹約的になるでしょう。
+（それに「今日は何をしたの」と聞かれたとき、「マクロを2つ3つでっち上げただけ」と言うより「新しい言語を定義してそのコンパイラを書いた」と言うほうが立派に聞こえます。）
+マクロの導入は、関数・変数・データ型の導入よりはるかに、プログラムの読み手の記憶に負担をかけます。ですから軽々しく行うべきではありません。
+マクロを導入するのは、明確な必要があり、かつ既存のシステムによくなじむときだけにしてください。
+C.A.R. Hoareの言葉を借りれば、「言語の設計者がしてはならないことの1つは、自分の試していない着想を盛り込むことである」。
 
-The next step is to decide what code the macro should expand into.
-It is a good idea to follow established Lisp conventions for macro syntax whenever possible.
-Look at the looping macros `(dolist, dotimes, do-symbols),` the defining macros `(defun, defvar, defparameter, defstruct),` or the I/O macros `(with-open-file`, `with-open-stream`, `with-input-from-string)`, for example.
-If you follow the naming and syntax conventions for one of these instead of inventing your own conventions, you'll be doing the reader of your program a favor.
-For `while,` a good syntax is:
+次の段階は、マクロがどんなコードに展開されるべきかを決めることです。
+マクロの構文については、できるかぎり既存のLispの流儀に従うのがよい考えです。
+たとえばループのマクロ `(dolist, dotimes, do-symbols)`、定義のマクロ `(defun, defvar, defparameter, defstruct)`、入出力のマクロ `(with-open-file`, `with-open-stream`, `with-input-from-string)` を見てください。
+独自の流儀をひねり出す代わりにこれらの命名と構文の流儀に従えば、プログラムの読み手に親切をすることになります。
+`while` なら、よい構文はこうです。
 
-> `(while` *test body...*)
+> `(while` *判定 本体...*)
 
-The third step is to write the code that you want a macro call to expand into:
+第三の段階は、マクロ呼び出しを展開した先に置きたいコードを書くことです。
 
 ```lisp
 loop
@@ -813,10 +813,10 @@ loop
   body
 ```
 
-The final step is to write the definition of the macro, using `defmacro`.
-A `defmacro` form is similar to a `defun` in that it has a parameter list, optional documentation string, and body.
-There are a few differences in what is allowed in the parameter list, which will be covered later.
-Here is a definition of the macro `while`, which takes a test and a body, and builds up the `loop` code shown previously:
+最後の段階は、`defmacro` を使ってマクロの定義を書くことです。
+`defmacro` は、引数リスト・省略可能なドキュメント文字列・本体を持つ点で `defun` に似ています。
+引数リストに書けるものにはいくつか違いがあり、それはのちほど扱います。
+以下は `while` マクロの定義です。判定と本体をとり、先に示した `loop` のコードを組み立てます。
 
 ```lisp
 (defmacro while (test &rest body)
@@ -826,8 +826,8 @@ Here is a definition of the macro `while`, which takes a test and a body, and bu
          body))
 ```
 
-(The function `list*` is like `list`, except that the last argument is appended onto the end of the list of the other arguments.)
-We can see what this macro expands into by using `macroexpand`, and see how it runs by typing in an example:
+（関数 `list*` は `list` に似ていますが、最後の引数が他の引数からなるリストの末尾に連結される点が違います。）
+このマクロが何に展開されるかは `macroexpand` で確かめられますし、例を打ち込めば動きも見られます。
 
 ```lisp
 > (macroexpand-1 '(while (< i 10)
@@ -846,15 +846,15 @@ We can see what this macro expands into by using `macroexpand`, and see how it r
 NIL
 ```
 
-[Section 24.6](chapter24.md) (page 853) describes a more complicated macro and some details on the pitfalls of writing complicated macros (page 855).
+[24.6節](chapter24.md)（853ページ）では、もっと複雑なマクロと、複雑なマクロを書くときの落とし穴の詳細（855ページ）を述べます。
 
-### Backquote Notation
+### 逆引用符の記法
 
-The hardest part about defining `while` is building the code that is the expansion of the macro.
-It would be nice if there was a more immediate way of building code.
-The following version of `while` following attempts to do just that.
-It defines the local variable `code` to be a template for the code we want, and then substitutes the real values of the variables test and body for the placeholders in the code.
-This is done with the function `subst`; (`subst` *new old tree*) substitutes *new* for each occurrence of *old* anywhere within *tree.*
+`while` の定義で最も難しいのは、マクロの展開先となるコードを組み立てることです。
+コードをもっと直に組み立てる方法があればありがたいのですが。
+次の版の `while` は、まさにそれを試みています。
+局所変数 `code` を、欲しいコードの雛形として定義し、そのコード中の目印を、変数 test と body の実際の値で置き換えます。
+これは関数 `subst` で行います。(`subst` *新 旧 木*) は、*木*の中に現れる*旧*のすべてを*新*で置き換えます。
 
 ```lisp
 (defmacro while (test &rest body)
@@ -863,12 +863,12 @@ This is done with the function `subst`; (`subst` *new old tree*) substitutes *ne
     (subst test 'test (subst body 'body code))))
 ```
 
-The need to build up code (and noncode data) from components is so frequent that there is a special notation for it, the *backquote* notation.
-The backquote character ``"`"`` is similar to the quote character `"'"`.
-A backquote indicates that what follows is *mostly* a literal expression but may contain some components that are to be evaluated.
-Anything marked by a leading comma `","` is evaluated and inserted into the structure, and anything marked with a leading `",@"` must evaluate to a list that is spliced into the structure: each element of the list is inserted, without the top-level parentheses.
-The notation is covered in more detail in [section 23.5](chapter23.md#s0030).
-Here we use the combination of backquote and comma to rewrite `while`:
+コード（やコードでないデータ）を部品から組み立てる必要はきわめて頻繁なので、そのための特別な記法 — *逆引用符*の記法 — があります。
+逆引用符 ``"`"`` は引用符 `"'"` に似ています。
+逆引用符は、それに続くものが*おおむね*そのままの式だが、評価されるべき部分をいくらか含みうる、ということを示します。
+先頭にカンマ `","` が付いたものは評価されて構造に挿入され、先頭に `",@"` が付いたものはリストに評価されねばならず、そのリストが構造に継ぎ込まれます。つまりリストの各要素が、最上位の括弧なしで挿入されます。
+この記法は [23.5節](chapter23.md#s0030) でより詳しく扱います。
+ここでは逆引用符とカンマの組み合わせを使って `while` を書き直します。
 
 ```lisp
 (defmacro while (test &rest body)
@@ -877,9 +877,9 @@ Here we use the combination of backquote and comma to rewrite `while`:
          ,@body))
 ```
 
-Here are some more examples of backquote.
-Note that at the end of a list, `",@"` has the same effect as `"."` followed by `","`.
-In the middle of a list, only `",@"`is a possibility.
+逆引用符の例をもう少し挙げます。
+リストの末尾では `",@"` が `"."` に続く `","` と同じ働きをすることに注意してください。
+リストの途中では `",@"` しか使えません。
 
 ```lisp
 > (setf test1 '(a test)) => (A TEST)
@@ -894,61 +894,61 @@ In the middle of a list, only `",@"`is a possibility.
 (THIS IS A TEST -- THIS IS ONLY A TEST)
 ```
 
-This completes the section on special forms and macros.
-The remaining sections of this chapter give an overview of the important built-in functions in Common Lisp.
+これで特殊形式とマクロの節は終わりです。
+この章の残りの節では、Common Lispの重要な組み込み関数を概観します。
 
-## 3.3 Functions on Lists
+## 3.3 リストを扱う関数
 
-For the sake of example, assume we have the following assignments:
+例のために、次の割り当てが済んでいるものとします。
 
 ```lisp
 (setf x '(a b c))
 (setf y '(1 2 3))
 ```
 
-The most important functions on lists are summarized here.
-The more complicated ones are explained more thoroughly when they are used.
+リストを扱う最も重要な関数をここにまとめます。
+より込み入ったものは、使うときにもっと丁寧に説明します。
 
 | []()             |                        |                                                |
 |------------------|------------------------|------------------------------------------------|
-| `(first x)`      | => `a`                 | first element of a list                        |
-| `(second x)`     | => `b`                 | second element of a list                       |
-| `(third x)`      | => `c`                 | third element of a list                        |
-| `(nth 0 x)`      | => `a`                 | nth element of a list, `0`-based               |
-| `(rest x)`       | => `(b c)`             | all but the first element                      |
-| `(car x)`        | => `a`                 | another name for the first element of a list   |
-| `(cdr x)`        | => `(b c)`             | another name for all but the first element     |
-| `(last x)`       | => `(c)`               | last cons cell in a list                       |
-| `(length x)`     | => 3                   | number of elements in a list                   |
-| `(reverse x)`    | => `(c b a)`           | puts list in reverse order                     |
-| `(cons 0 y)`     | => `(0 1 2 3)`         | add to front of list                           |
-| `(append x y)`   | => `(a b c 1 2 3)`     | append together elements                       |
-| `(list x y)`     | => `((a b c) (1 2 3))` | make a new list                                |
-| `(list* 1 2 x)`  | => `(1 2 a b c)`       | append last argument to others                 |
-| `(null nil)`     | => `T`                 | predicate is true of the empty list            |
-| `(null x)`       | => `nil`               | ... and false for everything else              |
-| `(listp x)`      | => `T`                 | predicate is true of any list, including `nil` |
-| `(listp 3)`      | => `nil`               | ... and is false for nonlists                  |
-| `(consp x)`      | => `t`                 | predicate is true of non-nil lists             |
-| `(consp nil)`    | => `nil`               | ... and false for atoms, including `nil`       |
-| `(equal x x)`    | => `t`                 | true for lists that look the same              |
-| `(equal x y)`    | => `nil`                  | ... and false for lists that look different    |
-| `(sort y #'>)`   | => `(3 2 1)`           | sort a list according to a comparison function |
-| `(subseq x 1 2)` | => `(B)`               | subsequence with given start and end points    |
+| `(first x)`      | => `a`                 | リストの最初の要素                             |
+| `(second x)`     | => `b`                 | リストの2番目の要素                            |
+| `(third x)`      | => `c`                 | リストの3番目の要素                            |
+| `(nth 0 x)`      | => `a`                 | リストのn番目の要素。`0` 始まり                |
+| `(rest x)`       | => `(b c)`             | 最初の要素を除いた残り                         |
+| `(car x)`        | => `a`                 | リストの最初の要素の別名                       |
+| `(cdr x)`        | => `(b c)`             | 最初の要素を除いた残りの別名                   |
+| `(last x)`       | => `(c)`               | リストの最後のコンスセル                       |
+| `(length x)`     | => 3                   | リストの要素数                                 |
+| `(reverse x)`    | => `(c b a)`           | リストを逆順にする                             |
+| `(cons 0 y)`     | => `(0 1 2 3)`         | リストの先頭に加える                           |
+| `(append x y)`   | => `(a b c 1 2 3)`     | 要素どうしを連結する                           |
+| `(list x y)`     | => `((a b c) (1 2 3))` | 新しいリストを作る                             |
+| `(list* 1 2 x)`  | => `(1 2 a b c)`       | 最後の引数を他の引数に連結する                 |
+| `(null nil)`     | => `T`                 | 空リストに対して真となる述語                   |
+| `(null x)`       | => `nil`               | ... それ以外には偽                             |
+| `(listp x)`      | => `T`                 | `nil` を含むあらゆるリストに真となる述語       |
+| `(listp 3)`      | => `nil`               | ... リストでないものには偽                     |
+| `(consp x)`      | => `t`                 | nil でないリストに真となる述語                 |
+| `(consp nil)`    | => `nil`               | ... `nil` を含むアトムには偽                   |
+| `(equal x x)`    | => `t`                 | 見た目が同じリストに真                         |
+| `(equal x y)`    | => `nil`                  | ... 見た目が違うリストには偽                   |
+| `(sort y #'>)`   | => `(3 2 1)`           | 比較関数に従ってリストを整列する               |
+| `(subseq x 1 2)` | => `(B)`               | 始点と終点で指定した部分列                     |
 
-We said that (`cons` *a b*) builds a longer list by adding element *a* to the front of list *b,* but what if *b* is not a list?
-This is not an error; the result is an object *x* such that (`first` *x*) => *a* (`rest`*x*) => *b,* and where *x* prints as (*a* . *b*).
-This is known as *dotted pair* notation.
-If *b* is a list, then the usual list notation is used for output rather than the dotted pair notation.
-But either notation can be used for input.
+(`cons` *a b*) は要素 *a* をリスト *b* の先頭に加えて長いリストを作る、と述べましたが、*b* がリストでなければどうなるでしょうか。
+これはエラーではありません。結果は (`first` *x*) => *a*、(`rest`*x*) => *b* となり、(*a* . *b*) と表示されるオブジェクト *x* です。
+これは*ドット対*の記法として知られています。
+*b* がリストなら、出力にはドット対の記法ではなく通常のリスト記法が使われます。
+しかし入力にはどちらの記法も使えます。
 
-So far we have been thinking of lists as sequences, using phrases like "a list of three elements."
-The list is a convenient abstraction, but the actual implementation of lists relies on lower-level building blocks called *cons cells.*
-A cons cell is a data structure with two fields: a first and a rest.
-What we have been calling "a list of three elements" can also be seen as a single cons cell, whose first field points to the first element and whose rest field points to another cons cell that is a cons cell representing a list of two elements.
-This second cons cell has a rest field that is a third cons cell, one whose rest field is nil.
-All proper lists have a last cons cell whose rest field is nil.
-[Figure 3.1](#fig-03-01) shows the cons cell notation for the three-element list (`one two three`), as well as for the result of (`cons 'one 'two`).
+ここまで私たちは「3要素のリスト」といった言い方をして、リストを列として考えてきました。
+リストは便利な抽象ですが、実際の実装は*コンスセル*と呼ばれる、より低水準の構成要素に立脚しています。
+コンスセルは first と rest という2つの欄を持つデータ構造です。
+私たちが「3要素のリスト」と呼んできたものは、1つのコンスセルとしても見られます。その first の欄が最初の要素を指し、rest の欄が2要素のリストを表す別のコンスセルを指しているのです。
+この2番目のコンスセルの rest の欄は3番目のコンスセルであり、その rest の欄は nil です。
+すべての真リストは、rest の欄が nil である最後のコンスセルを持ちます。
+[図3.1](#fig-03-01) は、3要素のリスト (`one two three`) と、(`cons 'one 'two`) の結果をコンスセルの記法で示したものです。
 
 | <a id="fig-03-01"></a>[]() |
 |---|
@@ -1390,7 +1390,7 @@ In addition, all the recognizers generated by `defstruct` have a hyphen before t
 
 The function `type-of` returns the type of its argument, and `typep` tests if an object is of a specified type.
 The function `subtypep` tests if one type can be determined to be a subtype of another.
-For example:
+たとえば次のようになります。
 
 ```lisp
 > (type-of 123) => FIXNUM
@@ -1632,7 +1632,7 @@ The functions `error` and `cerror` are used to signal an error condition.
 These are intended to remain in the program even after it has been debugged.
 The function `error` takes a format string and optional arguments.
 It signals a fatal error; that is, it stops the program and does not offer the user any way of restarting it.
-For example:
+たとえば次のようになります。
 
 ```lisp
 (defun average (numbers)
@@ -1678,7 +1678,7 @@ The system will ask for a new value for the test object until the user supplies 
 To make it easier to include error checks without inflating the length of the code too much, Common Lisp provides the special forms `check-type` and `assert`.
 As the name implies, `check-type` is used to check the type of an argument.
 It signals a continuable error if the argument has the wrong type.
-For example:
+たとえば次のようになります。
 
 ```lisp
 (defun sqr (x)
@@ -1699,7 +1699,7 @@ If continued: replace X with new value
 
 `assert` is more general than `check-type`.
 In the simplest form, assert tests an expression and signals an error if it is false.
-For example:
+たとえば次のようになります。
 
 ```lisp
 (defun sqr (x)
@@ -1783,7 +1783,7 @@ A program is not complete just because it gives the right output.
 It must also deliver the output in a timely fashion.
 The form (`time` *expression*) can be used to see how long it takes to execute *expression.*
 Some implementations also print statistics on the amount of storage required.
-For example:
+たとえば次のようになります。
 
 ```lisp
 > (defun f (n) (dotimes (i n) nil)) => F
