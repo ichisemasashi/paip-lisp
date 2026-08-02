@@ -986,7 +986,7 @@ AIの「古典的」な問題から始めましょう。<a id="tfn04-3"></a><sup
 
 これでこの演算子の並びを使い、この迷路でいくつかの問題を解けます。
 別の接続の並びを与えれば、簡単に別の迷路も作れます。
-Note that there is nothing that says the places in the maze are arranged in a five-by-five layout-that is just one way of visualizing the connectivity
+迷路の各地点が5×5の配置になっているとは、どこにも書かれていないことに注目してください。それは接続関係を思い描く1つの方法にすぎません
 
 `> (use *maze-ops*)`=> `48`
 
@@ -1012,18 +1012,18 @@ Note that there is nothing that says the places in the maze are arranged in a fi
   (AT 25))
 ```
 
-There is one subtle bug that the maze domain points out.
-We wanted GPS to return a list of the actions executed.
-However, in order to account for the case where the goal can be achieved with no action, I included `(START)` in the value returned by GPS.
-These examples include the `START` and `EXECUTING` forms but also a list of the form (AT *n*), for some *n*.
-This is the bug.
-If we go back and look at the function `GPS`, we find that it reports the result by removing all atoms from the state returned by `achieve-all`.
-This is a "pun"-we said remove atoms, when we really meant to remove all conditions except the `(START)` and `(EXECUTING *action*)` forms.
-Up to now, all these conditions were atoms, so this approach worked.
-The maze domain introduced conditions of the form (`AT` *n*), so for the first time there was a problem.
-The moral is that when a programmer uses puns-saying what's convenient instead of what's really happening-there's bound to be trouble.
-What we really want to do is not to remove atoms but to find all elements that denote actions.
-The code below says what we mean:
+迷路の領域が浮き彫りにする、微妙なバグが1つあります。
+GPSには実行した動作の並びを返してほしかったのでした。
+しかし動作なしで目標が達成できる場合に備えて、GPSが返す値に `(START)` を含めていました。
+これらの例には `START` と `EXECUTING` の形のほかに、ある *n* についての (AT *n*) という形のリストも含まれています。
+これがバグです。
+関数 `GPS` に戻って見ると、`achieve-all` が返した状態からアトムをすべて取り除いて結果を報告していることが分かります。
+これは「言葉の綾」です。本当は `(START)` と `(EXECUTING *action*)` の形以外の条件をすべて取り除くつもりだったのに、アトムを取り除くと言ってしまったのです。
+これまではそうした条件がすべてアトムだったので、この方式でうまくいっていました。
+迷路の領域が (`AT` *n*) という形の条件を持ち込んだために、初めて問題が表に出ました。
+教訓は、プログラマが言葉の綾を使う — 実際に起きていることではなく、都合のよい言い方をする — と、必ず面倒が起きるということです。
+本当にやりたいのはアトムを取り除くことではなく、動作を表す要素をすべて見つけることです。
+下のコードは、その意図をそのまま述べています。
 
 ```lisp
 (defun GPS (state goals &optional (*ops* *ops*))
@@ -1035,10 +1035,10 @@ The code below says what we mean:
   (or (equal x '(start)) (executing-p x)))
 ```
 
-The domain of maze solving also points out an advantage of version 2: that it returns a representation of the actions taken rather than just printing them out.
-The reason this is an advantage is that we may want to use the results for something, rather than just look at them.
-Suppose we wanted a function that gives us a path through a maze as a list of locations to visit in turn.
-We could do this by calling GPS as a subfunction and then manipulating the results:
+迷路解きの領域はまた、第2版の利点も示しています。取った動作を表示するだけでなく、その表現を返すという点です。
+これが利点なのは、結果をただ眺めるだけでなく、何かに使いたくなるかもしれないからです。
+迷路を抜ける経路を、順に訪れる地点の並びとして返す関数が欲しいとしましょう。
+これはGPSを下位の関数として呼び、その結果を加工すれば作れます。
 
 ```lisp
 (defun find-path (start end)
@@ -1053,9 +1053,9 @@ We could do this by calling GPS as a subfunction and then manipulating the resul
   (fifth (second action)))
 ```
 
-The function `find-path` calls GPS to get the `results`.
-If this is `nil`, there is no answer, but if it is not, then take the `rest` of `results` (in other words, ignore the `(START)` part).
-Pick out the destination, `*y*,` from each `(EXECUTING (MOVE FROM x TO y))` form, and remember to include the starting point.
+関数 `find-path` はGPSを呼んで `results` を得ます。
+これが `nil` なら答えはありません。そうでなければ `results` の `rest` を取ります（つまり `(START)` の部分を無視します）。
+各 `(EXECUTING (MOVE FROM x TO y))` の形から行き先 `*y*` を取り出し、出発点も忘れずに含めます。
 
 `> (use *maze-ops*)`=> `48`
 
@@ -1069,14 +1069,14 @@ Pick out the destination, `*y*,` from each `(EXECUTING (MOVE FROM x TO y))` form
 
 `> (equal (find-path 1 25) (reverse (find-path 25 1)))`=> `T`
 
-## 4.14 The Blocks World Domain
+## 4.14 積み木の世界の領域
 
-Another domain that has attracted more than its share of attention in AI circles is the blocks world domain.
-Imagine a child's set of building blocks on a table top.
-The problem is to move the blocks from their starting configuration into some goal configuration.
-We will assume that each block can have only one other block directly on top of it, although they can be stacked to arbitrary height.
-The only action that can be taken in this world is to move a single block that has nothing on top of it either to the top of another block or onto the table that represents the block world.
-We will create an operator for each possible block move.
+AIの界隈で、その値打ち以上に注目を集めてきたもう1つの領域が、積み木の世界です。
+卓上に置かれた子ども用の積み木一式を思い描いてください。
+問題は、積み木を初めの配置から目標の配置へ動かすことです。
+各積み木の真上に置ける積み木は1つだけとしますが、積み上げる高さに制限はないものとします。
+この世界で取れる動作は、上に何も載っていない積み木を1つ、別の積み木の上か、積み木の世界を表す卓上へ動かすことだけです。
+ありうる積み木の移動それぞれに対して演算子を作ります。
 
 ```lisp
 (defun make-block-ops (blocks)
@@ -1103,8 +1103,8 @@ We will create an operator for each possible block move.
       '((.a on ,c) (space on ,b))))
 ```
 
-Now we try these operators out on some problems.
-The simplest possible problem is stacking one block on another:
+では、これらの演算子をいくつかの問題で試してみましょう。
+考えうる最も単純な問題は、積み木を1つ別の積み木の上に載せることです。
 
 <a id="diagram-04-02"></a>
 <img src="images/chapter4/diagram-04-02.svg"
@@ -1121,8 +1121,8 @@ The simplest possible problem is stacking one block on another:
   (EXECUTING (MOVE A FROM TABLE TO B)))
 ```
 
-Here is a slightly more complex problem: inverting a stack of two blocks.
-This time we show the debugging output.
+もう少し込み入った問題を示します。2つ積んだ積み木の上下を入れ替えることです。
+今回はデバッグ出力も示します。
 
 <a id="diagram-04-03"></a>
 <img src="images/chapter4/diagram-04-03.svg"
@@ -1152,9 +1152,9 @@ Action: (MOVE B FROM TABLE TO A)
 
 `> (undebug)`=> `NIL`
 
-Sometimes it matters what order you try the conjuncts in.
-For example, you can't have your cake and eat it too, but you can take a picture of your cake and eat it too, as long as you take the picture *before* eating it.
-In the blocks world, we have:
+連言の項をどの順で試すかが問題になることがあります。
+たとえばケーキを取っておきながら食べることはできませんが、写真を撮ってから食べるなら、ケーキの写真を持ちつつ食べることはできます。食べる*前*に撮りさえすれば。
+積み木の世界では次のようになります。
 
 <a id="diagram-04-04"></a>
 <img src="images/chapter4/diagram-04-04.svg"
@@ -1174,11 +1174,11 @@ In the blocks world, we have:
 NIL
 ```
 
-In the first case, the tower was built by putting B on A first, and then C on B.
-In the second case, the program gets C on B first, but clobbers that goal while getting B on A.
-The "prerequisite clobbers sibling goal" situation is recognized, but the program doesn't do anything about it.
-One thing we could do is try to vary the order of the conjunct goals.
-That is, we could change `achieve-all` as follows:
+最初の場合、塔はまずBをAの上に、次にCをBの上に置いて作られました。
+2番目の場合、プログラムはまずCをBの上に載せますが、BをAの上に載せる際にその目標を潰してしまいます。
+「前提条件が兄弟ゴールを潰す」状況は認識されますが、プログラムはそれに対して何もしません。
+できることの1つは、連言の目標の順序を変えてみることです。
+つまり `achieve-all` を次のように変えられます。
 
 ```lisp
 (defun achieve-all (state goals goal-stack)
@@ -1202,15 +1202,15 @@ That is, we could change `achieve-all` as follows:
       (list l)))
 ```
 
-Now we can represent the goal either way, and we'll still get an answer.
-Notice that we only consider two orderings: the order given and the reversed order.
-Obviously, for goal sets of one or two conjuncts this is all the orderings.
-In general, if there is only one interaction per goal set, then one of these two orders will work.
-Thus, we are assuming that "prerequisite clobbers sibling goal" interactions are rare, and that there will seldom be more than one interaction per goal set.
-Another possibility would be to consider all possible permutations of the goals, but that could take a long time with large goal sets.
+これで目標をどちらの順で表しても答えが得られます。
+考えている順序は2通りだけ — 与えられた順序と、その逆順 — であることに注目してください。
+明らかに、連言が1つか2つの目標の組なら、これで全順序を尽くしています。
+一般に、目標の組ごとに干渉が1つしかなければ、この2つの順序のどちらかでうまくいきます。
+つまり私たちは、「前提条件が兄弟ゴールを潰す」干渉はまれであり、目標の組ごとに干渉が2つ以上あることはめったにない、と仮定しているわけです。
+別の可能性として目標のあらゆる順列を考えることもできますが、目標の組が大きいと長い時間がかかりかねません。
 
-Another consideration is the efficiency of solutions.
-Consider the simple task of getting block C on the table in the following diagram:
+もう1つ考えるべきは、解の効率です。
+次の図で、積み木Cを卓上に置くという単純な課題を考えてみましょう。
 
 <a id="diagram-04-05"></a>
 <img src="images/chapter4/diagram-04-05.svg"
@@ -1226,11 +1226,11 @@ Consider the simple task of getting block C on the table in the following diagra
   (EXECUTING (MOVE C FROM B TO TABLE)))
 ```
 
-The solution is correct, but there is an easier solution that moves C directly to the table.
-The simpler solution was not found because of an accident: it happens that `make-block-ops` defines the operators so that moving C from B to the table comes before moving C from A to the table.
-So the first operator is tried, and it succeeds provided C is on B.
-Thus, the two-step solution is found before the one-step solution is ever considered.
-The following example takes four steps when it could be done in two:
+この解は正しいのですが、Cを直に卓上へ動かす、もっと楽な解があります。
+単純なほうの解が見つからなかったのは偶然のせいです。`make-block-ops` はたまたま、CをBから卓上へ動かす演算子が、CをAから卓上へ動かす演算子より先に来るように定義しているのです。
+ですから最初の演算子が試され、CがBの上にあればそれが成功します。
+こうして、1手の解が検討される前に2手の解が見つかってしまいます。
+次の例は2手で済むところを4手かけています。
 
 <a id="diagram-04-06"></a>
 <img src="images/chapter4/diagram-04-06.svg"
@@ -1248,12 +1248,12 @@ The following example takes four steps when it could be done in two:
   (EXECUTING (MOVE A FROM C TO B)))
 ```
 
-How could we find shorter solutions?
-One way would be to do a full-fledged search: shorter solutions are tried first, temporarily abandoned when something else looks more promising, and then reconsidered later on.
-This approach is taken up in [chapter 6](chapter6.md), using a general searching function.
-A less drastic solution is to do a limited rearrangement of the order in which operators are searched: the ones with fewer unfulfilled preconditions are tried first.
-In particular, this means that operators with all preconditions filled would always be tried before other operators.
-To implement this approach, we change `achieve`:
+どうすればもっと短い解を見つけられるでしょうか。
+1つの方法は本格的な探索を行うことです。短い解をまず試し、他がより有望に見えたら一時的に捨て置き、あとで改めて検討します。
+この方式は[第6章](chapter6.md)で、汎用の探索関数を使って取り上げます。
+もっと穏やかな解決は、演算子を探す順序を限定的に組み替えることです。未達の事前条件が少ないものを先に試します。
+とくに、事前条件がすべて満たされている演算子は常に他より先に試されることになります。
+この方式を実装するには `achieve` を変えます。
 
 ```lisp
 (defun achieve (state goal goal-stack)
@@ -1275,7 +1275,7 @@ To implement this approach, we change `achieve`:
             (op-preconds op)))))
 ```
 
-Now we get the solutions we wanted:
+これで望んだ解が得られます。
 
 <!-- 4.7 is a copy of 4.6 -->
 <a id="diagram-04-07"></a>
@@ -1313,17 +1313,17 @@ Now we get the solutions we wanted:
   (EXECUTING (MOVE C FROM TABLE TO B)))
 ```
 
-### The Sussman Anomaly
+### サスマン・アノマリー
 
-Surprisingly, there are problems that can't be solved by *any* reordering of goals.
-Consider:
+驚いたことに、目標を*どう*並べ替えても解けない問題があります。
+次を見てください。
 
 <a id="diagram-04-09"></a>
 <img src="images/chapter4/diagram-04-09.svg"
   onerror="this.src='images/chapter4/diagram-04-09.png'; this.onerror=null;"
   alt="Diagram 4.9" />
 
-This doesn't look too hard, so let's see how our GPS handles it:
+それほど難しそうには見えないので、私たちのGPSがどう扱うか見てみましょう。
 
 ```lisp
 > (setf start '((c on a) (a on table) (b on table) (space on c)
@@ -1336,25 +1336,25 @@ This doesn't look too hard, so let's see how our GPS handles it:
 > (gps start '((b on c) (a on b))) => NIL
 ```
 
-There is a "prerequisite clobbers sibling goal" problem regardless of which way we order the conjuncts!
-In other words, no combination of plans for the two individual goals can solve the conjunction of the two goals.
-This is a surprising fact, and the example has come to be known as "the Sussman anomaly."<a id="tfn04-4"></a><sup>[4](#fn04-4)</sup>
-We will return to this problem in [chapter 6](chapter6.md).
+連言の項をどちらの順に並べても、「前提条件が兄弟ゴールを潰す」問題が起きてしまいます。
+言い換えれば、2つの個別の目標それぞれの計画をどう組み合わせても、2つの目標の連言は解けないのです。
+これは驚くべき事実であり、この例は「サスマン・アノマリー」として知られるようになりました。<a id="tfn04-4"></a><sup>[4](#fn04-4)</sup>
+この問題には[第6章](chapter6.md)で立ち戻ります。
 
-## 4.15 Stage 5 Repeated: Analysis of Version 2
+## 4.15 第5段階ふたたび: 第2版の分析
 
-We have shown that GPS is extensible to multiple domains.
-The main point is that we didn't need to change the program itself to get the new domains to work; we just changed the list of operators passed to GPS.
-Experience in different domains did suggest changes that could be made, and we showed how to incorporate a few changes.
-Although version 2 is a big improvement over version 1, it still leaves much to be desired.
-Now we will discover a few of the most troubling problems.
+GPSが複数の領域へ広げられることを示してきました。
+要点は、新しい領域を動かすのにプログラム自体を変える必要がなかったことです。GPSに渡す演算子の並びを変えただけです。
+異なる領域での経験は、加えうる変更をいくつか示唆してくれました。そのうち少数を取り込む方法も示しました。
+第2版は第1版より大きく進歩していますが、なお望ましい点が多く残っています。
+ここからは、最も厄介な問題をいくつか見ていきます。
 
-## 4.16 The Not Looking after You Don't Leap Problem
+## 4.16 跳ばなかったあとで見ない問題
 
-We solved the "leaping before you look" problem by introducing variables to hold a representation of possible future states, rather than just a single variable representing the current state.
-This prevents GPS from taking an ill-advised action, but we shall see that even with all the repair strategies introduced in the last section, it doesn't guarantee that a solution will be found whenever one is possible.
+「見る前に跳ぶ」問題は、現在の状態を表すただ1つの変数ではなく、ありうる将来の状態の表現を保持する変数を導入することで解きました。
+これでGPSが軽率な動作を取ることは防げますが、前節で導入した立て直しの手立てをすべて備えても、解が存在するときに必ず見つかると保証されるわけではないことを、これから見ます。
 
-To see the problem, add another operator to the front of the `*school-ops*` list and turn the debugging output back on:
+問題を見るために、`*school-ops*` の並びの先頭に演算子をもう1つ加え、デバッグ出力を再び入にします。
 
 ```lisp
 (use (push (op 'taxi-son-to-school
@@ -1365,7 +1365,7 @@ To see the problem, add another operator to the front of the `*school-ops*` list
 (debug :gps)
 ```
 
-Now, consider the problem of getting the child to school without using any money:
+では、金を使わずに子どもを学校へ送るという問題を考えましょう。
 
 ```lisp
 > (gps '(son-at-home have-money car-works)
@@ -1385,37 +1385,37 @@ Action: TAXI-SON-TO-SCHOOL
 NIL
 ```
 
-The first five lines of output successfully solve the `son-at-school` goal with the `TAXI-SON-TO-SCHOOL` action.
-The next line shows an unsuccessful attempt to solve the `have-money` goal.
-The next step is to try the other ordering.
-This time, the `have-money` goal is tried first, and succeeds.
-Then, the `son-at-school` goal is achieved again by the `TAXI-SON-TO-SCHOOL` action.
-But the check for consistency in `achieve-each` fails, and there are no repairs available.
-The goal fails, even though there is a valid solution: driving to school.
+出力の最初の5行は、`TAXI-SON-TO-SCHOOL` の動作で `son-at-school` の目標をうまく解いています。
+次の行は、`have-money` の目標を解こうとして失敗したことを示しています。
+次の段階は、もう一方の順序を試すことです。
+今度は `have-money` の目標が先に試され、成功します。
+そして `son-at-school` の目標が再び `TAXI-SON-TO-SCHOOL` の動作で達成されます。
+しかし `achieve-each` における整合性の検査が失敗し、立て直しの手立てもありません。
+学校まで車で送るという正当な解があるにもかかわらず、目標は失敗します。
 
-The problem is that `achieve` uses `some` to look at the `appropriate-ops`.
-Thus, if there is some appropriate operator, `achieve` succeeds.
-If there is only one goal, this will yield a correct solution.
-However, if there are multiple goals, as in this case, achieve will still only find one way to fulfil the first goal.
-If the first solution is a bad one, the only recourse is to try to repair it.
-In domains like the block world and maze world, repair often works, because all steps are reversible.
-But in the taxi example, no amount of plan repair can get the money back once it is spent, so the whole plan fails.
+問題は、`achieve` が `appropriate-ops` を見るのに `some` を使っていることです。
+ですから適切な演算子が1つでもあれば、`achieve` は成功します。
+目標が1つだけなら、これで正しい解が得られます。
+しかしこの場合のように目標が複数あると、achieve は最初の目標を満たす方法を1つ見つけるだけで終わってしまいます。
+最初の解が悪いものだった場合、頼れるのはそれを立て直すことだけです。
+積み木の世界や迷路の世界のような領域では、どの手も後戻りできるので立て直しはたいていうまくいきます。
+しかしタクシーの例では、いったん使った金はどれだけ計画を立て直しても戻ってこないので、計画全体が失敗します。
 
-There are two ways around this problem.
-The first approach is to examine all possible solutions, not just the first solution that achieves each subgoal.
-The language Prolog, to be discussed in [chapter 11](chapter11.md), does just that.
-The second approach is to have achieve and `achieve-all` keep track of a list of goals that must be *protected*.
-In the taxi example, we would trivially achieve the `have-money` goal and then try to achieve `son-at-school`, while protecting the goal `have-money`.
-An operator would only be appropriate if it didn't delete any protected goals.
-This approach still requires some kind of repair or search through multiple solution paths.
-If we tried only one ordering-achieving `son-at-school` and then trying to protect it while achieving `have-money`-then we would not find the solution.
-David Warren's WARPLAN planner makes good use of the idea of protected goals.
+この問題を回避する方法は2つあります。
+第一の方式は、各部分ゴールを達成する最初の解だけでなく、ありうる解をすべて調べることです。
+[第11章](chapter11.md)で論じるProlog言語がまさにそれを行います。
+第二の方式は、achieve と `achieve-all` に、*保護*せねばならない目標の並びを持ち回らせることです。
+タクシーの例なら、`have-money` の目標を自明に達成したうえで、`have-money` を保護しながら `son-at-school` の達成を試みることになります。
+演算子が適切とされるのは、保護された目標を1つも消さない場合にかぎられます。
+この方式でも、なお何らかの立て直しか、複数の解の道筋の探索が必要です。
+順序を1通りしか試さなければ — `son-at-school` を達成し、それを保護しながら `have-money` を達成しようとするだけなら — 解は見つかりません。
+David WarrenのWARPLANプランナは、保護された目標という考えをうまく活かしています。
 
-## 4.17 The Lack of Descriptive Power Problem
+## 4.17 記述力が足りない問題
 
-It would be a lot more economical, in the maze domain, to have one operator that says we can move from here to there if we are at "here," and if there is a connection from "here" to "there." Then the input to a particular problem could list the valid connections, and we could solve any maze with this single operator.
-Similarly, we have defined an operator where the monkey pushes the chair from the door to the middle of the room, but it would be better to have an operator where the monkey can push the chair from wherever it is to any other nearby location, or better yet, an operator to push any "pushable" object from one location to a nearby one, as long as there is no intervening obstacle.
-The conclusion is that we would like to have variables in the operators, so we could say something like:
+迷路の領域では、「ここ」にいて、「ここ」から「そこ」へ接続があるなら「ここ」から「そこ」へ動ける、と述べる演算子が1つあれば、ずっと経済的でしょう。そうすれば個々の問題の入力として正当な接続を並べるだけで、どんな迷路もこの1つの演算子で解けます。
+同様に、サルが椅子を戸口から部屋の中央へ押す演算子を定義しましたが、サルが椅子をどこからでも近くの別の場所へ押せる演算子のほうがよいでしょうし、さらに言えば、間に障害物がないかぎり「押せる」物体をどれでもある場所から近くの場所へ押す演算子ならもっとよいでしょう。
+結論として、演算子の中に変数を持てるようにしたい、ということです。そうすれば次のように書けます。
 
 ```lisp
 (op
@@ -1425,143 +1425,143 @@ The conclusion is that we would like to have variables in the operators, so we c
   :del-list '((monkey at A) (X at A)))
 ```
 
-Often we want to characterize a state in terms of something more abstract than a list of conditions.
-For example, in solving a chess problem, the goal is to have the opponent in checkmate, a situation that cannot be economically described in terms of primitives like `(black king on A 4)`, so we need to be able to state some kind of constraint on the goal state, rather than just listing its components.
-We might want to be able to achieve a disjunction or negation of conditions, where the current formalism allows only a conjunction.
+状態を、条件の並びよりも抽象的な何かで特徴づけたいこともよくあります。
+たとえばチェスの問題を解くとき、目標は相手を詰みにすることですが、これは `(black king on A 4)` のような基本要素では経済的に記述できません。ですから目標状態の構成要素をただ並べるのではなく、何らかの制約として述べられる必要があります。
+条件の選言や否定を達成したいこともあるでしょうが、いまの枠組みが許すのは連言だけです。
 
-It also is important, in many domains, to be able to state problems dealing with time: we want to achieve *X* before time *T*<sub>0</sub>, and then achieve *Y* before time *T*<sub>2</sub>, but not before *T*<sub>1</sub>.
-Scheduling work on a factory floor or building a house are examples of planning where time plays an important role.
+多くの領域では、時間を扱う問題を述べられることも重要です。時刻 *T*<sub>0</sub> より前に *X* を達成し、次に *T*<sub>2</sub> より前、ただし *T*<sub>1</sub> より後に *Y* を達成したい、といった具合です。
+工場の作業日程を組むことや家を建てることは、時間が重要な役目を果たす計画立案の例です。
 
-Often there are costs associated with actions, and we want to find a solution with minimal, or near-minimal costs.
-The cost might be as simple as the number of operators required for a solution-we saw in the blocks world domain that sometimes an operator that could be applied immediately was ignored, and an operator that needed several preconditions satisfied was chosen instead.
-Or we may be satisfied with a partial solution, if a complete solution is impossible or too expensive.
-We may also want to take the cost (and time) of computation into account.
+動作に費用が伴い、費用が最小かそれに近い解を見つけたいこともよくあります。
+費用は、解に要する演算子の数という単純なものかもしれません。積み木の世界では、すぐ適用できる演算子が無視され、事前条件をいくつも満たす必要のある演算子が代わりに選ばれることがあるのを見ました。
+あるいは完全な解が不可能だったり高くつきすぎたりするなら、部分的な解で満足することもあるでしょう。
+計算そのものの費用（と時間）も勘定に入れたいかもしれません。
 
-## 4.18 The Perfect Information Problem
+## 4.18 完全情報の問題
 
-All the operators we have seen so far have unambiguous results; they add or delete certain things from the current state, and GPS always knows exactly what they are going to do.
-In the real world, things are rarely so cut and dried.
-Going back to the problem of becoming rich, one relevant operator would be playing the lottery.
-This operator has the effect of consuming a few dollars, and once in a while paying off a large sum.
-But we have no way to represent a payoff "once in a while." Similarly, we have no way to represent unexpected difficulties of any kind.
-In the nursery school problem, we could represent the problem with the car battery by having GPS explicitly check to see if the car was working, or if it needed a battery, every time the program considered the driving operator.
-In the real world, we are seldom this careful; we get in the car, and only when it doesn't start do we consider the possibility of a dead battery.
+ここまで見た演算子はどれも曖昧さのない結果を持ちます。現在の状態に何かを加えるか取り除くかであり、GPSはそれが何をするかを常に正確に知っています。
+現実の世界では、ものごとがこれほど割り切れていることはめったにありません。
+裕福になるという問題に戻ると、関わりのある演算子の1つは宝くじを買うことでしょう。
+この演算子は数ドルを費やし、ごくたまに大金をもたらすという効果を持ちます。
+しかし「ごくたまに」という当たりを表す手立てがありません。同様に、どんな種類の予期せぬ困難も表せません。
+保育園の問題では、運転の演算子を検討するたびに、車が動くか、バッテリーが要るかをGPSに明示的に調べさせることで、バッテリーの問題を表せました。
+現実の世界で私たちはこれほど用心深くありません。車に乗り込み、動かなかったときに初めてバッテリー切れの可能性を考えるのです。
 
-## 4.19 The Interacting Goals Problem
+## 4.19 ゴールが干渉しあう問題
 
-People tend to have multiple goals, rather than working on one at a time.
-Not only do I want to get the kid to nursery school, but I want to avoid getting hit by another car, get to my job on time, get my work done, meet my friends, have some fun, continue breathing, and so on.
-I also have to discover goals on my own, rather than work on a set of predefined goals passed to me by someone else.
-Some goals I can keep in the background for years, and then work on them when the opportunity presents itself.
-There is never a notion of satisfying all possible goals.
-Rather, there is a continual process of achieving some goals, partially achieving others, and deferring or abandoning still others.
+人は1つずつ目標に取り組むのではなく、複数の目標を抱えているのが常です。
+子どもを保育園に送りたいだけでなく、他の車にぶつけられるのを避け、仕事に遅れず着き、仕事を片づけ、友人に会い、多少は楽しみ、呼吸を続け……といった具合です。
+また私は、誰かから渡された既定の目標の組に取り組むのではなく、自分で目標を見出さねばなりません。
+何年も背景に置いたままにして、機会が訪れたときに取り組む目標もあります。
+ありうる目標をすべて満たすという考えは、そもそも存在しません。
+あるのはむしろ、ある目標は達成し、別の目標は部分的に達成し、さらに別の目標は先送りするか捨てる、という絶え間ない営みです。
 
-In addition to having active goals, people also are aware of undesirable situations that they are trying to avoid.
-For example, suppose I have a goal of visiting a friend in the hospital.
-This requires being at the hospital.
-One applicable operator might be to walk to the hospital, while another would be to severely injure myself and wait for the ambulance to take me there.
-The second operator achieves the goal just as well (perhaps faster), but it has an undesirable side effect.
-This could be addressed either with a notion of solution cost, as outlined in the last section, or with a list of background goals that every solution attempts to protect.
+人は活きた目標を持つだけでなく、避けようとしている望ましくない状況も意識しています。
+たとえば、入院中の友人を見舞うという目標があるとしましょう。
+これには病院にいることが必要です。
+適用できる演算子の1つは病院まで歩くことですが、もう1つは自分に重傷を負わせて救急車で運んでもらうのを待つことでしょう。
+2つ目の演算子も同じように（おそらくもっと速く）目標を達成しますが、望ましくない副作用があります。
+これは、前節で述べた解の費用という考えか、どの解も保護しようとする背景の目標の並びによって扱えるでしょう。
 
-Herb Simon coined the term "satisficing" to describe the strategy of satisfying a reasonable number of goals to a reasonable degree, while abandoning or postponing other goals.
-GPS only knows success and failure, and thus has no way of maximizing partial success.
+Herb Simonは、他の目標を捨てたり先送りしたりしつつ、それなりの数の目標をそれなりの程度まで満たすという方針を表すために、「満足化（satisficing）」という語を造りました。
+GPSは成功と失敗しか知らないので、部分的な成功を最大化する手立てを持ちません。
 
-## 4.20 The End of GPS
+## 4.20 GPSの終わり
 
-These last four sections give a hint as to the scope of the limitations of GPS.
-In fact, it is not a very general problem solver at all.
-It *is* general in the sense that the algorithm is not tied to a particular domain; we can change domain by changing the operators.
-But GPS fails to be general in that it can't solve many interesting problems.
-It is confined to small tricks and games.
+ここまでの4節は、GPSの限界がどれほどの広がりを持つかを示唆しています。
+実のところ、これはまったく汎用の問題解決器などではありません。
+アルゴリズムが特定の領域に縛られていないという意味では汎用*です*。演算子を変えれば領域を変えられます。
+しかしGPSは、面白い問題の多くを解けないという点で汎用たりえていません。
+扱えるのはちょっとした細工と遊戯にとどまります。
 
-There is an important yet subtle reason why GPS was destined to fail, a reason that was not widely appreciated in 1957 but now is at the core of computer science.
-It is now recognized that there are problems that computers can't solve-not because a theoretically correct program can't be written, but because the execution of the program will take too long.
-A large number of problems can be shown to fall into the class of "NP-hard" problems.
-Computing a solution to these problems takes time that grows exponentially as the size of the problem grows.
-This is a property of the problems themselves, and holds no matter how clever the programmer is.
-Exponential growth means that problems that can be solved in seconds for, say, a five-input case may take trillions of years when there are 100 inputs.
-Buying a faster computer won't help much.
-After all, if a problem would take a trillion years to solve on your computer, it won't help much to buy 1000 computers each 1000 times faster than the one you have: you're still left with a million years wait.
-For a theoretical computer scientist, discovering that a problem is NP-hard is an end in itself.
-But for an AI worker, it means that the wrong question is being asked.
-Many problems are NP-hard when we insist on the optimal solution but are much easier when we accept a solution that might not be the best.
+GPSが失敗する運命にあったのには、重要でありながら見えにくい理由があります。1957年には広く理解されていなかったけれども、今では計算機科学の中核をなす理由です。
+計算機に解けない問題があることは、今では認められています。理論上正しいプログラムが書けないからではなく、その実行に時間がかかりすぎるからです。
+多くの問題が「NP困難」と呼ばれる種類に属することが示せます。
+これらの問題の解を計算するには、問題の大きさが増すにつれて指数的に増える時間がかかります。
+これは問題そのものの性質であり、プログラマがどれほど賢くても変わりません。
+指数的に増えるとは、たとえば入力が5つなら数秒で解ける問題が、100入力では何兆年もかかりうるということです。
+速い計算機を買ってもたいして助けにはなりません。
+手元の計算機で1兆年かかる問題なら、1000倍速い計算機を1000台買ったところでどうにもなりません。なお100万年待つことになるのです。
+理論計算機科学者にとって、問題がNP困難だと分かることはそれ自体が目的です。
+しかしAIに携わる者にとっては、間違った問いを立てているという意味になります。
+多くの問題は、最適解を求めればNP困難ですが、最良でないかもしれない解を受け入れればずっと易しくなります。
 
-The input to `GPS` is essentially a program, and the execution of GPS is the execution of that program.
-If GPS's input language is general enough to express any program, then there will be problems that can't be solved, either because they take too long to execute or because they have no solution.
-Modern problem-solving programs recognize this fundamental limitation, and either limit the class of problems they try to solve or consider ways of finding approximate or partial solutions.
-Some problem solvers also monitor their own execution time and know enough to give up when a problem is too hard.
+`GPS` への入力は本質的にプログラムであり、GPSの実行とはそのプログラムの実行です。
+GPSの入力言語がどんなプログラムも表せるほど汎用なら、実行に時間がかかりすぎるか、そもそも解がないかで、解けない問題が生じます。
+現代の問題解決プログラムはこの根本的な限界を認め、解こうとする問題の種類を限るか、近似解や部分解を見つける方法を考えるかしています。
+自らの実行時間を見張り、問題が難しすぎるときには見切りをつける分別を備えた問題解決器もあります。
 
-The following quote from Drew McDermott's article "Artificial Intelligence Meets Natural Stupidity" sums up the current feeling about GPS.
-Keep it in mind the next time you have to name a program.
+Drew McDermottの論文「Artificial Intelligence Meets Natural Stupidity」からの次の引用は、GPSについての現在の受け止め方をよく言い表しています。
+次にプログラムに名前を付けるときには、心に留めておいてください。
 
-> *Remember GPS?
-By now, "GPS" is a colorless term denoting a particularly stupid program to solve puzzles.
-But it originally meant "General Problem Solver " which caused everybody a lot of needless excitement and distraction.
-It should have been called *lfgns *-"Local Feature-Guided Network Searcher."*
+> *GPSを覚えているだろうか。
+いまや「GPS」は、パズルを解くとりわけ愚かなプログラムを指す、色あせた言葉である。
+しかしもとは「汎用問題解決器（General Problem Solver）」の意であり、それが皆に多くの無用な興奮と気の散りをもたらした。
+*lfgns* — 「局所特徴に導かれたネットワーク探索器（Local Feature-Guided Network Searcher）」とでも呼ぶべきだったのだ。*
 
-Nonetheless, GPS has been a useful vehicle for exploring programming in general, and AI programming in particular.
-More importantly, it has been a useful vehicle for exploring "the nature of deliberation." Surely we'll admit that Aristotle was a smarter person than you or me, yet with the aid of the computational model of mind as a guiding metaphor, and the further aid of a working computer program to help explore the metaphor, we have been led to a more thorough appreciation of means-ends analysis-at least within the computational model.
-We must resist the temptation to believe that all thinking follows this model.
+それでもGPSは、プログラミング一般、とりわけAIプログラミングを探るための有用な乗り物でした。
+さらに重要なのは、「思案の本性」を探るための有用な乗り物でもあったことです。アリストテレスが私やあなたより賢い人であったことは認めるとして、それでも心の計算モデルという導きの比喩と、その比喩を探る助けとなる実際に動くプログラムのおかげで、私たちは手段目標分析をより深く理解するに至りました — 少なくとも計算モデルの内側においては。
+あらゆる思考がこのモデルに従うと信じたくなる誘惑には、抗わねばなりません。
 
-The appeal of AI can be seen as a split between means and ends.
-The end of a successful AI project can be a program that accomplishes some useful task better, faster, or cheaper than it could be before.
-By that measure, GPS is a mostly a failure, as it doesn't solve many problems particularly well.
-But the means toward that end involved an investigation and formalization of the problem-solving process.
-By that measure, our reconstruction of GPS is a success to the degree in which it leads the reader to a better understanding of the issues.
+AIの魅力は、手段と目的の分裂として捉えられます。
+AIの計画が成功したときの目的は、有用な仕事を以前よりうまく、速く、安く成し遂げるプログラムでありえます。
+その尺度で言えば、GPSはおおむね失敗です。多くの問題をとりわけうまく解くわけではないのですから。
+しかしその目的への手段には、問題解決の過程の探究と形式化が含まれていました。
+その尺度で言えば、私たちのGPSの再構成は、読者を諸問題のより深い理解へ導いた分だけ成功なのです。
 
-## 4.21 History and References
+## 4.21 歴史と参考文献
 
-The original GPS is documented in Newell and Simon's 1963 paper and in their 1972 book, *Human Problem Solving*, as well as in Ernst and Newell 1969.
-The implementation in this chapter is based on the Strips program (Fikes and Nilsson 1971).
+元のGPSは、NewellとSimonの1963年の論文と1972年の著書 *Human Problem Solving*、そして Ernst and Newell 1969 に記録されています。
+本章の実装はStripsプログラム（Fikes and Nilsson 1971）に基づいています。
 
-There are other important planning programs.
-Earl Sacerdoti's Abstrips program was a modification of Strips that allowed for hierarchical planning.
-The idea was to sketch out a skeletal plan that solved the entire program at an abstract level, and then fill in the details.
-David Warren's Warplan planner is covered in Warren 1974a,b and in a section of Coelho and Cotta 1988.
-Austin Tate's Nonlin system (Tate 1977) achieved greater efficiency by considering a plan as a partially ordered sequence of operations rather than as a strictly ordered sequence of situations.
-David Chapman's Tweak synthesizes and formalizes the state of the art in planning as of 1987.
+重要な計画立案プログラムは他にもあります。
+Earl SacerdotiのAbstripsはStripsを改変したもので、階層的な計画立案を可能にしました。
+抽象的な水準で問題全体を解く骨組みの計画をまず描き、それから細部を埋めるという考えです。
+David WarrenのWarplanは Warren 1974a,b と Coelho and Cotta 1988 の一節で扱われています。
+Austin TateのNonlin（Tate 1977）は、計画を厳密に順序づけられた状況の列ではなく、部分的に順序づけられた操作の列とみなすことで、より高い効率を実現しました。
+David ChapmanのTweakは、1987年時点での計画立案の最先端を総合し形式化したものです。
 
-All of these papers-and quite a few other important planning papers-are reprinted in Allen, Hendler, and Tate 1990.
+これらの論文は — 他の重要な計画立案の論文も数多く — Allen, Hendler, and Tate 1990 に再録されています。
 
-## 4.22 Exercises
+## 4.22 練習問題
 
-**Exercise  4.1 [m]** It is possible to implement dbg using a single call to format.
-Can you figure out the format directives to do this?
+**練習問題 4.1 [m]** dbg は format の呼び出し1回で実装できる。
+そのための書式指示子が分かるか。
 
-**Exercise  4.2 [m]** Write a function that generates all permutations of its input.
+**練習問題 4.2 [m]** 入力のあらゆる順列を生成する関数を書け。
 
-**Exercise  4.3 [h]** GPS does not recognize the situation where a goal is accidentally solved as part of achieving another goal.
-Consider the goal of eating dessert.
-Assume that there are two operators available: eating ice cream (which requires having the ice cream) and eating cake (which requires having the cake).
-Assume that we can buy a cake, and that the bakery has a deal where it gives out free ice cream to each customer who purchases and eats a cake.
-(1) Design a list of operators to represent this situation.
-(2) Give gps the goal of eating dessert.
-Show that, with the right list of operators, `gps` will decide to eat ice cream, then decide to buy and eat the cake in order to get the free ice cream, and then go ahead and eat the ice cream, even though the goal of eating dessert has already been achieved by eating the cake.
-(3) Fix gps so that it does not manifest this problem.
+**練習問題 4.3 [h]** GPSは、ある目標を達成する過程で別の目標が偶然に解けてしまう状況を認識できない。
+デザートを食べるという目標を考えよ。
+演算子は2つ使えるものとする。アイスクリームを食べる（アイスクリームを持っていることが必要）と、ケーキを食べる（ケーキを持っていることが必要）である。
+ケーキは買えるものとし、その店ではケーキを買って食べた客にアイスクリームを無料で配る催しをしているものとする。
+(1) この状況を表す演算子の並びを設計せよ。
+(2) gps にデザートを食べるという目標を与えよ。
+適切な演算子の並びのもとでは、`gps` がアイスクリームを食べると決め、次に無料のアイスクリームを得るためにケーキを買って食べると決め、そしてケーキを食べた時点でデザートを食べるという目標がすでに達成されているにもかかわらず、そのままアイスクリームを食べてしまうことを示せ。
+(3) この問題が現れないよう gps を直せ。
 
-The following exercises address the problems in version 2 of the program.
+以下の問題は、プログラム第2版の諸問題を扱う。
 
-**Exercise  4.4 [h]** *The Not Looking after You Don't Leap Problem*.
-Write a program that keeps track of the remaining goals so that it does not get stuck considering only one possible operation when others will eventually lead to the goal.
-Hint: have achieve take an extra argument indicating the goals that remain to be achieved after the current goal is achieved.
-`achieve` should succeed only if it can achieve the current goal and also `achieve-all` the remaining goals.
+**練習問題 4.4 [h]** *跳ばなかったあとで見ない問題*。
+残りの目標を持ち回ることで、他の操作がいずれ目標に至るのに1つの操作しか考えずに行き詰まる、ということのないプログラムを書け。
+手がかり: achieve に、現在の目標を達成したあとに残る目標を示す引数を1つ加えよ。
+`achieve` は、現在の目標を達成でき、かつ残りの目標も `achieve-all` できる場合にかぎり成功すべきである。
 
-**Exercise  4.5 [d]** Write a planning program that, like Warren's Warplan, keeps track of the list of goals that remain to be done as well as the list of goals that have been achieved and should not be undone.
-The program should never undo a goal that has been achieved, but it should allow for the possibility of reordering steps that have already been taken.
-In this way, the program will solve the Sussman anomaly and similar problems.
+**練習問題 4.5 [d]** WarrenのWarplanのように、これから達成すべき目標の並びと、すでに達成されて取り消してはならない目標の並びの両方を持ち回る計画立案プログラムを書け。
+達成済みの目標を決して取り消さない一方で、すでに取った手順を並べ替える可能性は許すこと。
+こうすればサスマン・アノマリーや類似の問題を解けるようになる。
 
-**Exercise  4.6 [d]** *The Lack of Descriptive Power Problem*.
-Read [chapters 5](chapter5.md) and [6](chapter6.md) to learn about pattern matching.
-Write a version of GPS that uses the pattern matching tools, and thus allows variables in the operators.
-Apply it to the maze and blocks world domains.
-Your program will be more efficient if, like Chapman's Tweak program, you allow for the possibility of variables that remain unbound as long as possible.
+**練習問題 4.6 [d]** *記述力が足りない問題*。
+パターン照合について学ぶため [第5章](chapter5.md) と [第6章](chapter6.md) を読め。
+パターン照合の道具を使い、演算子に変数を許すGPSを書け。
+それを迷路と積み木の世界の領域に適用せよ。
+ChapmanのTweakのように、変数をできるだけ長く未束縛のままにしておく余地を残せば、プログラムはより効率的になる。
 
-**Exercise  4.7 [d]** Speculate on the design of a planner that can address the *Perfect Information* and *Interacting Goals* problems.
+**練習問題 4.7 [d]** *完全情報*の問題と*ゴールが干渉しあう*問題に対処できる計画立案器の設計を構想せよ。
 
-## 4.23 Answers
+## 4.23 解答
 
-**Answer 4.1** In this version, the format string `"~&~V@T~?"` breaks down as follows: `"~&"` means go to a fresh line; `"~V@T"` means insert spaces `(@T)` but use the next argument `(V)` to get the number of spaces.
-The `"~?"` is the indirection operator: use the next argument as a format string, and the argument following that as the list of arguments for the format string.
+**解答 4.1** この版では、書式文字列 `"~&~V@T~?"` は次のように分解できる。`"~&"` は新しい行へ移ることを意味し、`"~V@T"` は空白を挿入する `(@T)` が、その個数は次の引数 `(V)` から取ることを意味する。
+`"~?"` は間接指定の演算子で、次の引数を書式文字列として使い、そのさらに次の引数をその書式文字列への引数の並びとして使う。
 
 ```lisp
 (defun dbg-indent (id indent format-string &rest args)
@@ -1570,8 +1570,8 @@ The `"~?"` is the indirection operator: use the next argument as a format string
     (format *debug-io* "~&~V@T~?" (* 2 indent) format-string args)))
 ```
 
-**Answer 4.2** Here is one solution.
-The sophisticated Lisp programmer should also see the exercise on [page 680](chapter19.md#p680).
+**解答 4.2** 解の1つを示す。
+熟達したLispプログラマは [680ページ](chapter19.md#p680) の練習問題も参照されたい。
 
 ```lisp
 (defun permutations (bag)
@@ -1594,15 +1594,15 @@ The sophisticated Lisp programmer should also see the exercise on [page 680](cha
 ----------------------
 
 <a id="fn04-1"></a><sup>[1](#tfn04-1)</sup>
-Strips is the Stanford Research Institute Problem Solver, designed by [Richard Fikes and Nils Nilsson (1971)](bibliography.md#bb0405).
+Stripsは Stanford Research Institute Problem Solver の略で、[Richard Fikes と Nils Nilsson（1971）](bibliography.md#bb0405) が設計しました。
 
 <a id="fn04-2"></a><sup>[2](#tfn04-2)</sup>
-Gerald Sussman, in his book *A Computer Model of Skill Acquisition,* uses the term "prerequisite clobbers brother goal" or PCBG.
-I prefer to be gender neutral, even at the risk of being labeled a historical revisionist.
+Gerald Sussmanは著書 *A Computer Model of Skill Acquisition* で、「prerequisite clobbers brother goal（前提条件が兄弟＝brotherゴールを潰す）」、略してPCBGという語を使っています。
+私は、歴史修正主義者のそしりを受ける危険を冒してでも、性別に中立な言い方を選びます。
 
 <a id="fn04-3"></a><sup>[3](#tfn04-3)</sup>
-Originally posed by [Saul Amarel (1968)](bibliography.md#bb0045).
+もとは [Saul Amarel（1968）](bibliography.md#bb0045) が提起したものです。
 
 <a id="fn04-4"></a><sup>[4](#tfn04-4)</sup>
-A footnote in Waldinger 1977 says, "This problem was proposed by Allen Brown.
-Perhaps many children thought of it earlier but did not recognize that it was hard." The problem is named after Gerald Sussman because he popularized it in Sussman 1973.
+Waldinger 1977 の脚注にはこうあります。「この問題はAllen Brownが提起した。
+おそらく多くの子どもがもっと前に思いついていただろうが、それが難問だとは気づかなかったのだ。」この問題にGerald Sussmanの名が冠されているのは、彼が Sussman 1973 で広めたからです。

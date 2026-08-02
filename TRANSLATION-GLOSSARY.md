@@ -183,6 +183,30 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | universe of discourse | 論議領域 | 集合をビット列で表す文脈 |
 | programming idiom / cliche | プログラミングの慣用句／決まり文句 | |
 
+### 第4章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| General Problem Solver (GPS) | 汎用問題解決器（GPS） | 略称GPSは訳さない |
+| means-ends analysis | 手段目標分析 | GPSの中核。定訳 |
+| operator | 演算子 | GPSの動作単位 |
+| precondition | 事前条件 | |
+| add-list / delete-list | 追加リスト／削除リスト | |
+| goal / subgoal | 目標／部分ゴール | 見出しでは「ゴール」も使う |
+| goal stack | 目標のスタック | |
+| prerequisite clobbers sibling goal | 前提条件が兄弟ゴールを潰す | 原著が引用符付きの決まり文句として繰り返す |
+| leaping before you look | 見る前に跳ぶ | |
+| recursive subgoal | 部分ゴールが再帰する | |
+| semipredicate | 半述語 | 失敗時にnil、成功時に有用な値を返す関数 |
+| protected goal | 保護された目標 | WarplanのWarren由来 |
+| blocks world | 積み木の世界 | |
+| Sussman anomaly | サスマン・アノマリー | 固有名詞として音写 |
+| conjunct | 連言の項 | |
+| satisficing | 満足化 | Simonの造語。原語を併記 |
+| NP-hard | NP困難 | |
+| planner | 計画立案器／プランナ | 製品名は「プランナ」（Warplanなど） |
+| exploratory programming | 探索的なプログラミング | 第3章までと統一 |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -251,8 +275,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter3.md` | 完了 |
-| `chapter4.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter4.md` | 完了 |
+| `chapter5.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
