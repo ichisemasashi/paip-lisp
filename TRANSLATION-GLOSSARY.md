@@ -127,6 +127,33 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | exploratory programming | 探索的なプログラミング | |
 | rapid prototyping | 素早い試作 | |
 
+### 第1章・第2章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| computational object | 計算対象 | 第1章の導入。以降は単に「オブジェクト」 |
+| atom | アトム | |
+| prefix / infix notation | 前置記法／中置記法 | |
+| special form | 特殊形式 | 演算子は「特殊形式演算子」、式は「特殊形式の式」 |
+| documentation string | ドキュメント文字列 | 語としては訳すが、コード中のdocstringは原文のまま |
+| higher-order function | 高階関数 | |
+| first-class | 第一級 | |
+| dynamic typing | 動的な型付け | |
+| batch mode | 一括処理 | interactive（対話的）と対 |
+| storage management | 記憶領域の管理 | |
+| consing | コンス | `cons` によるセルの生成 |
+| special variable | スペシャル変数 | `*var*` 形式。「特殊変数」ではなく統一 |
+| lexical variable | レキシカル変数 | |
+| binding | 束縛 | |
+| terminal / nonterminal symbol | 終端記号／非終端記号 | 第2章 |
+| context-free phrase-structure grammar | 文脈自由句構造文法 | |
+| generative syntax | 生成統語論 | |
+| data-driven programming | データ駆動のプログラミング | |
+| rewrite (rule) | 書き換え（規則） | |
+| Kleene star / plus | クリーネスター／クリーネプラス | |
+| cross product | 直積 | |
+| noun / verb phrase | 名詞句／動詞句 | 文法カテゴリ名は訳すが、生成される英単語は原文のまま |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
