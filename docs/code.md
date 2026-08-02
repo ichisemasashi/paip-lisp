@@ -1,7 +1,7 @@
-## Code highlighting
+## コードのハイライト
 
 
-Here I'm testing the code highlighing functionality
+ここではコードの色分け機能を試しています
 
 ```lisp
 ;;; -*- Mode: Lisp; Syntax: Common-Lisp; -*-
