@@ -194,8 +194,9 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `appendix.md` | 完了 |
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
-| `README.md`（docs） | 未着手 |
-| `chapter1.md`〜`chapter25.md` | 未着手 |
+| `README.md`（docs） | 完了（全25章の節見出しまで） |
+| `chapter1.md` / `chapter2.md` | 完了 |
+| `chapter3.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
