@@ -1,10 +1,10 @@
 
 
-# Paradigms of Artificial Intelligence Programming
-## CASE STUDIES IN COMMON LISP
+# 人工知能プログラミングのパラダイム
+## COMMON LISPによる事例研究
 ## *Peter Norvig*
 
-<span align="center">MORGAN KAUFMANN PUBLISHERS ⬦ SAN FRANCISCO, CALIFORNIA</span>
+<span align="center">MORGAN KAUFMANN PUBLISHERS ⧦ SAN FRANCISCO, CALIFORNIA</span>
 
 Sponsoring Editor *Michael B. Morgan* \
 Production Manager *Yonie Overton* \
@@ -46,5 +46,5 @@ QA76.6.N6871991 \
 006.3-dc20 91-39187 \
 CIP
 
-*To my family...*
+*家族へ...*
 

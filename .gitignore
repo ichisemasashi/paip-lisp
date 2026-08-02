@@ -8,3 +8,18 @@ docs/dedication.md
 docs/index.md
 docs/paradigmsofartificialintelligenceprogramming.md
 docs/tableofcontents.md
+# macOS
+.DS_Store
+._*
+
+# Lisp build artifacts
+*.fasl
+*.fas
+*.lib
+*.dx64fsl
+*.lx64fsl
+
+# editor
+*~
+\#*\#
+.\#*
