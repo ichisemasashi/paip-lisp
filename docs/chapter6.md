@@ -1,17 +1,17 @@
-# Chapter 6
-## Building Software Tools
+# 第6章
+## ソフトウェア道具の構築
 
-> *Man is a tool-using animal...Without tools he is nothing with tools he is all.*
+> *人は道具を使う動物である……道具なくば無に等しく、道具あらば全てである。*
 
 > -Thomas Carlyle (1795-1881)
 
-In [chapters 4](chapter4.md) and [5](chapter5.md) we were concerned with building two particular programs, GPS and ELIZA. In this chapter, we will reexamine those two programs to discover some common patterns.
-Those patterns will be abstracted out to form reusable software tools that will prove helpful in subsequent chapters.
+[第4章](chapter4.md)と[第5章](chapter5.md)では、GPSとELIZAという2つの個別のプログラムを作ることに専念しました。この章ではその2つを見直し、共通する型を見つけ出します。
+見つけた型を抽象化して、以降の章で役立つ再利用可能なソフトウェアの道具に仕立てます。
 
-## 6.1 An Interactive Interpreter Tool
+## 6.1 対話型インタプリタの道具
 
-The structure of the function `eliza` is a common one.
-It is repeated below:
+関数 `eliza` の構造は、よくある型の1つです。
+以下に再掲します。
 
 ```lisp
 (defun eliza ()
@@ -21,8 +21,8 @@ It is repeated below:
     (print (flatten (use-eliza-rules (read))))))
 ```
 
-Many other applications use this pattern, including Lisp itself.
-The top level of Lisp could be defined as:
+この型は他の多くの応用でも使われており、Lisp自身もその1つです。
+Lispの最上位は次のように定義できるでしょう。
 
 ```lisp
 (defun lisp ()
@@ -31,27 +31,27 @@ The top level of Lisp could be defined as:
     (print (eval (read)))))
 ```
 
-The top level of a Lisp system has historically been called the "read-eval-print loop." Most modern Lisps print a prompt before reading input, so it should really be called the "prompt-read-eval-print loop," but there was no prompt in some early systems like MacLisp, so the shorter name stuck.
-If we left out the prompt, we could write a complete Lisp interpreter using just four symbols:
+Lispシステムの最上位は、歴史的に「read-eval-printループ」と呼ばれてきました。現代のLispはたいてい入力を読む前にプロンプトを表示するので、本当は「prompt-read-eval-printループ」と呼ぶべきですが、MacLispのような初期のシステムにはプロンプトがなかったため、短いほうの名が定着したのです。
+プロンプトを省けば、たった4つのシンボルで完全なLispインタプリタが書けます。
 
 ```lisp
 (loop (print (eval (read))))
 ```
 
-It may seem facetious to say those four symbols and eight parentheses constitute a Lisp interpreter.
-When we write that line, have we really accomplished anything?
-One answer to that question is to consider what we would have to do to write a Lisp (or Pascal) interpreter in Pascal.
-We would need a lexical analyzer and a symbol table manager.
-This is a considerable amount of work, but it is all handled by `read`.
-We would need a syntactic parser to assemble the lexical tokens into statements.
-`read` also handles this, but only because Lisp statements have trivial syntax: the syntax of lists and atoms.
-Thus `read` serves fine as a syntactic parser for Lisp, but would fail for Pascal.
-Next, we need the evaluation or interpretation part of the interpreter; `eval` does this nicely, and could handle Pascal just as well if we parsed Pascal syntax into Lisp expressions.
-`print` does much less work than `read` or `eval`, but is still quite handy.
+この4つのシンボルと8つの括弧がLispインタプリタをなすと言うのは、ふざけて聞こえるかもしれません。
+あの1行を書いて、私たちは本当に何かを成し遂げたのでしょうか。
+その問いへの1つの答えは、PascalでLisp（あるいはPascal）のインタプリタを書くなら何が必要かを考えてみることです。
+字句解析器とシンボル表の管理機構が要ります。
+これはかなりの手間ですが、すべて `read` が引き受けてくれます。
+字句を文へ組み立てる構文解析器も要ります。
+これも `read` が引き受けますが、それはLispの文が自明な構文 — リストとアトムの構文 — しか持たないからです。
+ですから `read` はLispの構文解析器としては十分に働きますが、Pascalには通用しません。
+次に、インタプリタの評価あるいは解釈の部分が要ります。`eval` がこれをうまくこなしますし、Pascalの構文をLispの式に解析できるならPascalも同様に扱えるでしょう。
+`print` は `read` や `eval` よりはるかに仕事が少ないものの、やはり重宝します。
 
-The important point is not whether one line of code can be considered an implementation of Lisp; it is to recognize common patterns of computation.
-Both `eliza` and `lisp` can be seen as interactive interpreters that read some input, transform or evaluate the input in some way, print the result, and then go back for more input.
-We can extract the following common pattern:
+大事なのは1行のコードをLispの実装とみなせるかどうかではなく、計算に共通する型を見抜くことです。
+`eliza` も `lisp` も、入力を読み、それを何らかの形で変形あるいは評価し、結果を表示して、また次の入力へ戻る対話型インタプリタと見なせます。
+次の共通の型を取り出せます。
 
 ```lisp
 (defun *program* ()
@@ -60,13 +60,13 @@ We can extract the following common pattern:
     (print (*transform* (read)))))
 ```
 
-There are two ways to make use of recurring patterns like this: formally and informally.
-The informal alternative is to treat the pattern as a cliche or idiom that will occur frequently in our writing of programs but will vary from use to use.
-When we want to write a new program, we remember writing or reading a similar one, go back and look at the first program, copy the relevant sections, and then modify them for the new program.
-If the borrowing is extensive, it would be good practice to insert a comment in the new program citing the original, but there would be no "official" connection between the original and the derived program.
+こうした繰り返し現れる型を活かす方法は2つあります。形式的な方法と、略式の方法です。
+略式のほうは、この型を、プログラムを書くたびに頻繁に現れるが使うたびに姿を変える決まり文句、あるいは慣用句として扱うやり方です。
+新しいプログラムを書きたくなったら、似たものを書いたか読んだかしたのを思い出し、その最初のプログラムを見に戻り、関係する部分を写して、新しいプログラム向けに手を入れます。
+借用が大がかりなら、新しいプログラムに元を示すコメントを入れておくのがよい習慣ですが、元のプログラムと派生したプログラムのあいだに「公式の」つながりはありません。
 
-The formal alternative is to create an abstraction, in the form of functions and perhaps data structures, and refer explicitly to that abstraction in each new application-in other words, to capture the abstraction in the form of a useable software tool.
-The interpreter pattern could be abstracted into a function as follows:
+形式的なほうは、関数（場合によってはデータ構造）の形で抽象を作り、新しい応用のたびにその抽象を明示的に参照するやり方です。言い換えれば、抽象を使えるソフトウェアの道具として捉えるのです。
+インタプリタの型は、次のように関数へ抽象化できます。
 
 ```lisp
 (defun interactive-interpreter (prompt transformer)
@@ -76,7 +76,7 @@ The interpreter pattern could be abstracted into a function as follows:
     (print (funcall transformer (read)))))
 ```
 
-This function could then be used in writing each new interpreter:
+この関数は、新しいインタプリタを書くたびに使えます。
 
 ```lisp
 (defun lisp ()
@@ -87,7 +87,7 @@ This function could then be used in writing each new interpreter:
     #'(lambda (x) (flatten (use-eliza-rules x)))))
 ```
 
-Or, with the help of the higher-order function compose:
+あるいは高階関数 compose の助けを借りれば、
 
 ```lisp
 (defun compose (f g)
@@ -99,27 +99,27 @@ Or, with the help of the higher-order function compose:
     (compose #'flatten #'use-eliza-rules)))
 ```
 
-There are two differences between the formal and informal approaches.
-First, they look different.
-If the abstraction is a simple one, as this one is, then it is probably easier to read an expression that has the loop explicitly written out than to read one that calls `interactive-interpreter`, since that requires finding the definition of `interactive-interpreter` and understanding it as well.
+形式的な方法と略式の方法には2つの違いがあります。
+第一に、見た目が違います。
+この例のように抽象が単純なら、`interactive-interpreter` を呼ぶ式を読むより、ループが明示的に書き下された式を読むほうがおそらく楽です。前者では `interactive-interpreter` の定義を探し、それも理解せねばならないからです。
 
-The other difference shows up in what's called *maintenance*.
-Suppose we find a missing feature in the definition of the interactive interpreter.
-One such omission is that the `loop` has no exit.
-I have been assuming that the user can terminate the loop by hitting some interrupt (or break, or abort) key.
-A cleaner implementation would allow the user to give the interpreter an explicit termination command.
-Another useful feature would be to handle errors within the interpreter.
-If we use the informal approach, then adding such a feature to one program would have no effect on the others.
-But if we use the formal approach, then improving `interactive-interpreter` would automatically bring the new features to all the programs that use it.
+もう1つの違いは、いわゆる*保守*の場面で現れます。
+対話型インタプリタの定義に足りない機能が見つかったとしましょう。
+その1つが、`loop` に出口がないことです。
+ここまで、利用者が割り込み（break、abort）のキーを押してループを止められると想定してきました。
+より整った実装なら、利用者がインタプリタに明示的な終了の命令を与えられるようにするでしょう。
+もう1つ役立つ機能は、インタプリタの中でエラーを扱うことです。
+略式の方法なら、1つのプログラムにそうした機能を加えても他には何の影響もありません。
+しかし形式的な方法なら、`interactive-interpreter` を改良すれば、それを使うすべてのプログラムに新しい機能が自動的に行き渡ります。
 
-The following version of `interactive-interpreter` adds two new features.
-First, it uses the macro `handler-case`<a id="tfn06-1"></a><sup>[1](#fn06-1)</sup> to handle errors.
-This macro evaluates its first argument, and normally just returns that value.
-However, if an error occurs, the subsequent arguments are checked for an error condition that matches the error that occurred.
-In this use, the case `error` matches all errors, and the action taken is to print the error condition and continue.
+次の版の `interactive-interpreter` は新しい機能を2つ加えます。
+第一に、エラーを扱うのにマクロ `handler-case`<a id="tfn06-1"></a><sup>[1](#fn06-1)</sup> を使います。
+このマクロは第1引数を評価し、通常はその値をそのまま返します。
+しかしエラーが起きた場合は、後続の引数を調べて、起きたエラーに合致するエラー条件を探します。
+ここでの使い方では `error` の場合がすべてのエラーに合致し、取られる動作はエラー条件を表示して続行することです。
 
-This version also allows the prompt to be either a string or a function of no arguments that will be called to print the prompt.
-The function `prompt-generator`, for example, returns a function that will print prompts of the form [1], [2], and so forth.
+この版ではまた、プロンプトを文字列にも、プロンプトを表示するために呼ばれる引数なしの関数にもできます。
+たとえば関数 `prompt-generator` は、[1]、[2] といった形のプロンプトを表示する関数を返します。
 
 ```lisp
 (defun interactive-interpreter (prompt transformer)
@@ -141,84 +141,84 @@ The function `prompt-generator`, for example, returns a function that will print
   #'(lambda () (format t ctl-string (incf num))))
 ```
 
-## 6.2 A Pattern-Matching Tool
+## 6.2 パターン照合の道具
 
-The `pat-match` function was a pattern matcher defined specifically for the ELIZA program.
-Subsequent programs will need pattern matchers too, and rather than write specialized matchers for each new program, it is easier to define one general pattern matcher that can serve most needs, and is extensible in case novel needs come up.
+`pat-match` は、ELIZAプログラム専用に定義したパターン照合器でした。
+以降のプログラムでもパターン照合器は必要になります。新しいプログラムごとに専用の照合器を書くより、たいていの用途に応えられて、目新しい要求が出てきたら拡張もできる汎用の照合器を1つ定義するほうが楽です。
 
-The problem in designing a "general" tool is deciding what features to provide.
-We can try to define features that might be useful, but it is also a good idea to make the list of features open-ended, so that new ones can be easily added when needed.
+「汎用」の道具を設計するときの難しさは、どんな機能を用意するかを決めることにあります。
+役に立ちそうな機能を定めてみるのもよいのですが、機能の一覧を開かれたものにして、必要になったら新しい機能を簡単に加えられるようにしておくのもよい考えです。
 
-Features can be added by generalizing or specializing existing ones.
-For example, we provide segment variables that match zero or more input elements.
-We can specialize this by providing for a kind of segment variable that matches one or more elements, or for an optional variable that matches zero or one element.
-Another possibility is to generalize segment variables to specify a match of *m* to *n* elements, for any specified *m* and *n*.
-These ideas come from experience with notations for writing regular expressions, as well as from very general heuristics for generalization, such as "consider important special cases" and "zero and one are likely to be important special cases."
+機能は、既存のものを一般化するか特殊化するかして加えられます。
+たとえば、入力の0個以上の要素に合致する区間変数を用意しています。
+これを特殊化して、1個以上の要素に合致する区間変数や、0個か1個の要素に合致する省略可能な変数を用意できます。
+別の可能性として、区間変数を一般化し、指定した *m* から *n* 個の要素への合致を表せるようにすることもできます。
+こうした着想は、正規表現を書く記法の経験と、「重要な特別な場合を考えよ」「0と1はおそらく重要な特別な場合である」といったきわめて一般的な一般化の発見的方法から来ています。
 
-Another useful feature is to allow the user to specify an arbitrary predicate that a match must satisfy.
-The notation `(?is ?n numberp)` could be used to match any expression that is a number and bind it to the variable `?n`.
-This would look like:
+もう1つ役立つ機能は、照合が満たすべき任意の述語を利用者が指定できるようにすることです。
+`(?is ?n numberp)` という記法で、数である任意の式に合致させ、それを変数 `?n` に束縛できるでしょう。
+次のようになります。
 
 ```lisp
 > (pat-match '(x = (?is ?n numberp)) '(x = 34)) => ((?n . 34))
 > (pat-match '(x = (?is ?n numberp)) '(x = x)) => NIL
 ```
 
-Since patterns are like boolean expressions, it makes sense to allow boolean operators on them.
-Following the question-mark convention, we will use `?and`, `?or` and `?not` for the operators.<a id="tfn06-2"></a><sup>[2](#fn06-2)</sup>
-Here is a pattern to match a relational expression with one of three relations.
-It succeeds because the `<` matches one of the three possibilities specified by `(?or < = >).`
+パターンは論理式のようなものなので、論理演算子を許すのは理にかなっています。
+疑問符の流儀に従い、演算子には `?and`、`?or`、`?not` を使います。<a id="tfn06-2"></a><sup>[2](#fn06-2)</sup>
+3つの関係のいずれかを持つ関係式に合致するパターンを示します。
+`<` が `(?or < = >)` の指定する3つの可能性の1つに合致するので、これは成功します。
 
 ```lisp
 > (pat-match '(?x (?or < = >) ?y) '(3 < 4)) => ((?Y . 4) (?X . 3))
 ```
 
-Here is an example of an `?and` pattern that checks if an expression is both a number and odd:
+式が数でありかつ奇数であるかを調べる `?and` パターンの例を示します。
 
 ```lisp
 > (pat-match '(x = (?and (?is ?n numberp) (?is ?n oddp))) '(x = 3)) => ((?N . 3))
 ```
 
-The next pattern uses `?not` to insure that two parts are not equal:
+次のパターンは `?not` を使って、2つの部分が等しくないことを保証します。
 
 ```lisp
 > (pat-match '(?x /= (?not ?x)) '(3 /= 4)) => ((?X . 3))
 ```
 
-The segment matching notation we have seen before.
-It is augmented to allow for three possibilities: zero or more expressions; one or more expressions; and zero or one expressions.
-Finally, the notation `(?if *exp*)` can be used to test a relationship between several variables.
-It has to be listed as a segment pattern rather than a single pattern because it does not consume any of the input at all:
+区間照合の記法はすでに見たものです。
+ここでは3つの可能性 — 0個以上の式、1個以上の式、0個か1個の式 — を許すよう拡張してあります。
+最後に、`(?if *式*)` という記法で複数の変数のあいだの関係を調べられます。
+これは入力をまったく消費しないので、単一要素のパターンではなく区間パターンとして挙げねばなりません。
 
 ```lisp
 > (pat-match '(?x > ?y (?if (> ?x ?y))) '(4 > 3)) =>
 ((?Y . 3) (?X . 4))
 ```
 
-When the description of a problem gets this complicated, it is a good idea to attempt a more formal specification.
-The following table describes a grammar of patterns, using the same grammar rule format described in [chapter 2](chapter2.md).
+問題の記述がこれほど込み入ってきたら、より形式的な仕様を試みるのがよい考えです。
+次の表は、[第2章](chapter2.md)で述べた文法規則の書式でパターンの文法を記述したものです。
 
 | []()            |                         |                                                   |
 |-----------------|-------------------------|---------------------------------------------------|
-| *pat*=>         | *var*                   | match any one expression                          |
-|                 | *constant*              | match just this atom                              |
-|                 | *segment-pat*           | match something against a sequence                |
-|                 | *single-pat*            | match something against one expression            |
-|                 | (*pat . pat*)           | match the first and the rest                      |
-| *single-pat*=>  | (`?is` *var predicate*) | test predicate on one expression                  |
-|                 | (`?or` *pat*...)        | match any pattern on one expression               |
-|                 | (`?and` *pat*...)       | match every pattern on one expression             |
-|                 | (`?not` *pat*...)       | succeed if pattern(s) do not match                |
-| *segment-pat*=> | ((`?*` *var*)...)       | match zero or more expressions                    |
-|                 | ((`?+` *var*) ... )     | match one or more expressions                     |
-|                 | ((`??` *var*) ... )     | match zero or one expression                      |
-|                 | ((`?if` *exp* )...)     | test if exp (which may contain variables) is true |
-| *var* =>        | `?`*chars*              | a symbol starting with ?                          |
-| *constant* =>   | *atom*                  | any nonvariable atom                              |
+| *pat*=>         | *var*                   | 任意の式1つに合致                                 |
+|                 | *constant*              | このアトムだけに合致                              |
+|                 | *segment-pat*           | 何かを並びに対して合致させる                      |
+|                 | *single-pat*            | 何かを式1つに対して合致させる                     |
+|                 | (*pat . pat*)           | 先頭と残りに合致                                  |
+| *single-pat*=>  | (`?is` *var 述語*)      | 式1つに述語を適用して調べる                       |
+|                 | (`?or` *pat*...)        | 式1つにいずれかのパターンが合致                   |
+|                 | (`?and` *pat*...)       | 式1つにすべてのパターンが合致                     |
+|                 | (`?not` *pat*...)       | パターンが合致しなければ成功                      |
+| *segment-pat*=> | ((`?*` *var*)...)       | 0個以上の式に合致                                 |
+|                 | ((`?+` *var*) ... )     | 1個以上の式に合致                                 |
+|                 | ((`??` *var*) ... )     | 0個か1個の式に合致                                |
+|                 | ((`?if` *式* )...)      | 式（変数を含みうる）が真かを調べる                |
+| *var* =>        | `?`*文字列*             | ? で始まるシンボル                                |
+| *constant* =>   | *atom*                  | 変数でない任意のアトム                            |
 
-Despite the added complexity, all patterns can still be classified into five cases.
-The pattern must be either a variable, constant, a (generalized) segment pattern, a (generalized) single-element pattern, or a cons of two patterns.
-The following definition of `pat-match` reflects the five cases (along with two checks for failure):
+複雑さは増しましたが、パターンはなお5つの場合に分類できます。
+パターンは、変数か、定数か、（一般化された）区間パターンか、（一般化された）単一要素パターンか、2つのパターンの cons のいずれかです。
+次の `pat-match` の定義は、この5つの場合（と失敗を調べる2つの検査）を反映しています。
 
 ```lisp
 (defun pat-match (pattern input &optional (bindings no-bindings))
@@ -238,7 +238,7 @@ The following definition of `pat-match` reflects the five cases (along with two 
     (t fail)))
 ```
 
-For completeness, we repeat here the necessary constants and low-level functions from ELIZA:
+完全を期すため、ELIZAから必要な定数と低水準の関数をここに再掲します。
 
 ```lisp
 (defconstant fail nil "Indicates pat-match failure")
@@ -285,27 +285,27 @@ For completeness, we repeat here the necessary constants and low-level functions
       (t fail))))
 ```
 
-The next step is to define the predicates that recognize generalized segment and single-element patterns, and the matching functions that operate on them.
-We could implement `segment-matcher` and `single-matcher` with case statements that consider all possible cases.
-However, that would make it difficult to extend the matcher.
-A programmer who wanted to add a new kind of segment pattern would have to edit the definitions of both `segment-pattern-p` and `segment-matcher` to install the new feature.
-This by itself may not be too bad, but consider what happens when two programmers each add independent features.
-If you want to use both, then neither version of `segment-matcher` (or `segment-pattern-p`) will do.
-You'll have to edit the functions again, just to merge the two extensions.
+次の段階は、一般化された区間パターンと単一要素パターンを判別する述語と、それらに働く照合の関数を定義することです。
+`segment-matcher` と `single-matcher` は、ありうる場合をすべて並べた case で実装することもできます。
+しかしそれでは照合器を拡張しにくくなります。
+新しい種類の区間パターンを加えたいプログラマは、その機能を組み込むために `segment-pattern-p` と `segment-matcher` の両方の定義に手を入れねばなりません。
+これだけならさほど悪くないかもしれませんが、2人のプログラマがそれぞれ独立に機能を加えたらどうなるか考えてみてください。
+両方を使いたければ、どちらの版の `segment-matcher`（や `segment-pattern-p`）でも用は足りません。
+2つの拡張を統合するためだけに、また関数に手を入れることになります。
 
-The solution to this dilemma is to write one version of `segment-pattern-p` and `segment-matcher`, once and for all, but to have these functions refer to a table of pattern/action pairs.
-The table would say "if you see `?*` in the pattern, then use the function `segment-match`," and so on.
-Then programmers who want to extend the matcher just add entries to the table, and it is trivial to merge different extensions (unless of course two programmers have chosen the same symbol to mark different actions).
+この板挟みを解くには、`segment-pattern-p` と `segment-matcher` を一度きり1つの版として書き、その関数がパターンと動作の対の表を参照するようにします。
+表には「パターン中に `?*` を見たら関数 `segment-match` を使え」といったことが書かれます。
+そうすれば照合器を拡張したいプログラマは表に項目を加えるだけで済み、異なる拡張の統合も造作もありません（もちろん2人が異なる動作に同じ記号を選んでいなければの話ですが）。
 
-This style of programming, where pattern/action pairs are stored in a table, is called *data*-*driven programming*.
-It is a very flexible style that is appropriate for writing extensible systems.
+パターンと動作の対を表に格納するこの流儀は、*データ駆動のプログラミング*と呼ばれます。
+きわめて融通の利く流儀であり、拡張可能なシステムを書くのに適しています。
 
-There are many ways to implement tables in Common Lisp, as discussed in [section 3.6](chapter3.md#s0080), [page 73](chapter3.md#p73).
-In this case, the keys to the table will be symbols  (like `?*`), and it is fine if the representation of the table is distributed across memory.
-Thus, property lists are an appropriate choice.
-We will have two tables, represented by the `segment-match` property and the `single-match` property of symbols like `?*`.
-The value of each property will be the name of a function that implements the match.
-Here are the table entries to implement the grammar listed previously:
+[3.6節](chapter3.md#s0080)・[73ページ](chapter3.md#p73)で論じたとおり、Common Lispで表を実装する方法はいくつもあります。
+ここでは表のキーが（`?*` のような）シンボルであり、表の表現がメモリ上に散らばっていても差し支えありません。
+ですから属性リストが適した選択です。
+表は2つ用意し、`?*` のようなシンボルの `segment-match` 属性と `single-match` 属性で表します。
+各属性の値は、その照合を実装する関数の名前です。
+先に挙げた文法を実装する表の項目を示します。
 
 ```lisp
 (setf (get '?is 'single-match) 'match-is)
@@ -318,9 +318,9 @@ Here are the table entries to implement the grammar listed previously:
 (setf (get '?if 'segment-match) 'match-if)
 ```
 
-With the table defined, we need to do two things.
-First, define the "glue" that holds the table together: the predicates and action-taking functions.
-A function that looks up a data-driven function and calls it (such as `segment-matcher` and `single-matcher`) is called a *dispatch function*.
+表を定義したら、やるべきことが2つあります。
+第一に、表をつなぎ止める「のり」 — 述語と動作を取る関数 — を定義することです。
+データ駆動の関数を引いて呼び出す関数（`segment-matcher` や `single-matcher` など）を*振り分け関数*と呼びます。
 
 ```lisp
 (defun segment-pattern-p (pattern)
@@ -356,8 +356,8 @@ A function that looks up a data-driven function and calls it (such as `segment-m
   (when (symbolp x) (get x 'single-match)))
 ```
 
-The last thing to do is define the individual matching functions.
-First, the single-pattern matching functions:
+最後にやるべきは、個々の照合の関数を定義することです。
+まず単一パターンの照合関数から。
 
 ```lisp
 (defun match-is (var-and-pred input bindings)
@@ -397,13 +397,13 @@ First, the single-pattern matching functions:
       bindings))
 ```
 
-Now the segment-pattern matching functions.
-`segment-match` is similar to the version presented as part of ELIZA. The difference is in how we determine `pos`, the position of the first element of the input that could match the next element of the pattern after the segment variable.
-In ELIZA, we assumed that the segment variable was either the last element of the pattern or was followed by a constant.
-In the following version, we allow nonconstant patterns to follow segment variables.
-The function `first-match-pos` is added to handle this.
-If the following element is in fact a constant, the same calculation is done using `position`.
-If it is not a constant, then we just return the first possible starting position-unless that would put us past the end of the input, in which case we return nil to indicate failure:
+次は区間パターンの照合関数です。
+`segment-match` はELIZAの一部として示した版と似ています。違うのは `pos` — 区間変数の後ろにあるパターンの次の要素に合致しうる、入力の最初の要素の位置 — の求め方です。
+ELIZAでは、区間変数はパターンの最後の要素であるか、その後ろに定数が続くと仮定していました。
+以下の版では、区間変数の後ろに定数でないパターンが続くことも許します。
+これを扱うために関数 `first-match-pos` を加えます。
+後続の要素が実際に定数であれば、`position` を使って同じ計算をします。
+定数でなければ、ありうる最初の開始位置をそのまま返します。ただしそれが入力の終わりを越える場合は、失敗を示す nil を返します。
 
 ```lisp
 (defun segment-match (pattern input bindings &optional (start 0))
@@ -433,22 +433,22 @@ If it is not a constant, then we just return the first possible starting positio
         (t nil)))
 ```
 
-In the first example below, the segment variable `?x` matches the sequence (`b c`).
-In the second example, there are two segment variables in a row.
-The first successful match is achieved with the first variable, `?x`, matching the empty sequence, and the second one, `?y`, matching (`b c`).
+下の最初の例では、区間変数 `?x` が並び (`b c`) に合致します。
+2つ目の例では、区間変数が2つ続いています。
+最初に成功する合致は、1つ目の変数 `?x` が空の並びに、2つ目の `?y` が (`b c`) に合致するものです。
 
 ```lisp
 > (pat-match '(a (?* ?x) d) '(a b c d)) => ((?X B C))
 > (pat-match '(a (?* ?x) (?* ?y) d) '(a b c d))=> ((?Y B C) (?X))
 ```
 
-In the next example, `?x` is first matched against nil and `?y` against (`b c d` ), but that fails, so we try matching `?x` against a segment of length one.
-That fails too, but finally the match succeeds with `?x` matching the two-element segment (`b c`), and `?y` matching (`d`).
+次の例では、まず `?x` を nil に、`?y` を (`b c d` ) に合致させようとしますが失敗するので、`?x` を長さ1の区間に合致させてみます。
+これも失敗しますが、最後に `?x` が2要素の区間 (`b c`) に、`?y` が (`d`) に合致して照合が成功します。
 
 ```lisp
  > (pat-match  '(a (?* ?x) (?* ?y) ?x ?y)  '(a b c d (b c) (d))) => ((?Y D) (?X B C))
 ```
-Given `segment-match`, it is easy to define the function to match one-or-more elements and the function to match zero-or-one element:
+`segment-match` があれば、1個以上の要素に合致する関数と、0個か1個の要素に合致する関数は簡単に定義できます。
 
 ```lisp
 (defun segment-match+ (pattern input bindings)
@@ -463,9 +463,9 @@ Given `segment-match`, it is easy to define the function to match one-or-more el
       (pat-match pat input bindings))))
 ```
 
-Finally, we supply the function to test an arbitrary piece of Lisp code.
-It does this by evaluating the code with the bindings implied by the binding list.
-This is one of the few cases where it is appropriate to call `eval`: when we want to give the user unrestricted access to the Lisp interpreter.
+最後に、任意のLispのコード片を評価して調べる関数を用意します。
+これは、束縛の並びが示す束縛のもとでコードを評価することで行います。
+`eval` を呼ぶのがふさわしい数少ない場合の1つです。利用者にLispインタプリタへの無制限のアクセスを与えたいときです。
 
 ```lisp
 (defun match-if (pattern input bindings)
@@ -477,36 +477,36 @@ This is one of the few cases where it is appropriate to call `eval`: when we wan
     (pat-match (rest pattern) input bindings)))
 ```
 
-Here are two examples using `?if`.
-The first succeeds because `(+  3 4)` is indeed `7`, and the second fails because `(>  3 4)` is false.
+`?if` を使った例を2つ示します。
+1つ目は `(+  3 4)` が確かに `7` なので成功し、2つ目は `(>  3 4)` が偽なので失敗します。
 
 ```lisp
 > (pat-match  '(?x ?op ?y is ?z (?if (eql (?op ?x ?y) ?z))) '(3 + 4 is 7)) => ((?Z . 7) (?Y . 4) (?OP . +) (?X . 3))
 > (pat-match  '(?x ?op ?y (?if (?op ?x ?y))) '(3 > 4)) => NIL
 ```
 
-The syntax we have defined for patterns has two virtues: first, the syntax is very general, so it is easy to extend.
-Second, the syntax can be easily manipulated by `pat-match`.
-However, there is one drawback: the syntax is a little verbose, and some may find it ugly.
-Compare the following two patterns:
+私たちがパターンのために定めた構文には美点が2つあります。第一に、構文がきわめて汎用なので拡張しやすいこと。
+第二に、`pat-match` がその構文を容易に扱えることです。
+ただし難点が1つ。構文がやや冗長で、不格好だと感じる人もいるでしょう。
+次の2つのパターンを比べてみてください。
 
 ```lisp
 (a (?* ?x) (?* ?y) d)
 (a ?x* ?y* d)
 ```
 
-Many readers find the second pattern easier to understand at a glance.
-We could change `pat-match` to allow for patterns of the form `?x*`, but that would mean `pat-match` would have a lot more work to do on every match.
-An alternative is to leave `pat-match` as is, but define another level of syntax for use by human readers only.
-That is, a programmer could type the second expression above, and have it translated into the first, which would then be processed by `pat-match.`
+2つ目のパターンのほうが一目で分かりやすいと感じる読者は多いはずです。
+`pat-match` を変えて `?x*` の形のパターンを許すこともできますが、そうすると照合のたびに `pat-match` の仕事がずっと増えます。
+別の手は、`pat-match` はそのままにして、人が読むためだけの別の層の構文を定めることです。
+つまりプログラマは上の2つ目の式を打ち込み、それが1つ目に変換されて `pat-match` で処理される、という具合です。
 
-In other words, we will define a facility to define a kind of pattern-matching macro that will be expanded the first time the pattern is seen.
-It is better to do this expansion once than to complicate `pat-match` and in effect do the expansion every time a pattern is used.
-(Of course, if a pattern is only used once, then there is no advantage.
-But in most programs, each pattern will be used again and again.)
+言い換えれば、パターンが最初に現れたときに展開される、一種のパターン照合マクロを定義する仕組みを作ります。
+`pat-match` を複雑にして、事実上パターンを使うたびに展開するより、この展開を一度だけ行うほうがよいのです。
+（もちろんパターンが一度しか使われないなら利点はありません。
+しかしたいていのプログラムでは、各パターンは何度も繰り返し使われます。）
 
-We need to define two functions: one to define pattern-matching macros, and another to expand patterns that may contain these macros.
-We will only allow symbols to be macros, so it is reasonable to store the expansions on each symbol's property list:
+関数を2つ定義する必要があります。1つはパターン照合マクロを定義するもの、もう1つはそのマクロを含みうるパターンを展開するものです。
+マクロになれるのはシンボルだけとするので、展開結果を各シンボルの属性リストに格納するのが理にかなっています。
 
 ```lisp
 (defun pat-match-abbrev (symbol expansion)
@@ -522,7 +522,7 @@ We will only allow symbols to be macros, so it is reasonable to store the expans
           (expand-pat-match-abbrev (rest pat))))))
 ```
 
-We would use this facility as follows:
+この仕組みは次のように使います。
 
 ```lisp
 > (pat-match-abbrev '?x* '(?* ?x)) => (?* ?X)
@@ -531,17 +531,17 @@ We would use this facility as follows:
 > (pat-match axyd '(a b c d)) => ((?Y B C) (?X))
 ```
 
-**Exercise  6**.**1** [**m**] Go back and change the ELIZA rules to use the abbreviation facility.
-Does this make the rules easier to read?
+**練習問題 6.1** [**m**] ELIZAの規則に戻り、この省略記法の仕組みを使うよう変えよ。
+これで規則は読みやすくなるか。
 
-**Exercise  6**.**2** [**h**] In the few prior examples, every time there was a binding of pattern variables that satisfied the input, that binding was found.
-Informally, show that `pat-match` will always find such a binding, or show a counterexample where it fails to find one.
+**練習問題 6.2** [**h**] 直前のいくつかの例では、入力を満たすパターン変数の束縛が存在するときは必ずその束縛が見つかった。
+`pat-match` が常にそうした束縛を見つけることを略式に示すか、見つけそこねる反例を示せ。
 
-## 6.3 A Rule-Based Translator Tool
+## 6.3 規則に基づく変換器の道具
 
-As we have defined it, the pattern matcher matches one input against one pattern.
-In `eliza`, we need to match each input against a number of patterns, and then return a result based on the rule that contains the first pattern that matches.
-To refresh your memory, here is the function `use-eliza-rules`:
+私たちが定義したパターン照合器は、1つの入力を1つのパターンに照合します。
+`eliza` では、各入力を多数のパターンに照合し、最初に合致したパターンを含む規則に基づいて結果を返す必要があります。
+記憶を新たにするため、関数 `use-eliza-rules` を再掲します。
 
 ```lisp
 (defun use-eliza-rules (input)
@@ -554,23 +554,23 @@ To refresh your memory, here is the function `use-eliza-rules`:
     *eliza-rules*))
 ```
 
-It turns out that this will be a quite common thing to do: search through a list of rules for one that matches, and take action according to that rule.
-To turn the structure of `use-eliza-rules` into a software tool, we will allow the user to specify each of the following:
+これはかなりよくある作業です。規則の並びを探して合致するものを見つけ、その規則に従って動作する、というものです。
+`use-eliza-rules` の構造をソフトウェアの道具に仕立てるため、次のそれぞれを利用者が指定できるようにします。
 
-*   What kind of rule to use.
-Every rule will be characterized by an if-part and a then-part, but the ways of getting at those two parts may vary.
+*   どんな種類の規則を使うか。
+どの規則も if の部分と then の部分で特徴づけられますが、その2つの部分の取り出し方はさまざまでありえます。
 
-*   What list of rules to use.
-In general, each application will have its own list of rules.
+*   どの規則の並びを使うか。
+一般に、応用ごとに独自の規則の並びを持ちます。
 
-*   How to see if a rule matches.
-By default, we will use `pat-match`, but it should be possible to use other matchers.
+*   規則が合致するかをどう調べるか。
+既定では `pat-match` を使いますが、他の照合器も使えるようにすべきです。
 
-*   What to do when a rule matches.
-Once we have determined which rule to use, we have to determine what it means to use it.
-The default is just to substitute the bindings of the match into the then-part of the rule.
+*   規則が合致したときに何をするか。
+どの規則を使うか決めたら、それを使うとはどういうことかを決めねばなりません。
+既定では、照合の束縛を規則の then の部分に差し込むだけです。
 
-The rule-based translator tool now looks like this:
+規則に基づく変換器の道具は、次のようになります。
 
 ```lisp
 (defun rule-based-translator
@@ -594,60 +594,60 @@ The rule-based translator tool now looks like this:
                 (random-elt responses)))))
 ```
 
-## 6.4 A Set of Searching Tools
+## 6.4 探索の道具立て
 
-The GPS program can be seen as a problem in *search*.
-In general, a search problem involves exploring from some starting state and investigating neighboring states until a solution is reached.
-As in GPS, *state* means a description of any situation or state of affairs.
-Each state may have several neighbors, so there will be a choice of how to search.
-We can travel down one path until we see it is a dead end, or we can consider lots of different paths at the same time, expanding each path step by step.
-Search problems are called *nondeterministic* because there is no way to determine what is the best step to take next.
-AI problems, by their very nature, tend to be nondeterministic.
-This can be a source of confusion for programmers who are used to deterministic problems.
-In this section we will try to clear up that confusion.
-This section also serves as an example of how higher-order functions can be used to implement general tools that can be specified by passing in specific functions.
+GPSプログラムは*探索*の問題と見なせます。
+一般に探索の問題とは、ある初期状態から出発して、解に至るまで近隣の状態を調べていくことです。
+GPSと同じく、*状態*とは何らかの状況やありさまの記述を意味します。
+各状態には隣接する状態がいくつもありうるので、どう探索するかの選択が生じます。
+1つの道を行き止まりと分かるまでたどることもできますし、多くの道を同時に検討して、各道を一歩ずつ伸ばしていくこともできます。
+探索の問題は*非決定的*と呼ばれます。次に取るべき最善の一歩を決める術がないからです。
+AIの問題は、その性質からして非決定的になりがちです。
+これは決定的な問題に慣れたプログラマにとって混乱のもとになりえます。
+この節ではその混乱を解きほぐそうと思います。
+この節はまた、個別の関数を渡すことで振る舞いを指定できる汎用の道具を、高階関数でどう実装するかの例にもなっています。
 
-Abstractly, a search problem can be characterized by four features:
+抽象的に言えば、探索の問題は4つの要素で特徴づけられます。
 
-*   The *start* state.
+*   *初期*状態。
 
-*   The *goal* state (or states).
+*   *目標*状態（1つとはかぎらない）。
 
-*   The *successors*, or states that can be reached from any other state.
+*   *後継*、すなわちある状態から到達できる状態。
 
-*   The *strategy* that determines the *order* in which we search.
+*   探索の*順序*を決める*戦略*。
 
-The first three features are part of the problem, while the fourth is part of the solution.
-In GPS, the starting state was given, along with a description of the goal states.
-The successors of a state were determined by consulting the operators.
-The search strategy was means-ends analysis.
-This was never spelled out explicitly but was implicit in the structure of the whole program.
-In this section we will formulate a general searching tool, show how it can be used to implement several different search strategies, and then show how GPS could be implemented with this tool.
+最初の3つは問題の一部であり、4つ目は解の一部です。
+GPSでは、初期状態が目標状態の記述とともに与えられていました。
+ある状態の後継は、演算子を参照して決まりました。
+探索の戦略は手段目標分析でした。
+これは明示的に書き下されてはおらず、プログラム全体の構造に暗黙のうちに込められていました。
+この節では汎用の探索の道具を定式化し、それでいくつかの異なる探索戦略をどう実装できるかを示し、さらにこの道具でGPSをどう実装できるかを示します。
 
-The first notion we have to define is the *state space*, or set of all possible states.
-We can view the states as nodes and the successor relation as links in a graph.
-Some state space graphs will have a small number of states, while others have an infinite number, but they can still be solved if we search cleverly.
-Some graphs will have a regular structure, while others will appear random.
-We will start by considering only trees-that is, graphs where a state can be reached by only one unique sequence of successor links.
-Here is a tree:
+まず定義すべきは*状態空間*、すなわちありうる状態すべての集合です。
+状態をグラフのノード、後継関係をその辺と見なせます。
+状態空間のグラフには状態が少数のものもあれば、無限にあるものもありますが、賢く探索すれば後者でも解けます。
+規則正しい構造を持つグラフもあれば、無作為に見えるものもあります。
+まずは木だけを考えることから始めます。つまり、ある状態に至る後継の辺の並びがただ1通りしかないグラフです。
+木の例を示します。
 
 <a id="diagram-06-01"></a>
 <img src="images/chapter6/diagram-06-01.svg"
   onerror="this.src='images/chapter6/diagram-06-01.png'; this.onerror=null;"
   alt="Diagram 6.1" />
 
-### Searching Trees
+### 木の探索
 
-We will call our first searching tool `tree-search`, because it is designed to search state spaces that are in the form of trees.
-It takes four arguments: (1) a list of valid starting states, (2) a predicate to decide if we have reached a goal state, (3) a function to generate the successors of a state, and (4) a function that decides in what order to search.
-The first argument is a list rather than a single state so that `tree-search` can recursively call itself after it has explored several paths through the state space.
-Think of the first argument not as a starting state but as a list of possible states from which the goal may be reached.
-This lists represents the fringe of the tree that has been explored so far.
-`tree-search` has three cases: If there are no more states to consider, then give up and return `fail`.
-If the first possible state is a goal state, then return the successful state.
-Otherwise, generate the successors of the first state and combine them with the other states.
-Order this combined list according to the particular search strategy and continue searching.
-Note that `tree-search` itself does not specify any particular searching strategy.
+最初の探索の道具を `tree-search` と呼ぶことにします。木の形をした状態空間を探索するために設計されているからです。
+引数は4つです。(1) 正当な初期状態の並び、(2) 目標状態に到達したかを判断する述語、(3) ある状態の後継を生成する関数、(4) どんな順序で探索するかを決める関数。
+第1引数が単一の状態ではなく並びなのは、状態空間の道をいくつか探ったあとで `tree-search` が自分自身を再帰的に呼べるようにするためです。
+第1引数は初期状態ではなく、そこから目標に到達しうる状態の候補の並びだと考えてください。
+この並びは、ここまでに探った木の縁を表しています。
+`tree-search` には3つの場合があります。検討すべき状態がもうなければ、あきらめて `fail` を返します。
+候補の最初の状態が目標状態なら、その成功した状態を返します。
+そうでなければ最初の状態の後継を生成し、他の状態と組み合わせます。
+その組み合わせた並びを個々の探索戦略に従って並べ、探索を続けます。
+`tree-search` 自身は特定の探索戦略を何も指定しないことに注意してください。
 
 ```lisp
 (defun tree-search (states goal-p successors combiner)
@@ -663,13 +663,13 @@ Note that `tree-search` itself does not specify any particular searching strateg
           goal-p successors combiner))))
 ```
 
-The first strategy we will consider is called *depth-first search*.
-In depth-first search, the longest paths are considered first.
-In other words, we generate the successors of a state, and then work on the first successor first.
-We only return to one of the subsequent successors if we arrive at a state that has no successors at all.
-This strategy can be implemented by simply appending the previous states to the end of the list of new successors on each iteration.
-The function `depth-first-search` takes a single starting state, a goal predicate, and a successor function.
-It packages the starting state into a list as expected by `tree-search`, and specifies append as the combining function:
+最初に考える戦略は*深さ優先探索*と呼ばれるものです。
+深さ優先探索では、最も長い道を先に検討します。
+言い換えれば、ある状態の後継を生成し、その最初の後継から取り組みます。
+後続の後継に戻るのは、後継をまったく持たない状態に行き着いたときだけです。
+この戦略は、繰り返しのたびに以前の状態を新しい後継の並びの末尾に連結するだけで実装できます。
+関数 `depth-first-search` は、単一の初期状態、目標の述語、後継の関数をとります。
+初期状態を `tree-search` が期待する並びに包み、組み合わせの関数として append を指定します。
 
 ```lisp
 (defun depth-first-search (start goal-p successors)
@@ -677,26 +677,26 @@ It packages the starting state into a list as expected by `tree-search`, and spe
   (tree-search (list start) goal-p successors #'append))
 ```
 
-Let's see how we can search through the binary tree defined previously.
-First, we define the successor function `binary-tree`.
-It returns a list of two states, the two numbers that are twice the input state and one more than twice the input state.
-So the successors of 1 will be 2 and 3, and the successors of 2 will be 4 and 5.
-The `binary-tree` function generates an infinite tree of which the first 15 nodes are diagrammed in our example.
+先に定義した二分木をどう探索できるか見てみましょう。
+まず後継の関数 `binary-tree` を定義します。
+これは2つの状態からなる並びを返します。入力の状態の2倍の数と、2倍より1大きい数です。
+ですから1の後継は2と3、2の後継は4と5になります。
+`binary-tree` は無限の木を生成し、その最初の15ノードを先の例に図示しています。
 
 ```lisp
 (defun binary-tree (x) (list (* 2 x) (+  1 (* 2 x))))
 ```
 
-To make it easier to specify a goal, we define the function `is` as a function that returns a predicate that tests for a particular value.
-Note that `is` does not do the test itself.
-Rather, it returns a function that can be called to perform tests:
+目標を指定しやすくするため、特定の値かどうかを調べる述語を返す関数として `is` を定義します。
+`is` 自身は判定を行わないことに注意してください。
+むしろ、判定を行うために呼べる関数を返します。
 
 ```lisp
 (defun is (value) #'(lambda (x) (eql x value)))
 ```
 
-Now we can turn on the debugging output and search through the binary tree, starting at 1, and looking for, say, 12, as the goal state.
-Each line of debugging output shows the list of states that have been generated as successors but not yet examined:
+これでデバッグ出力を入にして、1から始めてたとえば12を目標状態として二分木を探索できます。
+デバッグ出力の各行は、後継として生成されたがまだ調べられていない状態の並びを示しています。
 
 ```lisp
 > (debug :search) => (SEARCH)
@@ -716,11 +716,11 @@ Each line of debugging output shows the list of states that have been generated 
 [Abort]
 ```
 
-The problem is that we are searching an infinite tree, and the depth-first search strategy just dives down the left-hand branch at every step.
-The only way to stop the doomed search is to type an interrupt character.
+問題は、無限の木を探索していることと、深さ優先の戦略が毎回ただ左の枝へ潜っていくことです。
+この望みのない探索を止めるには、割り込みの文字を打つしかありません。
 
-An alternative strategy is *breadth-first search*, where the shortest path is extended first at each step.
-It can be implemented simply by appending the new successor states to the end of the existing states:
+代わりの戦略が*幅優先探索*で、各段階で最も短い道を先に伸ばします。
+これは新しい後継の状態を既存の状態の末尾に連結するだけで実装できます。
 
 ```lisp
 (defun prepend (x y) "Prepend y to start of x" (append y x))
@@ -730,8 +730,8 @@ It can be implemented simply by appending the new successor states to the end of
   (tree-search (list start) goal-p successors #'prepend))
 ```
 
-The only difference between depth-first and breadth-first search is the difference between `append` and `prepend`.
-Here we see `breadth-first-search` in action:
+深さ優先と幅優先の唯一の違いは、`append` と `prepend` の違いです。
+`breadth-first-search` の働きを見てみましょう。
 
 ```lisp
 > (breadth-first-search 1 (is 12) 'binary-tree)
@@ -750,17 +750,17 @@ Here we see `breadth-first-search` in action:
 12
 ```
 
-Breadth-first search ends up searching each node in numerical order, and so it will eventually find any goal.
-It is methodical, but therefore plodding.
-Depth-first search will be much faster - if it happens to find the goal at all.
-For example, if we were looking for 2048, depth-first search would find it in 12 steps, while breadth-first would take 2048 steps.
-Breadth-first search also requires more storage, because it saves more intermediate states.
+幅優先探索は結局ノードを数の順に探索するので、いずれどんな目標も見つけます。
+几帳面ですが、そのぶん鈍重です。
+深さ優先探索はずっと速いでしょう — たまたま目標を見つけられれば、の話ですが。
+たとえば2048を探すなら、深さ優先は12歩で見つけますが、幅優先は2048歩かかります。
+幅優先探索はまた、中間の状態を多く保持するので記憶領域も多く要します。
 
-If the search tree is finite, then either breadth-first or depth-first will eventually find the goal.
-Both methods search the entire state space, but in a different order.
-We will now show a depth-first search of the 15-node binary tree diagrammed previously.
-It takes about the same amount of time to find the goal (12) as it did with breadth-first search.
-It would have taken more time to find 15; less to find 8.
+探索の木が有限なら、幅優先でも深さ優先でもいずれ目標を見つけます。
+どちらの手法も状態空間全体を探索しますが、順序が違います。
+では先に図示した15ノードの二分木を深さ優先で探索する様子を示します。
+目標（12）を見つけるのにかかる手間は、幅優先探索とほぼ同じです。
+15を探すならもっとかかり、8ならもっと少なくて済んだでしょう。
 The big difference is in the number of states considered at one time.
 At most, depth-first search considers four at a time; in general it will need to store only *log2n* states to search a *n-node* tree, while breadth-first search needs to store *n/2* states.
 
