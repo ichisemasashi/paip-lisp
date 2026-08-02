@@ -1,173 +1,173 @@
-# Chapter 4
-## GPS: The General Problem Solver
+# 第4章
+## GPS: 汎用問題解決器
 
-> *There are now in the world machines that think.*
+> *いまや世界には、考える機械が存在する。*
 
 > -Herbert Simon
 
-> Nobel Prize-winning AI researcher
+> ノーベル賞を受賞したAI研究者
 
-The General Problem Solver, developed in 1957 by Alan Newell and Herbert Simon, embodied a grandiose vision: a single computer program that could solve *any* problem, given a suitable description of the problem.
-GPS caused quite a stir when it was introduced, and some people in AI felt it would sweep in a grand new era of intelligent machines.
-Simon went so far as to make this statement about his creation:
+汎用問題解決器（General Problem Solver）は、1957年にAlan NewellとHerbert Simonによって作られ、壮大な構想を体現していました。適切な記述さえ与えれば*どんな*問題でも解ける、ただ1つのプログラムという構想です。
+GPSは発表されたとき大きな波紋を呼び、AIの世界には、知的な機械の輝かしい新時代が到来すると考える人もいました。
+Simonは自らの創造物についてこうまで述べています。
 
-> *It is not my aim to surprise or shock you.... But the simplest way I can summarize is to say that there are now in the world machines that think, that learn and create.
-Moreover, their ability to do these things is going to increase rapidly until-in a visible future-the range of problems they can handle will be coextensive with the range to which the human mind has been applied.*
+> *驚かせたり衝撃を与えたりするのが目的ではありません……。しかし最も簡単にまとめるなら、こう言えます。いまや世界には、考え、学び、創造する機械が存在する、と。
+しかもその能力は急速に増していき、見通せる将来のうちに、機械が扱える問題の範囲は、人間の精神が向けられてきた範囲と同じ広がりを持つに至るでしょう。*
 
-Although GPS never lived up to these exaggerated claims, it was still an important program for historical reasons.
-It was the first program to separate its problem solving strategy from its knowledge of particular problems, and it spurred much further research in problem solving.
-For all these reasons, it is a fitting object of study.
+GPSがこうした誇張された主張に応えることはついにありませんでしたが、それでも歴史的な理由から重要なプログラムでした。
+問題解決の戦略と個別の問題についての知識とを分離した最初のプログラムであり、問題解決のその後の研究を大いに促しました。
+こうした理由から、研究の対象としてふさわしいのです。
 
-The original GPS program had a number of minor features that made it quite complex.
-In addition, it was written in an obsolete low-level language, IPL, that added gratuitous complexity.
-In fact, the confusing nature of IPL was probably an important reason for the grand claims about GPS.
-If the program was that complicated, it *must* do something important.
-We will be ignoring some of the subtleties of the original program, and we will use Common Lisp, a much more perspicuous language than IPL.
-The result will be a version of GPS that is quite simple, yet illustrates some important points about AI.
+元のGPSには細々とした機能がいくつもあり、それがかなりの複雑さを生んでいました。
+加えて、IPLという今では使われない低水準の言語で書かれており、それが無用な複雑さを重ねていました。
+実のところ、IPLの分かりにくさこそが、GPSについての大仰な主張の重要な一因だったのでしょう。
+あれほど複雑なプログラムなのだから、何か重要なことをしている*にちがいない*、というわけです。
+ここでは元のプログラムの細かな機微はいくつか無視し、IPLよりはるかに見通しのよい言語であるCommon Lispを使います。
+その結果できあがるのは、かなり単純でありながら、AIについての重要な点をいくつも示すGPSです。
 
-On one level, this chapter is about GPS.
-But on another level, it is about the process of developing an AI computer program.
-We distinguish five stages in the development of a program.
-First is the problem description, which is a rough idea-usually written in English prose-of what we want to do.
-Second is the program specification, where we redescribe the problem in terms that are closer to a computable procedure.
-The third stage is the implementation of the program in a programming language such as Common Lisp, the fourth is testing, and the fifth is debugging and analysis.
-The boundaries between these stages are fluid, and the stages need not be completed in the order stated.
-Problems at any stage can lead to a change in the previous stage, or even to complete redesign or abandonment of the project.
-A programmer may prefer to complete only a partial description or specification, proceed directly to implementation and testing, and then return to complete the specification based on a better understanding.
+ある水準では、この章はGPSについての章です。
+しかし別の水準では、AIプログラムを作り上げていく過程についての章です。
+プログラムの開発を5つの段階に分けて考えます。
+第一は問題の記述です。何をしたいのかについての大まかな考えで、たいていは英語の散文で書かれます。
+第二はプログラムの仕様です。問題を、計算できる手順に近い言葉で書き直します。
+第三はCommon Lispのようなプログラミング言語での実装、第四は試験、第五はデバッグと分析です。
+段階の境目は流動的で、述べた順に完了させる必要もありません。
+どの段階の問題も、前の段階の変更や、設計のやり直し、はては計画の放棄につながりえます。
+記述や仕様を部分的に済ませただけで実装と試験に進み、理解が深まってから仕様の完成に戻る、というやり方を好むプログラマもいるでしょう。
 
-We follow all five stages in the development of our versions of GPS, with the hope that the reader will understand GPS better and will also come to understand better how to write a program of his or her own.
-To summarize, the five stages of an AI programming project are:
+本章ではGPSを作るにあたって5段階すべてをたどります。読者がGPSをよりよく理解し、同時に自分自身のプログラムの書き方についても理解を深めてくれることを願ってのことです。
+まとめると、AIプログラミングの計画の5段階は次のとおりです。
 
-1.  **Describe** the problem in vague terms
+1.  漠然とした言葉で問題を**記述する**
 
-2.  **Specify** the problem in algorithmic terms
+2.  アルゴリズムの言葉で問題の**仕様を定める**
 
-3.  **Implement** the problem in a programming language
+3.  プログラミング言語で**実装する**
 
-4.  **Test** the program on representative examples
+4.  代表的な例でプログラムを**試験する**
 
-5.  **Debug** and **analyze** the resulting program, and repeat the process
+5.  できあがったプログラムを**デバッグ**し**分析**して、この過程を繰り返す
 
 
-## 4.1 Stage 1: Description
+## 4.1 第1段階: 記述
 
-As our problem description, we will start with a quote from Newell and Simon's 1972 book, *Human Problem Solving:*
+問題の記述として、NewellとSimonの1972年の著書 *Human Problem Solving* からの引用から始めましょう。
 
-> *The main methods of GPS jointly embody the heuristic of means-ends analysis.
-Means-ends analysis is typified by the following kind of common-sense argument:*
+> *GPSの主要な手法は、あわせて手段目標分析という発見的方法を体現している。
+手段目標分析は、次のような常識的な筋道に典型的に表れる。*
 
-*I want to take my son to nursery school.
-What's the difference between what I have and what I want?
-One of distance.
-What changes distance?
-My automobile.
-My automobile won't work.
-What is needed to make it work?
-A new battery.
-What has new batteries?
-An auto repair shop.
-I want the repair shop to put in a new battery; but the shop doesn't know I need one.
-What is the difficulty?
-One of communication.
-What allows communication?
-A telephone... and so on.*
+*息子を保育園に連れて行きたい。
+いま持っているものと欲しいものとの差は何か。
+距離だ。
+距離を変えるものは何か。
+自動車だ。
+その自動車が動かない。
+動かすには何が要るか。
+新しいバッテリーだ。
+新しいバッテリーがあるのはどこか。
+自動車修理店だ。
+修理店に新しいバッテリーを入れてほしい。しかし店はこちらが必要としていることを知らない。
+何が難点か。
+意思疎通だ。
+意思疎通を可能にするものは何か。
+電話だ……以下同様。*
 
-> *The kind of analysis-classifying things in terms of the functions they serve and oscillating among ends, functions required, and means that perform them-forms the basic system of heuristic of GPS.*
+> *この種の分析 — ものごとをそれが果たす機能によって分類し、目的と、必要とされる機能と、それを果たす手段とのあいだを行き来すること — が、GPSの発見的方法の基本体系をなしている。*
 
-Of course, this kind of analysis is not exactly new.
-The theory of means-ends analysis was laid down quite elegantly by Aristotle 2300 years earlier in the chapter entitled "The nature of deliberation and its objects" of the *Nicomachean Ethics* (Book III.
-3,1112b):
+もちろん、この種の分析はまったく新しいものというわけではありません。
+手段目標分析の理論は、2300年も前にアリストテレスが *ニコマコス倫理学*（第III巻）の「思案の本性とその対象」と題された章で、実に見事に述べています。
+3, 1112b）
 
-> *We deliberate not about ends, but about means.
-For a doctor does not deliberate whether he shall heal, nor an orator whether he shall persuade, nor a statesman whether he shall produce law and order, nor does anyone else deliberate about his end.
-They assume the end and consider how and by what means it is attained; and if it seems to be produced by several means they consider by which it is most easily and best produced, while if it is achieved by one only they consider how it will be achieved by this and by what means this will be achieved, till they come to the first cause, which in the order of discovery is last... and what is last in the order of analysis seems to be first in the order of becoming.
-And if we come on an impossibility, we give up the search, e.g., if we need money and this cannot be got; but if a thing appears possible we try to do it.*
+> *われわれが思案するのは目的についてではなく、手段についてである。
+医者は病を癒すべきかどうかを思案しないし、弁論家は説得すべきかどうかを、政治家は法と秩序をもたらすべきかどうかを思案しない。誰も自らの目的について思案はしないのである。
+人は目的を前提として置き、それがいかにして、どのような手段によって達せられるかを考える。複数の手段によって成るように見えるなら、どれによれば最も容易に、最もよく成るかを考え、ただ1つの手段によるのであれば、それによっていかに成るか、そしてその手段はまた何によって成るかを考え、ついには第一の原因に至る。それは発見の順序においては最後のものである……そして分析の順序において最後にあるものが、生成の順序においては最初にあるように思われる。
+そして不可能に行き当たれば、探索を断念する。たとえば金が要るのにそれが手に入らない場合である。しかし可能に見えるなら、それを行おうとする。*
 
-Given this description of a theory of problem solving, how should we go about writing a program?
-First, we try to understand more fully the procedure outlined in the quotes.
-The main idea is to solve a problem using a process called means-ends analysis, where the problem is stated in terms of what we want to happen.
-In Newell and Simon's example, the problem is to get the kid to school, but in general we would like the program to be able to solve a broad class of problems.
-We can solve a problem if we can find some way to eliminate "the difference between what I have and what I want." For example, if what I have is a child at home, and what I want is a child at school, then driving may be a solution, because we know that driving leads to a change in location.
-We should be aware that using means-ends analysis is a choice: it is also possible to start from the current situation and search forward to the goal, or to employ a mixture of different search strategies.
+問題解決の理論についてのこの記述を踏まえて、どうプログラムを書き進めればよいでしょうか。
+まず、引用に描かれた手順をより十分に理解しようとします。
+中心にある考えは、手段目標分析と呼ばれる過程で問題を解くことです。そこでは問題を「何が起きてほしいか」という言葉で述べます。
+NewellとSimonの例では、問題は子どもを学校に連れて行くことですが、一般にはプログラムに幅広い種類の問題を解いてほしいわけです。
+「持っているものと欲しいものとの差」をなくす手立てが見つかれば、問題は解けます。たとえば持っているのが「家にいる子ども」で、欲しいのが「学校にいる子ども」なら、運転が解になりえます。運転が場所の変化をもたらすと分かっているからです。
+手段目標分析を使うのは1つの選択だと意識しておくべきです。現在の状況から目標へ前向きに探索することも、複数の探索戦略を混ぜて使うこともできます。
 
-Some actions require the solving of *preconditions* as subproblems.
-Before we can drive the car, we need to solve the subproblem of getting the car in working condition.
-It may be that the car is already working, in which case we need do nothing to solve the subproblem.
-So a problem is solved either by taking appropriate action directly, or by first solving for the preconditions of an appropriate action and then taking the action.
-It is clear we will need some description of allowable actions, along with their preconditions and effects.
-We will also need to develop a definition of appropriateness.
-However, if we can define these notions better, it seems we won't need any new notions.
-Thus, we will arbitrarily decide that the problem description is complete, and move on to the problem specification.
+動作によっては、*事前条件*を部分問題として解く必要があります。
+車を運転する前に、車が動く状態にするという部分問題を解かねばなりません。
+車がすでに動いているなら、その部分問題を解くのに何もする必要はありません。
+つまり問題は、適切な動作を直に取るか、適切な動作の事前条件をまず解いてからその動作を取るか、どちらかで解かれます。
+許される動作を、その事前条件と効果とともに記述する何かが要るのは明らかです。
+適切さの定義も練り上げねばなりません。
+とはいえ、これらの概念をうまく定義できれば、新しい概念は要らなさそうです。
+そこで、問題の記述はここまでで完成としてしまい、問題の仕様へ進むことにします。
 
-## 4.2 Stage 2: Specification
+## 4.2 第2段階: 仕様
 
-At this point we have an idea-admittedly vague-of what it means to solve a problem in `GPS`. We can refine these notions into representations that are closer to Lisp as follows:
+ここまでで、`GPS` において問題を解くとはどういうことかについて、確かに漠然とはしていますが考えができました。これらの概念を、Lispに近い表現へと次のように練り上げられます。
 
-*   We can represent the current state of the world-"what I have"-or the goal state-"what I want"-as sets of conditions.
-Common Lisp doesn't have a data type for sets, but it does have lists, which can be used to implement sets.
-Each condition can be represented by a symbol.
-Thus, a typical goal might be the list of two conditions (`rich famous`), and a typical current state might be (`unknown poor`).
+*   世界の現在の状態 — 「持っているもの」 — や目標の状態 — 「欲しいもの」 — は、条件の集合として表せる。
+Common Lispに集合のデータ型はありませんが、リストがあり、それで集合を実装できます。
+各条件はシンボルで表せます。
+ですから典型的な目標は2つの条件からなるリスト (`rich famous`)、典型的な現在の状態は (`unknown poor`) といったところでしょう。
 
-*   We need a list of allowable operators.
-This list will be constant over the course of a problem, or even a series of problems, but we want to be able to change it and tackle a new problem domain.
+*   許される演算子の並びが要る。
+この並びは1つの問題、あるいは一連の問題を通じて一定ですが、それを変えて新しい問題領域に取り組めるようにもしたいところです。
 
-*   An operator can be represented as a structure composed of an action, a list of preconditions, and a list of effects.
-We can place limits on the kinds of possible effects by saying that an effect either adds or deletes a condition from the current state.
-Thus, the list of effects can be split into an add-list and a delete-list.
-This was the approach taken by the Strips<a id="tfn04-1"></a><sup>[1](#fn04-1)</sup>
-implementation of GPS, which we will be in effect reconstructing in this chapter.
-The original GPS allowed more flexibility in the specification of effects, but flexibility leads to inefficiency.
+*   演算子は、動作・事前条件の並び・効果の並びからなる構造体として表せる。
+効果は現在の状態に条件を加えるか、そこから取り除くかのいずれかだと定めれば、起こりうる効果の種類に枠をはめられます。
+ですから効果の並びは、追加リストと削除リストに分けられます。
+これはStrips<a id="tfn04-1"></a><sup>[1](#fn04-1)</sup>
+によるGPSの実装が採った方式であり、この章で事実上それを作り直すことになります。
+元のGPSは効果の指定にもっと自由を許していましたが、自由は非効率を招きます。
 
-*   A complete problem is described to GPS in terms of a starting state, a goal state, and a set of known operators.
-Thus, GPS will be a function of three arguments.
-For example, a sample call might be:
+*   完全な問題は、初期状態・目標状態・既知の演算子の集合という形でGPSに与えられる。
+ですからGPSは3引数の関数になります。
+たとえば呼び出しの例はこうなるでしょう。
 ```lisp
 (GPS '(unknown poor) '(rich famous) list-of-ops)
 ```
-In other words, starting from the state of being poor and unknown, achieve the state of being rich and famous, using any combination of the known operators.
-GPS should return a true value only if it solves the problem, and it should print a record of the actions taken.
-The simplest approach is to go through the conditions in the goal state one at a time and try to achieve each one.
-If they can all be achieved, then the problem is solved.
+言い換えれば、貧しく無名という状態から出発し、既知の演算子をどう組み合わせてもよいので、裕福で有名という状態を達成せよ、ということです。
+GPSは問題を解けたときにかぎり真の値を返し、取った動作の記録を表示すべきです。
+最も単純な方式は、目標状態の条件を1つずつたどり、それぞれの達成を試みることです。
+すべて達成できれば、問題は解けたことになります。
 
-*   A single goal condition can be achieved in two ways.
-If it is already in the current state, the goal is trivially achieved with no effort.
-Otherwise, we have to find some appropriate operator and try to apply it.
+*   1つの目標条件は2通りの方法で達成できる。
+それがすでに現在の状態にあれば、目標は労せずして自明に達成されています。
+そうでなければ、適切な演算子を見つけて適用を試みねばなりません。
 
-*   An operator is appropriate if one of the effects of the operator is to add the goal in question to the current state; in other words, if the goal is in the operator's add-list.
+*   演算子が適切であるとは、その効果の1つが当の目標を現在の状態に加えることである場合、言い換えれば、目標がその演算子の追加リストに含まれる場合をいう。
 
-*   We can apply an operator if we can achieve all the preconditions.
-But this is easy, because we just defined the notion of achieving a goal in the previous paragraph.
-Once the preconditions have been achieved, applying an operator means executing the action and updating the current state in term of the operator's add-list and delete-list.
-Since our program is just a simulation-it won't be actually driving a car or dialling a telephone-we must be content simply to print out the action, rather than taking any real action.
+*   事前条件をすべて達成できれば、演算子を適用できる。
+これは簡単です。目標を達成するという概念は、前の段落で定義したばかりだからです。
+事前条件が達成されたら、演算子の適用とは、動作を実行し、その演算子の追加リストと削除リストに従って現在の状態を更新することを意味します。
+このプログラムはあくまで模擬 — 実際に車を運転したり電話をかけたりはしません — なので、本当に動作するのではなく、動作を表示するだけで満足せねばなりません。
 
-## 4.3 Stage 3: Implementation
+## 4.3 第3段階: 実装
 
-The specification is complete enough to lead directly to a complete Common Lisp program.
-[Figure 4.1](#f0010) summarizes the variables, data types, and functions that make up the GPS program, along with some of the Common Lisp functions used to implement it.
+仕様は、そのまま完全なCommon Lispプログラムに落とせるだけの完成度に達しています。
+[図4.1](#f0010) は、GPSプログラムを構成する変数・データ型・関数を、実装に使ったCommon Lispの関数のいくつかとともにまとめたものです。
 
-| Symbol             | Use                                                   |
+| 記号               | 用途                                                  |
 | ------             | ---                                                   |
-|                    | **Top-Level Function**                                |
-| `GPS`              | Solve a goal from a state using a list of operators.  |
-|                    | **Special Variables**                                 |
-| `*state*`          | The current state, a list of conditions.              |
-| `*ops*`            | A list of available operators.                        |
-|                    | **Data Types**                                        |
-| `op`               | An operation with preconds, add-list and del-list.    |
-|                    | **Functions**                                         |
-| `achieve`          | Achieve an individual goal.                           |
-| `appropriate-p`    | Decide if an operator is appropriate for a goal.      |
-| `apply-op`         | Apply operator to current state.                      |
-|                    | **Selected Common Lisp Functions**                    |
-| `member`           | Test if an element is a member of a list. (p.78)       |
-| `set-difference`   | All elements in one set but not the other.            |
-| `union`            | All elements in either of the two sets.               |
-| `every`            | Test if every element of a list passes a test. (p. 62)|
-| `some`             | Test if any element of a list passes a test.          |
-|                    | **Previously Defined Functions**                      |
-| `find-all`         | A list of all matching elements. (p. 101)             |
+|                    | **最上位の関数**                                      |
+| `GPS`              | 演算子の並びを使い、ある状態から目標を解く。          |
+|                    | **スペシャル変数**                                    |
+| `*state*`          | 現在の状態。条件の並び。                              |
+| `*ops*`            | 使える演算子の並び。                                  |
+|                    | **データ型**                                          |
+| `op`               | 事前条件・追加リスト・削除リストを持つ演算。          |
+|                    | **関数**                                              |
+| `achieve`          | 個々の目標を達成する。                                |
+| `appropriate-p`    | 演算子が目標に適切かを判断する。                      |
+| `apply-op`         | 演算子を現在の状態に適用する。                        |
+|                    | **主なCommon Lispの関数**                             |
+| `member`           | 要素がリストに属するかを調べる。(78ページ)             |
+| `set-difference`   | 一方の集合にあって他方にない要素すべて。              |
+| `union`            | 2つの集合のいずれかにある要素すべて。                 |
+| `every`            | リストの全要素が判定を通るかを調べる。(62ページ)      |
+| `some`             | リストのいずれかの要素が判定を通るかを調べる。        |
+|                    | **既出の関数**                                        |
+| `find-all`         | 合致する要素すべての並び。(101ページ)                 |
 
-Here is the complete GPS program itself:
+GPSプログラムの全体を示します。
 
 ```lisp
 (defvar *state* nil "The current state: a list of conditions.")
@@ -200,32 +200,32 @@ Here is the complete GPS program itself:
     (setf *state* (union *state* (op-add-list op)))
   t))
 ```
-We can see the program is made up of seven definitions.
-These correspond to the seven items in the specification above.
-In general, you shouldn't expect such a perfect fit between specification and implementation.
-There are two `defvar` forms, one `defstruct`, and four `defun` forms.
-These are the Common Lisp forms for defining variables, structures, and functions, respectively.
-They are the most common top-level forms in Lisp, but there is nothing magic about them; they are just special forms that have the side effect of adding new definitions to the Lisp environment.
+プログラムが7つの定義からなっているのが分かります。
+これらは上の仕様の7項目に対応しています。
+一般には、仕様と実装がこれほどぴたりと合うことを期待すべきではありません。
+`defvar` が2つ、`defstruct` が1つ、`defun` が4つあります。
+これらはそれぞれ変数・構造体・関数を定義するCommon Lispの形です。
+Lispで最もよく使われる最上位の形ですが、魔法めいたところは何もありません。Lispの環境に新しい定義を加えるという副作用を持つ、ただの特殊形式です。
 
-The two `defvar` forms, repeated below, declare special variables named `*state*` and `*ops*,` which can then be accessed from anywhere in the program.
+下に再掲する2つの `defvar` は、`*state*` と `*ops*` という名のスペシャル変数を宣言します。これでプログラムのどこからでも参照できます。
 
 ```lisp
 (defvar *state* nil "The current state: a list of conditions.")
 (defvar *ops* nil "A list of available operators.")
 ```
-The `defstruct` form defines a structure called an `op`, which has slots called `action`, `preconds`, `add-list`, and `del-list`.
-Structures in Common Lisp are similar to structures in C, or records in Pascal.
-The `defstruct` automatically defines a constructor function, which is called `make-op`, and an access function for each slot of the structure.
-The access functions are called `op-action`, `op-preconds`, `op-add-list`, and `op-del-list`.
-The `defstruct` also defines a copier function, `copy-op`, a predicate, `op-p`, and `setf` definitions for changing each slot.
-None of those are used in the GPS program.
-Roughly speaking, it is as if the `defstruct` form
+`defstruct` は `op` という構造体を定義します。`action`、`preconds`、`add-list`、`del-list` というスロットを持ちます。
+Common Lispの構造体は、Cの構造体やPascalのレコードに似ています。
+`defstruct` は生成関数 `make-op` と、構造体の各スロットへのアクセス関数を自動的に定義します。
+アクセス関数の名前は `op-action`、`op-preconds`、`op-add-list`、`op-del-list` です。
+`defstruct` はさらに、複製関数 `copy-op`、述語 `op-p`、そして各スロットを変えるための `setf` の定義も作ります。
+GPSプログラムではそのどれも使いません。
+大まかに言えば、次の `defstruct` は
 
 ```lisp
 (defstruct op "An operation"
   (action nil) (preconds nil) (add-list nil) (del-list nil))
 ```
-expanded into the following definitions:
+以下の定義に展開されたかのようなものです。
 
 ```lisp
 (defun make-op (&key action preconds add-list del-list)
@@ -246,30 +246,30 @@ expanded into the following definitions:
 
 (setf (documentation 'op 'structure) "An operation")
 ```
-Next in the GPS program are four function definitions.
-The main function, `GPS`, is passed three arguments.
-The first is the current state of the world, the second the goal state, and the third a list of allowable operators.
-The body of the function says simply that if we can achieve every one of the goals we have been given, then the problem is solved.
-The unstated alternative is that otherwise, the problem is not solved.
+GPSプログラムの次に来るのは4つの関数定義です。
+主となる関数 `GPS` には引数が3つ渡されます。
+第1が世界の現在の状態、第2が目標状態、第3が許される演算子の並びです。
+関数の本体が言っているのは単純で、与えられた目標をすべて達成できれば問題は解けた、ということだけです。
+言外にあるもう一方は、そうでなければ問題は解けていない、ということです。
 
-The function `achieve` is given as an argument a single goal.
-The function succeeds if that goal is already true in the current state (in which case we don't have to do anything) or if we can apply an appropriate operator.
-This is accomplished by first building the list of appropriate operators and then testing each in turn until one can be applied.
-`achieve` calls `find-all`, which we defined on [page 101](chapter3.md#p101).
-In this use, `find-all` returns a list of operators that match the current goal, according to the predicate `appropriate-p`.
+関数 `achieve` には引数として目標が1つ渡されます。
+その目標が現在の状態ですでに真であるか（その場合は何もする必要がありません）、適切な演算子を適用できれば、この関数は成功します。
+これは、まず適切な演算子の並びを作り、次にそれぞれを順に試して適用できるものが見つかるまで続けることで実現します。
+`achieve` は [101ページ](chapter3.md#p101) で定義した `find-all` を呼びます。
+ここでの用法では、`find-all` は述語 `appropriate-p` に従って現在の目標に合致する演算子の並びを返します。
 
-The function `appropriate-p` tests if an operator is appropriate for achieving a goal.
-(It follows the Lisp naming convention that predicates end in `-p`.)
+関数 `appropriate-p` は、演算子が目標の達成に適切かを調べます。
+（述語は `-p` で終わるというLispの命名の流儀に従っています。）
 
-Finally, the function `apply-op` says that if we can achieve all the preconditions for an appropriate operator, then we can apply the operator.
-This involves printing a message to that effect and changing the state of the world by deleting what was in the delete-list and adding what was in the add-list.
-`apply-op` is also a predicate; it returns `t` only when the operator can be applied.
+最後に、関数 `apply-op` は、適切な演算子の事前条件をすべて達成できれば、その演算子を適用できる、と述べています。
+これには、その旨のメッセージを表示することと、削除リストにあったものを取り除き追加リストにあったものを加えて世界の状態を変えることが含まれます。
+`apply-op` も述語であり、演算子を適用できたときにかぎり `t` を返します。
 
-## 4.4 Stage 4: Test
+## 4.4 第4段階: 試験
 
-This section will define a list of operators applicable to the "driving to nursery school" domain and will show how to pose and solve some problems in that domain.
-First, we need to construct the list of operators for the domain.
-The `defstruct` form for the type `op` automatically defines the function `make-op`, which can be used as follows:
+この節では「保育園まで車で送る」という領域に使える演算子の並びを定義し、その領域でどう問題を立てて解くかを示します。
+まず、この領域の演算子の並びを組み立てる必要があります。
+型 `op` の `defstruct` は関数 `make-op` を自動的に定義しており、次のように使えます。
 
 ```lisp
 (make-op :action 'drive-son-to-school
@@ -277,20 +277,20 @@ The `defstruct` form for the type `op` automatically defines the function `make-
     :add-list '(son-at-school)
     :del-list '(son-at-home))
 ```
-This expression returns an operator whose action is the symbol `drive-son-to-school` and whose preconditions, add-list and delete-list are the specified lists.
-The intent of this operator is that whenever the son is at home and the car works, `drive-son-to-school` can be applied, changing the state by deleting the fact that the son is at home, and adding the fact that he is at school.
+この式は、動作がシンボル `drive-son-to-school` で、事前条件・追加リスト・削除リストが指定された並びである演算子を返します。
+この演算子の意図は、息子が家にいて車が動くときはいつでも `drive-son-to-school` を適用でき、息子が家にいるという事実を消し、学校にいるという事実を加えて状態を変える、というものです。
 
-It should be noted that using long hyphenated atoms like `son-at-home` is a useful approach only for very simple examples like this one.
-A better representation would break the atom into its components: perhaps (`at son home`).
-The problem with the atom-based approach is one of combinatorics.
-If there are 10 predicates (such as `at`) and 10 people or objects, then there will be 10 x 10 x 10 = 1000 possible hyphenated atoms, but only 20 components.
-Clearly, it would be easier to describe the components.
-In this chapter we stick with the hyphenated atoms because it is simpler, and we do not need to describe the whole world.
-Subsequent chapters take knowledge representation more seriously.
+`son-at-home` のような長いハイフンつきのアトムを使うのは、こうしたごく単純な例でのみ有効な方式だという点に注意すべきです。
+よりよい表現は、アトムを構成要素に分けるでしょう。たとえば (`at son home`) のように。
+アトムに基づく方式の問題は、組み合わせの数です。
+（`at` のような）述語が10個、人や物が10個あれば、ハイフンつきのアトムは 10 x 10 x 10 = 1000通りありえますが、構成要素は20個で済みます。
+構成要素を記述するほうが明らかに楽です。
+この章では単純さのためハイフンつきのアトムを使い続けます。世界全体を記述する必要もありませんから。
+以降の章では知識表現をもっと真剣に扱います。
 
-With this operator as a model, we can define other operators corresponding to Newell and Simon's quote on [page 109](chapter4.md#p109).
-There will be an operator for installing a battery, telling the repair shop the problem, and telephoning the shop.
-We can fill in the "and so on" by adding operators for looking up the shop's phone number and for giving the shop money:
+この演算子を手本に、[109ページ](chapter4.md#p109) のNewellとSimonの引用に対応する他の演算子も定義できます。
+バッテリーを取り付ける演算子、修理店に問題を伝える演算子、店に電話をかける演算子ができます。
+「以下同様」の部分は、店の電話番号を調べる演算子と、店に金を払う演算子を加えて埋められます。
 
 ```lisp
 (defparameter *school-ops*
@@ -316,11 +316,11 @@ We can fill in the "and so on" by adding operators for looking up the shop's pho
       :add-list '(shop-has-money)
       :del-list '(have-money))))
 ```
-The next step is to pose some problems to GPS and examine the solutions.
-Following are three sample problems.
-In each case, the goal is the same: to achieve the single condition `son-at-school`.
-The list of available operators is also the same in each problem; the difference is in the initial state.
-Each of the three examples consists of the prompt, ">", which is printed by the Lisp system, followed by a call to GPS, " ( `gps`... )", which is typed by the user, then the output from the program, "(`EXECUTING`...)", and finally the result of the function call, which can be either `SOLVED` or `NIL`.
+次の段階は、GPSにいくつか問題を出して解を調べることです。
+以下に3つの例題を示します。
+いずれも目標は同じで、`son-at-school` という1つの条件を達成することです。
+使える演算子の並びもどの問題でも同じで、違うのは初期状態です。
+3つの例はいずれも、Lispシステムが表示するプロンプト「>」、利用者が打ち込むGPSの呼び出し「( `gps`... )」、プログラムの出力「(`EXECUTING`...)」、そして関数呼び出しの結果（`SOLVED` か `NIL`）からなります。
 
 ```lisp
 > (gps '(son-at-home car-needs-battery have-money have-phone-book)
@@ -343,39 +343,39 @@ NIL
 (EXECUTING DRIVE-SON-TO-SCHOOL)
 SOLVED
 ```
-In all three examples the goal is to have the son at school.
-The only operator that has `son-at-school` in its add-list is `drive-son-to-school`, so GPS selects that operator initially.
-Before it can execute the operator, GPS has to solve for the preconditions.
-In the first example, the program ends up working backward through the operators `shop-installs-battery`, `give-shop-money`, `tell-shop-problem`, and `telephone-shop` to `look-up-number`, which has no outstanding preconditions.
-Thus, the `look-up-number` action can be executed, and the program moves on to the other actions.
-As Aristotle said, "What is the last in the order of analysis seems to be first in the order of becoming."
+3つの例のいずれも、目標は息子を学校にいさせることです。
+追加リストに `son-at-school` を持つ演算子は `drive-son-to-school` だけなので、GPSはまずその演算子を選びます。
+演算子を実行する前に、GPSは事前条件を解かねばなりません。
+最初の例では、プログラムは `shop-installs-battery`、`give-shop-money`、`tell-shop-problem`、`telephone-shop` と後ろ向きにたどり、未解決の事前条件を持たない `look-up-number` に行き着きます。
+こうして `look-up-number` の動作が実行でき、プログラムは他の動作へ進みます。
+アリストテレスが言ったとおり、「分析の順序において最後にあるものが、生成の順序においては最初にあるように思われる」のです。
 
-The second example starts out exactly the same, but the `look-up-number` operator fails because its precondition, `have-phone-book`, cannot be achieved.
-Knowing the phone number is a precondition, directly or indirectly, of all the operators, so no action is taken and GPS returns `NIL`.
+2つ目の例はまったく同じように始まりますが、`look-up-number` は事前条件 `have-phone-book` を達成できないため失敗します。
+電話番号を知っていることは、直接にせよ間接にせよすべての演算子の事前条件なので、動作は何も取られずGPSは `NIL` を返します。
 
-Finally, the third example is much more direct; the initial state specifies that the car works, so the driving operator can be applied immediately.
+最後の3つ目の例はずっと直接的です。初期状態で車が動くと指定されているので、運転の演算子をすぐに適用できます。
 
-## 4.5 Stage 5: Analysis, or "We Lied about the G"
+## 4.5 第5段階: 分析、あるいは「Gについては嘘をついた」
 
-In the sections that follow, we examine the question of just how general this General Problem Solver is.
-The next four sections point out limitations of our version of GPS, and we will show how to correct these limitations in a second version of the program.
+続く節では、この汎用問題解決器がいったいどれほど汎用なのかという問いを検討します。
+次の4節では私たちの版のGPSの限界を指摘し、第2版でそれをどう正すかを示します。
 
-One might ask if "limitations" is just a euphemism for "bugs." Are we "enhancing" the program, or are we "correcting" it?
-There are no clear answers on this point, because we never insisted on an unambiguous problem description or specification.
-AI programming is largely exploratory programming; the aim is often to discover more about the problem area rather than to meet a clearly defined specification.
-This is in contrast to a more traditional notion of programming, where the problem is completely specified before the first line of code is written.
+「限界」とは「バグ」の婉曲表現にすぎないのでは、と問う人もいるでしょう。私たちはプログラムを「強化」しているのか、それとも「修正」しているのか。
+この点に明確な答えはありません。曖昧さのない問題の記述や仕様を、私たちは初めから求めなかったからです。
+AIのプログラミングはおおむね探索的なプログラミングです。狙いは、明確に定められた仕様を満たすことよりも、問題領域についてより多くを見出すことにあるのがしばしばです。
+これは、コードの最初の1行を書く前に問題が完全に仕様化されている、という伝統的なプログラミング観とは対照的です。
 
-## 4.6 The Running Around the Block Problem
+## 4.6 街区をぐるぐる回る問題
 
-Representing the operator "driving from home to school" is easy: the precondition and delete-list includes being at home, and the add-list includes being at school.
-But suppose we wanted to represent "running around the block." There would be no net change of location, so does that mean there would be no add or delete-list?
-If so, there would be no reason ever to apply the operator.
-Perhaps the add-list should contain something like "got some exercise" or "feel tired," or something more general like "experience running around the block." We will return to this question later.
+「家から学校へ運転する」演算子を表すのは簡単です。事前条件と削除リストに家にいることが入り、追加リストに学校にいることが入ります。
+しかし「街区をぐるぐる走る」を表したいとしましょう。場所は差し引きゼロで変わらないので、追加リストも削除リストもないということでしょうか。
+もしそうなら、この演算子を適用する理由はまったくなくなります。
+追加リストには「運動した」や「疲れを感じる」、あるいはもっと一般に「街区を走るという経験」のようなものを入れるべきなのかもしれません。この問いにはのちほど立ち戻ります。
 
-## 4.7 The Clobbered Sibling Goal Problem
+## 4.7 兄弟ゴールを潰す問題
 
-Consider the problem of not only getting the child to school but also having some money left over to use for the rest of the day.
-GPS can easily solve this problem from the following initial condition:
+子どもを学校に送るだけでなく、その日の残りに使う金も手元に残す、という問題を考えましょう。
+次の初期条件からなら、GPSはこの問題を難なく解けます。
 
 ```lisp
 (gps '(son-at-home have-money car-works)
@@ -384,7 +384,7 @@ GPS can easily solve this problem from the following initial condition:
 (EXECUTING DRIVE-SON-TO-SCHOOL)
 SOLVED
 ```
-However, in the next example GPS incorrectly reports success, when in fact it has spent the money on the battery.
+しかし次の例では、実際にはバッテリーに金を使ってしまっているのに、GPSは誤って成功を報告します。
 
 ```lisp
 > (gps '(son-at-home car-needs-battery have-money have-phone-book)
@@ -398,33 +398,33 @@ However, in the next example GPS incorrectly reports success, when in fact it ha
 (EXECUTING DRIVE-SON-TO-SCHOOL)
 SOLVED
 ```
-The "bug" is that GPS uses the expression (`every #'achieve goals`) to achieve a set of goals.
-If this expression returns true, it means that every one of the goals has been achieved in sequence, but it doesn't mean they are all still true at the end.
-In other words, the goal (`have-money son-at-school`), which we intended to mean "end up in a state where both have-money and son-at-school are true," was interpreted by GPS to mean "first achieve `have-money`, and then achieve `son-at-school`." Sometimes achieving one goal can undo another, previously achieved goal.
-We will call this the "prerequisite clobbers sibling goal" problem.<a id="tfn04-2"></a><sup>[2](#fn04-2)</sup>
-That is, `have-money` and `son-at-school` are sibling goals, one of the prerequisites for the plan for `son-at-school` is `car-works`, and achieving that goal clobbers the `have-money` goal.
+「バグ」は、GPSが目標の集合を達成するのに式 (`every #'achieve goals`) を使っていることです。
+この式が真を返すのは、目標が順に1つずつ達成されたということであって、最後にそのすべてがまだ真だということではありません。
+言い換えれば、私たちが「have-money と son-at-school の両方が真である状態に行き着く」という意味のつもりだった目標 (`have-money son-at-school`) を、GPSは「まず `have-money` を達成し、次に `son-at-school` を達成する」と解釈したのです。ある目標の達成が、先に達成した別の目標を台無しにすることがあります。
+これを「前提条件が兄弟ゴールを潰す」問題と呼ぶことにします。<a id="tfn04-2"></a><sup>[2](#fn04-2)</sup>
+つまり `have-money` と `son-at-school` は兄弟ゴールであり、`son-at-school` のための計画の前提条件の1つが `car-works` で、それを達成することが `have-money` という目標を潰してしまうのです。
 
-Modifying the program to recognize the "prerequisite clobbers sibling goal" problem is straightforward.
-First note that we call `(every #'achieve` *something*`)` twice within the program, so let's replace those two forms with `(achieve-all` *something*`)`.
-We can then define `achieve-all` as follows:
+「前提条件が兄弟ゴールを潰す」問題を見つけられるようプログラムを直すのは、素直な作業です。
+まず、プログラム内で `(every #'achieve` *何か*`)` を2回呼んでいることに注目し、この2つを `(achieve-all` *何か*`)` に置き換えましょう。
+そのうえで `achieve-all` を次のように定義できます。
 
 ```lisp
 (defun achieve-all (goals)
   "Try to achieve each goal, then make sure they still hold."
   (and (every #'achieve goals) (subsetp goals *state*)))
 ```
-The Common Lisp function subsetp returns true if its first argument is a subset of its second.
-In `achieve-all`, it returns true if every one of the goals is still in the current state after achieving all the goals.
-This is just what we wanted to test.
+Common Lispの関数 subsetp は、第1引数が第2引数の部分集合であれば真を返します。
+`achieve-all` では、すべての目標を達成したあとでも、そのどれもが現在の状態に残っていれば真を返します。
+まさに調べたかったことです。
 
-The introduction of `achieve-all` prevents GPS from returning true when one of the goals gets clobbered, but it doesn't force GPS to replan and try to recover from a clobbered goal.
-We won't consider that possibility now, but we will take it up again in the section on the blocks world domain, which was Sussman's primary example.
+`achieve-all` の導入により、目標の1つが潰されたときにGPSが真を返すことはなくなりますが、潰された目標から立て直すために計画をやり直させるわけではありません。
+その可能性は今は考えず、Sussmanの主たる例だった積み木の世界の領域の節で改めて取り上げます。
 
-## 4.8 The Leaping before You Look Problem
+## 4.8 見る前に跳ぶ問題
 
-Another way to address the "prerequisite clobbers sibling goal" problem is just to be more careful about the order of goals in a goal list.
-If we want to get the kid to school and still have some money left, why not just specify the goal as (`son-at-school have-money`) rather than (`have-money son-at-school`)?
-Let's see what happens when we try that:
+「前提条件が兄弟ゴールを潰す」問題への別の対処は、目標の並びにおける順序にもっと気を配ることです。
+子どもを学校に送ってなお金を残したいなら、目標を (`have-money son-at-school`) ではなく (`son-at-school have-money`) と指定すればよいのでは。
+試すとどうなるか見てみましょう。
 
 ```lisp
 > (gps '(son-at-home car-needs-battery have-money have-phone-book)
@@ -438,21 +438,21 @@ Let's see what happens when we try that:
 (EXECUTING DRIVE-SON-TO-SCHOOL)
 NIL
 ```
-GPS returns nil, reflecting the fact that the goal cannot be achieved, but only after executing all actions up to and including driving to school.
-I call this the "leaping before you look" problem, because if you asked the program to solve for the two goals `(jump-off-cliff land-safely)` it would happily jump first, only to discover that it had no operator to land safely.
-This is less than prudent behavior.
+GPSは目標が達成できないことを反映して nil を返しますが、それは学校まで運転するのを含む全動作を実行したあとのことです。
+私はこれを「見る前に跳ぶ」問題と呼んでいます。`(jump-off-cliff land-safely)` という2つの目標を解かせたら、プログラムは嬉々としてまず跳び、そのあとで安全に着地する演算子がないと気づくからです。
+慎重な振る舞いとは言いがたいですね。
 
-The problem arises because planning and execution are interleaved.
-Once the preconditions for an operator are achieved, the action is taken-and `*state*` is irrevocably changed-even if this action may eventually lead to a dead end.
-An alternative would be to replace the single global `*state*` with distinct local state variables, such that a new variable is created for each new state.
-This alternative is a good one for another, independent reason, as we shall see in the next section.
+この問題は、計画と実行が織り交ぜられていることから生じます。
+演算子の事前条件がいったん達成されると、その動作は取られ — `*state*` は取り返しのつかない形で変わり — ます。たとえその動作が最後には行き止まりに至るとしてもです。
+代案としては、唯一の大域的な `*state*` を、状態ごとに新しい変数が作られるような個別の局所状態変数に置き換えることが考えられます。
+この代案は、次節で見るように、これとは別の独立した理由からもよいものです。
 
-## 4.9 The Recursive Subgoal Problem
+## 4.9 部分ゴールが再帰する問題
 
-In our simulated nursery school world there is only one way to find out a phone number: to look it up in the phone book.
-Suppose we want to add an operator for finding out a phone number by asking someone.
-Of course, in order to ask someone something, you need to be in communication with him or her.
-The asking-for-a-phone-number operator could be implemented as follows:
+私たちが模擬した保育園の世界では、電話番号を知る方法は1つ、電話帳で調べることだけです。
+誰かに尋ねて電話番号を知る演算子を加えたいとしましょう。
+もちろん誰かに何かを尋ねるには、その相手と意思疎通できている必要があります。
+電話番号を尋ねる演算子は次のように実装できます。
 
 ```lisp
 (push (make-op :action 'ask-phone-number
@@ -460,9 +460,9 @@ The asking-for-a-phone-number operator could be implemented as follows:
       :add-list '(know-phone-number))
     *school-ops*)
 ```
-(The special form ( `push` *item list*) puts the item on the front of the list; it is equivalent to (setf *list* (`cons` *item list*) ) in the simple case.)
-Unfortunately, something unexpected happens when we attempt to solve seemingly simple problems with this new set of operators.
-Consider the following:
+（特殊形式 ( `push` *要素 リスト*) は要素をリストの先頭に置きます。単純な場合には (setf *リスト* (`cons` *要素 リスト*) ) と等価です。）
+あいにく、この新しい演算子の組で一見単純な問題を解こうとすると、思わぬことが起こります。
+次を見てください。
 
 ```lisp
 > (gps '(son-at-home car-needs-battery have-money)
@@ -472,9 +472,9 @@ Consider the following:
 The regular push-down list has overflown.
 While in the function ACHIEVE <- EVERY <- REMOVE
 ```
-The error message (which will vary from one implementation of Common Lisp to another) means that too many recursively nested function calls were made.
-This indicates either a very complex problem or, more commonly, a bug in the program leading to infinite recursion.
-One way to try to see the cause of the bug is to trace a relevant function, such as `achieve`:
+（Common Lispの処理系ごとに異なる）このエラーメッセージは、再帰的に入れ子になった関数呼び出しが多すぎたことを意味します。
+これは、きわめて複雑な問題か、より多くの場合は無限再帰を招くプログラムのバグを示しています。
+バグの原因を探る1つの方法は、`achieve` のような関わりのある関数を追跡することです。
 
 `> (trace achieve)`=> `(ACHIEVE)`
 
@@ -496,49 +496,49 @@ One way to try to see the cause of the bug is to trace a relevant function, such
               (8 ENTER ACHIEVE: IN-COMMUNICATION-WITH-SHOP)
                 (9 ENTER ACHIEVE: KNOW-PHONE-NUMBER)
 ```
-The output from trace gives us the necessary clues.
-Newell and Simon talk of "oscillating among ends, functions required, and means that perform them." Here it seems we have an infinite oscillation between being in communication with the shop (levels 4, 6, 8,...) and knowing the shop's phone number (levels 5, 7, 9,...).
-The reasoning is as follows: we want the shop to know about the problem with the battery, and this requires being in communication with him or her.
-One way to get in communication is to phone, but we don't have a phone book to look up the number.
-We could ask them their phone number, but this requires being in communication with them.
-As Aristotle put it, "If we are to be always deliberating, we shall have to go on to infinity." We will call this the "recursive subgoal" problem: trying to solve a problem in terms of itself.
-One way to avoid the problem is to have `achieve` keep track of all the goals that are being worked on and give up if it sees a loop in the goal stack.
+trace の出力が必要な手がかりをくれます。
+NewellとSimonは「目的と、必要とされる機能と、それを果たす手段とのあいだを行き来する」と述べています。ここでは、店と意思疎通できていること（深さ4、6、8……）と、店の電話番号を知っていること（深さ5、7、9……）のあいだで無限の行き来が起きているようです。
+筋道はこうです。バッテリーの問題を店に知ってほしい。それには店と意思疎通できている必要がある。
+意思疎通する1つの方法は電話をかけることだが、番号を調べる電話帳がない。
+電話番号を尋ねることもできるが、それには相手と意思疎通できている必要がある。
+アリストテレスの言葉を借りれば、「常に思案し続けるのであれば、無限に進まねばならない」。これを「部分ゴールが再帰する」問題、すなわち問題をそれ自身によって解こうとする問題と呼ぶことにします。
+この問題を避ける1つの方法は、`achieve` に取り組み中の目標をすべて記録させ、目標のスタックに循環を見つけたらあきらめさせることです。
 
-## 4.10 The Lack of Intermediate Information Problem
+## 4.10 途中経過が分からない問題
 
-When GPS fails to find a solution, it just returns `nil`.
-This is annoying in cases where the user expected a solution to be found, because it gives no information about the cause of failure.
-The user could always trace some function, as we traced `achieve` above, but the output from trace is rarely exactly the information desired.
-It would be nice to have a general debugging output tool where the programmer could insert print statements into his code and have them selectively printed, depending on the information desired.
+GPSは解を見つけられなかったとき、ただ `nil` を返します。
+解が見つかると思っていた場合、失敗の原因について何も分からないので、これは腹立たしいことです。
+上で `achieve` を追跡したように、いつでも何かの関数を追跡はできますが、trace の出力がまさに欲しい情報であることはめったにありません。
+プログラマがコードに表示文を差し込んでおき、欲しい情報に応じて選択的に表示させられる、汎用のデバッグ出力の道具があるとありがたいでしょう。
 
-The function `dbg` provides this capability.
-`dbg` prints output in the same way as `format`, but it will only print when debugging output is desired.
-Each call to `dbg` is accompanied by an identifier that is used to specify a class of debugging messages.
-The functions `debug` and `undebug` are used to add or remove message classes to the list of classes that should be printed.
-In this chapter, all the debugging output will use the identifier `:gps`.
-Other programs will use other identifiers, and a complex program will use many identifiers.
+関数 `dbg` がこの機能を与えてくれます。
+`dbg` は `format` と同じ形で出力しますが、デバッグ出力が求められているときにしか表示しません。
+`dbg` の呼び出しにはそれぞれ識別子が伴い、デバッグメッセージの種類を指定するのに使われます。
+関数 `debug` と `undebug` は、表示すべき種類の並びにメッセージの種類を加えたり取り除いたりするのに使います。
+この章では、デバッグ出力はすべて識別子 `:gps` を使います。
+他のプログラムは別の識別子を使いますし、複雑なプログラムは多くの識別子を使うでしょう。
 
-A call to `dbg` will result in output if the first argument to `dbg`, the identifier, is one that was specified in a call to `debug`.
-The other arguments to `dbg` are a format string followed by a list of arguments to be printed according to the format string.
-In other words, we will write functions that include calls to `dbg` like:
+`dbg` の第1引数である識別子が `debug` の呼び出しで指定されたものであれば、`dbg` の呼び出しは出力を生みます。
+`dbg` の残りの引数は、書式文字列と、それに従って表示される引数の並びです。
+つまり、次のような `dbg` の呼び出しを含む関数を書くことになります。
 
 ```lisp
 (dbg :gps "The current goal is: ~a" goal)
 ```
 
-If we have turned on debugging with `(debug :gps)`, then calls to `dbg` with the identifier `:gps` will print output.
-The output is turned off with `(undebug :gps)`.
-`debug` and `undebug` are designed to be similar to `trace` and `untrace`, in that they turn diagnostic output on and off.
-They also follow the convention that `debug` with no arguments returns the current list of identifiers, and that `undebug` with no arguments turns all debugging off.
-However, they differ from `trace` and `untrace` in that they are functions, not macros.
-If you use only keywords and integers for identifiers, then you won't notice the difference.
+`(debug :gps)` でデバッグを入にしてあれば、識別子 `:gps` での `dbg` の呼び出しが出力を表示します。
+出力は `(undebug :gps)` で切れます。
+`debug` と `undebug` は、診断出力を入切りするという点で `trace`、`untrace` に似せて設計されています。
+引数なしの `debug` は現在の識別子の並びを返し、引数なしの `undebug` はデバッグをすべて切る、という流儀にも従います。
+ただし `trace`、`untrace` と違い、これらはマクロではなく関数です。
+識別子にキーワードと整数しか使わないなら、その違いに気づくことはないでしょう。
 
-Two new built-in features are introduced here.
-First, `*debug-io*` is the stream normally used for debugging input/output.
-In all previous calls to `format` we have used `t` as the stream argument, which causes output to go to the `*standard-output*` stream.
-Sending different types of output to different streams allows the user some flexibility.
-For example, debugging output could be directed to a separate window, or it could be copied to a file.
-Second, the function `fresh-line` advances to the next line of output, unless the output stream is already at the start of the line.
+ここで組み込みの機能を2つ新たに紹介します。
+第一に、`*debug-io*` はデバッグの入出力に通常使われるストリームです。
+これまでの `format` の呼び出しではストリームの引数に `t` を使っており、これは出力を `*standard-output*` ストリームへ送ります。
+種類の異なる出力を異なるストリームへ送れると、利用者にいくらか自由が生まれます。
+たとえばデバッグ出力を別のウィンドウに向けたり、ファイルに写したりできます。
+第二に、関数 `fresh-line` は出力を次の行に進めます。ただし出力ストリームがすでに行頭にある場合は進めません。
 
 ```lisp
 (defvar *dbg-ids* nil "Identifiers used by dbg")
@@ -558,8 +558,8 @@ Second, the function `fresh-line` advances to the next line of output, unless th
   (setf *dbg-ids* (if (null ids) nil
             (set-difference *dbg-ids* ids))))
 ```
-Sometimes it is easier to view debugging output if it is indented according to some pattern, such as the depth of nested calls to a function.
-To generate indented output, the function `dbg-indent` is defined:
+デバッグ出力は、関数の入れ子の深さのような何らかの規則で字下げされていると見やすいことがあります。
+字下げした出力を生むために、関数 `dbg-indent` を定義します。
 
 ```lisp
 (defun dbg-indent (id indent format-string &rest args)
@@ -569,25 +569,25 @@ To generate indented output, the function `dbg-indent` is defined:
     (dotimes (i indent) (princ " " *debug-io*))
     (apply #'format *debug-io* format-string args)))
 ```
-## 4.11 GPS Version 2: A More General Problem Solver
+## 4.11 GPS 第2版: より汎用の問題解決器
 
-At this point we are ready to put together a new version of GPS with solutions for the "running around the block," "prerequisite clobbers sibling goal," "leaping before you look," and "recursive subgoal" problems.
-The glossary for the new version is in [figure 4.2](#f0015).
+ここまでで、「街区をぐるぐる回る」「前提条件が兄弟ゴールを潰す」「見る前に跳ぶ」「部分ゴールが再帰する」の各問題への解を備えた新しい版のGPSを組み上げる準備が整いました。
+新しい版の用語一覧は [図4.2](#f0015) にあります。
 
 
-| Symbol             | Use                                                   |
+| 記号               | 用途                                                  |
 | ------             | ---                                                   |
-|                    | **Top-Level Function**                                |
-| `GPS`              | Solve a goal from a state using a list of operators.  |
-|                    | **Special Variables**                                 |
-| `*ops*`            | A list of available operators.                        |
-|                    | **Data Types**                                        |
-| `op`               | An operation with preconds, add-list and del-list.    |
+|                    | **最上位の関数**                                      |
+| `GPS`              | 演算子の並びを使い、ある状態から目標を解く。          |
+|                    | **スペシャル変数**                                    |
+| `*ops*`            | 使える演算子の並び。                                  |
+|                    | **データ型**                                          |
+| `op`               | 事前条件・追加リスト・削除リストを持つ演算。          |
 |                    | **Major Functions**                                   |
 | `achieve-all`      | Achieve a list of goals.                              |
-| `achieve`          | Achieve an individual goal.                           |
-| `appropriate-p`    | Decide if an operator is appropriate for a goal.      |
-| `apply-op`         | Apply operator to current state.                      |
+| `achieve`          | 個々の目標を達成する。                                |
+| `appropriate-p`    | 演算子が目標に適切かを判断する。                      |
+| `apply-op`         | 演算子を現在の状態に適用する。                        |
 |                    | **Auxiliary Functions**                               |
 | `executing-p`      | Is a condition an *executing* form?                   |
 | `starts-with`      | Is the argument a list that starts with a given atom? |
@@ -595,16 +595,16 @@ The glossary for the new version is in [figure 4.2](#f0015).
 | `op`               | Create an operator.                                   |
 | `use`              | Use a list of operators.                              |
 | `member-equal`     | Test if an element is equal to a member of a list.    |
-|                    | **Selected Common Lisp Functions**                    |
+|                    | **主なCommon Lispの関数**                             |
 | `member`           | Test if an element is a member of a list. (p.78)      |
-| `set-difference`   | All elements in one set but not the other.            |
+| `set-difference`   | 一方の集合にあって他方にない要素すべて。              |
 | `subsetp`          | Is one set wholly contained in another?               |
-| `union`            | All elements in either of the two sets.               |
-| `every`            | Test if every element of a list passes a test. (p. 62)|
-| `some`             | Test if any element of a list passes a test.          |
+| `union`            | 2つの集合のいずれかにある要素すべて。                 |
+| `every`            | リストの全要素が判定を通るかを調べる。(62ページ)      |
+| `some`             | リストのいずれかの要素が判定を通るかを調べる。        |
 | `remove-if`        | Remove all items satisfying a test.                   |
-|                    | **Previously Defined Functions**                      |
-| `find-all`         | A list of all matching elements. (p. 101)             |
+|                    | **既出の関数**                                        |
+| `find-all`         | 合致する要素すべての並び。(101ページ)                 |
 | `find-all-if`      | A list of all elements satisfying a predicate.        |
 
 The most important change is that, instead of printing a message when each operator is applied, we will instead have `GPS` return the resulting state.
