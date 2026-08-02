@@ -194,7 +194,7 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | add-list / delete-list | 追加リスト／削除リスト | |
 | goal / subgoal | 目標／部分ゴール | 見出しでは「ゴール」も使う |
 | goal stack | 目標のスタック | |
-| prerequisite clobbers sibling goal | 前提条件が兄弟ゴールを潰す | 原著が引用符付きの決まり文句として繰り返す |
+| prerequisite clobbers sibling goal | 前提条件が同胞ゴールを潰す | 原著が引用符付きの決まり文句として繰り返す。原著者は Sussman の原語 "brother goal" を性別に中立な "sibling" に改めており、その意図を汲んで「兄弟」ではなく「同胞」を当てた（4.7節の脚注参照） |
 | leaping before you look | 見る前に跳ぶ | |
 | recursive subgoal | 部分ゴールが再帰する | |
 | semipredicate | 半述語 | 失敗時にnil、成功時に有用な値を返す関数 |
