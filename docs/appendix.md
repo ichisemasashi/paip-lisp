@@ -1,21 +1,21 @@
-# Appendix
-## Obtaining the Code in this Book
-### FTP: The File Transfer Protocol
+# 付録
+## 本書のコードの入手方法
+### FTP: ファイル転送プロトコル
 
-FTP is a file transfer protocol that is widely accepted by computers around the world.
-FTP makes it easy to transfer files between two computers on which you have accounts.
-But more importantly, it also allows a user on one computer to access files on a computer on which he or she does not have an account, as long as both computers are connected to the Internet.
-This is known as *anonymous FTP.*
+FTPは、世界中の計算機で広く受け入れられているファイル転送プロトコルです。
+FTPを使えば、自分がアカウントを持っている2台の計算機のあいだで、ファイルを簡単にやりとりできます。
+しかしそれ以上に大事なのは、両方の計算機がインターネットにつながってさえいれば、アカウントを持っていない計算機上のファイルにも手が届くことです。
+これは *anonymous FTP*（匿名FTP）と呼ばれます。
 
-All the code in this book is available for anonymous FTP from the computer `mkp.com` in files in the directory `pub/norvig`.
-The file `README` in that directory gives further instructions on using the files.
+本書のコードはすべて、計算機 `mkp.com` のディレクトリ `pub/norvig` から匿名FTPで入手できます。
+そのディレクトリにある `README` に、ファイルの使い方がさらに書かれています。
 
-In the session below, the user `smith` retrieves the files from `mkp.com`.
-Smith's input is in *slanted font.* The login name must be *anonymous*, and Smith's own mail address is used as the password.
-The command *cd pub/norvig* changes to that directory, and the command *ls* lists all the files.
-The command *mget* \* retrieves all files (the *m* stands for "multiple").
-Normally, there would be a prompt before each file asking if you do indeed want to copy it, but the *prompt* command disabled this.
-The command *bye* ends the FTP session.
+次のセッションでは、利用者 `smith` が `mkp.com` からファイルを取得しています。
+Smithが入力した部分は *斜体* で示してあります。ログイン名は *anonymous* でなければならず、パスワードにはSmith自身のメールアドレスを使います。
+コマンド *cd pub/norvig* でそのディレクトリに移り、コマンド *ls* で全ファイルを一覧します。
+コマンド *mget* \* で全ファイルを取得します（*m* は「multiple（複数）」の意味です）。
+通常は各ファイルの前に、本当にコピーするかを尋ねる問い合わせが出ますが、*prompt* コマンドでこれを止めています。
+コマンド *bye* でFTPのセッションを終えます。
 
 `% *ftp mkp.com* (or *ftp 199.182.55.2*)`
 
@@ -47,16 +47,16 @@ The command *bye* ends the FTP session.
 
 `%`
 
-Anonymous FTP is a privilege, not a right.
-The site administrators at `mkp.com` and at other sites below have made their systems available out of a spirit of sharing, but there are real costs that must be paid for the connections, storage, and processing that makes this sharing possible.
-To avoid overloading these systems, do not FTP from 7:00 a.m.
-to 6:00 p.m.
-local time.
-This is especially true for sites not in your country.
-If you are using this book in a class, ask your professor for a particular piece of software before you try to FTP it; it would be wasteful if everybody in the class transferred the same thing.
-Use common sense and be considerate: none of us want to see sites start to close down because a few are abusing their privileges.
+匿名FTPは権利ではなく、与えられている特権です。
+`mkp.com` や以下に挙げるサイトの管理者は、共有の精神からシステムを開放しています。しかし、その共有を成り立たせている回線・記憶装置・処理には、現実に費用がかかっています。
+これらのシステムに負荷をかけすぎないよう、現地時間の午前7時から
+午後6時のあいだは
+FTPを使わないでください。
+自国以外のサイトについては特にそうです。
+授業で本書を使っているなら、必要なソフトウェアはFTPで取りにいく前に担当の先生に頼んでください。クラス全員が同じものを転送するのは無駄です。
+常識を働かせ、心配りをしてください。少数の濫用のせいでサイトが閉じられていくのは、誰も見たくないはずです。
 
-If you do not have FTP access to the Internet, you can still obtain the files from this book by contacting Morgan Kaufmann at the following:
+インターネットへのFTPが使えない場合でも、次の連絡先でMorgan Kaufmannに問い合わせれば本書のファイルを入手できます。
 
 Morgan Kaufmann Publishers, Inc.
 
@@ -74,102 +74,102 @@ Internet  mkp@mkp.com
 
 (800) 745-7323
 
-Make sure to specify which format you want:
+どの形式が必要かを必ず指定してください。
 
-Macintosh diskette ISBN 1-55860-227-5
+Macintosh用ディスケット ISBN 1-55860-227-5
 
-DOS 5.25 diskette ISBN 1-55860-228-3
+DOS 5.25インチ ディスケット ISBN 1-55860-228-3
 
-DOS 3.5 diskette ISBN 1-55860-229-1
+DOS 3.5インチ ディスケット ISBN 1-55860-229-1
 
-### Available Software
+### 入手できるソフトウェア
 
-In addition to the program from this book, a good deal of other software is available.
-The tables below list some of the relevant AI/Lisp programs.
-Each entry lists the name of the system, an address, and some comments.
-The address is either a computer from which you can FTP, or a mail address of a contact.
-Unless it is stated that distribution is by *email* or *Floppy* or requires a *license,* then you can FTP from the contact's home computer.
-In some cases the host computer and/or directory have been provided in italics in the comments field.
-However, in most cases it should be obvious what files to transfer.
-First do an `ls` command to see what files and directories are available.
-If there is a file called `README`, follow its advice: do a `get README` and then look at the file.
-If you still haven't found what you are looking for, be aware that most hosts keep their public software in the directory `pub`.
-Do a `cd pub` and then another `ls`, and you should find the desired files.
+本書のプログラムのほかにも、多くのソフトウェアが入手できます。
+以下の表に、関連するAI・Lispのプログラムをいくつか挙げます。
+各項目には、システムの名前、アドレス、そして短い注記が並んでいます。
+アドレスは、FTPできる計算機か、連絡先のメールアドレスのいずれかです。
+配布が *email* や *Floppy* によるとか、*license* が必要だと書かれていなければ、連絡先の計算機からFTPで取得できます。
+注記の欄に、ホスト計算機やディレクトリが斜体で示してある場合もあります。
+とはいえ、たいていはどのファイルを転送すればよいか自明でしょう。
+まず `ls` コマンドで、どんなファイルとディレクトリがあるかを見てください。
+`README` というファイルがあれば、その指示に従ってください。`get README` してから中身を読みます。
+それでも目当てのものが見つからなければ、たいていのホストは公開ソフトウェアを `pub` ディレクトリに置いていることを思い出してください。
+`cd pub` してからもう一度 `ls` すれば、目当てのファイルが見つかるはずです。
 
-If a file ends in the suffix `.Z`, then you should give the FTP command `binary` before transferring it, and then give the UNIX command `uncompress` to recover the original file.
-Files with the suffix `.tar` contain several files that can be unpacked with the `tar` command.
-If you have problems, consult your local documentation or system administrator.
+ファイル名が `.Z` で終わっている場合は、転送の前にFTPの `binary` コマンドを実行し、転送後にUNIXの `uncompress` コマンドで元のファイルに戻してください。
+`.tar` で終わるファイルには複数のファイルが入っており、`tar` コマンドで取り出せます。
+うまくいかないときは、手元の文書を読むか、システム管理者に相談してください。
 
-**Knowledge Representation**
-
-| []() | | | | | | | | | |
-|---|---|---|---|---|---|---|---|---|---|
-| System | Address | Comments |
-| Babbler | [rsfl@ra.msstate.edu](mailto:rsfl@ra.msstate.edu) | *email;*Markov chains/NLP |
-| BACK | [peltason@tubvm.cs.tu-berlin.de](mailto:peltason@tubvm.cs.tu-berlin.de) | *3.5" floppy;* KL-ONE family |
-| Belief | [almond@stat.washington.edu](mailto:almond@stat.washington.edu) | belief networks |
-| Classic | [dlm@research.att.com](mailto:dlm@research.att.com) | *license;* KL-ONE family |
-| Fol Getfol | [fausto@irst.it](mailto:fausto@irst.it) | *tape;* Weyrauch's FOL system |
-| Framekit | [ehn+@cs.cmu.edu](mailto:ehn+@cs.cmu.edu) | *floppy;* frames |
-| Framework | [mkant+@cs.cmu.edu](mailto:mkant+@cs.cmu.edu) | *a.gp.cs.cmu.edu:/usr/mkant/Public;* frames |
-| Frobs | [kessler@cs.utah.edu](mailto:kessler@cs.utah.edu) | frames |
-| Knowbel | [kramer@ai.toronto.edu](mailto:kramer@ai.toronto.edu) | sorted/temporal logic |
-| MVL | [ginsberg@t.stanford.edu](mailto:ginsberg@t.stanford.edu) | multivalued logics |
-| OPS | [slisp-group@b.gp.cs.cmu.edu](mailto:slisp-group@b.gp.cs.cmu.edu) | Forgy's OPS-5 language |
-| PARKA | [spector@cs.umd.edu](mailto:spector@cs.umd.edu) | frames (designed for connection machine) |
-| Parmenides | [pshell@cs.cmu.edu](mailto:pshell@cs.cmu.edu) | frames |
-| Rhetorical | [miller@cs.rochester.edu](mailto:miller@cs.rochester.edu) | planning, time logic |
-| SB-ONE | [kobsa@cs.uni-sb.de](mailto:kobsa@cs.uni-sb.de) | *license;* in German; KL-ONE family |
-| SNePS | [shapiro@cs.buffalo.edu](mailto:shapiro@cs.buffalo.edu) | *license;* semantic net/NLP |
-| SPI | [cs.orst.edu](mailto:cs.orst.edu) | Probabilistic inference |
-| YAK | [franconi@irst.it](mailto:franconi@irst.it) | KL-ONE family |
-
-**Planning and Learning**
+**知識表現**
 
 | []() | | | | | | | | | |
 |---|---|---|---|---|---|---|---|---|---|
-| System | Address | Comments |
-| COBWEB/3 | [cobweb@ptolemy.arc.nasa.gov](mailto:cobweb@ptolemy.arc.nasa.gov) | *email;* concept formation |
-| MATS | [kautz@research.att.com](mailto:kautz@research.att.com) | *license;* temporal constraints |
-| MICRO-xxx | [waander@cs.ume.edu](mailto:waander@cs.ume.edu) | case-based reasoning |
-| Nonlin | [nonlin-users-request@cs.umd.edu](mailto:nonlin-users-request@cs.umd.edu) | Tate's planner in Common Lisp |
-| Prodigy | [prodigy@cs.cmu.edu](mailto:prodigy@cs.cmu.edu) | *license;* planning and learning |
-| PROTOS | [porter@cs.utexas.edu](mailto:porter@cs.utexas.edu) | knowledge acquisition |
-| SNLP | [weld@cs.washington.edu](mailto:weld@cs.washington.edu) | nonlinear planner |
-| SOAR | [soar-requests/@cs.cmu.edu](mailto:soar-requests/@cs.cmu.edu) | *license*; integrated architecture |
-| THEO | [tom.mitchell@cs.cmu.edu](mailto:tom.mitchell@cs.cmu.edu) | frames, learning |
-| Tileworld | [pollack@ai.sri.com](mailto:pollack@ai.sri.com) | planning testbed |
-| TileWorld | [tileworld@ptolemy.arc.nasa.gov](mailto:tileworld@ptolemy.arc.nasa.gov) | planning testbed |
+| システム | アドレス | 注記 |
+| Babbler | [rsfl@ra.msstate.edu](mailto:rsfl@ra.msstate.edu) | *email;* マルコフ連鎖／自然言語処理 |
+| BACK | [peltason@tubvm.cs.tu-berlin.de](mailto:peltason@tubvm.cs.tu-berlin.de) | *3.5インチ フロッピー;* KL-ONE系 |
+| Belief | [almond@stat.washington.edu](mailto:almond@stat.washington.edu) | ベイジアンネットワーク |
+| Classic | [dlm@research.att.com](mailto:dlm@research.att.com) | *license;* KL-ONE系 |
+| Fol Getfol | [fausto@irst.it](mailto:fausto@irst.it) | *tape;* WeyrauchのFOLシステム |
+| Framekit | [ehn+@cs.cmu.edu](mailto:ehn+@cs.cmu.edu) | *floppy;* フレーム |
+| Framework | [mkant+@cs.cmu.edu](mailto:mkant+@cs.cmu.edu) | *a.gp.cs.cmu.edu:/usr/mkant/Public;* フレーム |
+| Frobs | [kessler@cs.utah.edu](mailto:kessler@cs.utah.edu) | フレーム |
+| Knowbel | [kramer@ai.toronto.edu](mailto:kramer@ai.toronto.edu) | ソート付き論理／時相論理 |
+| MVL | [ginsberg@t.stanford.edu](mailto:ginsberg@t.stanford.edu) | 多値論理 |
+| OPS | [slisp-group@b.gp.cs.cmu.edu](mailto:slisp-group@b.gp.cs.cmu.edu) | ForgyのOPS-5言語 |
+| PARKA | [spector@cs.umd.edu](mailto:spector@cs.umd.edu) | フレーム（コネクションマシン向けの設計） |
+| Parmenides | [pshell@cs.cmu.edu](mailto:pshell@cs.cmu.edu) | フレーム |
+| Rhetorical | [miller@cs.rochester.edu](mailto:miller@cs.rochester.edu) | プランニング、時間の論理 |
+| SB-ONE | [kobsa@cs.uni-sb.de](mailto:kobsa@cs.uni-sb.de) | *license;* ドイツ語; KL-ONE系 |
+| SNePS | [shapiro@cs.buffalo.edu](mailto:shapiro@cs.buffalo.edu) | *license;* 意味ネットワーク／自然言語処理 |
+| SPI | [cs.orst.edu](mailto:cs.orst.edu) | 確率的推論 |
+| YAK | [franconi@irst.it](mailto:franconi@irst.it) | KL-ONE系 |
 
-**Mathematics**
-
-| []() | | | | | | | | | |
-|---|---|---|---|---|---|---|---|---|---|
-| System | Address | Comments |
-| JACAL | [jaffer@altdorf.ai.mit.edu](mailto:jaffer@altdorf.ai.mit.edu) | algebraic manipulation |
-| Maxima | [rascal.ics.utexas.edu](mailto:rascal.ics.utexas.edu) | version of Macsyma; also proof-checker, nqthm |
-| MMA | [fateman@cs.berkeley.edu](mailto:fateman@cs.berkeley.edu) | *peoplesparc.berkeley.edu:pub/mma.\**; algebra |
-| XLispStat | [umnstat.stat.umn.edu](mailto:umnstat.stat.umn.edu) | Statistics; also S Bayes |
-
-**Compilers and Utilities**
+**プランニングと学習**
 
 | []() | | | | | | | | | |
 |---|---|---|---|---|---|---|---|---|---|
-| System | Address | Comments |
+| システム | アドレス | 注記 |
+| COBWEB/3 | [cobweb@ptolemy.arc.nasa.gov](mailto:cobweb@ptolemy.arc.nasa.gov) | *email;* 概念形成 |
+| MATS | [kautz@research.att.com](mailto:kautz@research.att.com) | *license;* 時間制約 |
+| MICRO-xxx | [waander@cs.ume.edu](mailto:waander@cs.ume.edu) | 事例ベース推論 |
+| Nonlin | [nonlin-users-request@cs.umd.edu](mailto:nonlin-users-request@cs.umd.edu) | TateのプランナのCommon Lisp版 |
+| Prodigy | [prodigy@cs.cmu.edu](mailto:prodigy@cs.cmu.edu) | *license;* プランニングと学習 |
+| PROTOS | [porter@cs.utexas.edu](mailto:porter@cs.utexas.edu) | 知識獲得 |
+| SNLP | [weld@cs.washington.edu](mailto:weld@cs.washington.edu) | 非線形プランナ |
+| SOAR | [soar-requests/@cs.cmu.edu](mailto:soar-requests/@cs.cmu.edu) | *license*; 統合アーキテクチャ |
+| THEO | [tom.mitchell@cs.cmu.edu](mailto:tom.mitchell@cs.cmu.edu) | フレーム、学習 |
+| Tileworld | [pollack@ai.sri.com](mailto:pollack@ai.sri.com) | プランニングの試験台 |
+| TileWorld | [tileworld@ptolemy.arc.nasa.gov](mailto:tileworld@ptolemy.arc.nasa.gov) | プランニングの試験台 |
+
+**数学**
+
+| []() | | | | | | | | | |
+|---|---|---|---|---|---|---|---|---|---|
+| システム | アドレス | 注記 |
+| JACAL | [jaffer@altdorf.ai.mit.edu](mailto:jaffer@altdorf.ai.mit.edu) | 数式処理 |
+| Maxima | [rascal.ics.utexas.edu](mailto:rascal.ics.utexas.edu) | Macsymaの一種; 証明検査器 nqthm も |
+| MMA | [fateman@cs.berkeley.edu](mailto:fateman@cs.berkeley.edu) | *peoplesparc.berkeley.edu:pub/mma.\**; 代数 |
+| XLispStat | [umnstat.stat.umn.edu](mailto:umnstat.stat.umn.edu) | 統計; S Bayes も |
+
+**コンパイラとユーティリティ**
+
+| []() | | | | | | | | | |
+|---|---|---|---|---|---|---|---|---|---|
+| システム | アドレス | 注記 |
 | AKCL | [rascal.ics.utexas.edu](mailto:rascal.ics.utexas.edu) | Austin Koyoto Common Lisp |
-| CLX, CLUE | [export.lcs.mit.edu](mailto:export.lcs.mit.edu) | Common Lisp interface to X Windows |
-| Gambit | [gambit@cs.brandeis.edu](mailto:gambit@cs.brandeis.edu) | *acorn.cs.brandeis.edu:dist/gambit\**; Scheme compiler |
-| ISI Grapher | [isi.edu](mailto:isi.edu) | Graph displayer; also NLP word lists |
-| PCL | [arisia.xerox.com](mailto:arisia.xerox.com) | Implementation of CLOS |
-| Prolog | [aisun1.ai.uga.edu](mailto:aisun1.ai.uga.edu) | Prolog-based utilities and NLP programs |
-| PYTHON | [ram+@cs.cmu.edu](mailto:ram+@cs.cmu.edu) | *a.gp.cs.cmu.edu:* Common Lisp Compiler and tools |
-| SBProlog | [arizona.edu](mailto:arizona.edu) | Stony Brook Prolog, Icon, Snobol |
-| Scheme | [altdorf.ai.mit.edu](mailto:altdorf.ai.mit.edu) | Scheme utilities and compilers |
-| Scheme | [scheme@nexus.yorku.ca](mailto:scheme@nexus.yorku.ca) | Scheme utilities and programs |
-| SIOD | [bu.edu](mailto:bu.edu) | *users/gjc;* small scheme interpreter |
-| Utilities | [a.gp.cs.cmu.edu](mailto:a.gp.cs.cmu.edu) | */usr/mkant/Public*; profiling, def system, etc. |
-| XLisp | [cs.orst.edu](mailto:cs.orst.edu) | Lisp interpreter |
-| XScheme | [tut.cis.ohio-state.edu](mailto:tut.cis.ohio-state.edu) | Also mitscheme compiler; sbprolog |
+| CLX, CLUE | [export.lcs.mit.edu](mailto:export.lcs.mit.edu) | X WindowへのCommon Lispインタフェース |
+| Gambit | [gambit@cs.brandeis.edu](mailto:gambit@cs.brandeis.edu) | *acorn.cs.brandeis.edu:dist/gambit\**; Schemeコンパイラ |
+| ISI Grapher | [isi.edu](mailto:isi.edu) | グラフ表示器; 自然言語処理用の語彙表も |
+| PCL | [arisia.xerox.com](mailto:arisia.xerox.com) | CLOSの実装 |
+| Prolog | [aisun1.ai.uga.edu](mailto:aisun1.ai.uga.edu) | Prologを土台にした道具と自然言語処理プログラム |
+| PYTHON | [ram+@cs.cmu.edu](mailto:ram+@cs.cmu.edu) | *a.gp.cs.cmu.edu:* Common Lispのコンパイラと道具 |
+| SBProlog | [arizona.edu](mailto:arizona.edu) | Stony Brook Prolog、Icon、Snobol |
+| Scheme | [altdorf.ai.mit.edu](mailto:altdorf.ai.mit.edu) | Schemeの道具とコンパイラ |
+| Scheme | [scheme@nexus.yorku.ca](mailto:scheme@nexus.yorku.ca) | Schemeの道具とプログラム |
+| SIOD | [bu.edu](mailto:bu.edu) | *users/gjc;* 小さなSchemeインタプリタ |
+| Utilities | [a.gp.cs.cmu.edu](mailto:a.gp.cs.cmu.edu) | */usr/mkant/Public*; 計測、defsystem など |
+| XLisp | [cs.orst.edu](mailto:cs.orst.edu) | Lispインタプリタ |
+| XScheme | [tut.cis.ohio-state.edu](mailto:tut.cis.ohio-state.edu) | mitschemeコンパイラも; sbprolog |
 
 
 

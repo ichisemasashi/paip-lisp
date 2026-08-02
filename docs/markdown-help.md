@@ -1,11 +1,11 @@
 
-## Markdown help
+## Markdownの手引き
 
-## Style guide
-Try to use Markdown instead of HTML. 
-Try to do minimal changes from the text - don't put a paragraph in one line, or remove trailing space separately, as they make diffs hard to follow. 
+## 書き方の指針
+HTMLではなくMarkdownを使ってください。
+本文からの変更は最小限に。段落を1行にまとめたり、行末の空白だけを別途取り除いたりすると、差分が追いにくくなります。
 
-Example sections in chapters: 
+章の中の見出しの例:
 
 ```
 # Chapter 1
@@ -14,34 +14,34 @@ Example sections in chapters:
 ### Answer 1.2
 ```
 
-To mark a block of code, use: 
+コードのかたまりを示すには、次のように書きます。
 
 ```
   ```lisp
 ```
-That will give syntax highlighting. Leave out `lisp` if it's something else, like assembly. 
+これで構文が色分けされます。アセンブリなど、Lisp以外のものなら `lisp` は省いてください。
 
-`>` to blockquote - to indent. You only need one at the start of a paragraph. 
+`>` は引用（字下げ）に使います。段落の先頭に1つあれば足ります。
 
-Use `*italics*` for *italics*, and `**bold**` for **bold**.
+*斜体* には `*italics*` を、**太字** には `**bold**` を使ってください。
 
-## Line breaks
-Non-paragraph line breaks can be tricky, like in the quotes at the start of chapters. 
-It looks like two trailing spaces do the trick in both Github Flavored Markdown and Docsify: 
+## 改行
+段落の途中での改行は厄介です。各章の冒頭にある引用などがそうです。
+GitHub Flavored MarkdownでもDocsifyでも、行末に空白2つを置けばうまくいくようです。
 
 
 > *Cerium quod factum.*  
-> (One is certain of only what one builds.) 
+> （人は自ら作ったものだけを確実に知る。）
 > 
 > -Giovanni Battista Vico (1668-1744)  
-> Italian royal historiographer 
+> イタリア王室の歴史編纂官
 
 
-## Special symbols
-There are a lot of special symbols, with special ways of calling them; there's [a Wikipedia page with a list.](https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references) Here are some of the common ones: 
+## 特殊な記号
+特殊な記号はたくさんあり、それぞれ独特の書き方をします。[一覧のあるWikipediaのページ](https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references)をご覧ください。よく使うものを挙げます。
 
 
-| symbol   | entity     |
+| 記号     | 実体参照   |
 |----------|------------|
 | &times;  | `&times;`  |
 | &pi;     | `&pi;`     |
@@ -55,11 +55,11 @@ There are a lot of special symbols, with special ways of calling them; there's [
 | &lambda; | `&lambda;` |
 | 0&#x0338;| `0&#x0338;`|
 
-Note that these will not work in code blocks. 
+これらはコードブロックの中では効かないので注意してください。
 
 
-## Markdown variants
+## Markdownの方言
 
-We're largely targeting [Github Flavored Markdown,](https://github.github.com/gfm/) but the online version uses [docsify,](https://docsify.js.org/) which uses [marked.](https://github.com/markedjs/marked) 
+おおむね [Github Flavored Markdown](https://github.github.com/gfm/) を対象にしていますが、オンライン版は [docsify](https://docsify.js.org/) を使っており、docsifyは [marked](https://github.com/markedjs/marked) を使っています。
 
-If you'd like to test the docsify parsing, you can run a local server; look at `scripts/httpd` - there are Ruby and Python variants. 
+docsifyでの解釈を試したい場合は、ローカルでサーバを動かせます。`scripts/httpd` を見てください。Ruby版とPython版があります。
