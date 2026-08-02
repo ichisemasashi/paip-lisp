@@ -1,45 +1,45 @@
-# Chapter 5
-## ELIZA: Dialog with a Machine
+# 第5章
+## ELIZA: 機械との対話
 
-> *It is said that to explain is to explain away.*
+> *説明するとは、説明して消し去ることだと言われる。*
 
 > -Joseph Weizenbaum
 
-> MIT computer scientist
+> MITの計算機科学者
 
-This chapter and the rest of part I will examine three more well-known AI programs of the 1960s.
-ELIZA held a conversation with the user in which it simulated a psychotherapist.
-STUDENT solved word problems of the kind found in high school algebra books, and MACSYMA solved a variety of symbolic mathematical problems, including differential and integral calculus.
-We will develop versions of the first two programs that duplicate most of the essential features, but for the third we will implement only a tiny fraction of the original program's capabilities.
+この章と第I部の残りでは、1960年代のよく知られたAIプログラムをさらに3つ取り上げます。
+ELIZAは心理療法士を演じて利用者と会話しました。
+STUDENTは高校の代数の教科書にあるような文章題を解き、MACSYMAは微分積分を含むさまざまな記号数学の問題を解きました。
+最初の2つについては本質的な機能の大半を再現する版を作りますが、3つ目については元のプログラムの能力のごく一部しか実装しません。
 
-All three programs make heavy use of a technique called pattern matching.
-Part I serves to show the versatility-and also the limitations-of this technique.
+3つのプログラムはいずれも、パターン照合と呼ばれる技法を多用します。
+第I部は、この技法の融通の利きぶりと、その限界の両方を示す役目を果たします。
 
-Of the three programs, the first two process input in plain English, and the last two solve non-trivial problems in mathematics, so there is some basis for describing them as being "intelligent."
-On the other hand, we shall see that this intelligence is largely an illusion, and that ELIZA in particular was actually designed to demonstrate this illusion, not to be a "serious" AI program.
+3つのうち最初の2つは普通の英語の入力を処理し、後の2つは数学の自明でない問題を解くので、これらを「知的」と呼ぶ根拠はいくらかあります。
+一方でこの知性は大部分が錯覚であること、とくにELIZAは「本格的な」AIプログラムであろうとしたのではなく、まさにこの錯覚を示すために作られたことを見ていきます。
 
-ELIZA was one of the first programs to feature English output as well as input.
-The program was named after the heroine of *Pygmalion,* who was taught to speak proper English by a dedicated teacher.
-ELIZA's principal developer, MIT professor Joseph Weizenbaum, published a paper on ELIZA in the January 1966 issue of the *Communications of the Association for Computing Machinery.*
-The introduction to that paper is reproduced in its entirety here:
+ELIZAは、入力だけでなく出力も英語で行った最初期のプログラムの1つです。
+このプログラムの名は *ピグマリオン* の主人公にちなみます。熱心な教師によって正しい英語を話すよう仕込まれた女性です。
+ELIZAの主たる開発者であるMITのJoseph Weizenbaum教授は、1966年1月号の *Communications of the Association for Computing Machinery* にELIZAについての論文を発表しました。
+その論文の序論を、ここに全文引用します。
 
-> *It is said that to explain is to explain away.
-This maxim is nowhere so well fulfilled as in the area of computer programming, especially in what is called heuristic programming and artificial intelligence.
-For in those realms machines are made to behave in wondrous ways, often sufficient to dazzle even the most experienced observer.
-But once a particular program is unmasked, once its inner workings are explained in language sufficiently plain to induce understanding, its magic crumbles away; it stands revealed as a mere collection of procedures, each quite comprehensible.
-The observer says to himself, "I could have written that." With that thought he moves the program in question from the shelf marked "intelligent," to that reserved for curios, fit to be discussed only with people less enlightened than he.*
+> *説明するとは、説明して消し去ることだと言われる。
+この格言が計算機のプログラミングの領域、とりわけ発見的プログラミングや人工知能と呼ばれる分野ほどよく当てはまる場所はない。
+それらの領域では機械が驚くべき振る舞いをするよう仕立てられ、しばしば最も経験を積んだ観察者すら眩惑するほどである。
+しかしひとたびそのプログラムの仮面が剥がされ、内側の働きが理解を促すに足るほど平易な言葉で説明されるや、魔法は崩れ去る。それはどれも十分に理解可能な手続きの寄せ集めにすぎないと露わになるのだ。
+観察者は心のうちでこう言う。「これなら自分にも書けた」。そう思ったとたん、彼はそのプログラムを「知的」と記された棚から、珍品のための棚へと移す。自分より物を知らぬ者とだけ語るにふさわしいものとして。*
 
-> *The object of this paper is to cause just such a re-evaluation of the program about to be "explained." Few programs ever needed it more.*
+> *本論文の目的は、これから「説明」しようとするプログラムについて、まさにそうした評価の見直しを引き起こすことにある。これほどそれを必要としたプログラムはほとんどない。*
 
-Let me point out in passing that the main object of this book is to cause the reader to say to him or herself, "I could have written that." It is hoped that in some cases this will be because the reader has gained something, and not solely because the programs in question have lost their ability to dazzle.
+ついでに述べておくと、本書の主たる目的も、読者に「これなら自分にも書けた」と思わせることにあります。願わくはその一部が、当のプログラムが眩惑する力を失ったからだけでなく、読者が何かを得たからでありますように。
 
-Let's start our investigation of ELIZA by looking at a sample dialog from the Weizenbaum article.
-ELIZA was designed to be instructed by a variety of scripts, or patterns of interaction.
-In fact it had several scripts, including ones in German and Welsh.
-But the only script that was used to any extent was in English, and it made ELIZA emulate a Rogerian psychoanalyst.
-Rogerians are "nondirective"-they try to let the patient reveal himself.
-This is an easy script for ELIZA to follow, because it involves being passive and reacting, rather than volunteering new information.
-In the listing that follows, the user's input is in mixed case, and ELIZA's response is in capitals:
+ELIZAの探究を、Weizenbaumの論文にある対話の例を見ることから始めましょう。
+ELIZAは、さまざまな台本 — やりとりの型 — によって振る舞いを指示できるよう設計されていました。
+実際、ドイツ語やウェールズ語のものを含め、台本はいくつもありました。
+しかし実際に使われたと言えるのは英語の台本だけで、それはELIZAにロジャーズ派の精神分析医をまねさせるものでした。
+ロジャーズ派は「非指示的」です — 患者が自ら語り出すのに任せようとします。
+これはELIZAにとってたどりやすい台本です。新しい情報を進んで出すのではなく、受け身で応じることが求められるからです。
+以下では、利用者の入力は大小文字混じり、ELIZAの応答は大文字で示します。
 
 ```text
 Men are all alike.
@@ -58,15 +58,15 @@ Perhaps I could learn to get along with my mother.
 TELL ME MORE ABOUT YOUR FAMILY
 ```
 
-This seems quite impressive; the program is responding reasonably to a variety of inputs and appears to be exhibiting true "understanding."
-But, as Weizenbaum explains, this appearance is an illusion, and the program has finessed the difficult task of understanding by carefully recognizing, transforming, and echoing pieces of the input.
-The procedure is to look for specific patterns, based on a key word or words in the input.
-For example, whenever the program sees the words "alike" or "same," it prints a message asking about similarity, in this case, "`IN WHAT WAY.`" Other patterns are more complicated.
-In the next to last exchange, ELIZA first throws away everything after the comma, and then uses a pattern that looks for input of the form "I need X" and transforms it to the output "What would it mean to you if you got X," where X is the phrase "some help" in this case.
-The great advantage of this approach is that the response will make sense for a variety of inputs: "I need a vacation" will elicit "What would it mean to you if you got a vacation." This will work automatically, without having to tell the program the difference between "some help" and "a vacation." The disadvantage is that the program will sometimes make silly responses: "I need this like a hole in the head" will be answered with "What would it mean to you if you got this like a hole in the head." In fact, the program only makes any sense at all if it is receiving input from someone who makes sense-and someone who interprets its answers charitably.
-When given "I need gibble plix zzq," ELIZA would reply "What would it mean to you if you got gibble plix zzq," without any inkling that something is wrong.
-Another example of the original ELIZA program has it communicating with another program, PARRY, which was written by Dr. Kenneth Colby to mimic paranoid behavior.
-Part of the conversation follows, with ELIZA again in capitals and PARRY in mixed case:
+これはかなり見事に思えます。プログラムはさまざまな入力にそれなりに応じており、本物の「理解」を示しているように見えます。
+しかしWeizenbaumが説明するとおり、この見かけは錯覚です。プログラムは入力の断片を注意深く見つけ、変形し、おうむ返しにすることで、理解という難題をうまくかわしているのです。
+手順は、入力中の鍵となる語に基づいて特定のパターンを探すことです。
+たとえば「alike」や「same」という語を見つけると、類似について尋ねるメッセージ — この場合は「`IN WHAT WAY.`」 — を表示します。他のパターンはもっと込み入っています。
+最後から2番目のやりとりでは、ELIZAはまずカンマ以降をすべて捨て、次に「I need X」という形の入力を探すパターンを使って「What would it mean to you if you got X」という出力に変えています。ここでXは「some help」という句です。
+この方式の大きな利点は、さまざまな入力に対して応答が筋の通ったものになることです。「I need a vacation」には「What would it mean to you if you got a vacation」が返ります。「some help」と「a vacation」の違いをプログラムに教えずとも、これは自動的に働きます。欠点は、ときに間の抜けた応答をすることです。「I need this like a hole in the head」（まったく必要ない、の意の慣用句）には「What would it mean to you if you got this like a hole in the head」と返ってきます。実のところこのプログラムは、筋の通ったことを言う相手からの入力を受け、しかもその答えを好意的に解釈してもらえる場合にのみ、かろうじて意味をなすのです。
+「I need gibble plix zzq」と入力されれば、ELIZAは何かがおかしいと露ほども気づかず「What would it mean to you if you got gibble plix zzq」と応じるでしょう。
+元のELIZAのもう1つの例では、Kenneth Colby博士が偏執的な振る舞いをまねるために書いたPARRYという別のプログラムと会話しています。
+その会話の一部を示します。ここでもELIZAは大文字、PARRYは大小文字混じりです。
 
 ```text
 I don't understand your motives.
@@ -83,26 +83,26 @@ I don't get you.
 DO YOU WISH THAT YOU DID GET I?
 ```
 
-This suggests that neither ELIZA nor PARRY had a deep understanding of the dialog.
-When there is a human to take on most of the burden of carrying forth the conversation, these programs can be convincing, but when the human is taken out of the conversation, the weaknesses of the programs are revealed.
+これは、ELIZAもPARRYも対話を深く理解してはいなかったことを示しています。
+会話を進める重荷の大半を人間が負ってくれるときには、これらのプログラムは説得力を持ちえます。しかし会話から人間を取り除くと、その弱さが露わになるのです。
 
-## 5.1 Describing and Specifying ELIZA
-Now that we have an idea of what ELIZA is like, we can begin the description and specification of the program, and eventually move to the implementation and debugging.
+## 5.1 ELIZAを記述し仕様を定める
+ELIZAがどんなものか見当がついたので、プログラムの記述と仕様に取りかかり、やがて実装とデバッグへ進めます。
 
-The ELIZA algorithm can be described simply as: (1) read an input, (2) find a pattern that matches the input, (3) transform the input into a response, and (4) print the response.
-These four steps are repeated for each input.
+ELIZAのアルゴリズムは単純にこう述べられます。(1) 入力を読む、(2) 入力に合致するパターンを見つける、(3) 入力を応答に変形する、(4) 応答を表示する。
+この4段階を入力ごとに繰り返します。
 
-The specification and implementation of steps (1) and (4) are trivial: for (1), use the built-in `read` function to read a list of words, and for (4) use `print` to print the list of words in the response.
+(1) と (4) の仕様と実装は自明です。(1) では組み込みの `read` で語の並びを読み、(4) では `print` で応答の語の並びを表示します。
 
-Of course, there are some drawbacks to this specification.
-The user will have to type a real list-using parentheses-and the user can't use characters that are special to `read`, like quotation marks, commas, and periods.
-So our input won't be as unconstrained as in the sample dialog, but that's a small price to pay for the convenience of having half of the problem neatly solved.
+もちろんこの仕様には難点もあります。
+利用者は括弧を使って本物のリストを打たねばならず、引用符・カンマ・ピリオドのような `read` にとって特別な文字は使えません。
+ですから入力は対話例ほど自由ではなくなりますが、問題の半分がきれいに片づく便利さを思えば、支払う代価としては小さなものです。
 
-## 5.2 Pattern Matching
-The hard part comes with steps (2) and (3)-this notion of pattern matching and transformation.
-There are four things to be concerned with: a general pattern and response, and a specific input and transformation of that input.
-Since we have agreed to represent the input as a list, it makes sense for the other components to be lists too.
-For example, we might have:
+## 5.2 パターン照合
+難しいのは (2) と (3) — パターン照合と変形という考え — です。
+関わるものは4つあります。一般的なパターンと応答、そして具体的な入力とその変形です。
+入力をリストで表すと決めた以上、他の要素もリストにするのが理にかなっています。
+たとえば次のようになるでしょう。
 
 ```text
 Pattern: (i need a X)
@@ -112,13 +112,13 @@ Input: (i need a vacation)
 Transformation: (what would it mean to you if you got a vacation ?)
 ```
 
-The pattern matcher must match the literals `i` with `i`, `need` with `need`, and `a` with `a`, as well as match the variable `X` with `vacation`.
-This presupposes that there is some way of deciding that `X` is a variable and that `need` is not.
-We must then arrange to substitute `vacation` for `X` within the response, in order to get the final transformation.
+パターン照合器は、そのままの語 `i` を `i` に、`need` を `need` に、`a` を `a` に合致させると同時に、変数 `X` を `vacation` に合致させねばなりません。
+これは、`X` が変数で `need` がそうでないと判断する手立てがあることを前提にしています。
+そのうえで、最終的な変形を得るために、応答の中の `X` を `vacation` に置き換えるようにせねばなりません。
 
-Ignoring for a moment the problem of transforming the pattern into the response, we can see that this notion of pattern matching is just a generalization of the Lisp function `equal`.
-Below we show the function `simple-equal`, which is like the built-in function `equal`,<a id="tfn05-1"></a><sup>[1](#fn05-1)</sup>
-and the function `pat-match`, which is extended to handle pattern-matching variables:
+パターンを応答に変形する問題をひとまず措けば、このパターン照合という考えは、Lispの関数 `equal` を一般化したものにすぎないと分かります。
+以下に、組み込み関数 `equal` に相当する `simple-equal`<a id="tfn05-1"></a><sup>[1](#fn05-1)</sup>
+と、パターン照合の変数を扱えるよう拡張した `pat-match` を示します。
 
 ```lisp
 (defun simple-equal (x y)
@@ -138,22 +138,22 @@ and the function `pat-match`, which is extended to handle pattern-matching varia
                (pat-match (rest pattern) (rest input))))))
 ```
 
-&#9635; **Exercise 5.1 [s]** Would it be a good idea to replace the complex and form in `pat-match` with the simpler `(every #'pat-match pattern input)?`
+&#9635; **練習問題 5.1 [s]** `pat-match` の複雑な and の形を、より単純な `(every #'pat-match pattern input)` に置き換えるのはよい考えだろうか。
 
-Before we can go on, we need to decide on an implementation for pattern-matching variables.
-We could, for instance, say that only a certain set of symbols, such as {X, Y, Z}, are variables.
-Alternately, we could define a structure of type `variable`, but then we'd have to type something verbose like `(make-variable :name' X )` every time we wanted one.
-Another choice would be to use symbols, but to distinguish variables from constants by the name of the symbol.
-For example, in Prolog, variables start with capital letters and constants with lowercase.
-But Common Lisp is case-insensitive, so that won't work.
-Instead, there is a tradition in Lisp-based AI programs to have variables be symbols that start with the question mark character.
+先へ進む前に、パターン照合の変数をどう実装するか決めねばなりません。
+たとえば {X, Y, Z} のような特定のシンボルだけを変数とする、と決めることもできます。
+あるいは `variable` という型の構造体を定義することもできますが、そうすると変数が必要になるたび `(make-variable :name' X )` のような冗長な記述を打つことになります。
+もう1つの選択は、シンボルを使いつつ、その名前によって変数と定数を区別することです。
+たとえばPrologでは、変数は大文字で、定数は小文字で始まります。
+しかしCommon Lispは大文字と小文字を区別しないので、この手は使えません。
+代わりに、Lispで書かれたAIプログラムには、変数を疑問符で始まるシンボルとする慣わしがあります。
 
-So far we have dealt with symbols as atoms-objects with no internal structure.
-But things are always more complicated than they first appear and, as in Lisp as in physics, it turns out that even atoms have components.
-In particular, symbols have names, which are strings and are accessible through the `symbol-name` function.
-Strings in turn have elements that are characters, accessible through the function `char`.
-The character '?' is denoted by the self-evaluating escape sequence `#\?`.
-So the predicate `variable-p` can be defined as follows, and we now have a complete pattern matcher:
+ここまで私たちはシンボルをアトム — 内部構造を持たないオブジェクト — として扱ってきました。
+しかしものごとは常に見かけより込み入っているもので、物理学と同じくLispでも、アトムにさえ構成要素があると分かります。
+とくにシンボルは名前を持ち、それは文字列であって `symbol-name` 関数で取り出せます。
+文字列はさらに文字という要素を持ち、これは関数 `char` で取り出せます。
+文字 '?' は、自分自身に評価されるエスケープ列 `#\?` で表します。
+ですから述語 `variable-p` は次のように定義でき、これで完全なパターン照合器が揃います。
 
 ```lisp
 (defun variable-p (x)
@@ -166,19 +166,19 @@ T
 NIL
 ```
 
-In each case we get the right answer, but we don't get any indication of what `?X` is, so we couldn't substitute it into the response.
-We need to modify `pat-match` to return some kind of table of variables and corresponding values.
-In making this choice, the experienced Common Lisp programmer can save some time by being opportunistic: recognizing when there is an existing function that will do a large part of the task at hand.
-What we want is to substitute values for variables throughout the response.
-The alert programmer could refer to the index of this book or the Common Lisp reference manual and find the functions `substitute`, `subst`, and `sublis`.
-All of these substitute some new expression for an old one within an expression.
-It turns out that `sublis` is most appropriate because it is the only one that allows us to make several substitutions all at once.
-`sublis` takes two arguments, the first a list of old-new pairs, and the second an expression in which to make the substitutions.
-For each one of the pairs, the `car` is replaced by the `cdr`.
-In other words, we would form each pair with something like `(cons old new)`.
-(Such a list of pairs is known as an *association list*, or *a-list,* because it associates keys with values.
-See section 3.6.)
-In terms of the example above, we would use:
+いずれの場合も正しい答えは得られますが、`?X` が何であるかの手がかりが返らないので、応答に置き換えることができません。
+`pat-match` を、変数と対応する値の表のようなものを返すよう直す必要があります。
+この選択にあたって、経験を積んだCommon Lispプログラマは抜け目なく立ち回って手間を省けます。目の前の仕事の大部分を片づけてくれる既存の関数がないかを見抜くのです。
+やりたいのは、応答の全体にわたって変数を値に置き換えることです。
+目端の利くプログラマなら、本書の索引かCommon Lispの参照手引きを引いて、`substitute`、`subst`、`sublis` という関数を見つけるでしょう。
+どれも式の中の古い式を新しい式に置き換えるものです。
+最も適しているのは `sublis` です。複数の置換を一度に行えるのはこれだけだからです。
+`sublis` は引数を2つとります。第1が「旧・新」の対の並び、第2が置換を行う対象の式です。
+各対について、`car` が `cdr` に置き換えられます。
+言い換えれば、各対は `(cons old new)` のようにして作ることになります。
+（こうした対の並びは*連想リスト*、すなわち*a-list*と呼ばれます。キーと値を結び付けるからです。
+3.6節を参照してください。）
+上の例で言えば、次のように使います。
 
 ```lisp
 > (sublis '((?X . vacation))
@@ -186,8 +186,8 @@ In terms of the example above, we would use:
 (WHAT WOULD IT MEAN TO YOU IF YOU GOT A VACATION ?)
 ```
 
-Now we need to arrange for `pat-match` to return an a-list, rather than just `T` for success.
-Here's a first attempt:
+次に、`pat-match` が成功時に単に `T` を返すのではなく、a-list を返すようにせねばなりません。
+まずは最初の試みです。
 
 ```lisp
 (defun pat-match (pattern input)
@@ -200,28 +200,28 @@ Here's a first attempt:
                    (pat-match (rest pattern) (rest input))))))
 ```
 
-This implementation looks reasonable: it returns an a-list of one element if the pattern is a variable, and it appends alists if the pattern and input are both lists.
-However, there are several problems.
-First, the test `(eql pattern input)` may return `T`, which is not a list, so `append` will complain.
-Second, the same test might return nil, which should indicate failure, but it will just be treated as a list, and will be appended to the rest of the answer.
-Third, we haven't distinguished between the case where the match fails-and returns nil-versus the case where everything matches, but there are no variables, so it returns the null a-list.
-(This is the semipredicate problem discussed on page 127.)
-Fourth, we want the bindings of variables to agree-if `?X` is used twice in the pattern, we don't want it to match two different values in the input.
-Finally, it is inefficient for `pat-match` to check both the `first` and `rest` of lists, even when the corresponding `first` parts fail to match.
-(Isn't it amazing that there could be five bugs in a seven-line function?)
+この実装は妥当に見えます。パターンが変数なら1要素の a-list を返し、パターンと入力がどちらもリストなら a-list どうしを連結します。
+しかし問題がいくつかあります。
+第一に、判定 `(eql pattern input)` はリストでない `T` を返しうるので、`append` が文句を言います。
+第二に、同じ判定が nil を返すこともあり、それは失敗を示すはずなのに、ただのリストとして扱われて答えの残りに連結されてしまいます。
+第三に、照合が失敗して nil を返す場合と、すべて合致したが変数がないので空の a-list を返す場合とを区別していません。
+（これは127ページで論じた半述語の問題です。）
+第四に、変数の束縛は一致していてほしいのです。`?X` がパターン中で2回使われているなら、入力の異なる2つの値に合致してほしくはありません。
+最後に、対応する `first` の部分が合致しない場合でも `pat-match` がリストの `first` と `rest` の両方を調べるのは非効率です。
+（7行の関数にバグが5つもありうるとは、驚くべきことではないでしょうか。）
 
-We can resolve these problems by agreeing on two major conventions.
-First, it is very convenient to make `pat-match` a true predicate, so we will agree that it returns `nil` only to indicate failure.
-That means that we will need a non-nil value to represent the empty binding list.
-Second, if we are going to be consistent about the values of variables, then the `first` will have to know what the `rest` is doing.
-We can accomplish this by passing the binding list as a third argument to `pat-match`.
-We make it an optional argument, because we want to be able to say simply `(pat-match *a b*)`.
+これらの問題は、2つの大きな約束を設けることで解決できます。
+第一に、`pat-match` を本物の述語にするのがとても便利なので、`nil` を返すのは失敗を示すときだけと約束します。
+つまり、空の束縛の並びを表す nil 以外の値が必要になります。
+第二に、変数の値について一貫させるなら、`first` は `rest` が何をしているかを知らねばなりません。
+これは束縛の並びを `pat-match` の第3引数として渡すことで実現できます。
+単に `(pat-match *a b*)` と書けるようにしたいので、これは省略可能な引数にします。
 
-To abstract away from these implementation decisions, we define the constants `fail` and `no-bindings` to represent the two problematic return values.
-The special form `defconstant` is used to indicate that these values will not change.
-(It is customary to give special variables names beginning and ending with asterisks, but this convention usually is not followed for constants.
-The reasoning is that asterisks shout out, "Careful!
-I may be changed by something outside of this lexical scope." Constants, of course, will not be changed.)
+こうした実装上の決定を覆い隠すために、問題となる2つの戻り値を表す定数 `fail` と `no-bindings` を定義します。
+これらの値が変わらないことを示すのに、特殊形式 `defconstant` を使います。
+（スペシャル変数の名前を両端アスタリスクにするのが習わしですが、定数についてはふつうこの流儀に従いません。
+理由は、アスタリスクが「注意せよ。
+このレキシカルスコープの外の何かに変えられるかもしれない」と叫んでいるからです。定数はもちろん変えられません。）
 
 ```lisp
 (defconstant fail nil "Indicates pat-match failure")
@@ -230,7 +230,7 @@ I may be changed by something outside of this lexical scope." Constants, of cour
   "Indicates pat-match success, with no variables.")
 ```
 
-Next, we abstract away from `assoc` by introducing the following four functions:
+次に、以下の4つの関数を導入して `assoc` を覆い隠します。
 
 ```lisp
 (defun get-binding (var bindings)
@@ -250,14 +250,14 @@ Next, we abstract away from `assoc` by introducing the following four functions:
   (cons (cons var val) bindings))
 ```
 
-Now that variables and bindings are defined, `pat-match` is easy.
-It consists of five cases.
-First, if the binding list is `fail`, then the match fails (because some previous match must have failed).
-If the pattern is a single variable, then the match returns whatever `match-variable` returns; either the existing binding list, an extended one, or `fail`.
-Next, if both pattern and input are lists, we first call `pat-match` recursively on the first element of each list.
-This returns a binding list (or `fail`), which we use to match the rest of the lists.
-This is the only case that invokes a nontrivial function, so it is a good idea to informally prove that the function will terminate: each of the two recursive calls reduces the size of both pattern and input, and `pat-match` checks the case of atomic patterns and inputs, so the function as a whole must eventually return an answer (unless both pattern and input are of infinite size).
-If none of these four cases succeeds, then the match fails.
+変数と束縛が定義できたので、`pat-match` は簡単です。
+5つの場合からなります。
+第一に、束縛の並びが `fail` なら照合は失敗します（それ以前の照合が失敗していたはずだからです）。
+パターンが単一の変数なら、照合は `match-variable` が返すものをそのまま返します。既存の束縛の並びか、拡張されたものか、`fail` のいずれかです。
+次に、パターンと入力がどちらもリストなら、まず各リストの最初の要素に対して `pat-match` を再帰的に呼びます。
+これが束縛の並び（か `fail`）を返し、それを使ってリストの残りを照合します。
+自明でない関数を呼ぶのはこの場合だけなので、この関数が停止することを略式に証明しておくのがよい考えです。2つの再帰呼び出しはいずれもパターンと入力の大きさを減らし、`pat-match` はアトムのパターンと入力の場合を調べるので、関数全体としてはいずれ答えを返すはずです（パターンと入力の両方が無限の大きさでないかぎり）。
+この4つの場合のいずれも成功しなければ、照合は失敗します。
 
 ```lisp
 (defun pat-match (pattern input &optional (bindings no-bindings))
@@ -280,16 +280,16 @@ If none of these four cases succeeds, then the match fails.
           (t fail))))
 ```
 
-We can now test `pat-match` and see how it works:
+これで `pat-match` を試して、その働きを見られます。
 
 ```lisp
 > (pat-match '(i need a ?X) '(i need a vacation))
 ((?X . VACATION) (T . T))
 ```
 
-The answer is a list of variable bindings in dotted pair notation; each element of the list is a (`*variable . value*`) pair.
-The `(T . T)` is a remnant from `no-bindings`.
-It does no real harm, but we can eliminate it by making `extend-bindings` a little more complicated:
+答えはドット対の記法による変数の束縛の並びで、その各要素が (`*変数 . 値*`) の対です。
+`(T . T)` は `no-bindings` の名残です。
+実害はありませんが、`extend-bindings` を少し複雑にすれば取り除けます。
 
 ```lisp
 (defun extend-bindings (var val bindings)
@@ -321,24 +321,24 @@ NIL
 ((?X A LONG VACATION) (?P . I ))
 ```
 
-Notice the distinction between `NIL` and `((T . T))`.
-The latter means that the match succeeded, but there were no bindings to return.
-Also, remember that `(?X 2 + 2)` means the same as `(?X . (2 + 2))`.
+`NIL` と `((T . T))` の違いに注目してください。
+後者は、照合は成功したが返すべき束縛がなかったことを意味します。
+また、`(?X 2 + 2)` は `(?X . (2 + 2))` と同じ意味であることを思い出してください。
 
-A more powerful implementation of `pat-match` is given in [chapter 6](chapter6.md).
-Yet another implementation is given in section 10.4.
-It is more efficient but more cumbersome to use.
+より強力な `pat-match` の実装は[第6章](chapter6.md)で示します。
+さらに別の実装を10.4節で示します。
+そちらはより効率的ですが、使うのは面倒です。
 
-## 5.3 Segment Pattern Matching
-In the pattern `(?P need . ?X)`, the variable `?X` matches the rest of the input list, regardless of its length.
-This is in contrast to `?P`, which can only match a single element, namely, the first element of the input.
-For many applications of pattern matching, this is fine; we only want to match corresponding elements.
-However, ELIZA is somewhat different in that we need to account for variables in any position that match a sequence of items in the input.
-We will call such variables *segment variables.* We will need a notation to differentiate segment variables from normal variables.
-The possibilities fall into two classes: either we use atoms to represent segment variables and distinguish them by some spelling convention (as we did to distinguish variables from constants) or we use a nonatomic construct.
-We will choose the latter, using a list of the form (`?*`*variable*) to denote segment variables.
-The symbol `?*` is chosen because it combines the notion of variable with the Kleenestar notation.
-So, the behavior we want from `pat-match` is now:
+## 5.3 区間のパターン照合
+パターン `(?P need . ?X)` において、変数 `?X` は入力リストの残り全体に、その長さにかかわらず合致します。
+これは、要素1つ — すなわち入力の最初の要素 — にしか合致できない `?P` とは対照的です。
+パターン照合の応用の多くではこれで十分です。対応する要素どうしを合わせたいだけですから。
+しかしELIZAは少し違い、入力中の要素の並びに合致する変数を、どの位置にも置けるようにする必要があります。
+そうした変数を*区間変数*と呼ぶことにします。区間変数を通常の変数と区別する記法が要ります。
+可能性は2つに分かれます。（変数と定数を区別したときのように）アトムで区間変数を表して綴りの決まりで見分けるか、アトムでない構造を使うかです。
+ここでは後者を選び、(`?*`*変数*) という形のリストで区間変数を表します。
+`?*` という記号を選んだのは、変数という考えとクリーネスターの記法を組み合わせたものだからです。
+ですから `pat-match` に望む振る舞いは次のようになります。
 
 ```lisp
 > (pat-match '((?* ?p) need (?* ?x))
@@ -346,9 +346,9 @@ So, the behavior we want from `pat-match` is now:
 ((?P MR HULOT AND I) (?X A VACATION))
 ```
 
-In other words, when both pattern and input are lists and the first element of the pattern is a segment variable, then the variable will match some initial part of the input, and the rest of the pattern will attempt to match the rest.
-We can update `pat-match` to account for this by adding a single cond-clause.
-Defining the predicate to test for segment variables is also easy:
+言い換えれば、パターンと入力がどちらもリストで、パターンの最初の要素が区間変数なら、その変数が入力の先頭部分に合致し、パターンの残りが入力の残りに合致しようとします。
+これに対応するには、`pat-match` にcond節を1つ加えるだけで済みます。
+区間変数かどうかを調べる述語の定義も簡単です。
 
 ```lisp
  (defun pat-match (pattern input &optional (bindings no-bindings))
@@ -371,22 +371,22 @@ Defining the predicate to test for segment variables is also easy:
        (starts-with (first pattern) '?*)))
 ```
 
-In writing `segment-match`, the important question is how much of the input the segment variable should match.
-One answer is to look at the next element of the pattern (the one after the segment variable) and see at what position it occurs in the input.
-If it doesn't occur, the total pattern can never match, and we should `fail`.
-If it does occur, call its position `pos`.
-We will want to match the variable against the initial part of the input, up to `pos`.
-But first we have to see if the rest of the pattern matches the rest of the input.
-This is done by a recursive call to `pat-match`.
-Let the result of this recursive call be named `b2`.
-If `b2` succeeds, then we go ahead and match the segment variable against the initial subsequence.
+`segment-match` を書くうえで大事な問いは、区間変数が入力のどこまでに合致すべきかです。
+1つの答えは、パターンの次の要素（区間変数の後ろのもの）を見て、それが入力のどの位置に現れるかを調べることです。
+現れなければパターン全体が合致することはありえないので、`fail` すべきです。
+現れたら、その位置を `pos` と呼びましょう。
+変数を入力の先頭から `pos` までの部分に合致させたいわけです。
+しかしその前に、パターンの残りが入力の残りに合致するかを確かめねばなりません。
+これは `pat-match` を再帰的に呼ぶことで行います。
+この再帰呼び出しの結果を `b2` と名づけましょう。
+`b2` が成功すれば、そのまま区間変数を先頭の部分列に合致させます。
 
-The tricky part is when `b2` fails.
-We don't want to give up completely, because it may be that if the segment variable matched a longer subsequence of the input, then the rest of the pattern would match the rest of the input.
-So what we want is to try `segment-match` again, but forcing it to consider a longer match for the variable.
-This is done by introducing an optional parameter, `start`, which is initially 0 and is increased with each failure.
-Notice that this policy rules out the possibility of any kind of variable following a segment variable.
-(Later we will remove this constraint.)
+厄介なのは `b2` が失敗したときです。
+完全にあきらめたくはありません。区間変数が入力のもっと長い部分列に合致すれば、パターンの残りが入力の残りに合致するかもしれないからです。
+ですから `segment-match` をもう一度、ただし変数のより長い合致を検討させる形で試したいのです。
+これは省略可能な引数 `start` を導入して行います。最初は0で、失敗のたびに増やします。
+この方針では、区間変数の後ろにどんな変数も置けなくなることに注意してください。
+（この制約はのちほど取り除きます。）
 
 ```lisp
 (defun segment-match (pattern input bindings &optional (start 0))
@@ -409,7 +409,7 @@ Notice that this policy rules out the possibility of any kind of variable follow
                      (match-variable var (subseq input 0 pos) b2))))))))
 ```
 
-Some examples of segment matching follow:
+区間照合の例をいくつか示します。
 
 ```lisp
 > (pat-match '((?* ?p) need (?* ?x))
@@ -420,21 +420,21 @@ Some examples of segment matching follow:
 ((?X WHAT HE IS) (?Y FOOL))
 ```
 
-The first of these examples shows a fairly simple case: `?p` matches everything up to need, and `?x` matches the rest.
-The next example involves the more complicated backup case.
-First `?x` matches everything up to the first `is` (this is position 2, since counting starts at 0 in Common Lisp).
-But then the pattern `a` fails to match the input `is`, so `segment-match` tries again with starting position 3.
-This time everything works; `is` matches `is`, `a` matches `a`, and `(?* ?y)` matches `fool`.
+最初の例はかなり単純な場合を示しています。`?p` が need までのすべてに、`?x` が残りに合致します。
+次の例は、より込み入った後戻りの場合を含みます。
+まず `?x` が最初の `is` までのすべてに合致します（Common Lispでは0から数えるので、位置は2です）。
+しかしそのあとパターンの `a` が入力の `is` に合致しないので、`segment-match` は開始位置を3にして再び試します。
+今度はすべてうまくいきます。`is` が `is` に、`a` が `a` に、`(?* ?y)` が `fool` に合致します。
 
-Unfortunately, this version of `segment-match` does not match as much as it should.
-Consider the following example:
+あいにく、この版の `segment-match` は本来合致すべきほどには合致しません。
+次の例を見てください。
 
 ```lisp
 > (pat-match '((?* ?x) a b (?* ?x)) '(1 2 a b a b 1 2 a b)) ⇒ NIL
 ```
 
-This fails because `?x` is matched against the subsequence `(1 2)`, and then the remaining pattern successfully matches the remaining input, but the final call to `match-variable` fails, because `?x` has two different values.
-The fix is to call `match-variable` before testing whether the `b2` fails, so that we will be sure to try `segment-match` again with a longer match no matter what the cause of the failure.
+これが失敗するのは、`?x` が部分列 `(1 2)` に合致し、残りのパターンが残りの入力にうまく合致したあとで、`?x` が異なる2つの値を持つために最後の `match-variable` の呼び出しが失敗するからです。
+直し方は、`b2` が失敗したかを調べる前に `match-variable` を呼ぶことです。そうすれば失敗の原因が何であれ、より長い合致で `segment-match` を確実に再試行できます。
 
 ```lisp
 (defun segment-match (pattern input bindings &optional (start 0))
@@ -459,21 +459,21 @@ The fix is to call `match-variable` before testing whether the `b2` fails, so th
                      b2)))))))
 ```
 
-Now we see that the match goes through:
+これで照合が通るのが分かります。
 
 ```lisp
 > (pat-match '((?* ?x) a b (?* ?x)) '(1 2 a b a b 1 2 a b))
 ((?X 1 2 A B))
 ```
 
-Note that this version of `segment-match` tries the shortest possible match first.
-It would also be possible to try the longest match first.
+この版の `segment-match` は、まず最も短い合致から試すことに注意してください。
+最も長い合致から試すようにすることもできます。
 
-## 5.4 The ELIZA Program: A Rule-Based Translator
-Now that we have a working pattern matcher, we need some patterns to match.
-What's more, we want the patterns to be associated with responses.
-We can do this by inventing a data structure called a `rule`, which consists of a pattern and one or more associated responses.
-These are rules in the sense that they assert, "If you see A, then respond with B or C, chosen at random." We will choose the simplest possible implementation for rules: as lists, where the first element is the pattern and the rest is a list of responses:
+## 5.4 ELIZAプログラム: 規則に基づく変換器
+動くパターン照合器ができたので、次は照合するパターンが要ります。
+さらに、パターンには応答が結び付いていてほしいのです。
+これは、パターンと1つ以上の応答からなる `rule` というデータ構造を考案すれば実現できます。
+これらが規則であるというのは、「Aを見たら、BかCを無作為に選んで応じよ」と述べているという意味です。規則の実装は考えうる最も単純なもの — 最初の要素がパターンで残りが応答の並びであるリスト — を選びます。
 
 ```lisp
 (defun rule-pattern (rule) (first rule))
@@ -481,7 +481,7 @@ These are rules in the sense that they assert, "If you see A, then respond with 
 (defun rule-responses (rule) (rest rule))
 ```
 
-Here's an example of a rule:
+規則の例を示します。
 
 ```lisp
 (((?* ?x) I want (?* ?y))
@@ -490,23 +490,23 @@ Here's an example of a rule:
  (Suppose you got ?y soon))
 ```
 
-When applied to the input `(I want to test this program)`, this rule (when interpreted by the ELIZA program) would pick a response at random, substitute in the value of `?y`, and respond with, say, `(why do you want to test this program)`.
+入力 `(I want to test this program)` に適用すると、この規則は（ELIZAプログラムに解釈されて）応答を無作為に選び、`?y` の値を差し込んで、たとえば `(why do you want to test this program)` と応じます。
 
-Now that we know what an individual rule will do, we need to decide how to handle a set of rules.
-If ELIZA is to be of any interest, it will have to have a variety of responses.
-So several rules may all be applicable to the same input.
-One possibility would be to choose a rule at random from among the rules having patterns that match the input.
+個々の規則が何をするか分かったので、次は規則の集合をどう扱うかを決めねばなりません。
+ELIZAが少しでも面白いものであるためには、応答に多様さが要ります。
+ですから同じ入力に複数の規則が適用できることもありえます。
+1つの可能性は、入力に合致するパターンを持つ規則の中から無作為に1つ選ぶことです。
 
-Another possibility is just to accept the first rule that matches.
-This implies that the rules form an ordered list, rather than an unordered set.
-The clever ELIZA rule writer can take advantage of this ordering and arrange for the most specific rules to come first, while more vague rules are near the end of the list.
+もう1つの可能性は、単に最初に合致した規則を採ることです。
+これは、規則が順序のない集合ではなく順序のある並びをなすことを意味します。
+抜け目のないELIZAの規則の書き手なら、この順序を利用して、最も具体的な規則を先に、漠然とした規則を並びの終わり近くに置くでしょう。
 
-The original ELIZA had a system where each rule had a priority number associated with it.
-The matching rule with the highest priority was chosen.
-Note that putting the rules in order achieves the same effect as having a priority number on each rule: the first rule implicitly has the highest priority, the second rule is next highest, and so on.
+元のELIZAには、各規則に優先度の数値が結び付いた仕組みがありました。
+合致した規則のうち優先度が最も高いものが選ばれます。
+規則を順に並べることは、各規則に優先度の数値を付けるのと同じ効果を持つことに注意してください。最初の規則が暗黙に最高の優先度を持ち、2番目がその次、という具合です。
 
-Here is a short list of rules, selected from Weizenbaum's original article, but with the form of the rules updated to the form we are using.
-The answer to exercise 5.18 contains a longer list of rules.
+Weizenbaumの元の論文から選んだ規則を、私たちの使っている形に改めて短く並べます。
+練習問題5.18の解答に、もっと長い規則の並びがあります。
 
 ```lisp
 (defparameter *eliza-rules*
@@ -530,38 +530,38 @@ The answer to exercise 5.18 contains a longer list of rules.
      (What other feelings do you have?))))
 ```
 
-Finally we are ready to define ELIZA proper.
-As we said earlier, the main program should be a loop that reads input, transforms it, and prints the result.
-Transformation is done primarily by finding some rule such that its pattern matches the input, and then substituting the variables into the rule's response.
-The program is summarized in figure 5.1.
+いよいよELIZA本体を定義する準備が整いました。
+先に述べたとおり、主となるプログラムは入力を読み、変形し、結果を表示するループであるべきです。
+変形は主に、パターンが入力に合致する規則を見つけ、その規則の応答に変数を差し込むことで行われます。
+プログラムの概要を図5.1にまとめます。
 
-Figure 5.1: Glossary for the ELIZA Program
+図5.1: ELIZAプログラムの用語一覧
 
 | Symbol             | Use                                                   |
 | ------             | ---                                                   |
 |                    | **Top-Level Function**                                |
-| `eliza`            | Respond to user input using pattern matching rules.   |
+| `eliza`            | パターン照合の規則で利用者の入力に応じる。            |
 |                    | **Special Variables**                                 |
-| `*eliza-rules*`    | A list of transformation rules.                       |
+| `*eliza-rules*`    | 変形規則の並び。                                      |
 |                    | **Data Types**                                        |
-| `rule`             | An association of a pattern with a list of responses. |
+| `rule`             | パターンと応答の並びとの結び付き。                    |
 |                    | **Functions**                                         |
-| `eliza`            | Respond to user input using pattern matching rules.   |
-| `use-eliza-rules`  | Find some rule with which to transform the input.     |
-| `switch-viewpoint` | Change I to you and vice versa, and so on.            |
-| `flatten`          | Append together elements of a list.                   |
+| `eliza`            | パターン照合の規則で利用者の入力に応じる。            |
+| `use-eliza-rules`  | 入力を変形する規則を見つける。                        |
+| `switch-viewpoint` | I を you に、その逆に、といった具合に入れ替える。     |
+| `flatten`          | リストの要素どうしを連結する。                        |
 |                    | **Selected Common Lisp Functions**                    |
-| `sublis`           | Substitute elements into a tree.                      |
+| `sublis`           | 木の中に要素を差し込む。                              |
 |                    | **Previously Defined Functions**                      |
-| `random-elt`       | Pick a random element from a list. (p. 36)            |
-| `pat-match`        | Match a pattern against an input, (p. 160)            |
-| `mappend`          | Append together the results of a mapcar.              |
+| `random-elt`       | リストから無作為に要素を1つ選ぶ。(36ページ)           |
+| `pat-match`        | パターンを入力に照合する。(160ページ)                 |
+| `mappend`          | mapcar の結果どうしを連結する。                       |
 
-There are a few minor complications.
-We print a prompt to tell the user to input something.
-We use the function `flatten` to insure that the output won't have embedded lists after variable substitution.
-An important trick is to alter the input by swapping "you" for "me" and so on, since these terms are relative to the speaker.
-Here is the complete program:
+細かな込み入った点がいくつかあります。
+何か入力するよう利用者に促すプロンプトを表示します。
+変数の置換後に出力へリストが埋め込まれないよう、関数 `flatten` を使います。
+大事な工夫は、「you」と「me」などを入れ替えて入力を変えることです。これらの語は話し手から見た相対的なものだからです。
+プログラムの全体を示します。
 
 ```lisp
 (defun eliza ()
@@ -585,9 +585,9 @@ Here is the complete program:
           words))
 ```
 
-Note the use of `write` with the `:pretty` keyword true.
-This will give better formatted output in some cases.
-The program makes use of the previously defined `random-elt`, and `flatten`, which is defined here using `mappend` and `mklist`, a function that is defined in the InterLisp dialect but not in Common Lisp.
+`:pretty` キーワードを真にして `write` を使っている点に注目してください。
+これで場合によっては整形の行き届いた出力が得られます。
+このプログラムは既出の `random-elt` と `flatten` を使います。`flatten` はここで `mappend` と `mklist` を使って定義しています。`mklist` はInterLisp方言にはあるがCommon Lispにはない関数です。
 
 ```lisp
 (defun flatten (the-list)
@@ -609,14 +609,14 @@ The program makes use of the previously defined `random-elt`, and `flatten`, whi
   (elt choices (random (length choices))))
 ```
 
-The actual ELIZA program had a few complications that don't show up in this version.
-First, there was an alias method for associating several words with the same pattern; both "mother" and "father" could be associated with the "family" pattern.
-There was also a synonym mechanism that would treat "don't" and "do not" or "everybody" and "everyone" the same.
-In the case of input with several comma-separated phrases, each phrase was processed separately, and the response with the highest priority was selected.
-In addition, the original ELIZA had a "memory" mechanism.
-When no pattern matched the input, it said something like "Tell me more about X," where X is some input given earlier.
-Finally, our version has fewer rules.
-Despite the shortcomings of our version, it can occasionally hold up its end of a conversation, as shown below:
+実際のELIZAには、この版に現れない込み入った点がいくつかありました。
+第一に、複数の語を同じパターンに結び付ける別名の仕組みがありました。「mother」も「father」も「family」のパターンに結び付けられたのです。
+また、「don't」と「do not」、「everybody」と「everyone」を同じものとして扱う同義語の仕組みもありました。
+カンマで区切られた句が複数ある入力の場合は、各句が別々に処理され、優先度の最も高い応答が選ばれました。
+さらに元のELIZAには「記憶」の仕組みがありました。
+どのパターンも入力に合致しないとき、「Tell me more about X」のように言うのです。Xは以前に与えられた入力です。
+最後に、私たちの版は規則の数が少なくなっています。
+私たちの版には至らぬ点もありますが、以下に示すとおり、会話の受け答えをどうにか務めることもあります。
 
 ```text
 > (eliza)
@@ -639,70 +639,70 @@ ELIZA> (i feel this is enough)
 ELIZA> [Abort]
 ```
 
-In the end, it is the technique that is important-not the program.
-ELIZA has been "explained away" and should rightfully be moved to the curio shelf.
-Pattern matching in general remains important technique, and we will see it again in subsequent chapters.
-The notion of a rule-based translator is also important.
-The problem of understanding English (and other languages) remains an important part of AI.
-Clearly, the problem of understanding English is not solved by ELIZA.
-In part V, we will address the problem again, using more sophisticated techniques.
+結局のところ大事なのは技法であって、プログラムではありません。
+ELIZAは「説明して消し去られ」たのであり、当然ながら珍品の棚へ移されるべきものです。
+パターン照合という技法一般は依然として重要であり、以降の章でも再び登場します。
+規則に基づく変換器という考えもまた重要です。
+英語（や他の言語）を理解するという問題は、なおAIの重要な一部であり続けています。
+英語を理解するという問題がELIZAによって解決されていないのは明らかです。
+第V部では、より洗練された技法を使ってこの問題に再び取り組みます。
 
-## 5.5 History and References
-As mentioned above, the original article describing ELIZA is Weizenbaum 1966.
-Another dialog system using similar pattern-matching techniques is Kenneth Colby's (1975) PARRY.
-This program simulated the conversation of a paranoid person well enough to fool several professional psychologists.
-Although the pattern matching techniques were simple, the model of belief maintained by the system was much more sophisticated than ELIZA.
-Colby has suggested that dialog programs like ELIZA, augmented with some sort of belief model like PARRY, could be useful tools in treating mentally disturbed people.
-According to Colby, it would be inexpensive and effective to have patients converse with a specially designed program, one that could handle simple cases and alert doctors to patients that needed more help.
-Weizenbaum's book *Computer Power and Human Reason* (1976) discusses ELIZA and PARRY and takes a very critical view toward Colby's suggestion.
-Other interesting early work on dialog systems that model belief is reported by Allan Collins (1978) and Jamie Carbonell (1981).
+## 5.5 歴史と参考文献
+上で述べたとおり、ELIZAを記述した元の論文は Weizenbaum 1966 です。
+似たパターン照合の技法を使う別の対話システムが、Kenneth Colby（1975）のPARRYです。
+このプログラムは偏執的な人物の会話を、専門の心理学者を何人か欺くほどうまく模倣しました。
+パターン照合の技法は単純でしたが、そのシステムが保持していた信念のモデルはELIZAよりはるかに洗練されていました。
+Colbyは、ELIZAのような対話プログラムにPARRYのような信念のモデルを加えたものが、精神を病んだ人々の治療に役立つ道具になりうると示唆しました。
+Colbyによれば、患者に専用のプログラムと会話させるのは安価で効果的であり、そのプログラムは単純な事例に対処し、より手厚い支援を要する患者を医師に知らせられるだろうというのです。
+Weizenbaumの著書 *Computer Power and Human Reason*（1976）はELIZAとPARRYを論じ、Colbyの示唆にきわめて批判的な立場を取っています。
+信念をモデル化する対話システムについての、他の興味深い初期の研究は Allan Collins（1978）と Jamie Carbonell（1981）が報告しています。
 
-## 5.6 Exercises
-&#9635; **Exercise 5.2 [m]** Experiment with this version of ELIZA.
-Show some exchanges where it performs well, and some where it fails.
-Try to characterize the difference.
-Which failures could be fixed by changing the rule set, which by changing the `pat-match` function (and the pattern language it defines), and which require a change to the `eliza` program itself?
+## 5.6 練習問題
+&#9635; **練習問題 5.2 [m]** この版のELIZAで試してみよ。
+うまく応じるやりとりと、失敗するやりとりをいくつか示せ。
+その違いを特徴づけてみよ。
+失敗のうち、規則の組を変えれば直るのはどれか、`pat-match` 関数（とそれが定めるパターン言語）を変える必要があるのはどれか、`eliza` プログラム自体の変更を要するのはどれか。
 
-&#9635; **Exercise 5.3 [h]** Define a new set of rules that make ELIZA give stereotypical responses to some situation other than the doctor-patient relationship.
-Or, write a set of rules in a language other than English.
-Test and debug your new rule set.
+&#9635; **練習問題 5.3 [h]** 医師と患者の関係以外の状況について、ELIZAに型どおりの応答をさせる新しい規則の組を定義せよ。
+あるいは英語以外の言語で規則の組を書け。
+新しい規則の組を試験し、デバッグせよ。
 
-&#9635; **Exercise 5.4 [s]** We mentioned that our version of ELIZA cannot handle commas or double quote marks in the input.
-However, it seems to handle the apostrophe in both input and patterns.
-Explain.
+&#9635; **練習問題 5.4 [s]** 私たちの版のELIZAは入力中のカンマや二重引用符を扱えないと述べた。
+しかしアポストロフィは入力でもパターンでも扱えるように見える。
+その理由を説明せよ。
 
-&#9635; **Exercise 5.5 [h]** Alter the input mechanism to handle commas and other punctuation characters.
-Also arrange so that the user doesn't have to type parentheses around the whole input expression.
-(Hint: this can only be done using some Lisp functions we have not seen yet.
-Look at `read-line` and `read-from-string`.)
+&#9635; **練習問題 5.5 [h]** カンマその他の区切り記号を扱えるよう入力の仕組みを変えよ。
+また、利用者が入力全体を括弧で囲まずに済むようにせよ。
+（手がかり: これはまだ見ていないLispの関数を使わなければできない。
+`read-line` と `read-from-string` を見よ。）
 
-&#9635; **Exercise 5.6 [m]** Modify ELIZA to have an explicit exit.
-Also arrange so that the output is not printed in parentheses either.
+&#9635; **練習問題 5.6 [m]** ELIZAに明示的な終了手段を設けよ。
+出力も括弧付きで表示されないようにせよ。
 
-&#9635; **Exercise 5.7 [m]** Add the "memory mechanism" discussed previously to ELIZA.
-Also add some way of defining synonyms like "everyone" and "everybody."
+&#9635; **練習問題 5.7 [m]** 先に論じた「記憶の仕組み」をELIZAに加えよ。
+また「everyone」と「everybody」のような同義語を定義する手立ても加えよ。
 
 
-&#9635; **Exercise 5.8 [h]** It turns out that none of the rules in the given script uses a variable more than once-there is no rule of the form `(?x... ?x)`.
-Write a pattern matcher that only adds bindings, never checks variables against previous bindings.
-Use the `time` special form to compare your function against the current version.
+&#9635; **練習問題 5.8 [h]** 与えられた台本の規則には、変数を2回以上使うものが1つもない — `(?x... ?x)` の形の規則は存在しない。
+束縛を加えるだけで、変数を以前の束縛と照合しないパターン照合器を書け。
+`time` の特殊形式を使って、自分の関数を現在の版と比べよ。
 
-&#9635; **Exercise 5.9 [h]** Winston and Horn's book *Lisp* presents a good pattern-matching program.
-Compare their implementation with this one.
-One difference is that they handle the case where the first element of the pattern is a segment variable with the following code (translated into our notation):
+&#9635; **練習問題 5.9 [h]** WinstonとHornの著書 *Lisp* にはよくできたパターン照合プログラムが載っている。
+彼らの実装とここでの実装を比べよ。
+違いの1つは、パターンの最初の要素が区間変数である場合を、次のコード（本書の記法に直したもの）で扱っている点である。
 
 ```lisp
 (or (pat-match (rest pattern) (rest input) bindings)
   (pat-match pattern (rest input) bindings))
 ```
 
-This says that a segment variable matches either by matching the first element of the input, or by matching more than the first element.
-It is much simpler than our approach using `position`, partly because they don't update the binding list.
-Can you change their code to handle bindings, and incorporate it into our version of `pat-match`?
-Is it still simpler?
-Is it more or less efficient?
+これは、区間変数が入力の最初の要素に合致するか、最初の要素より多くに合致するかのいずれかだと述べている。
+`position` を使う本書の方式よりずっと単純だが、それは彼らが束縛の並びを更新しないことにもよる。
+彼らのコードを束縛を扱えるように変え、本書の `pat-match` に組み込めるか。
+それでもなお単純だろうか。
+効率は上がるか下がるか。
 
-&#9635; **Exercise 5.10** What is wrong with the following definition of `simple-equal`?
+&#9635; **練習問題 5.10** 次の `simple-equal` の定義のどこがまずいか。
 
 ```lisp
 (defun simple-equal (x y)
@@ -714,55 +714,55 @@ Is it more or less efficient?
      (simple-equal (rest x) (rest y)))))
 ```
 
-&#9635; **Exercise 5.11 [m]** Weigh the advantages of changing `no-bindings` to `nil`, and `fail` to something else.
+&#9635; **練習問題 5.11 [m]** `no-bindings` を `nil` に、`fail` を別のものに変えることの利点を検討せよ。
 
-&#9635; **Exercise 5.12 [m]** Weigh the advantages of making `pat-match` return multiple values: the first would be true for a match and false for failure, and the second would be the binding list.
+&#9635; **練習問題 5.12 [m]** `pat-match` に多値を返させることの利点を検討せよ。第1の値は合致なら真、失敗なら偽、第2の値は束縛の並びとする。
 
-&#9635; **Exercise 5.13 [m]** Suppose that there is a call to `segment-match` where the variable already has a binding.
+&#9635; **練習問題 5.13 [m]** 変数がすでに束縛を持っている状態で `segment-match` が呼ばれる場合を考えよ。
 
-The current definition will keep making recursive calls to `segment-match`, one for each possible matching position.
-But this is silly-if the variable is already bound, there is only one sequence that it can possibly match against.
-Change the definition so that it looks only for this one sequence.
+現在の定義では、合致しうる位置ごとに `segment-match` を再帰的に呼び続けてしまう。
+しかしこれは馬鹿げている。変数がすでに束縛されているなら、合致しうる並びは1つしかない。
+その1つの並びだけを探すよう定義を変えよ。
 
-&#9635; **Exercise 5.14 [m]** Define a version of `mappend` that, like `mapcar`, accepts any number of argument lists.
+&#9635; **練習問題 5.14 [m]** `mapcar` のように任意個の引数リストを受け取る `mappend` を定義せよ。
 
-&#9635; **Exercise 5.15 [m]** Give an informal proof that `segment-match` always terminates.
+&#9635; **練習問題 5.15 [m]** `segment-match` が常に停止することの略式の証明を与えよ。
 
-&#9635; **Exercise 5.16 [s]** Trick question: There is an object in Lisp which, when passed to `variable-p`, results in an error.
-What is that object?
+&#9635; **練習問題 5.16 [s]** ひっかけ問題: Lispには、`variable-p` に渡すとエラーになるオブジェクトがある。
+それは何か。
 
-&#9635; **Exercise 5.17 [m]** The current version of ELIZA takes an input, transforms it according to the first applicable rule, and outputs the result.
-One can also imagine a system where the input might be transformed several times before the final output is printed.
-Would such a system be more powerful?
-If so, in what way?
+&#9635; **練習問題 5.17 [m]** 現在の版のELIZAは入力を受け取り、最初に適用できる規則に従って変形し、結果を出力する。
+最終的な出力を表示する前に、入力を何度も変形するシステムも考えられる。
+そうしたシステムはより強力だろうか。
+もしそうなら、どのような点でか。
 
-&#9635; **Exercise 5.18 [h]** Read Weizenbaum's original article on ELIZA and transpose his list of rules into the notation used in this chapter.
+&#9635; **練習問題 5.18 [h]** WeizenbaumのELIZAについての元の論文を読み、その規則の並びを本章の記法に移せ。
 
-## 5.7 Answers
-### Answer 5.1
-No.
-If either the pattern or the input were shorter, but matched every existing element, the every expression would incorrectly return true.
+## 5.7 解答
+### 解答 5.1
+いいえ。
+パターンか入力の一方が短く、しかし存在する要素すべてに合致した場合、every の式は誤って真を返してしまう。
 
 ```lisp
 (every #'pat-match '(a b c) '(a)) ⇒ T
 ```
 
-Furthermore, if either the pattern or the input were a dotted list, then the result of the every would be undefined-some implementations might signal an error, and others might just ignore the expression after the dot.
+さらに、パターンか入力の一方がドットリストであれば every の結果は未定義になる。エラーを通知する処理系もあれば、ドット以降の式を単に無視する処理系もあるだろう。
 
 ```lisp
 (every #'pat-match '(a b . c) '(a b . d)) ⇒ T, NIL, or error.
 ```
 
-### Answer 5.4
-The expression `don't` may look like a single word, but to the Lisp reader it is composed of the two elements `don` and `'t`, or `(quote t )`.
-If these elements are used consistently, they will match correctly, but they won't print quite right-there will be a space before the quote mark.
-In fact the `:pretty t` argument to `write` is specified primarily to make `(quote t)` print as `'t`
-(See page 559 of Steele's *Common Lisp the Language*, 2d edition).
+### 解答 5.4
+`don't` という式は1語に見えるかもしれないが、Lispのリーダにとっては `don` と `'t`（すなわち `(quote t )`）という2つの要素からなる。
+これらの要素を一貫して使えば正しく合致するが、表示は少しおかしくなる。引用符の前に空白が入ってしまうのだ。
+実のところ `write` に `:pretty t` を指定しているのは、主に `(quote t)` を `'t` と表示させるためである
+（Steeleの *Common Lisp the Language* 第2版の559ページを参照）。
 
-### Answer 5.5
-One way to do this is to read a whole line of text with `read-line` rather than `read`.
-Then, substitute spaces for any punctuation character in that string.
-Finally, wrap the string in parentheses, and read it back in as a list:
+### 解答 5.5
+1つの方法は、`read` ではなく `read-line` で1行分の文字列を読むことである。
+次に、その文字列中の区切り記号を空白に置き換える。
+最後に文字列を括弧で包み、リストとして読み戻す。
 
 ```lisp
 (defun read-line-no-punct ()
@@ -775,9 +775,9 @@ Finally, wrap the string in parentheses, and read it back in as a list:
 (defun punctuation-p (char) (find char ".,;:'!?#-()\\\""))
 ```
 
-This could also be done by altering the readtable, as in section 23.5, page 821.
+これは23.5節（821ページ）のようにリードテーブルを変えることでも実現できる。
 
-### Answer 5.6
+### 解答 5.6
 
 ```lisp
  (defun eliza ()
@@ -793,17 +793,17 @@ This could also be done by altering the readtable, as in section 23.5, page 821.
   (mapc #'(lambda (x) (prin1 x) (princ " ")) list))
 ```
 
-***`or`***
+***`あるいは`***
 
 ```lisp
 (defun print-with-spaces (list)
   (format t "~{~a ~}" list))
 ```
 
-### Answer 5.10
-Hint: consider `(simple-equal '() '(nil . nil))`.
+### 解答 5.10
+手がかり: `(simple-equal '() '(nil . nil))` を考えよ。
 
-### Answer 5.14
+### 解答 5.14
 
 ```lisp
 (defun mappend (fn &rest list)
@@ -811,19 +811,19 @@ Hint: consider `(simple-equal '() '(nil . nil))`.
   (apply #'append (apply #'mapcar fn lists)))
 ```
 
-### Answer 5.16
-It must be a symbol, because for nonsymbols, `variable-p` just returns nil.
-Getting the `symbol-name` of a symbol is just accessing a slot, so that can't cause an error.
-The only thing left is `elt`; if the symbol name is the empty string, then accessing element zero of the empty string is an error.
-Indeed, there is a symbol whose name is the empty string: the symbol.
+### 解答 5.16
+それはシンボルであるはずだ。シンボルでないものに対して `variable-p` は単に nil を返すからである。
+シンボルの `symbol-name` を取り出すのはスロットにアクセスするだけなので、エラーにはなりえない。
+残るは `elt` だけである。シンボル名が空文字列なら、空文字列の0番目の要素にアクセスするのはエラーになる。
+実際、名前が空文字列であるシンボルは存在する。
 
-### Answer 5.17
-Among other things, a recursive transformation system could be used to handle abbreviations.
-That is, a form like "don't" could be transformed into "do not" and then processed again.
-That way, the other rules need only work on inputs matching "do not."
+### 解答 5.17
+とりわけ、再帰的な変形の仕組みは短縮形を扱うのに使える。
+つまり「don't」のような形を「do not」に変形し、それを改めて処理するのである。
+そうすれば、他の規則は「do not」に合致する入力だけを扱えばよくなる。
 
-### Answer 5.18
-The following includes most of Weizenbaum's rules:
+### 解答 5.18
+以下にWeizenbaumの規則の大半を挙げる。
 
 ```lisp
 (defparameter *eliza-rules*
@@ -951,4 +951,4 @@ The following includes most of Weizenbaum's rules:
 ----------------------
 
 <a id="fn05-1"></a><sup>[1](#tfn05-1)</sup>
-The difference is that `simple-equal` does not handle strings.
+違いは、`simple-equal` が文字列を扱わない点です。

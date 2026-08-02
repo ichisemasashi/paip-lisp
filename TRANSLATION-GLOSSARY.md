@@ -207,6 +207,23 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | planner | 計画立案器／プランナ | 製品名は「プランナ」（Warplanなど） |
 | exploratory programming | 探索的なプログラミング | 第3章までと統一 |
 
+### 第5章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| pattern matching | パターン照合 | 全章で統一 |
+| pattern matcher | パターン照合器 | |
+| segment variable | 区間変数 | `(?* ?x)` 形式。入力の連続する並びに合致する |
+| segment matching | 区間の照合 | |
+| binding / binding list | 束縛／束縛の並び | |
+| rule-based translator | 規則に基づく変換器 | ELIZAの副題 |
+| script | 台本 | ELIZAの対話の型。「スクリプト」ではなく統一 |
+| nondirective | 非指示的 | ロジャーズ派の技法 |
+| response | 応答 | |
+| transformation | 変形 | 入力→応答の書き換え |
+| alias / synonym | 別名／同義語 | 元のELIZAの機構 |
+| belief model | 信念のモデル | PARRYの文脈 |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -275,8 +292,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter4.md` | 完了 |
-| `chapter5.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter5.md` | 完了 |
+| `chapter6.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
