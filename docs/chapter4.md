@@ -583,35 +583,35 @@ GPSは解を見つけられなかったとき、ただ `nil` を返します。
 | `*ops*`            | 使える演算子の並び。                                  |
 |                    | **データ型**                                          |
 | `op`               | 事前条件・追加リスト・削除リストを持つ演算。          |
-|                    | **Major Functions**                                   |
-| `achieve-all`      | Achieve a list of goals.                              |
+|                    | **主な関数**                                          |
+| `achieve-all`      | 目標の並びを達成する。                                |
 | `achieve`          | 個々の目標を達成する。                                |
 | `appropriate-p`    | 演算子が目標に適切かを判断する。                      |
 | `apply-op`         | 演算子を現在の状態に適用する。                        |
-|                    | **Auxiliary Functions**                               |
-| `executing-p`      | Is a condition an *executing* form?                   |
-| `starts-with`      | Is the argument a list that starts with a given atom? |
-| `convert-op`       | Convert an operator to use the *executing* convention.|
-| `op`               | Create an operator.                                   |
-| `use`              | Use a list of operators.                              |
-| `member-equal`     | Test if an element is equal to a member of a list.    |
+|                    | **補助の関数**                                        |
+| `executing-p`      | 条件が *executing* の形かどうか。                     |
+| `starts-with`      | 引数が与えたアトムで始まるリストかどうか。            |
+| `convert-op`       | 演算子を *executing* の流儀に合わせて変換する。       |
+| `op`               | 演算子を作る。                                        |
+| `use`              | 演算子の並びを使う。                                  |
+| `member-equal`     | 要素がリストのいずれかと等しいかを調べる。            |
 |                    | **主なCommon Lispの関数**                             |
 | `member`           | Test if an element is a member of a list. (p.78)      |
 | `set-difference`   | 一方の集合にあって他方にない要素すべて。              |
-| `subsetp`          | Is one set wholly contained in another?               |
+| `subsetp`          | ある集合が別の集合に丸ごと含まれるか。                |
 | `union`            | 2つの集合のいずれかにある要素すべて。                 |
 | `every`            | リストの全要素が判定を通るかを調べる。(62ページ)      |
 | `some`             | リストのいずれかの要素が判定を通るかを調べる。        |
-| `remove-if`        | Remove all items satisfying a test.                   |
+| `remove-if`        | 判定を満たす要素をすべて取り除く。                    |
 |                    | **既出の関数**                                        |
 | `find-all`         | 合致する要素すべての並び。(101ページ)                 |
-| `find-all-if`      | A list of all elements satisfying a predicate.        |
+| `find-all-if`      | 述語を満たす要素すべての並び。                        |
 
-The most important change is that, instead of printing a message when each operator is applied, we will instead have `GPS` return the resulting state.
-A list of "messages" in each state indicates what actions have been taken.
-Each message is actually a condition, a list of the form (executing *operator*).
-This solves the "running around the block" problem: we could call `GPS` with an initial goal of `((executing run-around-block))`, and it would execute the `run-around-block` operator, thereby satisfying the goal.
-The following code defines a new function, `op`, which builds operators that include the message in their add-list.
+最も重要な変更は、演算子を適用するたびにメッセージを表示するのをやめ、`GPS` に結果の状態を返させることです。
+各状態に含まれる「メッセージ」の並びが、どんな動作が取られたかを示します。
+各メッセージは実際には条件であり、(executing *演算子*) という形のリストです。
+これで「街区をぐるぐる回る」問題が解けます。初期の目標を `((executing run-around-block))` として `GPS` を呼べば、`run-around-block` の演算子が実行され、目標が満たされるからです。
+次のコードは、追加リストにこのメッセージを含む演算子を作る新しい関数 `op` を定義します。
 
 ```lisp
 (defun executing-p (x)
@@ -634,20 +634,20 @@ The following code defines a new function, `op`, which builds operators that inc
     (make-op :action action :preconds preconds
           :add-list add-list :del-list del-list)))
 ```
-Operators built by `op` will be correct, but we can convert existing operators using `convert-op` directly:
+`op` で作った演算子は正しくなりますが、既存の演算子は `convert-op` を直に使って変換できます。
 
 ```lisp
 (mapc #'convert-op *school-ops*)
 ```
 
-This is an example of exploratory programming: instead of starting all over when we discover a limitation of the first version, we can use Lisp to alter existing data structures for the new version of the program.
+これは探索的なプログラミングの一例です。第1版の限界に気づいたときに一から作り直すのではなく、Lispを使って既存のデータ構造を新しい版に合わせて変えられるのです。
 
-The definition of the variable `*ops*` and the structure `op` are exactly the same as before, and the rest of the program consists of five functions we have already seen: `GPS`, `achieve-all`, `achieve`, `appropriate-p`, and `apply-op`.
-At the top level, the function `GPS` calls `achieve-all`, which returns either `nil` or a valid state.
-From this we remove all the atoms, which leaves only the elements of the final state that are lists-in other words, the actions of the form (`executing` *operator*).
-Thus, the value of `GPS` itself is the list of actions taken to arrive at the final state.
-`GPS` no longer returns `SOLVED` when it finds a solution, but it still obeys the convention of returning nil for failure, and non-nil for success.
-In general, it is a good idea to have a program return a meaningful value rather than print that value, if there is the possibility that some other program might ever want to use the value.
+変数 `*ops*` と構造体 `op` の定義は以前とまったく同じで、残りは既に見た5つの関数 — `GPS`、`achieve-all`、`achieve`、`appropriate-p`、`apply-op` — からなります。
+最上位では、関数 `GPS` が `achieve-all` を呼び、これは `nil` か正当な状態のいずれかを返します。
+そこからアトムをすべて取り除くと、最終状態の要素のうちリストであるもの — つまり (`executing` *演算子*) の形の動作 — だけが残ります。
+ですから `GPS` 自身の値は、最終状態に至るまでに取られた動作の並びになります。
+`GPS` は解を見つけても `SOLVED` を返さなくなりましたが、失敗なら nil、成功なら nil 以外を返すという流儀は守っています。
+一般に、他のプログラムがその値を使いたがる可能性が少しでもあるなら、値を表示するのではなく意味のある値を返させるのがよい考えです。
 
 ```lisp
 (defvar *ops* nil "A list of available operators.")
@@ -660,46 +660,46 @@ In general, it is a good idea to have a program return a meaningful value rather
   (remove-if #'atom (achieve-all (cons '(start) state) goals nil)))
 ```
 
-The first major change in version 2 is evident from the first line of the program: there is no `*state*` variable.
-Instead, the program keeps track of local state variables.
-This is to solve the "leaping before you look" problem, as outlined before.
-The functions `achieve`, `achieve-all`, and `apply-op` all take an extra argument which is the current state, and all return a new state as their value.
-They also must still obey the convention of returning nil when they fail.
+第2版の最初の大きな変更は、プログラムの1行目から明らかです。`*state*` という変数がありません。
+代わりに、局所的な状態変数で状態を持ち回ります。
+これは先に述べた「見る前に跳ぶ」問題を解くためです。
+関数 `achieve`、`achieve-all`、`apply-op` はいずれも現在の状態という引数を1つ余分にとり、値として新しい状態を返します。
+また、失敗時には nil を返すという流儀もやはり守らねばなりません。
 
-Thus we have a potential ambiguity: does nil represent failure, or does it represent a valid state that happens to have no conditions?
-We resolve the ambiguity by adopting the convention that all states must have at least one condition.
-This convention is enforced by the function `GPS`.
-Instead of calling (`achieve-all state goals nil`), `GPS` calls `(achieve-all (cons '(start) state) goals nil)`.
-So even if the user passes `GPS` a null initial state, it will pass on a state containing `(start)` to `achieve-all`.
-From then on, we are guaranteed that no state will ever become nil, because the only function that builds a new state is `apply-op`, and we can see by looking at the last line of `apply-op` that it always appends something onto the state it is returning.
-(An `add-list` can never be nil, because if it were, the operator would not be appropriate.
-Besides, every operator includes the (executing ...) condition.)
+ここで曖昧さが生じえます。nil は失敗を表すのか、それともたまたま条件を持たない正当な状態を表すのか。
+この曖昧さは、すべての状態は少なくとも1つの条件を持たねばならない、という約束を設けて解消します。
+この約束は関数 `GPS` が守らせます。
+`GPS` は (`achieve-all state goals nil`) ではなく `(achieve-all (cons '(start) state) goals nil)` を呼びます。
+ですから利用者が `GPS` に空の初期状態を渡しても、`achieve-all` には `(start)` を含む状態が渡されます。
+それ以降、状態が nil になることは決してないと保証されます。新しい状態を作る関数は `apply-op` だけであり、その最後の行を見れば、返す状態に必ず何かを連結しているのが分かるからです。
+（`add-list` が nil になることはありえません。もしそうなら、その演算子は適切ではないからです。
+それに、どの演算子も (executing ...) という条件を含んでいます。）
 
-Note that the final value we return from `GPS` has all the atoms removed, so we end up reporting only the actions performed, since they are represented by conditions of the form (`executing *action*`).
-Adding the `(start)` condition at the beginning also serves to differentiate between a problem that cannot be solved and one that is solved without executing any actions.
-Failure returns nil, while a solution with no steps will at least include the `(start)` condition, if nothing else.
+`GPS` が返す最終的な値はアトムがすべて取り除かれているので、報告されるのは行われた動作だけになります。動作は (`executing *action*`) の形の条件で表されているからです。
+冒頭に `(start)` という条件を加えることは、解けない問題と、動作を1つも実行せずに解ける問題とを区別する役にも立ちます。
+失敗なら nil が返り、手順のない解でも少なくとも `(start)` という条件だけは含まれます。
 
-Functions that return nil as an indication of failure and return some useful value otherwise are known as *semipredicates*.
-They are error prone in just these cases where nil might be construed as a useful value.
-Be careful when defining and using semipredicates: (1) Decide if nil could ever be a meaningful value.
-(2) Insure that the *user* can't corrupt the program by supplying nil as a value.
-In this program, `GPS` is the only function the user should call, so once we have accounted for it, we're covered.
-(3) Insure that the *program* can't supply nil as a value.
-We did this by seeing that there was only one place in the program where new states were constructed, and that this new state was formed by appending a one-element list onto another state.
-By following this three-step procedure, we have an informal proof that the semipredicates involving states will function properly.
-This kind of informal proof procedure is a common element of good program design.
+失敗の印として nil を返し、そうでなければ有用な値を返す関数は*半述語*と呼ばれます。
+これらは、nil が有用な値と受け取られかねない、まさにこうした場合に誤りを招きやすいのです。
+半述語を定義し使うときは気をつけてください。(1) nil が意味のある値になりうるかを判断する。
+(2) *利用者*が nil を値として与えてプログラムを壊せないようにする。
+このプログラムでは利用者が呼ぶべき関数は `GPS` だけなので、それさえ手当てすれば足ります。
+(3) *プログラム*が nil を値として与えられないようにする。
+これは、新しい状態を作る箇所がプログラム中に1つしかないこと、そしてその新しい状態が1要素のリストを別の状態に連結して作られることを確かめることで果たしました。
+この3段階の手順を踏むことで、状態に関わる半述語が正しく働くという略式の証明が得られます。
+この種の略式の証明の手続きは、よいプログラム設計に共通して見られる要素です。
 
-The other big change in version 2 is the introduction of a goal stack to solve the recursive subgoal problem.
-The program keeps track of the goals it is working on and immediately fails if a goal appears as a subgoal of itself.
-This test is made in the second clause of `achieve`.
+第2版のもう1つの大きな変更は、部分ゴールが再帰する問題を解くために目標のスタックを導入したことです。
+プログラムは取り組み中の目標を記録し、ある目標が自分自身の部分ゴールとして現れたら直ちに失敗します。
+この判定は `achieve` の2番目の節で行われます。
 
-The function `achieve-all` tries to achieve each one of the goals in turn, setting the variable `current-state` to be the value returned from each successive call to `achieve`.
-If all goals are achieved in turn, and if all the goals still hold at the end (as `subsetp` checks for), then the final state is returned; otherwise the function fails, returning nil.
+関数 `achieve-all` は目標を1つずつ順に達成しようとし、変数 `current-state` に `achieve` の各呼び出しが返した値を設定していきます。
+目標が順にすべて達成され、かつ（`subsetp` が調べるとおり）最後にそのすべてがまだ成り立っていれば、最終状態が返ります。そうでなければ失敗して nil を返します。
 
-Most of the work is done by `achieve`, which gets passed a state, a single goal condition, and the stack of goals worked on so far.
-If the condition is already in the state, then `achieve` succeeds and returns the state.
-On the other hand, if the goal condition is already in the goal stack, then there is no sense continuing-we will be stuck in an endless loop-so `achieve` returns nil.
-Otherwise, `achieve` looks through the list of operators, trying to find one appropriate to apply.
+仕事の大半は `achieve` が行います。これには状態、1つの目標条件、そしてここまでに取り組んだ目標のスタックが渡されます。
+その条件がすでに状態に含まれていれば、`achieve` は成功してその状態を返します。
+一方、目標条件がすでに目標スタックにあるなら、続ける意味はありません — 果てしない循環にはまるだけです — から、`achieve` は nil を返します。
+そうでなければ `achieve` は演算子の並びを見渡し、適用するのにふさわしいものを探します。
 
 ```lisp
 (defun achieve-all (state goals goal-stack)
@@ -722,23 +722,23 @@ Otherwise, `achieve` looks through the list of operators, trying to find one app
           (find-all goal *ops* :test #'appropriate-p)))))
 ```
 
-The goal `( (executing run-around-block) )` is a list of one condition, where the condition happens to be a two-element list.
-Allowing lists as conditions gives us more flexibility, but we also have to be careful.
-The problem is that not all lists that look alike actually are the same.
-The predicate `equal` essentially tests to see if its two arguments look alike, while the predicate `eql` tests to see if its two arguments actually are identical.
-Since functions like `member` use `eql` by default, we have to specify with a `:test` keyword that we want `equal` instead.
-Since this is done several times, we introduce the function `member-equal`.
-In fact, we could have carried the abstraction one step further and defined `member-situation`, a function to test if a condition is true in a situation.
-This would allow the user to change the matching function from `eql` to `equal`, and to anything else that might be useful.
+目標 `( (executing run-around-block) )` は条件1つからなる並びで、その条件がたまたま2要素のリストになっています。
+条件にリストを許すと自由度は増しますが、気をつけねばならないこともあります。
+問題は、見た目が同じリストが実際に同一だとはかぎらないことです。
+述語 `equal` は本質的に2つの引数が同じに見えるかを調べ、述語 `eql` は2つの引数が実際に同一かを調べます。
+`member` のような関数は既定で `eql` を使うので、代わりに `equal` を使いたいと `:test` キーワードで指定せねばなりません。
+これを何度も行うので、`member-equal` という関数を導入します。
+実のところ抽象をもう一歩進めて、ある状況で条件が真かを調べる関数 `member-situation` を定義することもできました。
+そうすれば利用者は照合の関数を `eql` から `equal` へ、さらに役立ちそうな他のものへ変えられたでしょう。
 
 ```lisp
 (defun member-equal (item list)
   (member item list :test #'equal))
 ```
 
-The function `apply-op`, which used to change the state irrevocably and print a message reflecting this, now returns the new state instead of printing anything.
-It first computes the state that would result from achieving all the preconditions of the operator.
-If it is possible to arrive at such a state, then `apply-op` returns a new state derived from this state by adding what's in the add-list and removing everything in the delete-list.
+以前は状態を取り返しのつかない形で変え、それを示すメッセージを表示していた関数 `apply-op` は、今では何も表示せず新しい状態を返します。
+まず、その演算子の事前条件をすべて達成した結果となる状態を計算します。
+そうした状態に到達できるなら、`apply-op` はその状態に追加リストの中身を加え、削除リストの中身をすべて取り除いた新しい状態を返します。
 
 ```lisp
 (defun apply-op (state goal op goal-stack)
@@ -759,13 +759,13 @@ If it is possible to arrive at such a state, then `apply-op` returns a new state
   (member-equal goal (op-add-list op)))
 ```
 
-There is one last complication in the way we compute the new state.
-In version 1 of GPS, states were (conceptually) unordered sets of conditions, so we could use `union` and `set-difference` to operate on them.
-In version 2, states become ordered lists, because we need to preserve the ordering of actions.
-Thus, we have to use the functions `append` and `remove-if`, since these are defined to preserve order, while `union` and `set-difference` are not.
+新しい状態の計算のしかたには、最後にもう1つ込み入った点があります。
+GPSの第1版では、状態は（概念上）順序のない条件の集合だったので、`union` と `set-difference` で操作できました。
+第2版では、動作の順序を保つ必要があるため、状態は順序のあるリストになります。
+ですから `append` と `remove-if` を使わねばなりません。これらは順序を保つと定められていますが、`union` と `set-difference` はそうではないからです。
 
-Finally, the last difference in version 2 is that it introduces a new function: `use`.
-This function is intended to be used as a sort of declaration that a given list of operators is to be used for a series of problems.
+最後に、第2版のもう1つの違いは、`use` という新しい関数を導入したことです。
+この関数は、与えた演算子の並びを一連の問題に使う、という一種の宣言として用いることを意図しています。
 
 ```lisp
 (defun use (oplist)
@@ -775,17 +775,17 @@ This function is intended to be used as a sort of declaration that a given list 
    (length (setf *ops* oplist)))
 ```
 
-Calling use sets the parameter `*ops*`, so that it need not be specified on each call to GPS.
-Accordingly, in the definition of GPS itself the third argument, `*ops*`, is now optional; if it is not supplied, a default will be used.
-The default value for `*ops*` is given as `*ops*`.
-This may seem redundant or superfluous-how could a variable be its own default?
-The answer is that the two occurrences of `*ops*` look alike, but they actually refer to two completely separate bindings of the special variable `*ops*`.
-Most of the time, variables in parameter lists are local variables, but there is no rule against binding a special variable as a parameter.
-Remember that the effect of binding a special variable is that all references to the special variable that occur anywhere in the program-even outside the lexical scope of the function-refer to the new binding of the special variable.
-So after a sequence of calls we eventually reach achieve, which references `*ops*`, and it will see the newly bound value of `*ops*`.
+use を呼ぶとパラメータ `*ops*` が設定されるので、GPSを呼ぶたびに指定する必要がなくなります。
+それに伴い、GPS自身の定義でも第3引数 `*ops*` は省略可能になり、与えられなければ既定値が使われます。
+`*ops*` の既定値は `*ops*` と書かれています。
+これは冗長、あるいは無意味に見えるかもしれません。変数が自分自身の既定値になるとはどういうことでしょうか。
+答えは、2つの `*ops*` は同じに見えても、実際にはスペシャル変数 `*ops*` のまったく別々の束縛を指している、ということです。
+たいていの場合、引数リストの変数は局所変数ですが、スペシャル変数を引数として束縛してはならないという規則はありません。
+スペシャル変数を束縛すると、プログラムのどこにあるその変数への参照も — 関数のレキシカルなスコープの外にあるものでさえ — 新しい束縛を指すようになることを思い出してください。
+ですから呼び出しをたどっていくと、やがて `*ops*` を参照する achieve に至り、そこでは新しく束縛された `*ops*` の値が見えます。
 
-The definition of GPS is repeated here, along with an alternate version that binds a local variable and explicitly sets and resets the special variable `*ops*`.
-Clearly, the idiom of binding a special variable is more concise, and while it can be initially confusing, it is useful once understood.
+ここでGPSの定義を再掲します。あわせて、局所変数を束縛してスペシャル変数 `*ops*` を明示的に設定し戻す別版も示します。
+スペシャル変数を束縛する書き方のほうが明らかに簡潔で、最初は分かりにくくとも、いったん理解すれば役に立ちます。
 
 ```lisp
 (defun GPS (state goals &optional (*ops* *ops*))
@@ -803,9 +803,9 @@ Clearly, the idiom of binding a special variable is more concise, and while it c
       result)))
 ```
 
-Now let's see how version 2 performs.
-We use the list of operators that includes the "asking the shop their phone number" operator.
-First we make sure it will still do the examples version 1 did:
+では第2版の働きぶりを見てみましょう。
+「店に電話番号を尋ねる」演算子を含む演算子の並びを使います。
+まず、第1版でできた例が引き続きできることを確かめます。
 
 ```lisp
 > (use *school-ops*) => 7
@@ -864,8 +864,8 @@ Action: DRIVE-SON-TO-SCHOOL
   (EXECUTING DRIVE-SON-TO-SCHOOL))
 ```
 
-Now we see that version 2 can also handle the three cases that version 1 got wrong.
-In each case, the program avoids an infinite loop, and also avoids leaping before it looks.
+次に、第1版が誤った3つの場合も第2版なら扱えることを見ます。
+いずれの場合も、プログラムは無限の循環を避け、見る前に跳ぶことも避けています。
 
 ```lisp
 > (gps '(son-at-home car-needs-battery have-money have-phone-book)
@@ -879,21 +879,21 @@ NIL
 NIL
 ```
 
-Finally, we see that this version of GPS also works on trivial problems requiring no action:
+最後に、この版のGPSが動作を要しない自明な問題でも働くことを見ます。
 
 `> (gps '(son-at-home) '(son-at-home))`=> `((START))`
 
-## 4.12 The New Domain Problem: Monkey and Bananas
+## 4.12 新しい領域の問題: サルとバナナ
 
-To show that GPS is at all general, we have to make it work in different domains.
-We will start with a "classic" AI problem.<a id="tfn04-3"></a><sup>[3](#fn04-3)</sup>
-Imagine the following scenario: a hungry monkey is standing at the doorway to a room.
-In the middle of the room is a bunch of bananas suspended from the ceiling by a rope, well out of the monkey's reach.
-There is a chair near the door, which is light enough for the monkey to push and tall enough to reach almost to the bananas.
-Just to make things complicated, assume the monkey is holding a toy ball and can only hold one thing at a time.
+GPSがそもそも汎用であることを示すには、異なる領域で働かせてみせねばなりません。
+AIの「古典的」な問題から始めましょう。<a id="tfn04-3"></a><sup>[3](#fn04-3)</sup>
+次のような場面を思い描いてください。腹を空かせたサルが部屋の戸口に立っています。
+部屋の中央には、天井からロープで吊るされたバナナの房があり、サルの手はとうてい届きません。
+戸口の近くには椅子があり、サルが押せるほど軽く、バナナにあと少しで届くほど高いものです。
+話をややこしくするために、サルはおもちゃのボールを持っており、一度に1つしか持てないものとします。
 
-In trying to represent this scenario, we have some flexibility in choosing what to put in the current state and what to put in with the operators.
-For now, assume we define the operators as follows:
+この場面を表そうとするとき、何を現在の状態に置き、何を演算子に持たせるかにはいくらか自由があります。
+ここでは演算子を次のように定義するものとします。
 
 ```lisp
 (defparameter *banana-ops*
@@ -930,8 +930,8 @@ For now, assume we define the operators as follows:
       :del-list '(has-bananas hungry))))
 ```
 
-Using these operators, we could pose the problem of becoming not-hungry, given the initial state of being at the door, standing on the floor, holding the ball, hungry, and with the chair at the door.
-`GPS` can find a solution to this problem:
+これらの演算子を使えば、戸口にいて、床に立っていて、ボールを持っていて、腹を空かせていて、椅子が戸口にあるという初期状態から、空腹でなくなるという問題を立てられます。
+`GPS` はこの問題の解を見つけられます。
 
 `> (use *banana-ops*)`=> `6`
 
@@ -946,21 +946,21 @@ Using these operators, we could pose the problem of becoming not-hungry, given t
   (EXECUTING EAT-BANANAS))
 ```
 
-Notice we did not need to make any changes at all to the `GPS` program.
-We just used a different set of operators.
+`GPS` プログラムには一切変更を加える必要がなかったことに注目してください。
+演算子の組を違うものにしただけです。
 
-## 4.13 The Maze Searching Domain
+## 4.13 迷路探索の領域
 
-Now we will consider another "classic" problem, maze searching.
-We will assume a particular maze, diagrammed here.
+次はもう1つの「古典的」な問題、迷路探索を考えます。
+ここに図示した特定の迷路を前提とします。
 
 <a id="diagram-04-01"></a>
 <img src="images/chapter4/diagram-04-01.svg"
   onerror="this.src='images/chapter4/diagram-04-01.png'; this.onerror=null;"
   alt="Diagram 4.1" />
 
-It is much easier to define some functions to help build the operators for this domain than it would be to type in all the operators directly.
-The following code defines a set of operators for mazes in general, and for this maze in particular:
+この領域の演算子を作る助けとなる関数をいくつか定義するほうが、演算子をすべて直に打ち込むよりずっと楽です。
+次のコードは、迷路一般のための演算子の組と、とくにこの迷路のための演算子の組を定義します。
 
 ```lisp
 (defun make-maze-ops (pair)
@@ -981,11 +981,11 @@ The following code defines a set of operators for mazes in general, and for this
       (23 18) (23 24) (24 19) (19 20) (20 15) (15 10) (10 5) (20 25))))
 ```
 
-Note the backquote notation, ( ' ).
-It is covered in [section 3.2](chapter3.md#s0020), [page 67](chapter3.md#p67).
+逆引用符の記法 ( ' ) に注目してください。
+これは [3.2節](chapter3.md#s0020)、[67ページ](chapter3.md#p67) で扱っています。
 
-We can now use this list of operators to solve several problems with this maze.
-And we could easily create another maze by giving another list of connections.
+これでこの演算子の並びを使い、この迷路でいくつかの問題を解けます。
+別の接続の並びを与えれば、簡単に別の迷路も作れます。
 Note that there is nothing that says the places in the maze are arranged in a five-by-five layout-that is just one way of visualizing the connectivity
 
 `> (use *maze-ops*)`=> `48`
