@@ -1760,13 +1760,13 @@ nil
 
 データベースのような複雑なデータ構造を作るときは、対応する整合性検査器も作っておくのがよい考えです。
 整合性検査器とは、データ構造を見渡して、起こりうる誤りをすべて調べる関数のことです。
-When a new error is discovered, a check for it should be incorporated into the consistency checker.
-Calling the consistency checker is the fastest way to help isolate bugs in the data structure.
+新しい誤りが見つかったら、その検査を整合性検査器に組み込むべきです。
+整合性検査器を呼ぶのが、データ構造のバグを切り分ける最も速い手立てです。
 
-In addition, it is a good idea to keep a list of difficult test cases on hand.
-That way, when the program is changed, it will be easy to see if the change reintroduces a bug that had been previously removed.
-This is called *regression testing,* and [Waters (1991)](bibliography.md#bb1350) presents an interesting tool for maintaining a suite of regression tests.
-But it is simple enough to maintain an informal test suite with a function that calls assert on a series of examples:
+加えて、手ごわい試験例の一覧を手元に置いておくのもよい考えです。
+そうしておけば、プログラムを変えたときに、以前取り除いたバグがぶり返していないかを簡単に確かめられます。
+これは*退行試験*と呼ばれます。[Waters (1991)](bibliography.md#bb1350) は退行試験の一式を保守する興味深い道具を示しています。
+とはいえ、一連の例に対して assert を呼ぶ関数で、略式の試験一式を保つだけでも十分です。
 
 ```lisp
 (defun test-ex ()
@@ -1777,12 +1777,12 @@ But it is simple enough to maintain an informal test suite with a function that 
   (assert (equal (ex 'x 0) 0)))
 ```
 
-### Timing Tools
+### 時間を測る道具
 
-A program is not complete just because it gives the right output.
-It must also deliver the output in a timely fashion.
-The form (`time` *expression*) can be used to see how long it takes to execute *expression.*
-Some implementations also print statistics on the amount of storage required.
+プログラムは正しい出力を出すというだけでは完成ではありません。
+その出力を然るべき速さで届けねばなりません。
+(`time` *式*) という形を使えば、*式*の実行にどれだけかかるかを見られます。
+処理系によっては、必要とした記憶量の統計も表示します。
 たとえば次のようになります。
 
 ```lisp
@@ -1796,20 +1796,20 @@ Evaluation of (F 10000) took 4.347272 Seconds of elapsed time, including 0.0 sec
 Evaluation of (F 10000) took 0.011518 Seconds of elapsed time, including 0.0 seconds of paging time for 0 faults, Consed 0 words.
 ```
 
-This shows that the compiled version is over 300 times faster and uses less storage to boot.
-Most serious Common Lisp programmers work exclusively with compiled functions.
-However, it is usually a bad idea to worry too much about efficiency details while starting to develop a program.
-It is better to design a flexible program, get it to work, and then modify the most frequently used parts to be more efficient.
-In other words, separate the development stage from the fine-tuning stage.
-[Chapters 9](chapter9.md) and [10](chapter10.md) give more details on efficiency consideration, and [chapter 25](chapter25.md) gives more advice on debugging and antibugging techniques.
+コンパイルした版が300倍以上速く、しかも記憶量も少なくて済むことが分かります。
+本気で取り組むCommon Lispプログラマの大半は、コンパイル済みの関数だけを使って作業します。
+とはいえ、プログラムを作り始める段階で効率の細部を気にしすぎるのは、たいていよくない考えです。
+融通の利くプログラムを設計し、動くようにしてから、最もよく使われる部分をより効率的に手直しするほうがよいのです。
+言い換えれば、開発の段階と細かな調整の段階を分けるということです。
+[第9章](chapter9.md)と[第10章](chapter10.md)で効率の検討をさらに詳しく述べ、[第25章](chapter25.md)でデバッグとバグ防ぎの技法について助言します。
 
-## 3.15 Evaluation
+## 3.15 評価
 
-There are three functions for doing evaluation in Lisp: `funcall, apply,` and `eval`.
-`funcall` is used to apply a function to individual arguments, while `apply` is used to apply a function to a list of arguments.
-Actually, `apply` can be given one or more individual arguments before the final argument, which is always a list.
-`eval` is passed a single argument, which should be an entire form - a function or special form followed by its arguments, or perhaps an atom.
-The following five forms are equivalent:
+Lispで評価を行う関数は3つあります。`funcall`、`apply`、`eval` です。
+`funcall` は関数を個々の引数に適用するのに使い、`apply` は関数を引数の並びに適用するのに使います。
+実のところ `apply` には、常にリストである最後の引数の前に、個々の引数を1つ以上与えられます。
+`eval` には引数を1つ渡します。それは形全体 — 関数か特殊形式とその引数、あるいはアトム — であるべきです。
+次の5つの形は等価です。
 
 ```lisp
 > (+ 1 2 3 4)             => 10
@@ -1819,25 +1819,25 @@ The following five forms are equivalent:
 > (eval '(+ 1 2 3 4))      => 10
 ```
 
-In the past, `eval` was seen as the key to Lisp's flexibility.
-In modern Lisps with lexical scoping, such as Common Lisp, `eval` is used less often (in fact, in Scheme there is no `eval` at all).
-Instead, programmers are expected to use `lambda` to create a new function, and then `apply` or `funcall` the function.
-In general, if you find yourself using `eval,` you are probably doing the wrong thing.
+かつて `eval` はLispの柔軟さの鍵と見られていました。
+Common Lispのようなレキシカルスコープを持つ現代のLispでは、`eval` の出番は減っています（実際Schemeには `eval` がまったくありません）。
+代わりにプログラマは、`lambda` で新しい関数を作り、それを `apply` か `funcall` することが期待されています。
+一般に、`eval` を使っている自分に気づいたら、おそらく間違ったことをしています。
 
-## 3.16 Closures
+## 3.16 クロージャ
 
-What does it mean to create a new function?
-Certainly every time a `function` (or `#')` special form is evaluated, a function is returned.
-But in the examples we have seen and in the following one, it is always the *same* function that is returned.
+新しい関数を作るとは、どういうことでしょうか。
+確かに `function`（あるいは `#'`）という特殊形式が評価されるたびに、関数が返ります。
+しかしこれまで見た例でも、次の例でも、返るのは常に*同じ*関数です。
 
 ```lisp
 > (mapcar #'(lambda (x) (+ x x)) '(1 3 10)) => (2 6 20)
 ```
 
-Every time we evaluate the `#'(lambda ...)` form, it returns the function that doubles its argument.
-However, in the general case, a function consists of the body of the function coupled with any *free lexical variables* that the function references.
-Such a pairing is called a *lexical closure,* or just a *closure,* because the lexical variables are enclosed within the function.
-Consider this example:
+`#'(lambda ...)` の形を評価するたびに、引数を2倍する関数が返ります。
+しかし一般には、関数は本体と、その関数が参照する*自由なレキシカル変数*とが結び付いたものからなります。
+この組み合わせを*レキシカルクロージャ*、あるいは単に*クロージャ*と呼びます。レキシカル変数が関数の中に閉じ込められる（enclose）からです。
+次の例を考えてみましょう。
 
 ```lisp
 (defun adder (c)
@@ -1849,13 +1849,13 @@ Consider this example:
 > (mapcar (adder 10) '(1 3 10)) => (11 13 20)
 ```
 
-Each time we call `adder` with a different value for `c`, it creates a different function, the function that adds `c` to its argument.
-Since each call to `adder` creates a new local variable named `c`, each function returned by `adder` is a unique function.
+`c` に違う値を与えて `adder` を呼ぶたびに、違う関数 — 引数に `c` を足す関数 — が作られます。
+`adder` の呼び出しごとに `c` という名の新しい局所変数が作られるので、`adder` が返す関数はそれぞれ別個の関数になります。
 
 もう1つ例を挙げます。
-The function `bank-account` returns a closure that can be used as a representation of a bank account.
-The closure captures the local variable balance.
-The body of the closure provides code to access and modify the local variable.
+関数 `bank-account` は、銀行口座の表現として使えるクロージャを返します。
+このクロージャは局所変数 balance を捕まえています。
+クロージャの本体には、その局所変数を参照し書き換えるコードが入っています。
 
 ```lisp
 (defun bank-account (balance)
@@ -1866,8 +1866,8 @@ The body of the closure provides code to access and modify the local variable.
         (withdraw (setf balance (- balance amount))))))
 ```
 
-In the following, two calls to bank-account create two different closures, each with a separate value for the lexical variable `balance`.
-The subsequent calls to the two closures change their respective balances, but there is no confusion between the two accounts.
+以下では、bank-account を2回呼んで2つの異なるクロージャを作ります。それぞれがレキシカル変数 `balance` の別々の値を持ちます。
+続く2つのクロージャへの呼び出しはそれぞれの残高を変えますが、2つの口座が混じることはありません。
 
 ```lisp
 > (setf my-account (bank-account 500.00)) => #<CLOSURE 52330407>
@@ -1883,24 +1883,24 @@ The subsequent calls to the two closures change their respective balances, but t
 > (funcall my-account 'withdraw 25.00) => 400.0
 ```
 
-This style of programming will be considered in more detail in [chapter 13](chapter13.md).
+この流儀のプログラミングは[第13章](chapter13.md)でさらに詳しく検討します。
 
-## 3.17 Special Variables
+## 3.17 スペシャル変数
 
-Common Lisp provides for two kinds of variables: *lexical* and *special* variables.
-For the beginner, it is tempting to equate the special variables in Common Lisp with global variables in other languages.
-Unfortunately, this is not quite correct and can lead to problems.
-It is best to understand Common Lisp variables on their own terms.
+Common Lispは2種類の変数を用意しています。*レキシカル*変数と*スペシャル*変数です。
+初学者は、Common Lispのスペシャル変数を他の言語の大域変数と同一視したくなります。
+あいにくこれは正確ではなく、問題を招きかねません。
+Common Lispの変数は、それ自体の言葉で理解するのが一番です。
 
-By default, Common Lisp variables are *lexical variables.*
-Lexical variables are introduced by some syntactic construct like `let` or `defun` and get their name from the fact that they may only be referred to by code that appears lexically within the body of the syntactic construct.
-The body is called the *scope* of the variable.
+既定では、Common Lispの変数は*レキシカル変数*です。
+レキシカル変数は `let` や `defun` のような構文構造によって導入され、その構造の本体の中に字句的に現れるコードからしか参照できないことから、この名が付いています。
+その本体を変数の*スコープ*と呼びます。
 
-So far, there is no difference between Common Lisp and other languages.
-The interesting part is when we consider the *extent,* or lifetime, of a variable.
-In other languages, the extent is the same as the scope: a new local variable is created when a block is entered, and the variable goes away when the block is exited.
-But because it is possible to create new functions - closures - in Lisp, it is therefore possible for code that references a variable to live on after the scope of the variable has been exited.
-Consider again the `bank-account` function, which creates a closure representing a bank account:
+ここまでは、Common Lispと他の言語に違いはありません。
+面白いのは、変数の*存在期間*、すなわち寿命を考えるときです。
+他の言語では、存在期間はスコープと同じです。区画に入ると新しい局所変数が作られ、区画を出ると消えます。
+しかしLispでは新しい関数 — クロージャ — を作れるので、変数のスコープを出たあとも、その変数を参照するコードが生き続けることがありえます。
+銀行口座を表すクロージャを作る `bank-account` 関数を、もう一度見てみましょう。
 
 ```lisp
 (defun bank-account (balance)
@@ -1911,28 +1911,28 @@ Consider again the `bank-account` function, which creates a closure representing
         (withdraw (setf balance (- balance amount))))))
 ```
 
-The function introduces the lexical variable `balance`.
-The scope of `balance` is the body of the function, and therefore references to `balance` can occur only within this scope.
-What happens when `bank-account` is called and exited?
-Once the body of the function has been left, no other code can refer to that instance of `balance.`
-The scope has been exited, but the extent of `balance` lives on.
-We can call the closure, and it can reference `balance`, because the code that created the closure appeared lexically within the scope of `balance`.
+この関数はレキシカル変数 `balance` を導入します。
+`balance` のスコープは関数の本体なので、`balance` への参照はこのスコープの中でしか起こりえません。
+`bank-account` が呼ばれ、そこから抜けたとき何が起こるでしょうか。
+関数の本体を離れてしまえば、他のどのコードもその `balance` の実体を参照できません。
+スコープは抜けましたが、`balance` の存在期間は続いています。
+クロージャを呼べば `balance` を参照できます。クロージャを作ったコードが、`balance` のスコープの中に字句的に現れていたからです。
 
-In summary, Common Lisp lexical variables are different because they can be captured inside closures and referred to even after the flow of control has left their scope.
+まとめると、Common Lispのレキシカル変数が違うのは、クロージャの中に捕まえられ、制御の流れがそのスコープを離れたあとでも参照できるからです。
 
-Now we will consider special variables.
-A variable is made special by a `defvar` or `defparameter` form.
-For example, if we say
+次にスペシャル変数を見ましょう。
+変数は `defvar` や `defparameter` によってスペシャルになります。
+たとえば次のように書けば、
 
 ```lisp
 (defvar *counter* 0)
 ```
 
-then we can refer to the special variable `*counter*` anywhere in our program.
-This is just like a familiar global variable.
-The tricky part is that the global binding of `*counter*` can be shadowed by a local binding for that variable.
-In most languages, the local binding would introduce a local lexical variable, but in Common Lisp, special variables can be bound both locally and globally.
-Here is an example:
+プログラムのどこからでもスペシャル変数 `*counter*` を参照できます。
+これはおなじみの大域変数とそっくりです。
+厄介なのは、`*counter*` の大域的な束縛が、その変数の局所的な束縛によって覆い隠されうることです。
+たいていの言語では局所的な束縛は局所レキシカル変数を導入しますが、Common Lispではスペシャル変数を局所的にも大域的にも束縛できます。
+例を挙げます。
 
 ```lisp
 (defun report ()
@@ -1952,28 +1952,28 @@ Counter = 0
 NIL
 ```
 
-There are three calls to `report` here.
-In the first and third, `report` prints the global value of the special variable `*counter*`.
-In the second call, the `let` form introduces a new binding for the special variable `*counter*`, which is again printed by `report.`
-Once the scope of the `let` is exited, the new binding is disestablished, so the final call to `report` uses the global value again.
+ここには `report` の呼び出しが3つあります。
+1つ目と3つ目では、`report` はスペシャル変数 `*counter*` の大域的な値を表示します。
+2つ目の呼び出しでは、`let` がスペシャル変数 `*counter*` の新しい束縛を導入し、それが `report` によって表示されます。
+`let` のスコープを抜けると新しい束縛は解かれるので、最後の `report` の呼び出しは再び大域的な値を使います。
 
-In summary, Common Lisp special variables are different because they have global scope but admit the possibility of local (dynamic) shadowing.
-Remember: A lexical variable has lexical scope and indefinite extent.
-A special variable has indefinite scope and dynamic extent.
+まとめると、Common Lispのスペシャル変数が違うのは、大域的なスコープを持ちながら、局所的（動的）な覆い隠しを許すからです。
+覚えておいてください。レキシカル変数はレキシカルなスコープと、無期限の存在期間を持ちます。
+スペシャル変数は無限定のスコープと、動的な存在期間を持ちます。
 
-The function call (`symbol-value` *var*), where *var* evaluates to a symbol, can be used to get at the current value of a special variable.
-To set a special variable, the following two forms are completely equivalent:
+*var* がシンボルに評価されるとき、関数呼び出し (`symbol-value` *var*) でスペシャル変数の現在の値を取り出せます。
+スペシャル変数を設定するには、次の2つの形がまったく等価です。
 
-> `(setf (symbol-value` *var*) *value*) \
-> `(set` *var value*)
+> `(setf (symbol-value` *var*) *値*) \
+> `(set` *var 値*)
 
-where both *var* and *value* are evaluated.
-There are no corresponding forms for accessing and setting lexical variables.
-Special variables set up a mapping between symbols and values that is accessible to the running program.
-This is unlike lexical variables (and all variables in traditional languages) where symbols (identifiers) have significance only while the program is being compiled.
-Once the program is running, the identifiers have been compiled away and cannot be used to access the variables; only code that appears within the scope of a lexical variable can reference that variable.
+ここで *var* と*値*はどちらも評価されます。
+レキシカル変数を参照し設定する、これに対応する形はありません。
+スペシャル変数は、動いているプログラムから触れられる、シンボルと値の対応づけを設けます。
+これはレキシカル変数（および伝統的な言語のすべての変数）とは違います。そちらではシンボル（識別子）はコンパイル中にしか意味を持ちません。
+プログラムが動き出せば識別子はコンパイルによって消えており、変数へのアクセスには使えません。レキシカル変数のスコープ内に現れるコードだけが、その変数を参照できます。
 
-&#9635; **Exercise 3.6 [s]** Given the following initialization for the lexical variable `a` and the special variable `*b*`, what will be the value of the `let` form?
+&#9635; **練習問題 3.6 [s]** レキシカル変数 `a` とスペシャル変数 `*b*` が次のように初期化されているとき、`let` の形の値は何になるか。
 
 ```lisp
 (setf a 'global-a)
@@ -1986,26 +1986,26 @@ Once the program is running, the identifiers have been compiled away and cannot 
   (list a *b* (fn) (symbol-value 'a) (symbol-value '*b*)))
 ```
 
-## 3.18 Multiple Values
+## 3.18 多値
 
-Throughout this book we have spoken of "the value returned by a function."
-Historically, Lisp was designed so that every function returns a value, even those functions that are more like procedures than like functions.
-But sometimes we want a single function to return more than one piece of information.
-Of course, we can do that by making up a list or structure to hold the information, but then we have to go to the trouble of defining the structure, building an instance each time, and then taking that instance apart to look at the pieces.
-Consider the function `round`.
-One way it can be used is to round off a floating-point number to the nearest integer.
-So (`round 5.1`) is 5.
-Sometimes, though not always, the programmer is also interested in the fractional part.
-The function `round` serves both interested and disinterested programmers by returning two values: the rounded integer and the remaining fraction:
+本書を通じて、私たちは「関数が返す値」という言い方をしてきました。
+歴史的に、Lispはどの関数も値を返すよう設計されました。関数というより手続きに近いものであってもです。
+しかし1つの関数に、複数の情報を返してほしいことがあります。
+もちろん情報を入れるリストや構造体をこしらえればできますが、それには構造体を定義し、毎回実体を作り、中身を見るためにそれを分解する、という手間がかかります。
+関数 `round` を考えてみましょう。
+使い方の1つは、浮動小数点数を最も近い整数に丸めることです。
+ですから (`round 5.1`) は5です。
+常にではありませんが、小数部分にも関心があることがあります。
+関数 `round` は、丸めた整数と残りの小数という2つの値を返すことで、関心のあるプログラマにもないプログラマにも応えます。
 
 ```lisp
 > (round 5.1) => 5 .1
 ```
 
-There are two values after the => because `round` returns two values.
-Most of the time, multiple values are ignored, and only the first value is used.
-So (`* 2 (round 5.1)`) is 10, just as if `round` had only returned a single value.
-If you want to get at multiple values, you have to use a special form, such as `multiple-value-bind`:
+=> のあとに値が2つあるのは、`round` が2つの値を返すからです。
+たいていの場合、多値は無視され、最初の値だけが使われます。
+ですから (`* 2 (round 5.1)`) は10になります。`round` が1つの値しか返さなかったかのようにです。
+多値を取り出したいなら、`multiple-value-bind` のような特殊形式を使わねばなりません。
 
 ```lisp
 (defun show-both (x)
@@ -2017,19 +2017,19 @@ If you want to get at multiple values, you have to use a special form, such as `
 5.1 = 5 + 0.1
 ```
 
-You can write functions of your own that return multiple values using the function `values`, which returns its arguments as multiple values:
+引数を多値として返す関数 `values` を使えば、多値を返す関数を自分で書けます。
 
 ```lisp
 > (values 1 2 3) => 1 2 3
 ```
 
-Multiple values are a good solution because they are unobtrusive until they are needed.
-Most of the time when we are using `round,` we are only interested in the integer value.
-If `round` did not use multiple values, if it packaged the two values up into a list or structure, then it would be harder to use in the normal cases.
+多値がよい解決なのは、必要になるまで出しゃばらないからです。
+`round` を使うとき、たいていは整数値にしか関心がありません。
+もし `round` が多値を使わず、2つの値をリストや構造体にまとめていたら、普通の場面で使いにくくなっていたでしょう。
 
-It is also possible to return no values from a function with (`values`).
-This is sometimes used by procedures that are called for effect, such as printing.
-For example, `describe` is defined to print information and then return no values:
+(`values`) を使えば、関数から値を1つも返さないこともできます。
+これは表示のように、作用のために呼ばれる手続きで使われることがあります。
+たとえば `describe` は、情報を表示してから値を返さないよう定義されています。
 
 ```
 > (describe 'x)
@@ -2037,8 +2037,8 @@ Symbol X is in the USER package.
 It has no value, definition or properties.
 ```
 
-However, when (`values`) or any other expression returning no values is nested in a context where a value is expected, it still obeys the Lisp rule of one-value-per-expression and returns `nil`.
-In the following example, `describe` returns no values, but then `list` in effect asks for the first value and gets `nil`.
+ただし (`values`) やその他の値を返さない式が、値を期待される文脈に入れ子になっている場合は、「式ごとに値1つ」というLispの規則に従って `nil` を返します。
+次の例では `describe` は値を返しませんが、`list` が事実上その最初の値を求め、`nil` を得ています。
 
 ```
 > (list (describe 'x))
@@ -2047,13 +2047,13 @@ It has no value, definition or properties.
 (NIL)
 ```
 
-## 3.19 More about Parameters
+## 3.19 引数についてもう少し
 
-Common Lisp provides the user with a lot of flexibility in specifying the parameters to a function, and hence the arguments that the function accepts.
-Following is a program that gives practice in arithmetic.
-It asks the user a series of *n* problems, where each problem tests the arithmetic operator op (which can be `+`, `-`, `*`, or `/`, or perhaps another binary operator).
-The arguments to the operator will be random integers from 0 to range.
-Here is the program:
+Common Lispは、関数の引数の指定 — ひいてはその関数が受け取る実引数 — について、利用者に大きな自由を与えています。
+以下は算数の練習をさせるプログラムです。
+利用者に *n* 問を出し、各問は算術演算子 op（`+`、`-`、`*`、`/`、あるいは他の二項演算子）を試します。
+演算子の引数は0から range までの無作為な整数です。
+プログラムを示します。
 
 ```lisp
 (defun math-quiz (op range n)
@@ -2069,7 +2069,7 @@ Here is the program:
       (princ "Sorry, that's not right.")))
 ```
 
-and here is an example of its use:
+そして使い方の例を示します。
 
 ```lisp
 > (math-quiz '+ 100 2)
@@ -2079,13 +2079,13 @@ How much is 91 + 19? 100
 Sorry, that's not right.
 ```
 
-One problem with the function `math-quiz` is that it requires the user to type three arguments: the operator, a range, and the number of iterations.
-The user must remember the order of the arguments, and remember to quote the operator.
-This is quite a lot to expect from a user who presumably is just learning to add!
+`math-quiz` の1つの難点は、利用者に演算子・範囲・繰り返し回数という3つの引数を打たせることです。
+利用者は引数の順序を覚え、演算子を引用符で囲むことも忘れずにいなければなりません。
+足し算を習い始めたばかりであろう利用者に期待するには、いささか多すぎます。
 
-Common Lisp provides two ways of dealing with this problem.
-First, a programmer can specify that certain arguments are *optional* and provide default values for those arguments.
-For example, in `math-quiz` we can arrange to make `+` be the default operator, `100` be the default number range, and `10` be the default number of examples with the following definition:
+Common Lispはこの問題に対処する方法を2つ用意しています。
+第一に、プログラマは特定の引数を*省略可能*と指定し、その既定値を与えられます。
+たとえば `math-quiz` では、次の定義によって `+` を既定の演算子、`100` を既定の数の範囲、`10` を既定の問題数にできます。
 
 ```lisp
 (defun math-quiz (&optional (op '+) (range 100) (n 10))
@@ -2094,15 +2094,15 @@ For example, in `math-quiz` we can arrange to make `+` be the default operator, 
     (problem (random range) op (random range))))
 ```
 
-Now (`math-quiz`) means the same as (`math-quiz '+ 100 10`).
-If an optional parameter appears alone without a default value, then the default is `nil`.
-Optional parameters are handy; however, what if the user is happy with the operator and range but wants to change the number of iterations?
-Optional parameters are still position-dependent, so the only solution is to type in all three arguments: (`math-quiz '+ 100 5`).
+これで (`math-quiz`) は (`math-quiz '+ 100 10`) と同じ意味になります。
+省略可能な引数が既定値なしで単独で現れた場合、既定値は `nil` です。
+省略可能な引数は重宝します。しかし利用者が演算子と範囲には満足していて、繰り返し回数だけ変えたい場合はどうでしょうか。
+省略可能な引数はやはり位置に依存するので、唯一の手立ては3つの引数をすべて打つこと、つまり (`math-quiz '+ 100 5`) です。
 
-Common Lisp also allows for parameters that are position-independent.
-These *keyword* parameters are explicitly named in the function call.
-They are useful when there are a number of parameters that normally take default values but occasionally need specific values.
-For example, we could have defined `math-quiz` as:
+Common Lispは、位置に依存しない引数も許しています。
+この*キーワード*引数は、関数呼び出しの中で明示的に名前を書きます。
+ふだんは既定値でよいが、ときに個別の値が要る引数がいくつもある場合に役立ちます。
+たとえば `math-quiz` は次のようにも定義できました。
 
 ```lisp
 (defun math-quiz (&key (op '+) (range 100) (n 10))
@@ -2111,23 +2111,23 @@ For example, we could have defined `math-quiz` as:
     (problem (random range) op (random range))))
 ```
 
-Now (`math-quiz :n 5`) and (`math-quiz :op '+ :n 5 :range 100`) mean the same.
-Keyword arguments are specified by the parameter name preceded by a colon, and followed by the value.
-The keyword/value pairs can come in any order.
+これで (`math-quiz :n 5`) と (`math-quiz :op '+ :n 5 :range 100`) は同じ意味になります。
+キーワード引数は、引数名の前にコロンを付け、そのあとに値を続けて指定します。
+キーワードと値の対は、どんな順序で並べても構いません。
 
-A symbol starting with a colon is called a *keyword*, and can be used anywhere, not just in argument lists.
-The term *keyword* is used differently in Lisp than in many other languages.
-For example, in Pascal, keywords (or *reserved* words) are syntactic symbols, like `if, else, begin`, and `end`.
-In Lisp we call such symbols *special form operators* or just *special forms.*
+コロンで始まるシンボルを*キーワード*と呼び、引数リストの中だけでなくどこでも使えます。
+*キーワード*という語は、Lispでは他の多くの言語とは違う使われ方をします。
+たとえばPascalでは、キーワード（あるいは*予約*語）は `if`、`else`、`begin`、`end` のような構文上の記号です。
+Lispではそうしたシンボルを*特殊形式演算子*、あるいは単に*特殊形式*と呼びます。
 <a id="tfn03-3"></a>
-Lisp keywords are symbols that happen to reside in the keyword package.<sup>[3](#fn03-3)</sup>
-They have no special syntactic meaning, although they do have the unusual property of being self-evaluating: they are constants that evaluate to themselves, unlike other symbols, which evaluate to whatever value was stored in the variable named by the symbol.
-Keywords also happen to be used in specifying `&key` argument lists, but that is by virtue of their value, not by virtue of some syntax rule.
-It is important to remember that keywords are used in the function call, but normal nonkeyword symbols are used as parameters in the function definition.
+Lispのキーワードは、たまたまキーワードパッケージに属しているシンボルです。<sup>[3](#fn03-3)</sup>
+構文上の特別な意味はありませんが、自分自身に評価されるという変わった性質を持ちます。つまり自分自身に評価される定数であり、シンボルが名づける変数に格納された値に評価される他のシンボルとは違います。
+キーワードは `&key` の引数リストの指定にも使われますが、それは構文規則によるのではなく、その値による働きです。
+キーワードは関数呼び出しで使い、関数定義の引数には通常のキーワードでないシンボルを使う、という点を覚えておくのが大切です。
 
-Just to make things a little more confusing, the symbols `&optional, &rest,` and `&key` are called *lambda-list keywords*, for historical reasons.
-Unlike the colon in real keywords, the `&` in lambda-list keywords has no special significance.
-Consider these annotated examples:
+話をもう少しややこしくすることに、`&optional`、`&rest`、`&key` というシンボルは歴史的な理由から*ラムダリストキーワード*と呼ばれます。
+本物のキーワードにおけるコロンとは違い、ラムダリストキーワードの `&` に特別な意味はありません。
+注記を付けた次の例を見てください。
 
 ```lisp
 > :xyz => :XYZ                            ; keywords are self-evaluating
@@ -2151,72 +2151,72 @@ Keywords are constants, and so cannot be used as names of variables.
    (g (second keys) 1 (first keys) 2)) => (2 1)
 ```
 
-Many of the functions presented in this chapter take keyword arguments that make them more versatile.
-For example, remember the function `find`, which can be used to look for a particular element in a sequence:
+この章で紹介した関数の多くは、より融通が利くようにキーワード引数をとります。
+たとえば、列の中から特定の要素を探すのに使える `find` を思い出してください。
 
 ```lisp
 > (find 3 '(1 2 3 4 -5 6.0)) => 3
 ```
-It turns out that `find` takes several optional keyword arguments.
-For example, suppose we tried to find `6` in this sequence:
+実は `find` は省略可能なキーワード引数をいくつかとります。
+たとえば、この列から `6` を探そうとしたとしましょう。
 
 ```lisp
 > (find 6 '(1 2 3 4 -5 6.0)) => nil
 ```
 
-This fails because `find` tests for equality with `eql`, and `6` is not `eql` to `6.0`.
-However, `6` is `equalp` to 6.0, so we could use the `:test` keyword:
+これが失敗するのは、`find` が `eql` で等価性を調べており、`6` は `6.0` と `eql` ではないからです。
+しかし `6` は 6.0 と `equalp` なので、`:test` キーワードが使えます。
 
 ```lisp
 > (find 6 '(1 2 3 4 -5 6.0) :test #'equalp) => 6.0
 ```
 
-In fact, we can specify any binary predicate for the `:test` keyword; it doesn't have to be an equality predicate.
-For example, we could find the first number that `4` is less than:
+実のところ `:test` にはどんな二項述語でも指定できます。等価性の述語である必要はありません。
+たとえば、`4` より大きい最初の数を見つけられます。
 
 ```lisp
 > (find 4 '(1 2 3 4 -5 6.0) :test #'<) => 6.0
 ```
 
-Now suppose we don't care about the sign of the numbers; if we look for `5`, we want to find the `-5`.
-We can handle this with the key keyword to take the absolute value of each element of the list with the `abs` function:
+では数の符号を気にしない場合を考えましょう。`5` を探したら `-5` を見つけたいとします。
+これは key キーワードで、リストの各要素に `abs` 関数を適用して絶対値をとることで扱えます。
 
 ```lisp
 > (find 5 '(1 2 3 4 -5 6.0) :key #'abs) => -5
 ```
 
-Keyword parameters significantly extend the usefulness of built-in functions, and they can do the same for functions you define.
-Among the built-in functions, the most common keywords fall into two main groups: `:test`, `:test-not` and `:key,` which are used for matching functions, and `:start`, `:end,` and `:from-end,` which are used on sequence functions.
-Some functions accept both sets of keywords.
-(*Common Lisp the Language*, 2d edition, discourages the use of `:test-not` keywords, although they are still a part of the language.)
+キーワード引数は組み込み関数の使い出を大きく広げますし、自分で定義する関数についても同じことができます。
+組み込み関数のうち、よく使われるキーワードは大きく2群に分かれます。照合の関数に使う `:test`、`:test-not`、`:key` と、列の関数に使う `:start`、`:end`、`:from-end` です。
+両方の群を受け付ける関数もあります。
+（*Common Lisp the Language* 第2版は `:test-not` キーワードの使用を勧めていませんが、言語の一部ではあり続けています。）
 
-The matching functions include `sublis`, `position`, `subst`, `union`, `intersection`, `set-difference`, `remove`, `remove-if`, `subsetp`, `assoc`, `find,` and `member.`
-By default, each tests if some item is `eql` to one or more of a series of other objects.
-This test can be changed by supplying some other predicate as the argument to `:test`, or it can be reversed by specifying `:test-not.`
-In addition, the comparison can be made against some part of the object rather than the whole object by specifying a selector function as the `:key` argument.
+照合の関数には `sublis`、`position`、`subst`、`union`、`intersection`、`set-difference`、`remove`、`remove-if`、`subsetp`、`assoc`、`find`、`member` があります。
+既定では、いずれもある要素が一連の他のオブジェクトの1つ以上と `eql` かを調べます。
+この判定は `:test` に別の述語を与えて変えられますし、`:test-not` を指定して逆にすることもできます。
+さらに `:key` に取り出しの関数を指定すれば、オブジェクト全体ではなくその一部と比べられます。
 
-The sequence functions include `remove`, `remove-if`, `position,` and `find`.
-The most common type of sequence is the list, but strings and vectors can also be used as sequences.
-A sequence function performs some action repeatedly for some elements of a sequence.
-The default is to go through the sequence from beginning to end, but the reverse order can be specified with `:from-end t` and a subsequence can be specifed by supplying a number for the `:start` or `:end` keyword.
-The first element of a sequence is numbered 0, not 1, so be careful.
+列の関数には `remove`、`remove-if`、`position`、`find` があります。
+最もよく使う列はリストですが、文字列やベクタも列として使えます。
+列の関数は、列の要素のいくつかに対して何らかの動作を繰り返し行います。
+既定では列を先頭から末尾へたどりますが、`:from-end t` で逆順を指定でき、`:start` や `:end` に数を与えれば部分列を指定できます。
+列の最初の要素は1ではなく0番なので、気をつけてください。
 
-As an example of keyword parameters, suppose we wanted to write sequence functions that are similar to `find` and `find-if`, except that they return a list of all matching elements rather than just the first matching element.
-We will call the new functions `find-all` and `find-all-if`.
-Another way to look at these functions is as variations of remove.
-Instead of removing items that match, they keep all the items that match, and remove the ones that don't.
-Viewed this way, we can see that the function `find-all-if` is actually the same function as `remove-if-not`.
-It is sometimes useful to have two names for the same function viewed in different ways (like `not` and `null`).
-The new name could be defined with a `defun`, but it is easier to just copy over the definition:
+キーワード引数の例として、`find` や `find-if` に似ているが、合致する最初の要素だけでなく合致するすべての要素のリストを返す列の関数を書きたいとしましょう。
+新しい関数を `find-all` と `find-all-if` と呼ぶことにします。
+これらの関数は、remove の変種として見ることもできます。
+合致する要素を取り除くのではなく、合致する要素をすべて残し、合致しないものを取り除くのです。
+こう見ると、`find-all-if` は実のところ `remove-if-not` と同じ関数だと分かります。
+（`not` と `null` のように）違う見方をした同じ関数に2つの名前があると、役に立つことがあります。
+新しい名前は `defun` でも定義できますが、定義をそのまま写すほうが手軽です。
 
 ```lisp
 (setf (symbol-function 'find-all-if) #'remove-if-not)
 ```
 
-Unfortunately, there is no built-in function that corresponds exactly to `find-all`, so we will have to define it.
-Fortunately, `remove` can do most of the work.
-All we have to do is arrange to pass remove the complement of the `:test` predicate.
-For example, finding all elements that are equal to 1 in a list is equivalent to removing elements that are not equal to 1:
+あいにく `find-all` にぴたりと対応する組み込み関数はないので、自分で定義せねばなりません。
+幸い、仕事の大半は `remove` がしてくれます。
+やるべきことは、`:test` の述語の補集合にあたる述語を remove に渡すよう仕立てるだけです。
+たとえばリストから1に等しい要素をすべて見つけることは、1に等しくない要素を取り除くことと等価です。
 
 ```lisp
 > (setf nums '(1 2 3 2 1)) => (1 2 3 2 1)
@@ -2224,9 +2224,9 @@ For example, finding all elements that are equal to 1 in a list is equivalent to
 > (find-all 1 nums :test #'=) ≡ (remove 1 nums :test #'/=) => (1 1)
 ```
 
-Now what we need is a higher-order function that returns the complement of a function.
-In other words, given `=`, we want to return `/=`.
-This function is called `complement` in ANSI Common Lisp, but it was not defined in earlier versions, so it is given here:
+さて必要なのは、関数の補にあたる関数を返す高階関数です。
+言い換えれば、`=` を与えられたら `/=` を返してほしいのです。
+この関数はANSI Common Lispでは `complement` と呼ばれますが、それ以前の版では定義されていなかったので、ここに示します。
 
 ```lisp
 (defun complement (fn)
@@ -2236,11 +2236,11 @@ This function is called `complement` in ANSI Common Lisp, but it was not defined
   #'(lambda (&rest args) (not (apply fn args))))
 ```
 
-When `find-all` is called with a given `:test` predicate, all we have to do is call `remove` with the complement as the `:test` predicate.
-This is true even when the `:test` function is not specified, and therefore defaults to `eql`.
-We should also test for when the user specifies the `:test-not` predicate, which is used to specify that the match succeeds when the predicate is false.
-It is an error to specify both a `:test` and `:test-not` argument to the same call, so we need not test for that case.
-The definition is:
+`find-all` が `:test` 述語つきで呼ばれたら、その補を `:test` 述語として `remove` を呼ぶだけです。
+`:test` が指定されず既定の `eql` になる場合も同じです。
+利用者が `:test-not` 述語を指定した場合も調べるべきです。これは述語が偽のときに照合が成功することを指定するものです。
+同じ呼び出しに `:test` と `:test-not` の両方を指定するのはエラーなので、その場合を調べる必要はありません。
+定義は次のとおりです。
 
 ```lisp
 (defun find-all (item sequence &rest keyword-args
@@ -2254,14 +2254,14 @@ The definition is:
              :test (complement test) keyword-args)))
 ```
 
-The only hard part about this definition is understanding the parameter list.
-The `&rest` accumulates all the keyword/value pairs in the variable `keyword-args`.
-In addition to the `&rest` parameter, two specific keyword parameters, `:test` and `:test-not`, are specified.
-Any time you put a `&key` in a parameter list, you need an `&allow-other-keys` if, in fact, other keywords are allowed.
-In this case we want to accept keywords like `:start` and `:key` and pass them on to `remove`.
+この定義で唯一難しいのは、引数リストを理解することです。
+`&rest` は、キーワードと値の対をすべて変数 `keyword-args` にためます。
+`&rest` の引数に加えて、`:test` と `:test-not` という2つの個別のキーワード引数を指定しています。
+引数リストに `&key` を置いたとき、実際に他のキーワードも許すのであれば `&allow-other-keys` が必要です。
+ここでは `:start` や `:key` のようなキーワードを受け取り、`remove` に渡したいのです。
 
-All the keyword/value pairs will be accumulated in the list `keyword-args`, including the `:test` or `:test-not` values.
-So we will have:
+キーワードと値の対はすべて、`:test` や `:test-not` の値も含めてリスト `keyword-args` にたまります。
+ですから次のようになります。
 
 ```lisp
 (find-all 1 nums :test #'= :key #'abs)
@@ -2269,18 +2269,18 @@ So we will have:
   => (1 1)
 ```
 
-Note that the call to `remove` will contain two `:test` keywords.
-This is not an error; Common Lisp declares that the leftmost value is the one that counts.
+`remove` の呼び出しに `:test` キーワードが2つ含まれることに注意してください。
+これはエラーではありません。Common Lispは最も左の値が有効だと定めています。
 
-&#9635; **Exercise 3.7 [s]** Why do you think the leftmost of two keys is the one that counts, rather than the rightmost?
+&#9635; **練習問題 3.7 [s]** 2つのキーのうち、右端ではなく左端が有効とされるのはなぜだと思うか。
 
-&#9635; **Exercise 3.8 [m]** Some versions of Kyoto Common Lisp (KCL) have a bug wherein they use the rightmost value when more than one keyword/value pair is specified for the same keyword.
-Change the definition of `find-all` so that it works in KCL.
+&#9635; **練習問題 3.8 [m]** Kyoto Common Lisp（KCL）の一部の版には、同じキーワードに複数のキーワード・値の対が指定されたとき右端の値を使うというバグがある。
+KCLでも動くように `find-all` の定義を変えよ。
 
-There are two more lambda-list keywords that are sometimes used by advanced programmers.
-First, within a macro definition (but not a function definition), the symbol `&body` can be used as a synonym for `&rest`.
-The difference is that `&body` instructs certain formatting programs to indent the rest as a body.
-Thus, if we defined the macro:
+上級のプログラマがときに使うラムダリストキーワードが、あと2つあります。
+第一に、マクロ定義の中で（関数定義では使えません）、シンボル `&body` を `&rest` の同義語として使えます。
+違いは、`&body` が一部の整形プログラムに、残りを本体として字下げするよう指示することです。
+ですから次のマクロを定義すると、
 
 ```lisp
 (defmacro while2 (test &body body)
@@ -2289,7 +2289,7 @@ Thus, if we defined the macro:
          . ,body))
 ```
 
-Then the automatic indentation of `while2` (on certain systems) is prettier than `while`:
+（一部の処理系では）`while2` の自動字下げは `while` より美しくなります。
 
 ```lisp
 (while (< i 10)
@@ -2301,11 +2301,11 @@ Then the automatic indentation of `while2` (on certain systems) is prettier than
   (setf i (+ i 1)))
 ```
 
-Finally, an `&aux` can be used to bind a new local variable or variables, as if bound with `let*`.
-Personally, I consider this an abomination, because `&aux` variables are not parameters at all and thus have no place in a parameter list.
-I think they should be clearly distinguished as local variables with a `let`.
-But some good programmers do use `&aux`, presumably to save space on the page or screen.
-Against my better judgement, I show an example:
+最後に、`&aux` を使えば、`let*` で束縛したかのように新しい局所変数を束縛できます。
+個人的には、これは忌まわしいものだと思っています。`&aux` の変数はそもそも引数ではないので、引数リストに居場所はありません。
+`let` によって局所変数としてはっきり区別すべきだと考えます。
+しかし優れたプログラマにも `&aux` を使う人はいます。おそらく紙面や画面の場所を節約するためでしょう。
+良識に反しますが、例を挙げておきます。
 
 ```lisp
 (defun length14 (list &aux (len 0))
@@ -2313,32 +2313,32 @@ Against my better judgement, I show an example:
     (incf len)))
 ```
 
-## 3.20 The Rest of Lisp
+## 3.20 Lispの残りの部分
 
-There is a lot more to Common Lisp than what we have seen here, but this overview should be enough for the reader to comprehend the programs in the chapters to come.
-The serious Lisp programmer will further his or her education by continuing to consult reference books and online documentation.
-You may also find part V of this book to be helpful, particularly [chapter 24](chapter24.md), which covers advanced features of Common Lisp (such as packages and error handling) and [chapter 25](chapter25.md), which is a collection of troubleshooting hints for the perplexed Lisper.
+Common Lispにはここで見た以上のものがまだたくさんありますが、この概観があれば、これからの章のプログラムを読み解くには足りるはずです。
+本気で取り組むLispプログラマは、参考書やオンラインの文書を引き続き当たることで学びを深めていくでしょう。
+本書の第V部も役に立つはずです。とくに、Common Lispの進んだ機能（パッケージやエラー処理など）を扱う[第24章](chapter24.md)と、途方に暮れたLisp使いのための不具合の切り分けの手がかりを集めた[第25章](chapter25.md)です。
 
-While it may be distracting for the beginner to be continually looking at some reference source, the alternative - to explain every new function in complete detail as it is introduced - would be even more distracting.
-It would interrupt the description of the AI programs, which is what this book is all about.
+絶えず参考書を引くのは初心者には気の散ることかもしれませんが、その代わりに新しい関数を出るたび細部まで説明したら、もっと気が散るでしょう。
+AIプログラムの説明が途切れてしまいます。本書の眼目はそこにあるのです。
 
-## 3.21 Exercises
+## 3.21 練習問題
 
-&#9635; **Exercise 3.9 [m]** Write a version of `length` using the function `reduce`.
+&#9635; **練習問題 3.9 [m]** 関数 `reduce` を使って `length` を書け。
 
-&#9635; **Exercise 3.10 [m]** Use a reference manual or `describe` to figure out what the functions `lcm` and `nreconc` do.
+&#9635; **練習問題 3.10 [m]** 参考書か `describe` を使って、関数 `lcm` と `nreconc` が何をするか調べよ。
 
-&#9635; **Exercise 3.11** [m] There is a built-in Common Lisp function that, given a key, a value, and an association list, returns a new association list that is extended to include the key/value pair.
-What is the name of this function?
+&#9635; **練習問題 3.11** [m] キー・値・連想リストを与えると、そのキーと値の対を含むよう拡張された新しい連想リストを返す組み込み関数がCommon Lispにある。
+その関数の名前は何か。
 
-&#9635; **Exercise 3.12 [m]** Write a single expression using format that will take a list of words and print them as a sentence, with the first word capitalized and a period after the last word.
-You will have to consult a reference to learn new `format` directives.
+&#9635; **練習問題 3.12 [m]** 語のリストをとり、最初の語を大文字で始め、最後の語のあとにピリオドを付けて1つの文として表示する式を、format を使って1つ書け。
+新しい `format` の指示子を知るには参考書を当たる必要がある。
 
-## 3.22 Answers
+## 3.22 解答
 
-**Answer 3.2** `(cons` *a b*) = (`list*` *a b*)
+**解答 3.2** `(cons` *a b*) = (`list*` *a b*)
 
-**Answer 3.3**
+**解答 3.3**
 
 ```lisp
 (defun dprint (x)
@@ -2355,7 +2355,7 @@ You will have to consult a reference to learn new `format` directives.
   (dprint x))
 ```
 
-**Answer 3.4** Use the same `dprint` function defined in the last exercise, but change `pr-rest`.
+**解答 3.4** 前問で定義した `dprint` はそのまま使い、`pr-rest` だけを変える。
 
 ```lisp
 (defun pr-rest (x)
@@ -2364,11 +2364,11 @@ You will have to consult a reference to learn new `format` directives.
         (t (princ " ") (dprint (first x)) (pr-rest (rest x)))))
 ```
 
-**Answer 3.5** We will keep a data base called `*db*`.
-The data base is organized into a tree structure of nodes.
-Each node has three fields: the name of the object it represents, a node to go to if the answer is yes, and a node for when the answer is no.
-We traverse the nodes until we either get an "it" reply or have to give up.
-In the latter case, we destructively modify the data base to contain the new information.
+**解答 3.5** `*db*` というデータベースを持つことにする。
+データベースはノードの木構造として構成される。
+各ノードは3つの欄を持つ。表すオブジェクトの名前、答えが yes のときに進むノード、no のときのノードである。
+「it」という返事を得るか、あきらめざるをえなくなるまでノードをたどる。
+後者の場合は、新しい情報を含むようデータベースを破壊的に書き換える。
 
 ```lisp
 (defstruct node
@@ -2402,7 +2402,7 @@ In the latter case, we destructively modify the data base to contain the new inf
   (make-node :name (read)))
 ```
 
-Here it is used:
+実際に使ってみる。
 
 ```lisp
 > (questions)
@@ -2424,23 +2424,23 @@ Is it a BEAR? it
 AHA!
 ```
 
-**Answer 3.6** The value is (`LOCAL-A LOCAL-B LOCAL-B GLOBAL-A LOCAL-B`).
+**解答 3.6** 値は (`LOCAL-A LOCAL-B LOCAL-B GLOBAL-A LOCAL-B`) である。
 
-The `let` form binds `a` lexically and `*b*` dynamically, so the references to `a` and `*b*` (including the reference to `*b*` within `fn`) all get the local values.
-The function `symbol-value` always treats its argument as a special variable, so it ignores the lexical binding for a and returns the global binding instead.
-However, the `symbol-value` of `*b*` is the local dynamic value.
+`let` は `a` をレキシカルに、`*b*` を動的に束縛するので、`a` と `*b*` への参照（`fn` の中の `*b*` への参照も含む）はいずれも局所の値を得る。
+関数 `symbol-value` は引数を常にスペシャル変数として扱うので、a のレキシカルな束縛を無視し、代わりに大域的な束縛を返す。
+ただし `*b*` の `symbol-value` は、局所の動的な値である。
 
-**Answer 3.7** There are two good reasons: First, it makes it faster to search through the argument list: just search until you find the key, not all the way to the end.
-Second, in the case where you want to override an existing keyword and pass the argument list on to another function, it is cheaper to `cons` the new keyword/value pair on the front of a list than to append it to the end of a list.
+**解答 3.7** もっともな理由が2つある。第一に、引数リストの探索が速くなる。末尾まで見ずに、キーが見つかった時点で探索を終えられる。
+第二に、既存のキーワードを上書きして引数リストを別の関数に渡したい場合、新しいキーワードと値の対をリストの末尾に連結するより、先頭に `cons` するほうが安く済む。
 
-**Answer 3.9**
+**解答 3.9**
 
 ```lisp
 (defun length-r (list)
   (reduce #'+ (mapcar #'(lambda (x) 1) list)))
 ```
 
-or more efficiently:
+あるいはもっと効率よく:
 
 ```lisp
 (defun length-r (list)
@@ -2448,22 +2448,22 @@ or more efficiently:
           :initial-value 0))
 ```
 
-or, with an ANSI-compliant Common Lisp, you can specify a `:` key
+あるいはANSIに準拠したCommon Lispなら、`:` のキーを指定できる
 
 ```lisp
 (defun length-r (list)
   (reduce #'+ list :key #'(lambda (x) 1)))
 ```
 
-**Answer 3.12** `(format t "~@(~{~a~^ ~}.~)" '(this is a test))`
+**解答 3.12** `(format t "~@(~{~a~^ ~}.~)" '(this is a test))`
 
 ----------------------
 
 <a id="fn03-1"></a><sup>[1](#tfn03-1)</sup>
-Association lists are covered in section 3.6.
+連想リストは3.6節で扱っています。
 
 <a id="fn03-2"></a><sup>[2](#tfn03-2)</sup>
-In mathematics, a function must associate a unique output value with each input value.
+数学において関数は、各入力値に対して一意の出力値を対応づけねばなりません。
 
 <a id="fn03-3"></a><sup>[3](#tfn03-3)</sup>
-A *package* is a symbol table: a mapping between strings and the symbols they name.
+*パッケージ*とはシンボル表、すなわち文字列とそれが名づけるシンボルとの対応づけのことです。

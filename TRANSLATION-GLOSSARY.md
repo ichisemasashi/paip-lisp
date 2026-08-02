@@ -154,6 +154,35 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | cross product | 直積 | |
 | noun / verb phrase | 名詞句／動詞句 | 文法カテゴリ名は訳すが、生成される英単語は原文のまま |
 
+### 第3章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| maxim | 格率 | 3.1節の6項目。行動指針なので「格言」ではない |
+| accumulator | 累算器 | 途中結果を持ち回る変数 |
+| place / generalized variable | 場所／一般化変数 | `setf` の対象。原著が両語を使い分けている |
+| dotted pair | ドット対 | |
+| cons cell | コンスセル | |
+| proper list | 真リスト | 末尾の rest が nil のリスト |
+| association list / property list | 連想リスト／属性リスト | a-list / p-list は原語のまま併記 |
+| hash table | ハッシュ表 | |
+| recognizer predicate | 判別述語 | `numberp` のような型判定 |
+| destructive function | 破壊的な関数 | |
+| antibugging | バグ防ぎ | Norvigの造語。デバッグの前段で誤りを捕まえる |
+| consistency checker | 整合性検査器 | |
+| regression testing | 退行試験 | |
+| stream | ストリーム | 入出力の源の記述子 |
+| format directive | 書式指示子 | `~a` などの `~` で始まる指示 |
+| scope / extent | スコープ／存在期間 | extent は変数の寿命。3.17節の核心 |
+| lexical closure | レキシカルクロージャ | 単に「クロージャ」とも |
+| free lexical variable | 自由なレキシカル変数 | |
+| multiple values | 多値 | |
+| keyword parameter | キーワード引数 | |
+| lambda-list keyword | ラムダリストキーワード | `&optional`、`&rest`、`&key` |
+| complement (of a predicate) | 補 | `=` に対する `/=` |
+| universe of discourse | 論議領域 | 集合をビット列で表す文脈 |
+| programming idiom / cliche | プログラミングの慣用句／決まり文句 | |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -222,8 +251,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md` / `chapter2.md` | 完了 |
-| `chapter3.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter3.md` | 完了 |
+| `chapter4.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
