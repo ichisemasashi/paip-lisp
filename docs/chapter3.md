@@ -1438,40 +1438,40 @@ Common Lispの型の階層はかなり込み入っています。
 ほとんどの型に述語がある一方で、型の判別ではなく、もっと一般的な条件を判定する述語もあります。
 たとえば `oddp` は奇数の整数に対してのみ真になり、`string-greaterp` は一方の文字列が他方よりアルファベット順で後ろにあれば真になります。
 
-## 3.12 Input/Output
+## 3.12 入出力
 
-Input in Lisp is incredibly easy because a complete lexical and syntactic parser is available to the user.
-The parser is called `read`.
-It is used to read and return a single Lisp expression.
-If you can design your application so that it reads Lisp expressions, then your input worries are over.
-Note that the expression parsed by `read` need not be a legal *evaluable* Lisp expression.
-That is, you can read (`"hello" cons zzz`) just as well as (`+ 2 2`).
-In cases where Lisp expressions are not adequate, the function `read-char` reads a single character, and `read-line` reads everything up to the next newline and returns it as a string.
+Lispでの入力は驚くほど簡単です。字句と構文の完全な解析器が利用者に開かれているからです。
+その解析器が `read` です。
+Lispの式を1つ読んで返すのに使います。
+アプリケーションをLispの式を読む形に設計できれば、入力の悩みは消えます。
+`read` が解析する式は、*評価できる*正しいLispの式である必要はないことに注意してください。
+つまり (`+ 2 2`) と同じように (`"hello" cons zzz`) も読めます。
+Lispの式では間に合わない場合、関数 `read-char` は1文字を読み、`read-line` は次の改行までをすべて読んで文字列として返します。
 
-To read from the terminal, the functions `read, read-char,` or `read-line` (with no arguments) return an expression, a character, and a string up to the end of line, respectively.
-It is also possible to read from a file.
-The function `open` or the macro `with-open-stream` can be used to open a file and associate it with a *stream,* Lisp's name for a descriptor of an input/output source.
-All three read functions take three optional arguments.
-The first is the stream to read from.
-The second, if true, causes an error to be signaled at end of file.
-If the second argument is nil, then the third argument indicates the value to return at end of file.
+端末から読むには、`read`、`read-char`、`read-line`（引数なし）を使い、それぞれ式・文字・行末までの文字列が返ります。
+ファイルから読むこともできます。
+関数 `open` かマクロ `with-open-stream` を使ってファイルを開き、*ストリーム*と結び付けられます。ストリームとは、入出力の源を指す記述子に対するLispの呼び名です。
+3つの read 系の関数はいずれも省略可能な引数を3つとります。
+第1引数は読み取り元のストリームです。
+第2引数が真なら、ファイルの終わりでエラーが通知されます。
+第2引数が nil なら、第3引数がファイルの終わりで返す値を示します。
 
-Output in Lisp is similar to output in other languages, such as C.
-There are a few low-level functions to do specific kinds of output, and there is a very general function to do formatted output.
-The function `print` prints any object on a new line, with a space following it.
-`prin1` will print any object without the new line and space.
-For both functions, the object is printed in a form that could be processed by `read`.
-For example, the string `"hello there"` would print as `"hello there".`
-The function `princ` is used to print in a human-readable format.
-The string in question would print as `hello there` with `princ`-the quote marks are not printed.
-This means that `read` cannot recover the original form; `read` would interpret it as two symbols, not one string.
-The function `write` accepts eleven different keyword arguments that control whether it acts like `prin1` or `princ`, among other things.
+Lispの出力は、Cなど他の言語の出力と似ています。
+特定の種類の出力を行う低水準の関数がいくつかと、整形出力を行うきわめて汎用の関数が1つあります。
+関数 `print` は、どんなオブジェクトも新しい行に表示し、そのあとに空白を1つ置きます。
+`prin1` は改行と空白なしでオブジェクトを表示します。
+どちらの関数も、オブジェクトを `read` で処理できる形で表示します。
+たとえば文字列 `"hello there"` は `"hello there"` と表示されます。
+関数 `princ` は、人が読みやすい形で表示するのに使います。
+先の文字列は `princ` では `hello there` と表示されます。引用符は表示されません。
+つまり `read` では元の形を復元できません。`read` はこれを1つの文字列ではなく2つのシンボルと解釈します。
+関数 `write` は11種類のキーワード引数を受け付け、`prin1` のように振る舞うか `princ` のように振る舞うかなどを制御できます。
 
-The output functions also take a stream as an optional argument.
-In the following, we create the file `test.text` and print two expressions to it.
-Then we open the file for reading, and try to read back the first expression, a single character, and then two more expressions.
-Note that the `read-char` returns the character `#\G`, so the following `read` reads the characters `OODBYE` and turns them into a symbol.
-The final `read` hits the end of file, and so returns the specified value, `eof`.
+出力の関数も、省略可能な引数としてストリームをとります。
+以下では、ファイル `test.text` を作って式を2つ書き出します。
+次にそのファイルを読み取り用に開き、最初の式、1文字、さらに2つの式を読み戻してみます。
+`read-char` が文字 `#\G` を返すので、続く `read` は文字 `OODBYE` を読んでシンボルにすることに注意してください。
+最後の `read` はファイルの終わりに達するので、指定した値 `eof` を返します。
 
 ```lisp
 > (with-open-file (stream "test.text" :direction :output)
@@ -1485,16 +1485,16 @@ GOODBYE        ; and creates the file test.text
 ((HELLO THERE) #\G OODBYE EOF)
 ```
 
-The function `terpri` stands for "terminate print line," and it skips to the next line.
-The function `fresh-line` also skips to the next line, unless it can be determined that the output is already at the start of a line.
+関数 `terpri` は「terminate print line（表示行を終える）」を表し、次の行へ移ります。
+関数 `fresh-line` も次の行へ移りますが、出力がすでに行頭にあると判断できる場合は移りません。
 
-Common Lisp also provides a very general function for doing formatted output, called `format.`
-The first argument to `format` is always the stream to print to; use `t` to print to the terminal.
-The second argument is the format string.
-It is printed out verbatim, except for *format directives*, which begin with the character `"~"`.
-These directives tell how to print out the remaining arguments.
-Users of C's `printf` function or FORTRAN's `format` statement should be familiar with this idea.
-Here's an example:
+Common Lispは整形出力のためのきわめて汎用の関数 `format` も備えています。
+`format` の第1引数は常に出力先のストリームです。端末に出すには `t` を使います。
+第2引数は書式文字列です。
+これはそのまま出力されますが、`"~"` で始まる*書式指示子*だけは別です。
+指示子は、残りの引数をどう表示するかを指定します。
+Cの `printf` 関数やFORTRANの `format` 文を使ったことがあれば、この考えにはなじみがあるでしょう。
+例を挙げます。
 
 ```lisp
 > (format t "hello, world")
@@ -1502,7 +1502,7 @@ hello, world
 NIL
 ```
 
-Things get interesting when we put in additional arguments and include format directives:
+引数を増やし、書式指示子を入れると面白くなってきます。
 
 ```lisp
 > (format t "~&~a plus ~s is ~f" "two" "two" 4)
@@ -1510,11 +1510,11 @@ two plus "two" is 4.0
 NIL
 ```
 
-The directive `~&` moves to a fresh line, `~a` prints the next argument as `princ` would, `~s` prints the next argument as `prin1` would, and `~f` prints a number in floating-point format.
-If the argument is not a number, then `princ` is used.
-`format` always returns nil.
-There are 26 different format directives.
-Here's a more complex example:
+指示子 `~&` は新しい行へ移り、`~a` は次の引数を `princ` のように表示し、`~s` は `prin1` のように表示し、`~f` は数を浮動小数点の形式で表示します。
+引数が数でなければ `princ` が使われます。
+`format` は常に nil を返します。
+書式指示子は26種類あります。
+もっと込み入った例を挙げます。
 
 ```lisp
 > (let ((numbers '(1 2 3 4 5)))
@@ -1524,28 +1524,28 @@ one plus two plus three plus four plus five is XV
 NIL
 ```
 
-The directive `~r` prints the next argument, which should be a number, in English, and `~@r` prints a number as a roman numeral.
-The compound directive `~{...~}` takes the next argument, which must be a list, and formats each element of the list according to the format string inside the braces.
-Finally, the directive `~^` exits from the enclosing `~{...~}` loop if there are no more arguments.
-You can see that `format`, like `loop`, comprises almost an entire programming language, which, also like `loop`, is not a very Lisplike language.
+指示子 `~r` は、数であるべき次の引数を英語で表示し、`~@r` は数をローマ数字で表示します。
+複合指示子 `~{...~}` は、リストでなければならない次の引数をとり、波括弧の中の書式文字列に従ってリストの各要素を整形します。
+最後に、指示子 `~^` は引数がもうなければ、囲んでいる `~{...~}` のループから抜けます。
+`format` も `loop` と同じくほとんど1つのプログラミング言語をなしており、しかも `loop` と同じく、あまりLispらしくない言語だと分かるでしょう。
 
-## 3.13 Debugging Tools
+## 3.13 デバッグの道具
 
-In many languages, there are two strategies for debugging: (1) edit the program to insert print statements, recompile, and try again, or (2) use a debugging program to investigate (and perhaps alter) the internal state of the running program.
+多くの言語では、デバッグの戦略は2つです。(1) プログラムを編集して表示文を差し込み、再コンパイルしてもう一度試す。(2) デバッガを使って、動いているプログラムの内部状態を調べる（そしておそらく書き換える）。
 
-Common Lisp admits both these strategies, but it also offers a third: (3) add annotations that are not part of the program but have the effect of automatically altering the running program.
-The advantage of the third strategy is that once you are done you don't have to go back and undo the changes you would have introduced in the first strategy.
-In addition, Common Lisp provides functions that display information about the program.
-You need not rely solely on looking at the source code.
+Common Lispはこの両方を認めますが、第三の道も差し出します。(3) プログラムの一部ではないが、動いているプログラムを自動的に変える働きを持つ注記を加える。
+第三の戦略の利点は、終わったあとに、第一の戦略で入れたはずの変更を戻しに行かなくてよいことです。
+加えてCommon Lispは、プログラムについての情報を表示する関数も備えています。
+ソースコードを眺めることだけに頼る必要はありません。
 
-We have already seen how `trace` and `untrace` can be used to provide debugging information (page 65).
-Another useful tool is `step`, which can be used to halt execution before each subform is evaluated.
-The form (`step` *expression*) will evaluate and return *expression*, but pauses at certain points to allow the user to inspect the computation, and possibly change things before proceeding to the next step.
-The commands available to the user are implementation-dependent, but typing a `?` should give you a list of commands.
-As an example, here we step through an expression twice, the first time giving commands to stop at each subevaluation, and the second time giving commands to skip to the next function call.
-In this implementation, the commands are control characters, so they do not show up in the output.
+`trace` と `untrace` でデバッグ情報を得る方法はすでに見ました（65ページ）。
+もう1つ役に立つ道具が `step` で、各部分式が評価される前に実行を止められます。
+(`step` *式*) は*式*を評価して返しますが、要所で一時停止し、利用者が計算を調べ、必要なら次の段階に進む前に手を入れられるようにします。
+使えるコマンドは処理系によりますが、`?` を打てばコマンドの一覧が出るはずです。
+例として、ここでは1つの式を2回たどります。1回目は部分評価ごとに止まるコマンドを、2回目は次の関数呼び出しまで飛ばすコマンドを与えています。
+この処理系ではコマンドが制御文字なので、出力には現れません。
 
-All output, including the symbols <= and => are printed by the stepper itself; I have added no annotation.
+<= と => の記号を含め、出力はすべてステッパ自身が表示したものです。私は何も注記を加えていません。
 
 ```lisp
 > (step (+ 3 4 (* 5 6 (/ 7 8))))
@@ -1572,8 +1572,8 @@ All output, including the symbols <= and => are printed by the stepper itself; I
 133/4
 ```
 
-The functions `describe`, `inspect`, `documentation`, and `apropos` provide information about the state of the current program.
-`apropos` prints information about all symbols whose name matches the argument:
+関数 `describe`、`inspect`、`documentation`、`apropos` は、現在のプログラムの状態についての情報を与えてくれます。
+`apropos` は、名前が引数に合致するすべてのシンボルについて情報を表示します。
 
 ```lisp
 > (apropos 'string)
@@ -1584,7 +1584,7 @@ STRING                 function (X)
 ...
 ```
 
-Once you know what object you are interested in, `describe` can give more information on it:
+関心のあるオブジェクトが分かったら、`describe` がさらに詳しい情報をくれます。
 
 ```lisp
 > (describe 'make-string)
@@ -1606,32 +1606,32 @@ MAKE-STRING has property :SOURCE-FILE: #P"SYS:KERNEL; STRINGS"
   Sign 0, exponent #o211, 23-bit fraction #o6450754
 ```
 
-If all you want is a symbol's documentation string, the function `documentation` will do the trick:
+シンボルのドキュメント文字列だけが欲しいなら、関数 `documentation` で用が足ります。
 
 ```lisp
 > (documentation 'first 'function) => "Return the first element of LIST."
 > (documentation 'pi 'variable) => "pi"
 ```
 
-If you want to look at and possibly alter components of a complex structure, then `inspect` is the tool.
-In some implementations it invokes a fancy, window-based browser.
+複雑な構造の構成要素を眺め、必要なら書き換えたいなら、`inspect` がその道具です。
+処理系によっては、洒落たウィンドウ式の閲覧器が立ち上がります。
 
-Common Lisp also provides a debugger that is entered automatically when an error is signalled, either by an inadvertant error or by deliberate action on the part of the program.
-The details of the debugger vary between implementations, but there are standard ways of entering it.
-The function `break` enters the debugger after printing an optional message.
-It is intended as the primary method for setting debugging break points.
-`break` is intended only for debugging purposes; when a program is deemed to be working, all calls to `break` should be removed.
-However, it is still a good idea to check for unusual conditions with `error`, `cerror`, `assert,` or `check-type`, which will be described in the following section.
+Common Lispはデバッガも備えており、うっかりした誤りでも、プログラムの意図的な動作でも、エラーが通知されると自動的にデバッガに入ります。
+デバッガの詳細は処理系によって異なりますが、そこへ入る標準的な方法はあります。
+関数 `break` は、省略可能なメッセージを表示してからデバッガに入ります。
+デバッグ用の停止点を設ける主要な手立てとして用意されています。
+`break` はデバッグ専用です。プログラムが動くと判断できたら、`break` の呼び出しはすべて取り除くべきです。
+とはいえ、次の節で述べる `error`、`cerror`、`assert`、`check-type` で異常な状況を調べておくのは、やはりよい考えです。
 
-## 3.14 Antibugging Tools
+## 3.14 バグを防ぐ道具
 
-It is a good idea to include *antibugging* checks in your code, in addition to doing normal debugging.
-Antibugging code checks for errors and possibly takes corrective action.
+通常のデバッグに加えて、コードに*バグ防ぎ*の検査を入れておくのはよい考えです。
+バグ防ぎのコードは誤りを調べ、場合によっては是正の手を打ちます。
 
-The functions `error` and `cerror` are used to signal an error condition.
-These are intended to remain in the program even after it has been debugged.
-The function `error` takes a format string and optional arguments.
-It signals a fatal error; that is, it stops the program and does not offer the user any way of restarting it.
+関数 `error` と `cerror` はエラー条件を通知するのに使います。
+これらはデバッグが済んだあともプログラムに残しておくためのものです。
+関数 `error` は書式文字列と省略可能な引数をとります。
+致命的なエラーを通知します。つまりプログラムを止め、利用者に再開の手立てを与えません。
 たとえば次のようになります。
 
 ```lisp
@@ -1642,12 +1642,12 @@ It signals a fatal error; that is, it stops the program and does not offer the u
          (length numbers))))
 ```
 
-In many cases, a fatal error is a little drastic.
-The function `cerror` stands for continuable error.
-`cerror` takes two format strings; the first prints a message indicating what happens if we continue, and the second prints the error message itself.
-`cerror` does not actually take any action to repair the error, it just allows the user to signal that continuing is alright.
-In the following implementation, the user continues by typing `:continue`.
-In ANSI Common Lisp, there are additional ways of specifying options for continuing.
+多くの場合、致命的なエラーは少し極端です。
+関数 `cerror` は continuable error（継続可能なエラー）を表します。
+`cerror` は書式文字列を2つとります。1つ目は継続した場合に何が起きるかを示すメッセージを、2つ目はエラーメッセージそのものを表示します。
+`cerror` は実際には誤りを直す手立てを何も取らず、継続して構わないと利用者が示せるようにするだけです。
+以下の処理系では、利用者は `:continue` と打つことで継続します。
+ANSI Common Lispには、継続の選択肢を指定する方法がさらにあります。
 
 ```lisp
 (defun average (numbers)
@@ -1667,17 +1667,17 @@ If continued: Use 0 as the average.
 0
 ```
 
-In this example, adding error checking nearly doubled the length of the code.
-This is not unusual; there is a big difference between code that works on the expected input and code that covers all possible errors.
-Common Lisp tries to make it easier to do error checking by providing a few special forms.
-The form `ecase` stands for "exhaustive case" or "error case."
-It is like a normal case form, except that if none of the cases are satisfied, an error message is generated.
-The form `ccase` stands for "continuable case." It is like `ecase`, except that the error is continuable.
-The system will ask for a new value for the test object until the user supplies one that matches one of the programmed cases.
+この例では、エラー検査を加えたことでコードの長さがほぼ倍になりました。
+これは珍しいことではありません。想定した入力で動くコードと、起こりうる誤りをすべて押さえたコードとのあいだには、大きな隔たりがあります。
+Common Lispは、いくつかの特殊形式を用意することでエラー検査を書きやすくしようとしています。
+`ecase` は「exhaustive case（網羅的なcase）」あるいは「error case（エラーcase）」を表します。
+通常の case と同じですが、どの場合も満たされなければエラーメッセージが出る点が違います。
+`ccase` は「continuable case（継続可能なcase）」を表します。`ecase` と同じですが、エラーが継続可能です。
+システムは、書かれた場合のいずれかに合致する値を利用者が与えるまで、判定対象の新しい値を求め続けます。
 
-To make it easier to include error checks without inflating the length of the code too much, Common Lisp provides the special forms `check-type` and `assert`.
-As the name implies, `check-type` is used to check the type of an argument.
-It signals a continuable error if the argument has the wrong type.
+コードをあまり膨らませずにエラー検査を入れやすくするため、Common Lispは特殊形式 `check-type` と `assert` を用意しています。
+名前が示すとおり、`check-type` は引数の型を調べるのに使います。
+引数の型が違えば、継続可能なエラーを通知します。
 たとえば次のようになります。
 
 ```lisp
@@ -1687,7 +1687,7 @@ It signals a continuable error if the argument has the wrong type.
   (* x x))
 ```
 
-If `sqr` is called with a non-number argument, an appropriate error message is printed:
+`sqr` が数でない引数で呼ばれると、しかるべきエラーメッセージが表示されます。
 
 ```lisp
 > (sqr "hello")
@@ -1697,8 +1697,8 @@ If continued: replace X with new value
 16
 ```
 
-`assert` is more general than `check-type`.
-In the simplest form, assert tests an expression and signals an error if it is false.
+`assert` は `check-type` より汎用です。
+最も単純な形では、assert は式を調べ、偽ならエラーを通知します。
 たとえば次のようになります。
 
 ```lisp
@@ -1708,9 +1708,9 @@ In the simplest form, assert tests an expression and signals an error if it is f
   (* x x))
 ```
 
-There is no possibility of continuing from this kind of assertion.
-It is also possible to give `assert` a list of places that can be modified in an attempt to make the assertion true.
-In this example, the variable `x` is the only thing that can be changed:
+この種の表明から継続することはできません。
+`assert` には、表明を真にするために書き換えられる場所の並びを与えることもできます。
+この例では、変えられるのは変数 `x` だけです。
 
 ```lisp
 (defun sqr (x)
@@ -1719,17 +1719,17 @@ In this example, the variable `x` is the only thing that can be changed:
   (* x x))
 ```
 
-If the assertion is violated, an error message will be printed and the user will be given the option of continuing by altering `x`.
-If `x` is given a value that satisfies the assertion, then the program continues.
-`assert` always returns nil.
+表明が破られると、エラーメッセージが表示され、利用者は `x` を書き換えて継続する選択肢を与えられます。
+表明を満たす値が `x` に与えられれば、プログラムは続きます。
+`assert` は常に nil を返します。
 
-Finally, the user who wants more control over the error message can provide a format control string and optional arguments.
-So the most complex syntax for assert is:
+最後に、エラーメッセージをより細かく制御したい利用者は、書式制御文字列と省略可能な引数を与えられます。
+つまり assert の最も複雑な構文はこうです。
 
-> `(assert` *test-form* (*place...*) *format-ctl-string format-arg...*)
+> `(assert` *判定の式* (*場所...*) *書式制御文字列 書式引数...*)
 
-Here is another example.
-The assertion tests that the temperature of the bear's porridge is neither too hot nor too cold.
+もう1つ例を挙げます。
+この表明は、熊のお粥の温度が熱すぎも冷たすぎもしないことを調べます。
 
 ```lisp
 (defun eat-porridge (bear)
@@ -1740,8 +1740,8 @@ The assertion tests that the temperature of the bear's porridge is neither too h
   (eat (bear-porridge bear)))
 ```
 
-In the interaction below, the assertion failed, and the programmer's error message was printed, along with two possibilities for continuing.
-The user selected one, typed in a call to `make-porridge` for the new value, and the function successfully continued.
+以下のやりとりでは表明が破れ、プログラマの書いたエラーメッセージが、継続の2つの選択肢とともに表示されました。
+利用者は一方を選び、新しい値として `make-porridge` の呼び出しを打ち込み、関数は無事に続きました。
 
 ```lisp
 > (eat-porridge momma-bear)
@@ -1755,11 +1755,11 @@ Form to evaluate and use to replace (BEAR-PORRIDGE BEAR):
 nil
 ```
 
-It may seem like wasted effort to spend time writing assertions that (if all goes well) will never be used.
-However, for all but the perfect programmer, bugs do occur, and the time spent antibugging will more than pay for itself in saving debugging time.
+（すべてうまくいけば）決して使われない表明を書くのは、無駄な労力に思えるかもしれません。
+しかし完璧なプログラマでもないかぎりバグは起きるもので、バグ防ぎに費やした時間は、デバッグの時間の節約で十分に元が取れます。
 
-Whenever you develop a complex data structure, such as some kind of data base, it is a good idea to develop a corresponding consistency checker.
-A consistency checker is a function that will look over a data structure and test for all possible errors.
+データベースのような複雑なデータ構造を作るときは、対応する整合性検査器も作っておくのがよい考えです。
+整合性検査器とは、データ構造を見渡して、起こりうる誤りをすべて調べる関数のことです。
 When a new error is discovered, a check for it should be incorporated into the consistency checker.
 Calling the consistency checker is the fastest way to help isolate bugs in the data structure.
 
@@ -1852,7 +1852,7 @@ Consider this example:
 Each time we call `adder` with a different value for `c`, it creates a different function, the function that adds `c` to its argument.
 Since each call to `adder` creates a new local variable named `c`, each function returned by `adder` is a unique function.
 
-Here is another example.
+もう1つ例を挙げます。
 The function `bank-account` returns a closure that can be used as a representation of a bank account.
 The closure captures the local variable balance.
 The body of the closure provides code to access and modify the local variable.
