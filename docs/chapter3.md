@@ -953,50 +953,50 @@ NIL
 | <a id="fig-03-01"></a>[]() |
 |---|
 | <img src="images/chapter3/fig-03-01.svg" onerror="this.src='images/chapter3/fig-03-01.png'; this.onerror=null;" alt="Figure 3.1: Cons Cell Diagrams" /> |
-| **Figure 3.1: Cons Cell Diagrams** |
+| **図3.1: コンスセルの図** |
 
-&#9635; **Exercise 3.2 [s]** The function cons can be seen as a special case of one of the other functions listed previously.
-Which one?
+&#9635; **練習問題 3.2 [s]** 関数 cons は、先に挙げた他の関数のいずれかの特別な場合とみなせる。
+どれか。
 
-&#9635; **Exercise 3.3 [m]** Write a function that will print an expression in dotted pair notation.
-Use the built-in function `princ` to print each component of the expression.
+&#9635; **練習問題 3.3 [m]** 式をドット対の記法で表示する関数を書け。
+式の各構成要素の表示には組み込み関数 `princ` を使うこと。
 
-&#9635; **Exercise 3.4 [m]** Write a function that, like the regular `print` function, will print an expression in dotted pair notation when necessary but will use normal list notation when possible.
+&#9635; **練習問題 3.4 [m]** 通常の `print` 関数のように、必要なときはドット対の記法で、可能なときは通常のリスト記法で式を表示する関数を書け。
 
-## 3.4 Equality and Internal Representation
+## 3.4 等価性と内部表現
 
-In Lisp there are five major equality predicates, because not all objects are created equally equal.
-The numeric equality predicate, `=`, tests if two numbers are the same.
-It is an error to apply `=` to non-numbers.
-The other equality predicates operate on any kind of object, but to understand the difference between them, we need to understand some of the internals of Lisp.
+Lispには主要な等価性の述語が5つあります。すべてのオブジェクトが等しく等しいものとして作られているわけではないからです。
+数の等価性の述語 `=` は、2つの数が同じかを調べます。
+数でないものに `=` を適用するのはエラーです。
+他の等価性の述語はどんな種類のオブジェクトにも働きますが、それらの違いを理解するには、Lispの内部をいくらか知る必要があります。
 
-When Lisp reads a symbol in two different places, the result is guaranteed to be the exact same symbol.
-The Lisp system maintains a symbol table that the function read uses to map between characters and symbols.
-But when a list is read (or built) in two different places, the results are *not* identically the same, even though the corresponding elements may be.
-This is because `read` calls `cons` to build up the list, and each call to `cons` returns a new cons cell.
-[Figure 3.2](#fig-03-02) shows two lists, `x` and `Y`, which are both equal to (`one two`), but which are composed of different cons cells, and hence are not identical.
-[Figure 3.3](#fig-03-03) shows that the expression (`rest x`) does not generate new cons cells, but rather shares structure with `x`, and that the expression (`cons 'zero x`) generates exactly one new cons cell, whose rest is `x`.
+Lispが2つの異なる場所でシンボルを読んだとき、結果はまったく同一のシンボルになることが保証されています。
+Lispシステムはシンボル表を保持しており、read 関数がそれを使って文字とシンボルを対応づけます。
+しかしリストが2つの異なる場所で読まれた（あるいは組み立てられた）場合、対応する要素が同一であっても、結果は同一では*ありません*。
+`read` はリストを組み立てるのに `cons` を呼び、`cons` の呼び出しはそのつど新しいコンスセルを返すからです。
+[図3.2](#fig-03-02) は2つのリスト `x` と `Y` を示しています。どちらも (`one two`) に等しいのですが、別々のコンスセルからできているので同一ではありません。
+[図3.3](#fig-03-03) は、式 (`rest x`) が新しいコンスセルを作らず `x` と構造を共有すること、そして式 (`cons 'zero x`) がちょうど1つの新しいコンスセル（その rest が `x`）を作ることを示しています。
 
 | <a id="fig-03-02"></a>[]() |
 |---|
 | <img src="images/chapter3/fig-03-02.svg" onerror="this.src='images/chapter3/fig-03-02.png'; this.onerror=null;" alt="Figure 3.2: Equal But Nonidentical Lists" /> |
-| **Figure 3.2: Equal But Nonidentical Lists** |
+| **図3.2: 等しいが同一ではないリスト** |
 
 | <a id="fig-03-03"></a>[]() |
 |---|
 | <img src="images/chapter3/fig-03-03.svg" onerror="this.src='images/chapter3/fig-03-03.png'; this.onerror=null;" alt="Figure 3.3: Parts of Lists" /> |
-| **Figure 3.3: Parts of Lists** |
+| **図3.3: リストの部分** |
 
-When two mathematically equal numbers are read (or computed) in two places, they may or may not be the same, depending on what the designers of your implementation felt was more efficient.
-In most systems, two equal fixnums will be identical, but equal numbers of other types will not (except possibly short floats).
-Common Lisp provides four equality predicates of increasing generality.
-All four begin with the letters `eq`, with more letters meaning the predicate considers more objects to be equal.
-The simplest predicate is `eq`, which tests for the exact same object.
-Next, `eql` tests for objects that are either `eq` or are equivalent numbers.
-`equal` tests for objects that are either `eql` or are lists or strings with `eql` elements.
-Finally, `equalp` is like `equal` except it also matches upper- and lowercase characters and numbers of different types.
-The following table summarizes the results of applying each of the four predicates to various values of *x* and *y*.
-The `?` value means that the result depends on your implementation: two integers that are `eql` may or may not be `eq`.
+数学的に等しい2つの数が2か所で読まれた（あるいは計算された）とき、それらが同じものになるかどうかは、処理系の設計者がどちらを効率的と考えたかによります。
+たいていの処理系では、等しい2つの fixnum は同一になりますが、他の型の等しい数はそうなりません（short float は例外かもしれません）。
+Common Lispは、一般性が増していく4つの等価性の述語を用意しています。
+4つとも `eq` という文字で始まり、文字が多いほど、より多くのオブジェクトを等しいとみなします。
+最も単純な述語は `eq` で、まったく同一のオブジェクトかを調べます。
+次の `eql` は、`eq` であるか、等価な数であるオブジェクトを調べます。
+`equal` は、`eql` であるか、要素が `eql` であるリストや文字列を調べます。
+最後の `equalp` は `equal` と同様ですが、大文字と小文字、および型の異なる数も合致とみなします。
+次の表は、4つの述語をさまざまな *x* と *y* の値に適用した結果をまとめたものです。
+`?` は結果が処理系に依存することを意味します。`eql` である2つの整数が `eq` になるかどうかは処理系次第です。
 
 | *x*     | *y*     | `eq`  | `eql` | `equal` | `equalp` |
 |---------|---------|-------|-------|---------|----------|
@@ -1008,48 +1008,48 @@ The `?` value means that the result depends on your implementation: two integers
 | `'0`    | `'0.0`  | `nil` | `nil` | `nil`   | `T`      |
 | `'0`    | `'1`    | `nil` | `nil` | `nil`   | `nil`    |
 
-In addition, there are specialized equality predicates such as =, `tree-equal, char-equal,` and `string-equal,` which compare numbers, trees, characters, and strings, respectively.
+このほかに、`=`、`tree-equal`、`char-equal`、`string-equal` といった専用の等価性の述語があり、それぞれ数・木・文字・文字列を比べます。
 
-## 3.5 Functions on Sequences
+## 3.5 列を扱う関数
 
-Common Lisp is in a transitional position halfway between the Lisps of the past and the Lisps of the future.
-Nowhere is that more apparent than in the sequence functions.
-The earliest Lisps dealt only with symbols, numbers, and lists, and provided list functions like `append` and `length.`
-More modern Lisps added support for vectors, strings, and other data types, and introduced the term *sequence* to refer to both vectors and lists.
-(A vector is a one-dimensional array.
-It can be represented more compactly than a list, because there is no need to store the `rest` pointers.
-It is also more efficient to get at the *n*th element of a vector, because there is no need to follow a chain of pointers.)
-Modern Lisps also support strings that are vectors of characters, and hence also a subtype of sequence.
+Common Lispは、過去のLispと未来のLispのちょうど中間という過渡的な位置にいます。
+それが最もはっきり現れているのが列の関数です。
+最初期のLispはシンボル・数・リストだけを扱い、`append` や `length` といったリストの関数を備えていました。
+より新しいLispはベクタ・文字列その他のデータ型への対応を加え、ベクタとリストの両方を指す*列*という語を導入しました。
+（ベクタとは一次元の配列です。
+`rest` のポインタを格納する必要がないので、リストより小さく表せます。
+またポインタの鎖をたどる必要がないので、*n* 番目の要素を取り出すのも効率的です。）
+新しいLispはまた、文字のベクタである文字列にも対応しており、これも列の部分型です。
 
-With the new data types came the problem of naming functions that operated on them.
-In some cases, Common Lisp chose to extend an old function: `length` can apply to vectors as well as lists.
-In other cases, the old names were reserved for the list functions, and new names were invented for generic sequence functions.
-For example, `append` and `mapcar` only work on lists, but `concatenate` and `map` work on any kind of sequence.
-In still other cases, new functions were invented for specific data types.
-For example, there are seven functions to pick the nth element out of a sequence.
-The most general is `elt`, which works on any kind of sequence, but there are specific functions for lists, arrays, strings, bit vectors, simple bit vectors, and simple vectors.
-Confusingly, `nth` is the only one that takes the index as the first argument:
+新しいデータ型とともに、それを扱う関数の命名という問題が生じました。
+場合によってCommon Lispは古い関数を拡張する道を選びました。`length` はリストにもベクタにも適用できます。
+別の場合には、古い名前はリストの関数のために残し、汎用の列の関数には新しい名前が考案されました。
+たとえば `append` と `mapcar` はリストにしか働きませんが、`concatenate` と `map` はどんな列にも働きます。
+さらに別の場合には、特定のデータ型のために新しい関数が考案されました。
+たとえば列からn番目の要素を取り出す関数は7つあります。
+最も汎用なのはどんな列にも働く `elt` ですが、リスト・配列・文字列・ビットベクタ・単純ビットベクタ・単純ベクタそれぞれに専用の関数もあります。
+紛らわしいことに、添字を第1引数にとるのは `nth` だけです。
 
-* `(nth` *n list*)
-* `(elt` *sequence n*)
-* `(aref` *array n*)
-* `(char` *string n*)
-* `(bit` *bit vector n*)
-* `(sbit` *simple-bit vector n*)
-* `(svref` *simple-vector n*)
+* `(nth` *n リスト*)
+* `(elt` *列 n*)
+* `(aref` *配列 n*)
+* `(char` *文字列 n*)
+* `(bit` *ビットベクタ n*)
+* `(sbit` *単純ビットベクタ n*)
+* `(svref` *単純ベクタ n*)
 
-The most important sequence functions are listed elsewhere in this chapter, depending on their particular purpose.
+重要な列の関数は、それぞれの用途に応じてこの章の別の箇所に挙げてあります。
 
-## 3.6 Functions for Maintaining Tables
+## 3.6 表を管理する関数
 
-Lisp lists can be used to represent a one-dimensional sequence of objects.
-Because they are so versatile, they have been put to other purposes, such as representing tables of information.
-The *association list* is a type of list used to implement tables.
-An association list is a list of dotted pairs, where each pair consists of a *key* and a *value.* Together, the list of pairs form a table: given a key, we can retrieve the corresponding value from the table, or verify that there is no such key stored in the table.
-Here's an example for looking up the names of states by their two-letter abbreviation.
-The function `assoc` is used.
-It returns the key/value pair (if there is one).
-To get the value, we just take the `cdr` of the result returned by `assoc`.
+Lispのリストは、オブジェクトの一次元の並びを表すのに使えます。
+きわめて融通が利くので、情報の表を表すなど他の用途にも使われてきました。
+*連想リスト*は、表を実装するのに使われるリストの一種です。
+連想リストはドット対のリストで、各対は*キー*と*値*からなります。この対の並びが全体として表をなします。キーを与えれば、対応する値を表から取り出したり、そのキーが表にないことを確かめたりできます。
+2文字の略号から州の名前を引く例を示します。
+`assoc` という関数を使います。
+これはキーと値の対を（あれば）返します。
+値を得るには、`assoc` が返した結果の `cdr` を取るだけです。
 
 ```lisp
 (setf state-table
@@ -1062,20 +1062,20 @@ To get the value, we just take the `cdr` of the result returned by `assoc`.
 > (assoc 'TX state-table) => NIL
 ```
 
-If we want to search the table by value rather than by key, we can use rassoc:
+キーではなく値で表を探したいなら、rassoc が使えます。
 
 ```lisp
 > (rassoc 'Arizona state-table) => (AZ . ARIZONA)
 > (car (rassoc 'Arizona state-table)) => AZ
 ```
 
-Managing a table with `assoc` is simple, but there is one drawback: we have to search through the whole list one element at a time.
-If the list is very long, this may take a while.
+`assoc` による表の管理は単純ですが、欠点が1つあります。リスト全体を1要素ずつ探さねばならないのです。
+リストがとても長ければ、時間がかかるかもしれません。
 
-Another way to manage tables is with *hash tables.*
-These are designed to handle large amounts of data efficiently but have a degree of overhead that can make them inappropriate for small tables.
-The function `gethash` works much like `get` - it takes two arguments, a key and a table.
-The table itself is initialized with a call to `make-hash-table` and modified with a `setf` of `gethash`:
+表を管理するもう1つの方法が*ハッシュ表*です。
+これは大量のデータを効率よく扱うよう設計されていますが、それなりの間接費がかかるので、小さな表には向かないことがあります。
+関数 `gethash` は `get` によく似た働きをします。キーと表の2つを引数にとります。
+表そのものは `make-hash-table` の呼び出しで初期化し、`gethash` に対する `setf` で書き換えます。
 
 ```lisp
 (setf table (make-hash-table))
@@ -1086,40 +1086,40 @@ The table itself is initialized with a call to `make-hash-table` and modified wi
 (setf (gethash 'AR table) 'Arkansas)
 ```
 
-Here we retrieve values from the table:
+ここでは表から値を取り出します。
 
 ```lisp
 > (gethash 'AK table) => ALASKA
 > (gethash 'TX table) => NIL
 ```
 
-The function `remhash` removes a key/value pair from a hash table, `clrhash` removes all pairs, and `maphash` can be used to map over the key/value pairs.
-The keys to hash tables are not restricted; they can be any Lisp object.
-There are many more details on the implementation of hash tables in Common Lisp, and an extensive literature on their theory.
+関数 `remhash` はハッシュ表からキーと値の対を取り除き、`clrhash` はすべての対を取り除きます。`maphash` はキーと値の対にわたって写像するのに使えます。
+ハッシュ表のキーに制限はなく、どんなLispオブジェクトでも構いません。
+Common Lispにおけるハッシュ表の実装には、さらに多くの細部があり、その理論についても膨大な文献があります。
 
-A third way to represent table is with *property lists.*
-A property list is a list of alternating key/value pairs.
-Property lists (sometimes called p-lists or plists) and association lists (sometimes called a-lists or alists) are similar:
+表を表す第三の方法が*属性リスト*です。
+属性リストは、キーと値が交互に並んだリストです。
+属性リスト（p-list、plist とも呼ばれます）と連想リスト（a-list、alist とも呼ばれます）は似ています。
 
 `a-list`: ((*key*<sub>1</sub> . *val*<sub>1</sub>) (*key*<sub>2</sub> .
 *val*<sub>2</sub>) ... (*key<sub>n</sub> . val<sub>n</sub>*))
 
 `p-list`: (*key*<sub>1</sub> *val*<sub>1</sub> *key*<sub>2</sub> *val*<sub>2</sub> ... *key<sub>n</sub> val<sub>n</sub>*)
 
-Given this representation, there is little to choose between a-lists and p-lists.
-They are slightly different permutations of the same information.
-The difference is in how they are normally used.
-Every symbol has a property list associated with it.
-That means we can associate a property/value pair directly with a symbol.
-Most programs use only a few different properties but have many instances of property/value pairs for each property.
-Thus, each symbol's p-list will likely be short.
-In our example, we are only interested in one property: the state associated with each abbreviation.
-That means that the property lists will be very short indeed: one property for each abbreviation, instead of a list of 50 pairs in the association list implementation.
+この表現だけを見れば、a-list と p-list にほとんど優劣はありません。
+同じ情報の、少し並べ方が違うだけのものです。
+違いは、ふだんどう使われるかにあります。
+どのシンボルにも属性リストが結び付いています。
+つまり、属性と値の対をシンボルに直接結び付けられるということです。
+たいていのプログラムは異なる属性を少ししか使いませんが、各属性について属性と値の対を数多く持ちます。
+ですから各シンボルの p-list はおそらく短くなります。
+この例で関心があるのは1つの属性、各略号に結び付いた州だけです。
+つまり属性リストは実に短くなります。連想リストによる実装では50組のリストだったものが、略号ごとに属性1つで済みます。
 
-Property values are retrieved with the function get, which takes two arguments: the first is a symbol for which we are seeking information, and the second is the property of that symbol that we are interested in.
-get returns the value of that property, if one has been stored.
-Property/value pairs can be stored under a symbol with a `setf` form.
-A table would be built as follows:
+属性の値は get という関数で取り出します。引数は2つで、第1引数は情報を求めているシンボル、第2引数はそのシンボルの、関心のある属性です。
+get は、その属性に値が格納されていればそれを返します。
+属性と値の対は、`setf` の形でシンボルのもとに格納できます。
+表は次のように作られます。
 
 ```lisp
 (setf (get 'AL 'state) 'Alabama)
@@ -1128,24 +1128,24 @@ A table would be built as follows:
 (setf (get 'AR 'state) 'Arkansas)
 ```
 
-Now we can retrieve values with get:
+これで get を使って値を取り出せます。
 
 ```lisp
 > (get 'AK 'state) => ALASKA
 > (get 'TX 'state) => NIL
 ```
 
-This will be faster because we can go immediately from a symbol to its lone property value, regardless of the number of symbols that have properties.
-However, if a given symbol has more than one property, then we still have to search linearly through the property list.
-As Abraham Lincoln might have said, you can make some of the table lookups faster some of the time, but you can't make all the table lookups faster all of the time.
-Notice that there is no equivalent of rassoc using property lists; if you want to get from a state to its abbreviation, you could store the abbreviation under a property of the state, but that would be a separate `setf` form, as in:
+これは速くなります。属性を持つシンボルの数に関わりなく、シンボルからその唯一の属性値へ直ちに行けるからです。
+ただし、あるシンボルが複数の属性を持つ場合は、やはり属性リストを線形に探す必要があります。
+リンカーンならこう言ったかもしれません。表の参照のいくつかを、ときに速くすることはできる。しかし表の参照のすべてを、常に速くすることはできない、と。
+属性リストには rassoc に当たるものがないことに注意してください。州から略号を得たいなら、州の属性として略号を格納できますが、それは次のように別の `setf` の形になります。
 
 ```lisp
 (setf (get 'Arizona 'abbrev) 'AZ)
 ```
 
-In fact, when source, property, and value are all symbols, there are quite a few possibilities for how to use properties.
-We could have mimicked the a-list approach, and listed all the properties under a single symbol, using setf on the function `symbol-plist` (which gives a symbol's complete property list):
+実のところ、元・属性・値がすべてシンボルの場合、属性の使い方にはかなり多くの可能性があります。
+a-list のやり方をまねて、（シンボルの属性リスト全体を返す）`symbol-plist` に setf を使い、すべての属性を1つのシンボルのもとに並べることもできました。
 
 ```lisp
 (setf (symbol-plist 'state-table)
@@ -1154,20 +1154,20 @@ We could have mimicked the a-list approach, and listed all the properties under 
 > (get 'state-table 'Alaska) => NIL
 ```
 
-Property lists have a long history in Lisp, but they are falling out of favor as new alternatives such as hash tables are introduced.
-There are two main reasons why property lists are avoided.
-First, because symbols and their property lists are global, it is easy to get conflicts when trying to put together two programs that use property lists.
-If two programs use the same property for different purposes, they cannot be used together.
-Even if two programs use *different* properties on the same symbols, they will slow each other down.
-Second, property lists are messy.
-There is no way to remove quickly every element of a table implemented with property lists.
-In contrast, this can be done trivially with `clrhash` on hash tables, or by setting an association list to nil.
+属性リストにはLispにおける長い歴史がありますが、ハッシュ表のような新しい選択肢が現れるにつれて使われなくなりつつあります。
+属性リストが避けられる主な理由は2つあります。
+第一に、シンボルとその属性リストは大域的なので、属性リストを使う2つのプログラムを組み合わせようとすると衝突が起きやすいのです。
+2つのプログラムが同じ属性を違う目的に使っていたら、いっしょには使えません。
+同じシンボルに*異なる*属性を使っていたとしても、互いに足を引っ張り合って遅くなります。
+第二に、属性リストは後始末が面倒です。
+属性リストで実装した表から、全要素を手早く取り除く方法がありません。
+これに対しハッシュ表なら `clrhash` で、連想リストなら nil を設定するだけで造作もなくできます。
 
-## 3.7 Functions on Trees
+## 3.7 木を扱う関数
 
-Many Common Lisp functions treat the expression `((a b) ((c)) (d e))` as a sequence of three elements, but there are a few functions that treat it as a tree with five non-null leaves.
-The function `copy-tree` creates a copy of a tree, and `tree-equal` tests if two trees are equal by traversing cons cells, but not other complex data like vectors or strings.
-In that respect, `tree-equal` is similar to `equal`, but `tree-equal` is more powerful because it allows a `:test keyword`:
+Common Lispの多くの関数は式 `((a b) ((c)) (d e))` を3要素の列として扱いますが、これを非nullの葉を5つ持つ木として扱う関数もいくつかあります。
+関数 `copy-tree` は木の複製を作り、`tree-equal` はコンスセルをたどって2つの木が等しいかを調べます。ただしベクタや文字列のような他の複雑なデータの中はたどりません。
+その点で `tree-equal` は `equal` に似ていますが、`:test` キーワードを受け付けるぶん強力です。
 
 ```lisp
 > (setf tree '((a b) ((c)) (d e)))
@@ -1184,17 +1184,17 @@ In that respect, `tree-equal` is similar to `equal`, but `tree-equal` is more po
 > (same-shape-tree tree '((1 2) (3) (4 5))) => NIL
 ```
 
-[Figure 3.4](#fig-03-04) shows the tree `((a b) ((c)) (d e))` as a cons cell diagram.
+[図3.4](#fig-03-04) は木 `((a b) ((c)) (d e))` をコンスセルの図で示したものです。
 
 | <a id="fig-03-04"></a>[]() |
 |---|
 | <img src="images/chapter3/fig-03-04.svg" onerror="this.src='images/chapter3/fig-03-04.png'; this.onerror=null;" alt="Figure 3.4: Cons Cell Diagram of a Tree" /> |
-| **Figure 3.4: Cons Cell Diagram of a Tree** |
+| **図3.4: 木のコンスセル図** |
 
-There are also two functions for substituting a new expression for an old one anywhere within a tree.
-`subst` substitutes a single value for another, while `sublis` takes a list of substitutions in the form of an association list of (*old . new*) pairs.
-Note that the order of old and new in the a-list for `sublis` is reversed from the order of arguments to `subst`.
-The name `sublis` is uncharacteristically short and confusing; a better name would be `subst-list`.
+木の中のどこにある古い式でも新しい式に置き換える関数も2つあります。
+`subst` はある値を別の値に置き換え、`sublis` は (*旧 . 新*) の対からなる連想リストの形で置換の並びをとります。
+`sublis` の a-list における旧と新の順序が、`subst` の引数の順序と逆になっていることに注意してください。
+`sublis` という名前は、この言語には珍しく短くて紛らわしいものです。`subst-list` のほうがよい名前でしょう。
 
 ```lisp
 > (subst 'new 'old '(old ((very old)))) => (NEW ((VERY NEW)))
@@ -1213,35 +1213,35 @@ The name `sublis` is uncharacteristically short and confusing; a better name wou
 (BONJOUR MON AMI - COMMENT VA TU TODAY?)
 ```
 
-## 3.8 Functions on Numbers
+## 3.8 数を扱う関数
 
-The most commonly used functions on numbers are listed here.
-There are quite a few other numeric functions that have been omitted.
+数を扱うよく使われる関数をここに挙げます。
+ここに載せていない数値関数もかなりあります。
 
 | []()           |          |                                                                |
 |----------------|----------|----------------------------------------------------------------|
-| `(+ 4 2)`      | => `6`   | add                                                            |
-| `(- 4 2)`      | => `2`   | subtract                                                       |
-| `(* 4 2)`      | => `8`   | multiply                                                       |
-| `(/ 4 2)`      | => `2`   | divide                                                         |
-| `(> 100 99)`   | => `t`   | greater than (also `>=`, greater than or equal to)             |
-| `(= 100 100)`  | => `t`   | equal (also `/=`, not equal)                                   |
-| `(< 99 100)`   | => `t`   | less than (also `<=`, less than or equal to)                   |
-| `(random 100)` | => `42`  | random integer from 0 to 99                                    |
-| `(expt 4 2)`   | => `16`  | exponentiation (also exp, *e<sup>x</sup>* and `log`)           |
-| `(sin pi)`     | => `0.0` | sine function (also `cos`, `tan,` etc.)                        |
-| `(asin 0)`     | => `0.0` | arcsine or sin<sup>-1</sup> function (also `acos, atan`, etc.) |
-| `(min 2 3 4)`  | => `2`   | minimum (also `max`)                                           |
-| `(abs -3)`     | => `3`   | absolute value                                                 |
-| `(sqrt 4)`     | => `2`   | square root                                                    |
-| `(round 4.1)`  | => `4`   | round off (also `truncate, floor, ceiling`)                    |
-| `(rem 11 5)`   | => `1`   | remainder (also `mod`)                                         |
+| `(+ 4 2)`      | => `6`   | 加算                                                           |
+| `(- 4 2)`      | => `2`   | 減算                                                           |
+| `(* 4 2)`      | => `8`   | 乗算                                                           |
+| `(/ 4 2)`      | => `2`   | 除算                                                           |
+| `(> 100 99)`   | => `t`   | より大きい（`>=` 以上もある）                                  |
+| `(= 100 100)`  | => `t`   | 等しい（`/=` 等しくない、もある）                              |
+| `(< 99 100)`   | => `t`   | より小さい（`<=` 以下もある）                                  |
+| `(random 100)` | => `42`  | 0から99までの無作為な整数                                      |
+| `(expt 4 2)`   | => `16`  | べき乗（exp、*e<sup>x</sup>*、`log` もある）                   |
+| `(sin pi)`     | => `0.0` | 正弦関数（`cos`、`tan` などもある）                            |
+| `(asin 0)`     | => `0.0` | 逆正弦、すなわち sin<sup>-1</sup>（`acos`、`atan` などもある） |
+| `(min 2 3 4)`  | => `2`   | 最小値（`max` もある）                                         |
+| `(abs -3)`     | => `3`   | 絶対値                                                         |
+| `(sqrt 4)`     | => `2`   | 平方根                                                         |
+| `(round 4.1)`  | => `4`   | 四捨五入（`truncate`、`floor`、`ceiling` もある）              |
+| `(rem 11 5)`   | => `1`   | 剰余（`mod` もある）                                           |
 
-## 3.9 Functions on Sets
+## 3.9 集合を扱う関数
 
-One of the important uses of lists is to represent sets.
-Common Lisp provides functions that treat lists in just that way.
-For example, to see what elements the sets *r* = {*a, b, c, d*} and *s* = {*c, d, e*} have in common, we could use:
+リストの重要な使い道の1つが、集合を表すことです。
+Common Lispは、リストをまさにそのように扱う関数を備えています。
+たとえば集合 *r* = {*a, b, c, d*} と *s* = {*c, d, e*} に共通する要素を調べるには、次のようにします。
 
 ```lisp
 > (setf r '(a b c d)) => (A B C D)
@@ -1249,32 +1249,32 @@ For example, to see what elements the sets *r* = {*a, b, c, d*} and *s* = {*c, d
 > (intersection r s) => (C D)
 ```
 
-This implementation returned (`C D`) as the answer, but another might return (`D C`).
-They are equivalent sets, so either is valid, and your program should not depend on the order of elements in the result.
-Here are the main functions on sets:
+この処理系は答えとして (`C D`) を返しましたが、別の処理系なら (`D C`) を返すかもしれません。
+どちらも等価な集合なので両方とも正しく、プログラムが結果の要素の順序に依存してはいけません。
+集合を扱う主な関数を挙げます。
 
 | []()                   |                  |                                               |
 |------------------------|------------------|-----------------------------------------------|
-| `(intersection r s)`   | => `(c d)`       | find common elements of two sets              |
-| `(union r s)`          | => `(a b c d e)` | find all elements in either of two sets       |
-| `(set-difference r s)` | => `(a b)`       | find elements in one but not other set        |
-| `(member 'd r)`        | => `(d)`         | check if an element is a member of a set      |
-| `(subsetp s r)`        | => `nil`         | see if all elements of one set are in another |
-| `(adjoin 'b s`)        | => `(b c d e)`   | add an element to a set                       |
-| `(adjoin 'c s)`        | => `(c d e)`     | ... but don't add duplicates                  |
+| `(intersection r s)`   | => `(c d)`       | 2つの集合に共通する要素を求める               |
+| `(union r s)`          | => `(a b c d e)` | 2つの集合のいずれかにある要素をすべて求める   |
+| `(set-difference r s)` | => `(a b)`       | 一方にあって他方にない要素を求める            |
+| `(member 'd r)`        | => `(d)`         | 要素が集合に属するかを調べる                  |
+| `(subsetp s r)`        | => `nil`         | 一方の全要素が他方に含まれるかを調べる        |
+| `(adjoin 'b s`)        | => `(b c d e)`   | 集合に要素を加える                            |
+| `(adjoin 'c s)`        | => `(c d e)`     | ... ただし重複は加えない                      |
 
-It is also possible to represent a set with a sequence of bits, given a particular universe of discourse.
-For example, if every set we are interested in must be a subset of (`a b c d e`), then we can use the bit sequence 11110 to represent (`a b c d`), 00000 to represent the empty set, and 11001 to represent (`a b e`).
-The bit sequence can be represented in Common Lisp as a bit vector, or as an integer in binary notation.
-For example, (`a b e`) would be the bit vector `#*11001` or the integer 25, which can also be written as `#b11001`.
+論議領域を定めておけば、集合をビットの並びで表すこともできます。
+たとえば関心のある集合がすべて (`a b c d e`) の部分集合なら、ビット列 11110 で (`a b c d`) を、00000 で空集合を、11001 で (`a b e`) を表せます。
+ビット列はCommon Lispでは、ビットベクタとしても、二進表記の整数としても表せます。
+たとえば (`a b e`) はビットベクタ `#*11001` か、整数25（`#b11001` とも書けます）になります。
 
-The advantage of using bit sequences is that it takes less space to encode a set, assuming a small universe.
-Computation will be faster, because the computer's underlying instruction set will typically process 32 elements at a time.
+ビット列を使う利点は、論議領域が小さければ集合を符号化する領域が少なくて済むことです。
+計算も速くなります。計算機の命令セットは、たいてい一度に32要素を処理するからです。
 
-Common Lisp provides a full complement of functions on both bit vectors and integers.
-The following table lists some, their correspondence to the list functions.
+Common Lispはビットベクタと整数の両方について、ひととおりの関数を備えています。
+次の表にいくつかを、リストの関数との対応とともに挙げます。
 
-| `lists`          | `integers` | `bit vectors` |
+| `リスト`         | `整数`     | `ビットベクタ` |
 |------------------|------------|---------------|
 | `intersection`   | `logand`   | `bit-and`     |
 | `union`          | `logior`   | `bit-ior`     |
@@ -1282,7 +1282,7 @@ The following table lists some, their correspondence to the list functions.
 | `member`         | `logbitp`  | `bit`         |
 | `length`         | `logcount` |               |
 
-For example,
+たとえば次のようになります。
 
 ```lisp
 (intersection '(a b c d) '(a b e)) =>  (A B)
@@ -1290,22 +1290,22 @@ For example,
 (logand       #b11110    #b11001)  =>  24 = #b11000
 ```
 
-## 3.10 Destructive Functions
+## 3.10 破壊的な関数
 
-In mathematics, a function is something that computes an output value given some input arguments.
-Functions do not "do" anything, they just compute results.
-For example, if I tell you that *x* = 4 and *y* = 5 and ask you to apply the function "plus" to *x* and *y,* I expect you to tell me 9.
-If I then ask, "Now what is the value of *x*?" it would be surprising if *x* had changed.
-In mathematics, applying an operator to *x* can have no effect on the value of *x.*
+数学において関数とは、入力の引数を与えられて出力の値を計算するもののことです。
+関数は何かを「する」のではなく、ただ結果を計算します。
+たとえば *x* = 4、*y* = 5 と伝えて、*x* と *y* に「plus」という関数を適用してくださいと頼めば、9と答えてもらえるはずです。
+そのあと「では *x* の値は」と尋ねて、*x* が変わっていたら驚くでしょう。
+数学では、*x* に演算子を適用しても *x* の値には何の影響もありえません。
 
-In Lisp, some functions *are* able to take effect beyond just computing the result.
+Lispでは、結果を計算するだけにとどまらない働きをする関数が*あります*。
 <a id="tfn03-2"></a>
-These "functions" are not functions in the mathematical sense,<sup>[2](#fn03-2)</sup> and in other languages they are known as "procedures."
-Of course, most of the Lisp functions *are* true mathematical functions, but the few that are not can cause great problems.
-They can also be quite useful in certain situations.
-For both reasons, they are worth knowing about.
+こうした「関数」は数学的な意味での関数ではなく、<sup>[2](#fn03-2)</sup> 他の言語では「手続き」と呼ばれます。
+もちろんLispの関数の大半は本物の数学的な関数ですが、そうでない少数のものが大きな問題を引き起こしうるのです。
+一方で、ある種の場面では実に役に立ちます。
+どちらの理由からも、知っておく値打ちがあります。
 
-Consider the following:
+次を考えてみましょう。
 
 ```lisp
 > (setf x '(a b c)) => (A B C)
@@ -1313,8 +1313,8 @@ Consider the following:
 > (append x y) => (A B C 1 2 3)
 ```
 
-`append` is a pure function, so after evaluating the call to `append,` we can rightfully expect that `x` and `y` retain their values.
-Now consider this:
+`append` は純粋な関数なので、`append` の呼び出しを評価したあとも `x` と `y` が値を保っていると当然に期待できます。
+では次はどうでしょう。
 
 ```lisp
 > (nconc x y) => (A B C 1 2 3)
@@ -1322,74 +1322,74 @@ Now consider this:
 > y => (1 2 3)
 ```
 
-The function `nconc` computes the same result as `append,` but it has the side effect of altering its first argument.
-It is called a *destructive* function, because it destroys existing structures, replacing them with new ones.
-This means that there is quite a conceptual load on the programmer who dares to use `nconc`.
-He or she must be aware that the first argument may be altered, and plan accordingly.
-This is far more complicated than the case with nondestructive functions, where the programmer need worry only about the results of a function call.
+関数 `nconc` は `append` と同じ結果を計算しますが、第1引数を書き換えるという副作用を持ちます。
+これは*破壊的*な関数と呼ばれます。既存の構造を壊して新しいものに置き換えるからです。
+つまり、あえて `nconc` を使うプログラマには、かなりの概念的な負担がかかるということです。
+第1引数が書き換わりうることを承知し、それを見込んで組み立てねばなりません。
+これは、関数呼び出しの結果だけを気にすればよい非破壊的な関数の場合より、はるかに込み入っています。
 
-The advantage of `nconc` is that it doesn't use any storage.
-While `append` must make a complete copy of `x` and then have that copy end with `y`, `nconc` does not need to copy anything.
-Instead, it just changes the rest field of the last element of `x` to point to `y.`
-So use destructive functions when you need to conserve storage, but be aware of the consequences.
+`nconc` の利点は、記憶領域をまったく使わないことです。
+`append` は `x` を丸ごと複製し、その複製の末尾を `y` にせねばなりませんが、`nconc` は何も複製する必要がありません。
+代わりに `x` の最後の要素の rest の欄を `y` を指すように変えるだけです。
+ですから記憶領域を節約する必要があるときは破壊的な関数を使ってください。ただし、その帰結は承知のうえで。
 
-Besides `nconc`, many of the destructive functions have names that start with `n`, including `nreverse, nintersection, nunion, nset-difference`, and `nsubst`.
-An important exception is `delete`, which is the name used for the destructive version of `remove`.
-Of course, the `setf` special form can also be used to alter structures, but it is the destructive functions that are most dangerous, because it is easier to overlook their effects.
+`nconc` のほかにも、破壊的な関数の多くは `n` で始まる名前を持ちます。`nreverse`、`nintersection`、`nunion`、`nset-difference`、`nsubst` などです。
+重要な例外が `delete` で、これは `remove` の破壊的な版に付けられた名前です。
+もちろん特殊形式 `setf` も構造を書き換えるのに使えますが、最も危ういのは破壊的な関数です。その働きは見落としやすいからです。
 
-&#9635; **Exercise 3.5 [h]** (Exercise in altering structure.)
-Write a program that will play the role of the guesser in the game Twenty Questions.
-The user of the program will have in mind any type of thing.
-The program will ask questions of the user, which must be answered yes or no, or "it" when the program has guessed it.
-If the program runs out of guesses, it gives up and asks the user what "it" was.
-At first the program will not play well, but each time it plays, it will remember the user's replies and use them for subsequent guesses.
+&#9635; **練習問題 3.5 [h]**（構造の書き換えの練習）
+「二十の質問」というゲームで、当てる側を務めるプログラムを書け。
+プログラムの利用者は、どんな種類のものでも1つ思い浮かべる。
+プログラムは利用者に質問し、利用者は yes か no で答える。プログラムが当てたときは「it」と答える。
+当てる手がなくなったら、プログラムは降参して「それ」が何だったかを利用者に尋ねる。
+最初のうちプログラムはうまく当てられないが、遊ぶたびに利用者の答えを覚え、以降の推測に使う。
 
-## 3.11 Overview of Data Types
+## 3.11 データ型の概観
 
-This chapter has been organized around functions, with similar functions grouped together.
-But there is another way of organizing the Common Lisp world: by considering the different data types.
-This is useful for two reasons.
-First, it gives an alternative way of seeing the variety of available functionality.
-Second, the data types themselves are objects in the Common Lisp language, and as we shall see, there are functions that manipulate data types.
-These are useful mainly for testing objects (as with the typecase macro) and for making declarations.
+この章は関数を軸に、似た関数をまとめる形で構成してきました。
+しかしCommon Lispの世界を整理するもう1つの見方があります。データ型ごとに考えることです。
+これは2つの理由から役に立ちます。
+第一に、使える機能の広がりを別の角度から見せてくれます。
+第二に、データ型そのものがCommon Lispにおけるオブジェクトであり、のちに見るようにデータ型を操作する関数もあります。
+これらは主に（typecase マクロのように）オブジェクトを調べるときと、宣言を書くときに役立ちます。
 
-Here is a table of the most commonly used data types:
+よく使われるデータ型を表に示します。
 
-| Type         | Example        | Explanation                                                |
+| 型           | 例             | 説明                                                       |
 |--------------|----------------|------------------------------------------------------------|
-| `character`  | `#\c`          | A single letter, number, or punctuation mark.              |
-| `number`     | `42`           | The most common numbers are floats and integers.           |
-| `float`      | `3.14159`      | A number with a decimal point.                             |
-| `integer`    | `42`           | A whole number, of either fixed or indefinite size:        |
-| `fixnum`     | `123`          | An integer that fits in a single word of storage.          |
-| `bignum`     | `123456789`    | An integer of unbounded size.                              |
-| `function`   | `#'sin`        | A function can be applied to an argument list.             |
-| `symbol`     | `sin`          | Symbols can name fns and vars, and are themselves objects. |
-| `null`       | `nil`          | The object `nil` is the only object of type null.          |
-| `keyword`    | `:key`         | Keywords are a subtype of symbol.                          |
-| `sequence`   | `(a b c)`      | Sequences include lists and vectors.                       |
-| `list`       | `(a b c)`      | A list is either a `cons` or `null`.                       |
-| `vector`     | `#(a b c)`     | A vector is a subtype of sequence.                         |
-| `cons`       | `(a b c)`      | A cons is a non-nil list.                                  |
-| `atom`       | `t`            | An atom is anything that is not a cons.                    |
-| `string`     | `"abc"`        | A string is a type of vector of characters.                |
-| `array`      | `#lA(a b c)`   | Arrays include vectors and higher-dimensional arrays.      |
-| `structure`  | `#S(type ...)` | Structures are defined by `defstruct`.                     |
-| `hash-table` | ...            | Hash tables are created by `make-hash-table`.              |
+| `character`  | `#\c`          | 1文字の英字・数字・記号。                                  |
+| `number`     | `42`           | よく使う数は浮動小数点数と整数。                           |
+| `float`      | `3.14159`      | 小数点を持つ数。                                           |
+| `integer`    | `42`           | 整数。大きさは固定でも無制限でもよい。                     |
+| `fixnum`     | `123`          | 記憶の1語に収まる整数。                                    |
+| `bignum`     | `123456789`    | 大きさに上限のない整数。                                   |
+| `function`   | `#'sin`        | 関数は引数の並びに適用できる。                             |
+| `symbol`     | `sin`          | シンボルは関数や変数を名づけ、それ自体もオブジェクト。     |
+| `null`       | `nil`          | null型のオブジェクトは `nil` ただ1つ。                     |
+| `keyword`    | `:key`         | キーワードはシンボルの部分型。                             |
+| `sequence`   | `(a b c)`      | 列にはリストとベクタが含まれる。                           |
+| `list`       | `(a b c)`      | リストは `cons` か `null` のいずれか。                     |
+| `vector`     | `#(a b c)`     | ベクタは列の部分型。                                       |
+| `cons`       | `(a b c)`      | cons は nil でないリスト。                                 |
+| `atom`       | `t`            | アトムは cons でないものすべて。                           |
+| `string`     | `"abc"`        | 文字列は文字のベクタの一種。                               |
+| `array`      | `#lA(a b c)`   | 配列にはベクタと多次元配列が含まれる。                     |
+| `structure`  | `#S(type ...)` | 構造体は `defstruct` で定義する。                          |
+| `hash-table` | ...            | ハッシュ表は `make-hash-table` で作る。                    |
 
-Almost every data type has a *recognizer predicate* - a function that returns true for only elements of that type.
-In general, a predicate is a function that always returns one of two values: true or false.
-In Lisp, the false value is `nil`, and every other value is considered true, although the most common true value is `t`.
-In most cases, the recognizer predicate's name is composed of the type name followed by `p: characterp` recognizes characters, `numberp` recognizes numbers, and so on.
-For example, `(numberp 3)` returns `t` because 3 is a number, but `(numberp "x")` returns `nil` because `"x"` is a string, not a number.
+ほとんどのデータ型には*判別述語* — その型の要素に対してのみ真を返す関数 — があります。
+一般に述語とは、常に真か偽の2つの値のいずれかを返す関数のことです。
+Lispでは偽の値は `nil` で、それ以外の値はすべて真とみなされます。もっとも、最もよく使われる真の値は `t` です。
+たいていの場合、判別述語の名前は型名のあとに `p` を付けたものです。`characterp` は文字を、`numberp` は数を判別する、という具合です。
+たとえば `(numberp 3)` は3が数なので `t` を返しますが、`(numberp "x")` は `"x"` が数ではなく文字列なので `nil` を返します。
 
-Unfortunately, Common Lisp is not completely regular.
-There are no recognizers for fixnums, bignums, sequences, and structures.
-Two recognizers, `null` and `atom`, do not end in `p.` Also note that there is a hyphen before the `p` in `hash-table-p,` because the type has a hyphen in it.
-In addition, all the recognizers generated by `defstruct` have a hyphen before the `p.`
+あいにくCommon Lispは完全に規則的というわけではありません。
+fixnum、bignum、列、構造体には判別述語がありません。
+`null` と `atom` という2つの判別述語は `p` で終わりません。また `hash-table-p` は型名にハイフンが入っているため、`p` の前にハイフンが付くことにも注意してください。
+さらに、`defstruct` が生成する判別述語はすべて `p` の前にハイフンが付きます。
 
-The function `type-of` returns the type of its argument, and `typep` tests if an object is of a specified type.
-The function `subtypep` tests if one type can be determined to be a subtype of another.
+関数 `type-of` は引数の型を返し、`typep` はオブジェクトが指定した型かを調べます。
+関数 `subtypep` は、ある型が別の型の部分型だと判定できるかを調べます。
 たとえば次のようになります。
 
 ```lisp
@@ -1406,37 +1406,37 @@ The function `subtypep` tests if one type can be determined to be a subtype of a
 > (subtypep 'fixnum 'number) T
 ```
 
-The hierarchy of types is rather complicated in Common Lisp.
-As the prior example shows, there are many different numeric types, and a number like 123 is considered to be of type `fixnum, integer,` and `number.`
-We will see later that it is also of type `rational` and `t.`
+Common Lispの型の階層はかなり込み入っています。
+先の例が示すとおり、数値の型は多くあり、123のような数は `fixnum`、`integer`、`number` のいずれの型でもあるとみなされます。
+のちに見るように、`rational` 型でも `t` 型でもあります。
 
-The type hierarchy forms a graph, not just a tree.
-For example, a vector is both a sequence and an array, although neither array nor sequence are subtypes of each other.
-Similarly, `null` is a subtype of both `symbol` and `list.`
+型の階層は木ではなくグラフをなします。
+たとえばベクタは列でも配列でもありますが、配列と列はどちらも他方の部分型ではありません。
+同様に `null` は `symbol` の部分型でも `list` の部分型でもあります。
 
-The following table shows a number of more specialized data types that are not used as often:
+次の表は、あまり使われない、より専門的なデータ型をいくつか示したものです。
 
-| Type           | Example               | Explanation                                              |
+| 型             | 例                    | 説明                                                     |
 |----------------|-----------------------|----------------------------------------------------------|
-| `t`            | `42`                  | Every object is of type `t.`                             |
-| `nil`          |                       | No object is of type `nil`.                              |
-| `complex`      | `#C(0 1)`             | Imaginary numbers.                                       |
-| `bit`          | `0`                   | Zero or one.                                             |
-| `rational`     | `2/3`                 | Rationals include integers and ratios.                   |
-| `ratio`        | `2/3`                 | Exact fractional numbers.                                |
-| `simple-array` | `#lA(x y)`            | An array that is not displaced or adjustable.            |
-| `readtable`    | `...`                 | A mapping from characters to their meanings to read.     |
-| `package`      | `...`                 | A collection of symbols that form a module.              |
-| `pathname`     | `#P"/usr/spool/mail"` | A file or directory name.                                |
-| `stream`       | `...`                 | A pointer to an open file; used for reading or printing. |
-| `random-state` | `...`                 | A state used as a seed by `random.`                      |
+| `t`            | `42`                  | あらゆるオブジェクトが `t` 型である。                    |
+| `nil`          |                       | `nil` 型のオブジェクトは存在しない。                     |
+| `complex`      | `#C(0 1)`             | 複素数。                                                 |
+| `bit`          | `0`                   | 0か1。                                                   |
+| `rational`     | `2/3`                 | 有理数には整数と比が含まれる。                           |
+| `ratio`        | `2/3`                 | 厳密な分数。                                             |
+| `simple-array` | `#lA(x y)`            | ずらしも大きさ変更もできない配列。                       |
+| `readtable`    | `...`                 | 文字から、読み取り時の意味への対応づけ。                 |
+| `package`      | `...`                 | 1つの部品をなすシンボルの集まり。                        |
+| `pathname`     | `#P"/usr/spool/mail"` | ファイルやディレクトリの名前。                           |
+| `stream`       | `...`                 | 開いたファイルへのポインタ。読み書きに使う。             |
+| `random-state` | `...`                 | `random` が種として使う状態。                            |
 
-In addition, there are even more specialized types, such as `short-float`, `compiled-function`, and `bit-vector`.
-It is also possible to construct more exact types, such as (`vector (integer 0 3) 100`), which represents a vector of 100 elements, each of which is an integer from 0 to 3, inclusive.
-[Section 10.1](chapter10.md#s0010) gives more information on types and their use.
+さらに `short-float`、`compiled-function`、`bit-vector` といった、いっそう専門的な型もあります。
+(`vector (integer 0 3) 100`) のように、より厳密な型を組み立てることもできます。これは各要素が0以上3以下の整数である、100要素のベクタを表します。
+[10.1節](chapter10.md#s0010)で型とその使い方をさらに詳しく述べます。
 
-While almost every type has a predicate, it is also true that there are predicates that are not type recognizers but rather recognize some more general condition.
-For example, `oddp` is true only of odd integers, and `string-greaterp` is true if one string is alphabetically greater than another.
+ほとんどの型に述語がある一方で、型の判別ではなく、もっと一般的な条件を判定する述語もあります。
+たとえば `oddp` は奇数の整数に対してのみ真になり、`string-greaterp` は一方の文字列が他方よりアルファベット順で後ろにあれば真になります。
 
 ## 3.12 Input/Output
 
