@@ -224,6 +224,28 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | alias / synonym | 別名／同義語 | 元のELIZAの機構 |
 | belief model | 信念のモデル | PARRYの文脈 |
 
+### 第6章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| dispatch function | 振り分け関数 | 表を引いてデータ駆動の関数を呼ぶ |
+| state space | 状態空間 | |
+| successor | 後継 | 探索で次に到達しうる状態 |
+| nondeterministic | 非決定的 | |
+| fringe | 縁 | 探索済みの木の外周 |
+| depth-first / breadth-first search | 深さ優先／幅優先探索 | 定訳 |
+| best-first search | 最良優先探索 | |
+| beam search / beam width | ビーム探索／ビーム幅 | |
+| hill-climbing | 山登り法 | ビーム幅1の探索 |
+| local maximum | 局所最大 | |
+| iterative deepening / widening | 反復深化／反復幅広げ | 後者は原著者の造語 |
+| A\* search | A\*探索 | |
+| non-admissible heuristic search | 許容的でない発見的探索 | 最良解を保証しない |
+| cost function | 費用関数 | |
+| combiner function | 組み合わせ関数 | 新旧の状態を統合し順序づける |
+| path | 経路 | 探索の道筋。データ構造名は `path` のまま |
+| overhead | 間接費 | |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -292,8 +314,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter5.md` | 完了 |
-| `chapter6.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter6.md` | 完了 |
+| `chapter7.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証

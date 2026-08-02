@@ -761,8 +761,8 @@ GPSでは、初期状態が目標状態の記述とともに与えられてい�
 では先に図示した15ノードの二分木を深さ優先で探索する様子を示します。
 目標（12）を見つけるのにかかる手間は、幅優先探索とほぼ同じです。
 15を探すならもっとかかり、8ならもっと少なくて済んだでしょう。
-The big difference is in the number of states considered at one time.
-At most, depth-first search considers four at a time; in general it will need to store only *log2n* states to search a *n-node* tree, while breadth-first search needs to store *n/2* states.
+大きな違いは、一度に検討する状態の数です。
+深さ優先探索が一度に検討するのは多くて4つです。一般に *n* ノードの木を探索するのに保持すべき状態は *log2n* 個で済みますが、幅優先探索は *n/2* 個を保持せねばなりません。
 
 ```lisp
 (defun finite-binary-tree (n)
@@ -786,25 +786,25 @@ At most, depth-first search considers four at a time; in general it will need to
 12
 ```
 
-### Guiding the Search
+### 探索を導く
 
-While breadth-first search is more methodical, neither strategy is able to take advantage of any knowledge about the state space.
-They both search blindly.
-In most real applications we will have some estimate of how far a state is from the solution.
-In such cases, we can implement a *best-first search*.
-The name is not quite accurate; if we could really search best first, that would not be a search at all.
-The name refers to the fact that the state that *appears* to be best is searched first.
+幅優先探索のほうが几帳面ではありますが、どちらの戦略も状態空間についての知識を活かせません。
+どちらも闇雲に探索します。
+現実の応用のたいていでは、ある状態が解からどれだけ隔たっているかの見積もりが得られます。
+そうした場合には*最良優先探索*を実装できます。
+この名は正確とは言えません。本当に最良のものから探索できるなら、それはもはや探索ではないでしょう。
+この名が指しているのは、最良に*見える*状態から探索する、という事実です。
 
-To implement best-first search we need to add one more piece of information: a cost function that gives an estimate of how far a given state is from the goal.
+最良優先探索を実装するには、情報をもう1つ加える必要があります。ある状態が目標からどれだけ隔たっているかを見積もる費用関数です。
 
-For the binary tree example, we will use as a cost estimate the numeric difference from the goal.
-So if we are looking for 12, then 12 has cost 0, 8 has cost 4 and 2048 has cost 2036.
-The higher-order function `diff`, shown in the following, returns a cost function that computes the difference from a goal.
-The higher-order function sorter takes a cost function as an argument and returns a combiner function that takes the lists of old and new states, appends them together, and sorts the result based on the cost function, lowest cost first.
-(The built-in function `sort` sorts a list according to a comparison function.
-In this case the smaller numbers come first.
-`sort` takes an optional `:key` argument that says how to compute the score for each element.
-Be careful - `sort` is a destructive function.)
+二分木の例では、費用の見積もりとして目標との数値の差を使います。
+ですから12を探しているなら、12の費用は0、8は4、2048は2036です。
+次に示す高階関数 `diff` は、目標との差を計算する費用関数を返します。
+高階関数 sorter は費用関数を引数にとり、古い状態と新しい状態の並びを受け取ってつなげ、費用関数に基づいて費用の小さい順に並べる組み合わせ関数を返します。
+（組み込み関数 `sort` は比較関数に従ってリストを並べます。
+ここでは小さい数が先に来ます。
+`sort` は各要素の点数の求め方を指定する省略可能な `:key` 引数をとります。
+注意してください。`sort` は破壊的な関数です。）
 
 ```lisp
 (defun diff (num)
@@ -821,7 +821,7 @@ Be careful - `sort` is a destructive function.)
   (tree-search (list start) goal-p successors (sorter cost-fn)))
 ```
 
-Now, using the difference from the goal as the cost function, we can search using best-first search:
+これで目標との差を費用関数として、最良優先探索で探索できます。
 
 ```lisp
 > (best-first-search 1 (is 12) #'binary-tree (diff 12))
@@ -835,11 +835,11 @@ Now, using the difference from the goal as the cost function, we can search usin
 12
 ```
 
-The more we know about the state space, the better we can search.
-For example, if we know that all successors are greater than the states they come from, then we can use a cost function that gives a very high cost for numbers above the goal.
-The function `price-is-right` is like `diff`, except that it gives a high penalty for going over the goal.<a id="tfn06-3"></a><sup>[3](#fn06-3)</sup>
-Using this cost function leads to a near-optimal search on this example.
-It makes the "mistake" of searching 7 before 6 (because 7 is closer to 12), but does not waste time searching 14 and 15:
+状態空間について知っていることが多いほど、うまく探索できます。
+たとえば後継が必ず元の状態より大きいと分かっていれば、目標を超える数に非常に高い費用を与える費用関数が使えます。
+関数 `price-is-right` は `diff` に似ていますが、目標を超えると高い罰を与える点が違います。<a id="tfn06-3"></a><sup>[3](#fn06-3)</sup>
+この費用関数を使うと、この例ではほぼ最適な探索になります。
+6より先に7を探すという「誤り」は犯しますが（7のほうが12に近いため）、14と15を探して時間を無駄にはしません。
 
 ```lisp
 (defun price-is-right (price)
@@ -857,19 +857,19 @@ It makes the "mistake" of searching 7 before 6 (because 7 is closer to 12), but 
 12
 ```
 
-All the searching methods we have seen so far consider ever-increasing lists of states as they search.
-For problems where there is only one solution, or a small number of solutions, this is unavoidable.
-To find a needle in a haystack, you need to look at a lot of hay.
-But for problems with many solutions, it may be worthwhile to discard unpromising paths.
-This runs the risk of failing to find a solution at all, but it can save enough space and time to offset the risk.
-A best-first search that keeps only a fixed number of alternative states at any one time is known as a *beam search*.
-Think of searching as shining a light through the dark of the state space.
-In other search strategies the light spreads out as we search deeper, but in beam search the light remains tightly focused.
-Beam search is a variant of best-first search, but it is also similar to depth-first search.
-The difference is that beam search looks down several paths at once, instead of just one, and chooses the best one to look at next.
-But it gives up the ability to backtrack indefinitely.
-The function `beam-search` is just like `best-first-search`, except that after we sort the states, we then take only the first `beam-width` states.
-This is done with `subseq`; `(subseq list start end)` returns the sublist that starts at position *start* and ends just before position *end*.
+ここまで見た探索の手法はどれも、探索が進むにつれて状態の並びがどんどん増えていきます。
+解が1つ、あるいはごく少数しかない問題では、これは避けられません。
+藁の山から針を見つけるには、たくさんの藁を見るほかありません。
+しかし解が多くある問題では、見込みの薄い道を捨てる値打ちがあるかもしれません。
+これは解をまったく見つけられない危険を伴いますが、その危険に見合うだけの領域と時間を節約できます。
+どの時点でも一定数の候補の状態しか保持しない最良優先探索を*ビーム探索*と呼びます。
+探索を、状態空間の闇に光を当てることだと考えてみてください。
+他の探索戦略では深く探るほど光が広がりますが、ビーム探索では光は絞られたままです。
+ビーム探索は最良優先探索の一種ですが、深さ優先探索にも似ています。
+違いは、ビーム探索が1本ではなく複数の道を同時に見て、次に見る最良のものを選ぶ点です。
+ただし、いくらでも後戻りできる能力は手放します。
+関数 `beam-search` は `best-first-search` と同じですが、状態を並べたあと先頭の `beam-width` 個だけを取る点が違います。
+これは `subseq` で行います。`(subseq list start end)` は位置 *start* から始まり位置 *end* の直前で終わる部分リストを返します。
 
 ```lisp
 (defun beam-search (start goal-p successors cost-fn beam-width)
@@ -883,7 +883,7 @@ This is done with `subseq`; `(subseq list start end)` returns the sublist that s
               (subseq sorted 0 beam-width))))))
 ```
 
-We can successfully search for 12 in the binary tree using a beam width of only 2:
+ビーム幅がわずか2でも、二分木から12をうまく探索できます。
 
 ```lisp
 > (beam-search 1 (is 12) #'binary-tree (price-is-right 12) 2)
@@ -895,8 +895,8 @@ We can successfully search for 12 in the binary tree using a beam width of only 
 12
 ```
 
-However, if we go back to the scoring function that just takes the difference from 12, then beam search fails.
-When it generates 14 and 15, it throws away 6, and thus loses its only chance to find the goal:
+しかし12との差を取るだけの評価関数に戻すと、ビーム探索は失敗します。
+14と15を生成した時点で6を捨ててしまい、目標を見つける唯一の機会を失うのです。
 
 ```lisp
 > (beam-search 1 (is 12) #'binary-tree (diff 12) 2)
@@ -914,20 +914,20 @@ When it generates 14 and 15, it throws away 6, and thus loses its only chance to
 [Abort]
 ```
 
-This search would succeed if we gave a beam width of 3.
-This illustrates a general principle: we can find a goal either by looking at more states, or by being smarter about the states we look at.
-That means having a better ordering function.
+ビーム幅を3にすれば、この探索は成功したでしょう。
+これは一般的な原則を示しています。目標を見つけるには、より多くの状態を見るか、見る状態の選び方を賢くするかのどちらかだ、ということです。
+後者はつまり、よりよい順序づけの関数を持つということです。
 
-Notice that with a beam width of infinity we get best-first search.
-With a beam width of 1, we get depth-first search with no backup.
-This could be called "depth-only search," but it is more commonly known as *hill-climbing*.
-Think of a mountaineer trying to reach a peak in a heavy fog.
-One strategy would be for the mountaineer to look at adjacent locations, climb to the highest one, and look again.
-This strategy may eventually hit the peak, but it may also get stuck at the top of a foothill, or *local maximum*.
-Another strategy would be for the mountaineer to turn back and try again when the fog lifts, but in AI, unfortunately, the fog rarely lifts.<a id="tfn06-4"></a><sup>[4](#fn06-4)</sup>
+ビーム幅を無限にすれば最良優先探索になることに注目してください。
+ビーム幅を1にすれば、後戻りのない深さ優先探索になります。
+これは「深さのみの探索」と呼んでもよいのですが、ふつうは*山登り法*として知られています。
+濃霧の中で頂を目指す登山者を思い描いてください。
+1つの戦略は、隣接する場所を見て最も高いところへ登り、また見回す、というものです。
+この戦略はいずれ頂に達するかもしれませんが、麓の丘の頂 — すなわち*局所最大*  — で立ち往生することもありえます。
+別の戦略は、引き返して霧が晴れてからやり直すことですが、あいにくAIでは霧が晴れることはめったにありません。<a id="tfn06-4"></a><sup>[4](#fn06-4)</sup>
 
-As a concrete example of a problem that can be solved by search, consider the task of planning a flight across the North American continent in a small airplane, one whose range is limited to 1000 kilometers.
-Suppose we have a list of selected cities with airports, along with their position in longitude and latitude:
+探索で解ける問題の具体例として、航続距離が1000キロメートルに限られた小型機で北米大陸を横断する飛行計画を立てる、という課題を考えましょう。
+空港のある都市をいくつか選び、その経度と緯度の並びが手元にあるとします。
 
 ```lisp
 (defstruct (city (:type list)) name long lat)
@@ -946,26 +946,26 @@ Suppose we have a list of selected cities with airports, along with their positi
    (Kansas-City      94.35 39.06)      (Wilmington        77.57 34.14)))
 ```
 
-This example introduces a new option to `defstruct`.
-Instead of just giving the name of the structure, it is also possible to use:
+この例は `defstruct` の新しい選択肢を導入します。
+構造体の名前だけを与える代わりに、次のようにも書けます。
 
 ```lisp
 (defstruct (structure-name (option value)...) "optional doc" slot...)
 ```
 
-For city, the option `:type` is specified as `list`.
-This means that cities will be implemented as lists of three elements, as they are in the initial value for `*cities*`.
+city については `:type` を `list` と指定しています。
+つまり都市は3要素のリストとして実装されるということで、`*cities*` の初期値のとおりです。
 
-The cities are shown on the map in [figure 6.1](#fig-06-01), which has connections between all cities within the 1000 kilometer range of each other.<a id="tfn06-5"></a><sup>[5](#fn06-5)</sup>
-This map was drawn with the help of `air-distance`, a function that returns the distance in kilometers between two cities "as the crow flies."
-It will be defined later.
-Two other useful functions are `neighbors`, which finds all the cities within 1000 kilometers, and `city`, which maps from a name to a city.
-The former uses `find-all-if`, which was defined on [page 101](chapter3.md#p101) as a synonym for `remove-if-not`.
+都市は [図6.1](#fig-06-01) の地図に示してあり、互いに1000キロメートル圏内にある都市はすべて線で結ばれています。<a id="tfn06-5"></a><sup>[5](#fn06-5)</sup>
+この地図は `air-distance` の助けを借りて描きました。2つの都市のあいだの直線距離をキロメートルで返す関数です。
+これはのちほど定義します。
+他に役立つ関数が2つ。1000キロメートル圏内の都市をすべて見つける `neighbors` と、名前から都市への対応づけを行う `city` です。
+前者は [101ページ](chapter3.md#p101) で `remove-if-not` の別名として定義した `find-all-if` を使います。
 
 | <a id="fig-06-01"></a>[]() |
 |---|
 | <img src="images/chapter6/fig-06-01.svg" onerror="this.src='images/chapter6/fig-06-01.png'; this.onerror=null;" alt="Figure 6.1" /> |
-| **Figure 6.1: A Map of Some Cities** |
+| **図6.1: いくつかの都市の地図** |
 
 ```lisp
 (defun neighbors (city)
@@ -980,9 +980,9 @@ The former uses `find-all-if`, which was defined on [page 101](chapter3.md#p101)
   (assoc name *cities*))
 ```
 
-We are now ready to plan a trip.
-The function `trip` takes the name of a starting and destination city and does a beam search of width one, considering all neighbors as successors to a state.
-The cost for a state is the air distance to the destination city:
+これで旅程を立てる準備が整いました。
+関数 `trip` は出発地と目的地の都市名をとり、隣接する都市すべてを状態の後継とみなして幅1のビーム探索を行います。
+状態の費用は目的地の都市までの直線距離です。
 
 ```lisp
 (defun trip (start dest)
@@ -992,8 +992,8 @@ The cost for a state is the air distance to the destination city:
           1))
 ```
 
-Here we plan a trip from San Francisco to Boston.
-The result seems to be the best possible path:
+ここではサンフランシスコからボストンへの旅程を立てます。
+結果は考えうる最良の道筋に見えます。
 
 ```lisp
 > (trip (city 'san-francisco) (city 'boston))
@@ -1008,8 +1008,8 @@ The result seems to be the best possible path:
 (BOSTON 71.05 42.21)
 ```
 
-But look what happens when we plan the return trip.
-There are two detours, to Chicago and Flagstaff:
+しかし帰路の計画を立てるとどうなるか見てください。
+シカゴとフラッグスタッフへの2つの回り道が生じています。
 
 ```lisp
 > (trip (city 'boston) (city 'san-francisco))
@@ -1024,40 +1024,40 @@ There are two detours, to Chicago and Flagstaff:
 (SAN-FRANCISCO 122.26 37.47)
 ```
 
-Why did `trip` go from Denver to San Francisco via Flagstaff?
-Because Flagstaff is closer to the destination than Grand Junction.
-The problem is that we are minimizing the distance to the destination at each step, when we should be minimizing the sum of the distance to the destination plus the distance already traveled.
+なぜ `trip` はデンバーからサンフランシスコへフラッグスタッフ経由で行ったのでしょうか。
+フラッグスタッフのほうがグランドジャンクションより目的地に近いからです。
+問題は、各段階で目的地までの距離を最小にしていることです。本当は目的地までの距離と、すでに移動した距離の和を最小にすべきなのです。
 
-### Search Paths
+### 探索の経路
 
-To minimize the total distance, we need some way to talk about the *path* that leads to the goal.
-But the functions we have defined so far only deal with individual states along the way.
-Representing paths would lead to another advantage: we could return the path as the solution, rather than just return the goal state.
-As it is, `trip` only returns the goal state, not the path to it.
-So there is no way to determine what `trip` has done, except by reading the debugging output.
+総距離を最小にするには、目標へ至る*経路*を語る手立てが要ります。
+しかしここまでに定義した関数は、途中の個々の状態しか扱いません。
+経路を表現できれば、もう1つ利点が生まれます。目標状態を返すだけでなく、経路そのものを解として返せるのです。
+いまのところ `trip` は目標状態を返すだけで、そこへ至る経路は返しません。
+ですからデバッグ出力を読む以外に、`trip` が何をしたかを知る術がありません。
 
-The data structure path is designed to solve both these problems.
-A path has four fields: the current state, the previous partial path that this path is extending, the cost of the path so far, and an estimate of the total cost to reach the goal.
-Here is the structure definition for path.
-It uses the `:print-function` option to say that all paths are to be printed with the function `print-path`, which will be defined below.
+データ構造 path は、この両方の問題を解くために設計されています。
+path は4つの欄を持ちます。現在の状態、この経路が伸ばしている手前の部分経路、ここまでの経路の費用、そして目標に達するまでの総費用の見積もりです。
+path の構造体定義を示します。
+`:print-function` の選択肢を使い、経路はすべて関数 `print-path` で表示すると指定しています。`print-path` は後ほど定義します。
 
 ```lisp
 (defstruct (path (:print-function print-path))
     state (previous nil) (cost-so-far 0) (total-cost 0))
 ```
 
-The next question is how to integrate paths into the searching routines with the least amount of disruption.
-Clearly, it would be better to make one change to `tree-search` rather than to change `depth-first-search`, `breadth-first-search`, and `beam-search`.
-However, looking back at the definition of `tree-search`, we see that it makes no assumptions about the structure of states, other than the fact that they can be manipulated by the goal predicate, successor, and combiner functions.
-This suggests that we can use `tree-search` unchanged if we pass it paths instead of states, and give it functions that can process paths.
+次の問題は、経路を探索の手続きにどう最小限の混乱で組み込むかです。
+`depth-first-search`、`breadth-first-search`、`beam-search` を変えるより、`tree-search` に一箇所手を入れるほうがよいのは明らかです。
+しかし `tree-search` の定義を振り返ると、状態の構造については、目標の述語・後継の関数・組み合わせの関数で扱えるということ以外、何も仮定していないと分かります。
+つまり、状態の代わりに経路を渡し、経路を処理できる関数を与えれば、`tree-search` はそのまま使えるということです。
 
-In the following redefinition of `trip`, the `beam-search` function is called with five arguments.
-Instead of passing it a city as the start state, we pass a path that has the city as its state field.
-The goal predicate should test whether its argument is a path whose state is the destination; we assume (and later define) a version of `is` that accommodates this.
-The successor function is the most difficult.
-Instead of just generating a list of neighbors, we want to first generate the neighbors, then make each one into a path that extends the current path, but with an updated cost so far and total estimated cost.
-The function `path-saver` returns a function that will do just that.
-Finally, the cost function we are trying to minimize is `path-total-cost`, and we provide a beam width, which is now an optional argument to `trip` that defaults to one:
+次の `trip` の定義し直しでは、`beam-search` を5つの引数で呼びます。
+初期状態として都市を渡す代わりに、その都市を状態の欄に持つ経路を渡します。
+目標の述語は、引数が状態を目的地とする経路かどうかを調べるべきです。これに対応する `is` があるものとし（のちほど定義します）。
+最も難しいのは後継の関数です。
+隣接する都市の並びを生成するだけでなく、まず隣接都市を生成し、それぞれを現在の経路を伸ばした経路に仕立て、ここまでの費用と総費用の見積もりを更新したいのです。
+関数 `path-saver` は、まさにそれを行う関数を返します。
+最後に、最小化しようとしている費用関数は `path-total-cost` で、ビーム幅も与えます。これは `trip` の省略可能な引数となり、既定値は1です。
 
 ```lisp
 (defun trip (start dest &optional (beam-width 1))
@@ -1071,8 +1071,8 @@ Finally, the cost function we are trying to minimize is `path-total-cost`, and w
 beam-width))
 ```
 
-The calculation of `air-distance` involves some complicated conversion of longitude and latitude to `x-y-z` coordinates.
-Since this is a problem in solid geometry, not AI, the code is presented without further comment:
+`air-distance` の計算には、経度と緯度から `x-y-z` 座標への込み入った変換が伴います。
+これはAIではなく立体幾何の問題なので、コードは特に注釈なしで示します。
 
 ```lisp
 (defconstant earth-diameter 12765.0
@@ -1104,10 +1104,10 @@ Since this is a problem in solid geometry, not AI, the code is presented without
   (* (+ (truncate deg) (* (rem  deg 1) 100/60)) pi 1/180))
 ```
 
-Before showing the auxiliary functions that implement this, here are some examples that show what it can do.
-With a beam width of 1, the detour to Flagstaff is eliminated, but the one to Chicago remains.
-With a beam width of 3, the correct optimal path is found.
-In the following examples, each call to the new version of `trip` returns a path, which is printed by `show-city-path`:
+これを実装する補助の関数を示す前に、何ができるかを示す例をいくつか挙げます。
+ビーム幅1では、フラッグスタッフへの回り道は消えますが、シカゴへの回り道は残ります。
+ビーム幅3にすれば、正しい最適な経路が見つかります。
+次の例では、新しい版の `trip` を呼ぶたびに経路が返り、それを `show-city-path` が表示します。
 
 ```lisp
 > (show-city-path (trip (city 'san-francisco) (city 'boston) 1))
@@ -1121,26 +1121,26 @@ In the following examples, each call to the new version of `trip` returns a path
   Kansas-City - Denver - Grand-Jct - Reno - San-Francisco  >
 ```
 
-This example shows how search is susceptible to irregularities in the search space.
-It was easy to find the correct path from west to east, but the return trip required more search, because Flagstaff is a falsely promising step.
-In general, there may be even worse dead ends lurking in the search space.
-Look what happens when we limit the airplane's range to 700 kilometers.
-The map is shown in [figure 6.2](#fig-06-02).
+この例は、探索が探索空間の不規則さにどれほど左右されるかを示しています。
+西から東への正しい経路を見つけるのは簡単でしたが、帰路にはより多くの探索が要りました。フラッグスタッフが見せかけだけ有望な一歩だからです。
+一般に、探索空間にはもっとひどい行き止まりが潜んでいるかもしれません。
+飛行機の航続距離を700キロメートルに制限するとどうなるか見てみましょう。
+地図は [図6.2](#fig-06-02) に示します。
 
 | <a id="fig-06-02"></a>[]() |
 |---|
 | <img src="images/chapter6/fig-06-02.svg" onerror="this.src='images/chapter6/fig-06-02.png'; this.onerror=null;" alt="Figure 6.2" /> |
-| **Figure 6.2: A Map of Cities within 700 km** |
+| **図6.2: 700km圏内の都市の地図** |
 
-If we try to plan a trip from Tampa to Quebec, we can run into problems with the dead end at Wilmington, North Carolina.
-With a beam width of 1, the path to Jacksonville and then Wilmington will be tried first.
-From there, each step of the path alternates between Atlanta and Wilmington.
-The search never gets any closer to the goal.
-But with a beam width of 2, the path from Tampa to Atlanta is not discarded, and it is eventually continued on to Indianapolis and eventually to Quebec.
-So the capability to back up is essential in avoiding dead ends.
+タンパからケベックへの旅程を立てようとすると、ノースカロライナ州ウィルミントンの行き止まりで困ったことになりえます。
+ビーム幅1では、ジャクソンビルを経てウィルミントンへ至る道がまず試されます。
+そこから先、経路の各段階はアトランタとウィルミントンのあいだを行き来するだけになります。
+探索は目標に一向に近づきません。
+しかしビーム幅2なら、タンパからアトランタへの道が捨てられず、やがてインディアナポリスへ、最終的にケベックへと続きます。
+つまり後戻りする能力は、行き止まりを避けるのに欠かせないのです。
 
-Now for the implementation details.
-The function `is` still returns a predicate that tests for a value, but now it accepts `:key` and `:test` keywords:
+では実装の細部です。
+関数 `is` は依然として値を調べる述語を返しますが、いまや `:key` と `:test` のキーワードを受け付けます。
 
 ```lisp
 (defun is (value &key (key #'identity) (test #'eql))
@@ -1148,9 +1148,9 @@ The function `is` still returns a predicate that tests for a value, but now it a
   #'(lambda (path) (funcall test value (funcall key path))))
 ```
 
-The `path-saver` function returns a function that will take a path as an argument and generate successors paths.
-`path-saver` takes as an argument a successor function that operates on bare states.
-It calls this function and, for each state returned, builds up a path that extends the existing path and stores the cost of the path so far as well as the estimated total cost:
+`path-saver` は、経路を引数にとって後継の経路を生成する関数を返します。
+`path-saver` は、素の状態に働く後継の関数を引数にとります。
+その関数を呼び、返された各状態について、既存の経路を伸ばした経路を組み立て、ここまでの費用と総費用の見積もりを格納します。
 
 ```lisp
 (defun path-saver (successors cost-fn cost-left-fn)
@@ -1170,12 +1170,12 @@ It calls this function and, for each state returned, builds up a path that exten
           (funcall successors old-state)))))
 ```
 
-By default a path structure would be printed as `#S ( PATH ... )`.
-But because each path has a `previous` field that is filled by another path, this output would get quite verbose.
-That is why we installed `print-path` as the print function for paths when we defined the structure.
-It uses the notation `#<...>`, which is a Common Lisp convention for printing output that can not be reconstructed by `read`.
-The function `show-city-path` prints a more complete representation of a path.
-We also define `map-path` to iterate over a path, collecting values:
+既定では、path の構造体は `#S ( PATH ... )` と表示されます。
+しかし各経路は別の経路が入った `previous` の欄を持つので、この出力はかなり冗長になってしまいます。
+構造体を定義したときに `print-path` を経路の表示関数として組み込んだのは、そのためです。
+これは `#<...>` という記法を使います。`read` で復元できない出力を表示するときのCommon Lispの流儀です。
+関数 `show-city-path` は、経路のより完全な表現を表示します。
+また、経路をたどって値を集める `map-path` も定義します。
 
 ```lisp
 (defun print-path (path &optional (stream t) depth)
@@ -1198,31 +1198,31 @@ We also define `map-path` to iterate over a path, collecting values:
           (map-path fn (path-previous path)))))
 ```
 
-### Guessing versus Guaranteeing a Good Solution
+### よい解を当てにいくか、保証するか
 
-Elementary AI textbooks place a great emphasis on search algorithms that are guaranteed to find the best solution.
-However, in practice these algorithms are hardly ever used.
-The problem is that guaranteeing the best solution requires looking at a lot of other solutions in order to rule them out.
-For problems with large search spaces, this usually takes too much time.
-The alternative is to use an algorithm that will probably return a solution that is close to the best solution, but gives no guarantee.
-Such algorithms, traditionally known as *non-admissible heuristic search* algorithms, can be much faster.
+初等的なAIの教科書は、最良の解を必ず見つけると保証された探索アルゴリズムを大いに重んじます。
+しかし実務では、そうしたアルゴリズムはほとんど使われません。
+問題は、最良の解を保証するには、他の多くの解を除外するためにそれらを見ねばならないことです。
+探索空間の大きな問題では、これはたいてい時間がかかりすぎます。
+代わりの手は、おそらく最良に近い解を返すが保証はしない、というアルゴリズムを使うことです。
+そうしたアルゴリズムは伝統的に*許容的でない発見的探索*と呼ばれ、はるかに高速でありえます。
 
-Of the algorithms we have seen so far, best-first search almost, but not quite, guarantees the best solution.
-The problem is that it terminates a little too early.
-Suppose it has calculated three paths, of cost 90, 95 and 110.
-It will expand the 90 path next.
-Suppose this leads to a solution of total cost 100.
-Best-first search will then return that solution.
-But it is possible that the 95 path could lead to a solution with a total cost less than 100.
-Perhaps the 95 path is only one unit away from the goal, so it could result in a complete path of length 96.
-This means that an optimal search should examine the 95 path (but not the 110 path) before exiting.
+ここまで見たアルゴリズムのうち、最良優先探索は最良の解をほぼ保証しますが、完全にではありません。
+問題は、終了が少し早すぎることです。
+費用が90、95、110の3つの経路を計算したとしましょう。
+次に90の経路を伸ばします。
+これが総費用100の解に至ったとします。
+最良優先探索はそこでその解を返します。
+しかし95の経路が総費用100未満の解に至る可能性もあります。
+95の経路が目標まであと1しかなければ、長さ96の完全な経路になりえます。
+つまり最適な探索は、終える前に95の経路を（110の経路は不要ですが）調べるべきなのです。
 
-Depth-first search and beam search, on the other hand, are definitely heuristic algorithms.
-Depth-first search finds a solution without any regard to its cost.
-With beam search, picking a good value for the beam width can lead to a good, quick solution, while picking the wrong value can lead to failure, or to a poor solution.
-One way out of this dilemma is to start with a narrow beam width, and if that does not lead to an acceptable solution, widen the beam and try again.
-We will call this *iterative widening*, although that is not a standard term.
-There are many variations on this theme, but here is a simple one:
+一方、深さ優先探索とビーム探索は明らかに発見的なアルゴリズムです。
+深さ優先探索は費用をまったく顧みずに解を見つけます。
+ビーム探索では、ビーム幅によい値を選べば手早くよい解に至りますが、誤った値を選べば失敗するか、粗末な解に至ります。
+この板挟みを抜ける1つの手は、狭いビーム幅から始めて、それで納得のいく解が得られなければ幅を広げてやり直すことです。
+これを*反復幅広げ*と呼ぶことにします。標準的な用語ではありませんが。
+この趣旨には多くの変種がありますが、ここでは単純なものを示します。
 
 ```lisp
 (defun iter-wide-search (start goal-p successors cost-fn
@@ -1236,7 +1236,7 @@ There are many variations on this theme, but here is a simple one:
                         :width (+ width 1) :max max))))
 ```
 
-Here `iter-wide-search` is used to search through a binary tree, failing with beam width 1 and 2, and eventually succeeding with beam width 3:
+ここでは `iter-wide-search` で二分木を探索します。ビーム幅1と2では失敗し、最終的に幅3で成功します。
 
 ```lisp
 > (iter-wide-search 1 (is 12) (finite-binary-tree 15) (diff 12))
@@ -1263,45 +1263,45 @@ Width: 1
 12
 ```
 
-The name iterative widening is derived from the established term *iterative deepening*.
-Iterative deepening is used to control depth-first search when we don't know the depth of the desired solution.
-The idea is first to limit the search to a depth of 1, then 2, and so on.
-That way we are guaranteed to find a solution at the minimum depth, just as in breadth-first search, but without wasting as much storage space.
-Of course, iterative deepening does waste some time because at each increasing depth it repeats all the work it did at the previous depth.
-But suppose that the average state has ten successors.
-That means that increasing the depth by one results in ten times more search, so only 10% of the time is wasted on repeated work.
-So iterative deepening uses only slightly more time and much less space.
-We will see it again in [chapters 11](chapter11.md) and [18](chapter18.md).
+反復幅広げという名は、定着した用語である*反復深化*から取ったものです。
+反復深化は、求める解の深さが分からないときに深さ優先探索を制御するのに使います。
+まず探索を深さ1に限り、次に2、というように進める考えです。
+そうすれば幅優先探索と同じく最小の深さで解を見つけると保証されますが、記憶領域の無駄はずっと少なくて済みます。
+もちろん反復深化は時間をいくらか無駄にします。深さを増すたびに、前の深さで行った作業をすべて繰り返すからです。
+しかし平均して各状態に後継が10個あるとしましょう。
+深さを1つ増やすと探索は10倍になるので、繰り返しの作業で無駄になるのは時間の10%だけです。
+つまり反復深化は、時間はわずかに多く使うだけで、領域ははるかに少なくて済みます。
+これは[第11章](chapter11.md)と[第18章](chapter18.md)で再び登場します。
 
-### Searching Graphs
+### グラフの探索
 
-So far, `tree-search` has been the workhorse behind all the searching routines.
-This is curious, when we consider that the city problem involves a graph that is not a tree at all.
-The reason `tree-search` works is that any graph can be treated as a tree, if we ignore the fact that certain nodes are identical.
-For example, the graph in [figure 6.3](#fig-06-03) can be rendered as a tree.
-[Figure 6.4](#f0025) shows only the top four levels of the tree; each of the bottom nodes (except the 6s) needs to be expanded further.
+ここまで、すべての探索の手続きを支える働き手は `tree-search` でした。
+都市の問題が扱うのは木でも何でもないグラフだと考えると、これは不思議なことです。
+`tree-search` が働くのは、あるノードどうしが同一だという事実を無視すれば、どんなグラフも木として扱えるからです。
+たとえば [図6.3](#fig-06-03) のグラフは木として描き直せます。
+[図6.4](#f0025) は木の上から4段だけを示しています。最下段のノード（6を除く）はそれぞれさらに展開する必要があります。
 
 
 | <a id="fig-06-03"></a>[]() |
 |---|
 | <img src="images/chapter6/fig-06-03.svg" onerror="this.src='images/chapter6/fig-06-03.png'; this.onerror=null;" alt="Figure 6.3" /> |
-| **Figure 6.3: A Graph with Six Nodes** |
+| **図6.3: 6ノードのグラフ** |
 
 | <a id="fig-06-04"></a>[]() |
 |---|
 | <img src="images/chapter6/fig-06-04.svg" onerror="this.src='images/chapter6/fig-06-04.png'; this.onerror=null;" alt="Figure 6.4" /> |
-| **Figure 6.4: The Corresponding Tree** |
+| **図6.4: それに対応する木** |
 
-In searching for paths through the graph of cities, we were implicitly turning the graph into a tree.
-That is, if `tree-search` found two paths from Pittsburgh to Kansas City (via Chicago or Indianapolis), then it would treat them as two independent paths, just as if there were two distinct Kansas Cities.
-This made the algorithms simpler, but it also doubles the number of paths left to examine.
-If the destination is San Francisco, we will have to search for a path from Kansas City to San Francisco twice instead of once.
-In fact, even though the graph has only 22 cities, the tree is infinite, because we can go back and forth between adjacent cities any number of times.
-So, while it is possible to treat the graph as a tree, there are potential savings in treating it as a true graph.
+都市のグラフを通る経路を探すとき、私たちは暗黙のうちにグラフを木に変えていました。
+つまり `tree-search` がピッツバーグからカンザスシティへの経路を2つ（シカゴ経由とインディアナポリス経由）見つけたら、あたかもカンザスシティが2つ別々にあるかのように、それらを独立した2つの経路として扱っていたのです。
+これはアルゴリズムを単純にしましたが、調べるべき経路の数も倍にします。
+目的地がサンフランシスコなら、カンザスシティからサンフランシスコへの経路を1回ではなく2回探すことになります。
+実際、グラフには都市が22しかないのに木は無限です。隣り合う都市のあいだを何度でも行き来できるからです。
+ですからグラフを木として扱うこともできますが、本物のグラフとして扱えば節約の余地があります。
 
-The function `graph-search` does just that.
-It is similar to `tree-search`, but accepts two additional arguments: a comparison function that tests if two states are equal, and a list of states that are no longer being considered, but were examined in the past.
-The difference between `graph-search` and `tree-search` is in the call to `new-states`, which generates successors but eliminates states that are in either the list of states currently being considered or the list of old states considered in the past.
+関数 `graph-search` がまさにそれを行います。
+`tree-search` に似ていますが、引数を2つ余分に受け取ります。2つの状態が等しいかを調べる比較関数と、もう検討対象ではないが過去に調べた状態の並びです。
+`graph-search` と `tree-search` の違いは `new-states` の呼び出しにあります。これは後継を生成しつつ、現在検討中の状態の並びか、過去に検討した古い状態の並びに含まれる状態を取り除きます。
 
 ```lisp
 (defun graph-search (states goal-p successors combiner &optional (state= #'eql) old-states)
@@ -1328,9 +1328,9 @@ The difference between `graph-search` and `tree-search` is in the call to `new-s
       (funcall successors (first states))))
 ```
 
-Using the successor function `next2`, we can search the graph shown here either as a tree or as a graph.
-If we search it as a graph, it takes fewer iterations and less storage space to find the goal.
-Of course, there is additional overhead to test for identical states, but on graphs like this one we get an exponential speed-up for a constant amount of overhead.
+後継の関数 `next2` を使えば、ここに示したグラフを木としてもグラフとしても探索できます。
+グラフとして探索すれば、目標を見つけるまでの繰り返しも記憶領域も少なくて済みます。
+もちろん同一の状態を調べる分の間接費はかかりますが、この種のグラフでは一定の間接費で指数的な高速化が得られます。
 
 ```lisp
 (defun next2 (x) (list (+ x 1) (+ x 2)))
@@ -1358,21 +1358,21 @@ Of course, there is additional overhead to test for identical states, but on gra
 6
 ```
 
-The next step is to extend the `graph-search` algorithm to handle paths.
-The complication is in deciding which path to keep when two paths reach the same state.
-If we have a cost function, then the answer is easy: keep the path with the cheaper cost.
-Best-first search of a graph removing duplicate states is called A* search.
+次の段階は、`graph-search` のアルゴリズムを経路も扱えるよう拡張することです。
+厄介なのは、2つの経路が同じ状態に達したときにどちらを残すかを決めることです。
+費用関数があれば答えは簡単です。費用の安いほうを残します。
+重複する状態を取り除きながらグラフを最良優先で探索することを、A*探索と呼びます。
 
-A* search is more complicated than `graph-search` because of the need both to add and to delete paths to the lists of current and old paths.
-For each new successor state, there are three possibilities.
-The new state may be in the list of current paths, in the list of old paths, or in neither.
-Within the first two cases, there are two subcases.
-If the new path is more expensive than the old one, then ignore the new path - it can not lead to a better solution.
-If the new path is cheaper than a corresponding path in the list of current paths, then replace it with the new path.
-If it is cheaper than a corresponding path in the list of the old paths, then remove that old path, and put the new path in the list of current paths.
+A*探索が `graph-search` より込み入っているのは、現在の経路と古い経路の並びに対して、経路を加えることも削ることも必要だからです。
+新しい後継の状態それぞれについて、3つの可能性があります。
+新しい状態は、現在の経路の並びにあるか、古い経路の並びにあるか、どちらにもないかです。
+最初の2つの場合には、それぞれ下位の場合が2つあります。
+新しい経路が古いものより高くつくなら、新しい経路は無視します。よりよい解には至りえないからです。
+新しい経路が現在の経路の並びにある対応する経路より安ければ、それを新しい経路で置き換えます。
+古い経路の並びにある対応する経路より安ければ、その古い経路を取り除き、新しい経路を現在の経路の並びに入れます。
 
-Also, rather than sort the paths by total cost on each iteration, they are kept sorted, and new paths are inserted into the proper place one at a time using `insert-path`.
-Two more functions, `better-path` and `find-path`, are used to compare paths and see if a state has already appeared.
+また、繰り返しのたびに総費用で経路を並べ替えるのではなく、常に整列された状態を保ち、新しい経路は `insert-path` で1つずつ適切な位置に挿入します。
+さらに `better-path` と `find-path` という2つの関数を使い、経路を比べたり、ある状態がすでに現れたかを調べたりします。
 
 ```lisp
 (defun a*-search (paths goal-p successors cost-fn cost-left-fn
@@ -1416,7 +1416,7 @@ Two more functions, `better-path` and `find-path`, are used to compare paths and
                     state= old-paths)))))
 ```
 
-Here are the three auxiliary functions:
+3つの補助関数を示します。
 
 ```lisp
 (defun find-path (state paths state=)
@@ -1440,12 +1440,12 @@ Here are the three auxiliary functions:
             (path-states (path-previous path)))))
 ```
 
-Below we use `a*-search` to search for 6 in the graph previously shown in [figure 6.3](#fig-06-03).
-The cost function is a constant 1 for each step.
-In other words, the total cost is the length of the path.
-The heuristic evaluation function is just the difference from the goal.
-The A* algorithm needs just three search steps to come up with the optimal solution.
-Contrast that to the graph search algorithm, which needed five steps, and the tree search algorithm, which needed ten steps-and neither of them found the optimal solution.
+以下では `a*-search` を使い、先に [図6.3](#fig-06-03) で示したグラフから6を探します。
+費用関数は一歩ごとに定数1です。
+言い換えれば、総費用は経路の長さです。
+発見的な評価関数は、単に目標との差です。
+A*のアルゴリズムは、最適解にたどり着くのにわずか3歩の探索で済みます。
+これに対しグラフ探索は5歩、木の探索は10歩を要し、しかもどちらも最適解を見つけませんでした。
 
 ```lisp
 > (path-states
@@ -1460,17 +1460,17 @@ Contrast that to the graph search algorithm, which needed five steps, and the tr
 (6 5 3 1)
 ```
 
-It may seem limiting that these search functions all return a single answer.
-In some applications, we may want to look at several solutions, or at all possible solutions.
-Other applications are more naturally seen as optimization problems, where we don't know ahead of time what counts as achieving the goal but are just trying to find some action with a low cost.
+これらの探索関数がどれも答えを1つしか返さないのは、窮屈に思えるかもしれません。
+応用によっては、解をいくつか、あるいはありうる解をすべて見たいこともあるでしょう。
+別の応用は最適化の問題と見るほうが自然です。そこでは何をもって目標達成とするかが前もって分からず、費用の低い動作を探しているだけです。
 
-It turns out that the functions we have defined are not limiting at all in this respect.
-They can be used to serve both these new purposes-provided we carefully specify the goal predicate.
-To find all solutions to a problem, all we have to do is pass in a goal predicate that always fails, but saves all the solutions in a list.
-The goal predicate will see all possible solutions and save away just the ones that are real solutions.
-Of course, if the search space is infinite this will never terminate, so the user has to be careful in applying this technique.
-It would also be possible to write a goal predicate that stopped the search after finding a certain number of solutions, or after looking at a certain number of states.
-Here is a function that finds all solutions, using beam search:
+実のところ、私たちが定義した関数はこの点でまったく窮屈ではありません。
+目標の述語を注意深く指定しさえすれば、この2つの新しい目的にも使えます。
+問題の解をすべて見つけるには、常に失敗するが解をすべて並びに保存する目標の述語を渡すだけです。
+その述語はありうる解をすべて見て、本物の解だけを取っておきます。
+もちろん探索空間が無限ならこれは終わらないので、この技法を使うときは注意が要ります。
+一定数の解を見つけたら、あるいは一定数の状態を見たら探索を止める目標の述語を書くこともできるでしょう。
+ビーム探索で解をすべて見つける関数を示します。
 
 ```lisp
 (defun search-all (start goal-p successors cost-fn beam-width)
@@ -1485,22 +1485,22 @@ Here is a function that finds all solutions, using beam search:
   solutions))
 ```
 
-## 6.5 GPS as Search
+## 6.5 探索としてのGPS
 
-The GPS program can be seen as a problem in search.
-For example, in the three-block blocks world, there are only 13 different states.
-They could be arranged in a graph and searched just as we searched for a route between cities.
-[Figure 6.5](#fig-06-05) shows this graph.
+GPSプログラムは探索の問題と見なせます。
+たとえば積み木3つの世界には、状態が13通りしかありません。
+それらをグラフに並べ、都市間の経路を探したのと同じように探索できます。
+[図6.5](#fig-06-05) にそのグラフを示します。
 
 | <a id="fig-06-05"></a>[]() |
 |---|
 | <img src="images/chapter6/fig-06-05.svg" onerror="this.src='images/chapter6/fig-06-05.png'; this.onerror=null;" alt="Figure 6.5" /> |
-| **Figure 6.5: The Blocks World as a Graph** |
+| **図6.5: グラフとしての積み木の世界** |
 
-The function `search-gps` does just that.
-Like the gps function on [page 135](chapter4.md#p135), it computes a final state and then picks out the actions that lead to that state.
-But it computes the state with a beam search.
-The goal predicate tests if the current state satisfies every condition in the goal, the successor function finds all applicable operators and applies them, and the cost function simply sums the number of actions taken so far, plus the number of conditions that are not yet satisfied:
+関数 `search-gps` がまさにそれを行います。
+[135ページ](chapter4.md#p135) の gps と同じく、最終状態を計算してから、その状態に至る動作を取り出します。
+ただし状態の計算にはビーム探索を使います。
+目標の述語は現在の状態が目標のすべての条件を満たすかを調べ、後継の関数は適用できる演算子をすべて見つけて適用し、費用関数はここまでに取った動作の数と、まだ満たされていない条件の数を足すだけです。
 
 ```lisp
 (defun search-gps (start goal &optional (beam-width 10))
@@ -1519,7 +1519,7 @@ The goal predicate tests if the current state satisfies every condition in the g
       beam-width)))
 ```
 
-Here is the successor function:
+後継の関数を示します。
 
 ```lisp
 (defun gps-successors (state)
@@ -1541,8 +1541,8 @@ Here is the successor function:
     *ops*))
 ```
 
-The search technique finds good solutions quickly for a variety of problems.
-Here we see the solution to the Sussman anomaly in the three-block blocks world:
+この探索の技法は、さまざまな問題に対してよい解を素早く見つけます。
+積み木3つの世界におけるサスマン・アノマリーの解を見てみましょう。
 
 ```lisp
 (setf start '((c on a) (a on table) (b on table) (space on c)
@@ -1559,75 +1559,75 @@ Here we see the solution to the Sussman anomaly in the three-block blocks world:
   (EXECUTING (MOVE A FROM TABLE TO B)))
 ```
 
-In these solutions we search forward from the start to the goal; this is quite different from the means-ends approach of searching backward from the goal for an appropriate operator.
-But we could formulate means-ends analysis as forward search simply by reversing start and goal: GPS's goal state is the search's start state, and the search's goal predicate tests to see if a state matches GPS's start state.
-This is left as an exercise.
+これらの解では初期状態から目標へ前向きに探索しています。これは目標から後ろ向きに適切な演算子を探す手段目標分析の方式とはかなり違います。
+しかし初期状態と目標を入れ替えるだけで、手段目標分析を前向きの探索として定式化できます。GPSの目標状態が探索の初期状態となり、探索の目標の述語は状態がGPSの初期状態に合致するかを調べる、というわけです。
+これは練習問題としておきます。
 
-## 6.6 History and References
+## 6.6 歴史と参考文献
 
-Pattern matching is one of the most important tools for AI.
-As such, it is covered in most textbooks on Lisp.
-Good treatments include Abelson and Sussman (1984), [Wilensky (1986)](bibliography.md#bb1390), [Winston and Horn (1988)](bibliography.md#bb1410), and [Kreutzer and McKenzie (1990)](bibliography.md#bb0680).
-An overview is presented in the "pattern-matching" entry in *Encyclopedia of AI* ([Shapiro 1990](bibliography.md#bb1085)).
+パターン照合はAIにとって最も重要な道具の1つです。
+そのためLispの教科書のたいていで扱われています。
+よい扱いとしては Abelson and Sussman (1984)、[Wilensky (1986)](bibliography.md#bb1390)、[Winston and Horn (1988)](bibliography.md#bb1410)、[Kreutzer and McKenzie (1990)](bibliography.md#bb0680) があります。
+概観は *Encyclopedia of AI*（[Shapiro 1990](bibliography.md#bb1085)）の「pattern-matching」の項にあります。
 
-Nilsson's *Problem*-*Solving Methods in Artificial Intelligence* (1971) was an early text-book that emphasized search as the most important defining characteristic of AI.
-More recent texts give less importance to search; Winston's *Artificial Intelligence* (1984) gives a balanced overview, and his *Lisp* (1988) provides implementations of some of the algorithms.
-They are at a lower level of abstraction than the ones in this chapter.
-Iterative deepening was first presented by [Korf (1985)](bibliography.md#bb0640), and iterative broadening by [Ginsberg and Harvey (1990)](bibliography.md#bb0470).
+Nilssonの *Problem-Solving Methods in Artificial Intelligence*（1971）は、探索こそAIを定義づける最も重要な特徴だと強調した初期の教科書です。
+より新しい教科書は探索をそれほど重んじません。Winstonの *Artificial Intelligence*（1984）は釣り合いの取れた概観を与え、同じ著者の *Lisp*（1988）はアルゴリズムのいくつかの実装を示しています。
+それらは本章のものより抽象の水準が低いものです。
+反復深化は [Korf (1985)](bibliography.md#bb0640) が、反復広げは [Ginsberg and Harvey (1990)](bibliography.md#bb0470) が最初に示しました。
 
-## 6.7 Exercises
+## 6.7 練習問題
 
-**Exercise  6**.**3** [**m**] Write a version of `interactive-interpreter` that is more general than the one defined in this chapter.
-Decide what features can be specified, and provide defaults for them.
+**練習問題 6.3** [**m**] 本章で定義したものより汎用な `interactive-interpreter` を書け。
+どんな機能を指定できるようにするかを決め、その既定値を与えよ。
 
-**Exercise  6**.**4** [**m**] Define a version of `compose` that allows any number of arguments, not just two.
-Hint: You may want to use the function `reduce`.
+**練習問題 6.4** [**m**] 引数を2つに限らず任意個受け取る `compose` を定義せよ。
+手がかり: 関数 `reduce` を使うとよい。
 
-**Exercise  6**.**5** [**m**] Define a version of `compose` that allows any number of arguments but is more efficient than the answer to the previous exercise.
-Hint: try to make decisions when `compose` is called to build the resulting function, rather than making the same decisions over and over each time the resulting function is called.
+**練習問題 6.5** [**m**] 任意個の引数を受け取り、かつ前問の解答より効率のよい `compose` を定義せよ。
+手がかり: できあがった関数が呼ばれるたびに同じ判断を繰り返すのではなく、`compose` が呼ばれて関数を組み立てる時点で判断を済ませるようにせよ。
 
-**Exercise  6**.**6** [**m**] One problem with `pat-match` is that it gives special significance to symbols starting with `?`, which means that they can not be used to match a literal pattern.
-Define a pattern that matches the input literally, so that such symbols can be matched.
+**練習問題 6.6** [**m**] `pat-match` の1つの難点は、`?` で始まるシンボルに特別な意味を与えているため、それらをそのままのパターンとして照合できないことである。
+入力をそのまま照合するパターンを定義し、そうしたシンボルも照合できるようにせよ。
 
-**Exercise  6**.**7** [**m**] Discuss the pros and cons of data-driven programming compared to the conventional approach.
+**練習問題 6.7** [**m**] データ駆動のプログラミングを従来の方式と比べ、その利点と欠点を論じよ。
 
-**Exercise  6**.**8** [**m**] Write a version of `tree-search` using an explicit loop rather than recursion.
+**練習問題 6.8** [**m**] 再帰ではなく明示的なループを使う `tree-search` を書け。
 
-**Exercise  6**.**9** [**m**] The `sorter` function is inefficient for two reasons: it calls `append`, which has to make a copy of the first argument, and it sorts the entire result, rather than just inserting the new states into the already sorted *old* states.
-Write a more efficient `sorter`.
+**練習問題 6.9** [**m**] `sorter` は2つの理由で非効率である。第1引数の複製を作らねばならない `append` を呼ぶことと、新しい状態をすでに整列済みの*古い*状態に挿入するのではなく、結果全体を並べ替えることである。
+より効率のよい `sorter` を書け。
 
-**Exercise  6**.**10** [**m**] Write versions of `graph-search` and `a*-search` that use hash tables rather than lists to test whether a state has been seen before.
+**練習問題 6.10** [**m**] ある状態が既出かを調べるのに、並びではなくハッシュ表を使う `graph-search` と `a*-search` を書け。
 
-**Exercise  6**.**11** [**m**] Write a function that calls `beam-search` to find the first *n* solutions to a problem and returns them in a list.
+**練習問題 6.11** [**m**] `beam-search` を呼んで問題の最初の *n* 個の解を見つけ、並びにして返す関数を書け。
 
-**Exercise  6**.**12** [**m**] On personal computers without floating-point hardware, the `air-distance` calculation will be rather slow.
-If this is a problem for you, arrange to compute the `xyz-coords` of each city only once and then store them, or store a complete table of air distances between cities.
-Also precompute and store the neighbors of each city.
+**練習問題 6.12** [**m**] 浮動小数点演算の装置を持たないパソコンでは、`air-distance` の計算はかなり遅くなる。
+それが問題なら、各都市の `xyz-coords` を一度だけ計算して保存するか、都市間の直線距離の表を丸ごと保存するようにせよ。
+各都市の隣接都市もあらかじめ計算して保存せよ。
 
-**Exercise  6**.**13** [**d**] Write a version of GPS that uses A* search instead of beam search.
-Compare the two versions in a variety of domains.
+**練習問題 6.13** [**d**] ビーム探索の代わりにA*探索を使うGPSを書け。
+2つの版をさまざまな領域で比べよ。
 
-**Exercise  6**.**14** [**d**] Write a version of GPS that allows costs for each operator.
-For example, driving the child to school might have a cost of 2, but calling a limousine to transport the child might have a cost of 100.
-Use these costs instead of a constant cost of 1 for each operation.
+**練習問題 6.14** [**d**] 演算子ごとに費用を指定できるGPSを書け。
+たとえば子どもを車で学校に送る費用は2だが、送迎の車を呼ぶ費用は100かもしれない。
+操作ごとに一定の費用1とする代わりに、この費用を使え。
 
-**Exercise  6**.**15** [**d**] Write a version of GPS that uses the searching tools but does means-ends analysis.
+**練習問題 6.15** [**d**] 探索の道具を使いつつ手段目標分析を行うGPSを書け。
 
-## 6.8 Answers
+## 6.8 解答
 
-**Answer 6**.**2** Unfortunately, `pat-match` does not always find the answer.
-The problem is that it will only rebind a segment variable based on a failure to match the rest of the pattern after the segment variable.
-In all the examples above, the "rest of the pattern after the segment variable" was the whole pattern, so `pat-match` always worked properly.
-But if a segment variable appears nested inside a list, then the rest of the segment variable's sublist is only a part of the rest of the whole pattern, as the following example shows:
+**解答 6.2** あいにく `pat-match` は常に答えを見つけるとはかぎらない。
+問題は、区間変数の後ろにあるパターンの残りの照合に失敗したときにしか、区間変数を束縛し直さないことである。
+上のすべての例では「区間変数の後ろのパターンの残り」がパターン全体だったので、`pat-match` は常に正しく働いた。
+しかし区間変数がリストの中に入れ子で現れると、その区間変数が属する部分リストの残りは、パターン全体の残りの一部でしかない。次の例がそれを示す。
 
 ```lisp
 > (pat-match '(((?* ?x) (?* ?y)) ?x ?y) '((a b c d ) (a b) (c d))) => NIL
 ```
 
-The correct answer with `?x` bound to `(a b)` and `?y` bound to `(c d)` is not found because the inner segment match succeeds with `?x` bound to `( )` and `?y` bound to `(a b c d)`, and once we leave the inner match and return to the top level, there is no going back for alternative bindings.
+`?x` が `(a b)` に、`?y` が `(c d)` に束縛される正しい答えは見つからない。内側の区間照合が `?x` を `( )` に、`?y` を `(a b c d)` に束縛して成功してしまい、いったん内側の照合を離れて最上位に戻ると、別の束縛を求めて戻ることができないからである。
 
-**Answer 6**.**3** The following version lets the user specify all four components of the prompt-read-eval-print loop, as well as the streams to use for input and output.
-Defaults are set up as for a Lisp interpreter.
+**解答 6.3** 次の版では、prompt-read-eval-printループの4つの構成要素すべてと、入出力に使うストリームを利用者が指定できる。
+既定値はLispインタプリタ向けに設定してある。
 
 ```lisp
 (defun interactive-interpreter
@@ -1641,7 +1641,7 @@ Defaults are set up as for a Lisp interpreter.
               output)))
 ```
 
-Here is another version that does all of the above and also handles multiple values and binds the various "history variables" that the Lisp top-level binds.
+以下は上のすべてに加え、多値も扱い、Lispの最上位が束縛するさまざまな「履歴変数」も束縛する版である。
 
 ```lisp
 (defun interactive-interpreter
@@ -1670,7 +1670,7 @@ Here is another version that does all of the above and also handles multiple val
         (funcall print value output)))))
 ```
 
-**Answer 6**.**4**
+**解答 6.4**
 
 ```lisp
 (defun compose (&rest functions)
@@ -1680,7 +1680,7 @@ Here is another version that does all of the above and also handles multiple val
       (reduce #'funcall functions :from-end t :initial-value x)))
 ```
 
-**Answer 6**.**5**
+**解答 6.5**
 
 ```lisp
 (defun compose (&rest functions)
@@ -1697,7 +1697,7 @@ Here is another version that does all of the above and also handles multiple val
                   :initia1-value x)))))
 ```
 
-**Answer 6**.**8**
+**解答 6.8**
 
 ```lisp
 (defun tree-search (states goal-p successors combiner)
@@ -1713,7 +1713,7 @@ Start with states, and search according to successors and combiner."
                           (rest states))))))))
 ```
 
-**Answer 6**.**9**
+**解答 6.9**
 
 ```lisp
 (defun sorter (cost-fn)
@@ -1723,7 +1723,7 @@ Start with states, and search according to successors and combiner."
           old #'> :key cost-fn)))
 ```
 
-**Answer 6**.**11**
+**解答 6.11**
 
 ```lisp
 (defun search-n (start n goal-p successors cost-fn beam-width)
@@ -1743,19 +1743,19 @@ Start with states, and search according to successors and combiner."
 ----------------------
 
 <a id="fn06-1"></a><sup>[1](#tfn06-1)</sup>
-The macro `handler-case` is only in ANSI Common Lisp.
+マクロ `handler-case` はANSI Common Lispにしかありません。
 
 <a id="fn06-2"></a><sup>[2](#tfn06-2)</sup>
-An alternative would be to reserve the question mark for variables only and use another notation for these match operators.
-Keywords would be a good choice, such as `:and`, `:or`, `:is`, etc.
+別の手として、疑問符を変数専用にとっておき、これらの照合の演算子には別の記法を使うこともできたでしょう。
+`:and`、`:or`、`:is` などのキーワードがよい選択肢でしょう。
 
 <a id="fn06-3"></a><sup>[3](#tfn06-3)</sup>
-The built-in constant `most-positive-fixnum` is a large integer, the largest that can be expressed without using bignums.
-Its value depends on the implementation, but in most Lisps it is over 16 million.
+組み込みの定数 `most-positive-fixnum` は大きな整数で、bignum を使わずに表せる最大のものです。
+その値は処理系によりますが、たいていのLispでは1600万を超えます。
 
 <a id="fn06-4"></a><sup>[4](#tfn06-4)</sup>
-In [chapter 8](chapter8.md) we will see an example where the fog did lift: symbolic integration was once handled as a problem in search, but new mathematical results now make it possible to solve the same class of integration problems without search.
+[第8章](chapter8.md)では霧が実際に晴れた例を見ます。記号による積分はかつて探索の問題として扱われていましたが、新しい数学の成果により、同じ種類の積分問題を探索なしで解けるようになりました。
 
 <a id="fn06-5"></a><sup>[5](#tfn06-5)</sup>
-The astute reader will recognize that this graph is not a tree.
-The difference between trees and graphs and the implications for searching will be covered later.
+鋭い読者は、このグラフが木ではないことに気づくでしょう。
+木とグラフの違い、そしてそれが探索に及ぼす影響は、のちほど扱います。
