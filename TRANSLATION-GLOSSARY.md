@@ -246,6 +246,23 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | path | 経路 | 探索の道筋。データ構造名は `path` のまま |
 | overhead | 間接費 | |
 
+### 第7章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| word problem | 文章題 | 代数の文章題 |
+| algebraic equation | 代数方程式 | |
+| system of equations | 連立方程式 | |
+| constraint propagation | 制約伝播 | STUDENTの解法 |
+| unknown | 未知数 | 数学的な変数 |
+| left-/right-hand side (lhs/rhs) | 左辺／右辺 | |
+| isolate | （変数を）単独で残す | `isolate` 関数 |
+| prefix/infix notation | 前置記法／中置記法 | |
+| noise word | 雑音語 | make-variableが無視する語 |
+| commutative | 交換可能 | |
+| accumulator | 累算器 | 第3章と統一 |
+| BOA constructor | BOA生成関数 | By Order of Arguments。原語を併記 |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -314,8 +331,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter6.md` | 完了 |
-| `chapter7.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter7.md` | 完了 |
+| `chapter8.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
