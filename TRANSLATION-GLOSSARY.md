@@ -263,6 +263,26 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | accumulator | 累算器 | 第3章と統一 |
 | BOA constructor | BOA生成関数 | By Order of Arguments。原語を併記 |
 
+### 第8章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| symbolic mathematics | 記号数学 | 数値数学（numerical）と対 |
+| simplification | 簡約 | 式を「簡約する」。プログラム名は `simplifier`（簡約器） |
+| infix / prefix notation | 中置記法／前置記法 | |
+| associativity / commutativity | 結合則／交換則 | |
+| operator precedence | 演算子の優先順位 | |
+| differentiation / derivative | 微分／導関数 | |
+| integration / integral | 積分 | |
+| antiderivative | 原始関数 | 脚注で「積分より正確」と注記 |
+| indefinite integration | 不定積分 | |
+| integration by parts | 部分積分 | 練習問題8.5 |
+| derivative-divides technique | 微分で割る技法 | 8.6節の中心手法 |
+| factor / factorize | 因子／因数分解 | |
+| like terms | 同類項 | |
+| closed form | 閉じた形 | Rischのアルゴリズム |
+| running product | 走行積 | running sumに倣う |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -331,8 +351,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter7.md` | 完了 |
-| `chapter8.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter8.md` | 完了 |
+| `chapter9.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
