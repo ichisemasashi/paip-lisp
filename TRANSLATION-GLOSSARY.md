@@ -308,6 +308,28 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | extreme and mean ratio | 外中比 | ユークリッドの呼称 |
 | forced win / possible loss | 必勝／負けの可能性のある状態 | ニムの解析（解答9.5） |
 
+### 第10章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| declaration | 宣言 | `the`、`optimize`、`inline` など |
+| boxed / unboxed | 箱入り／箱なし | 型情報を含む表現と生のビット |
+| generic function | 総称関数 | |
+| fill pointer | フィルポインタ | Common Lispの機構 |
+| resource | 資源（プール） | 実体を明示管理するプール |
+| leak (memory) | 漏れる | メモリ管理の不備 |
+| ephemeral / generation scavenging GC | 短命／世代掃討のごみ集め | |
+| compacting garbage collection | 詰め込み型のごみ集め | |
+| amortized | 割り勘にされる | 全呼び出しにコスト分散 |
+| queue / enqueue | キュー／enqueue | |
+| trie | トライ | 構成要素の並びをキーとする表 |
+| discrimination net | 判別ネット | Charniakらのトライの呼称 |
+| dag (directed acyclic graph) | dag（有向非巡回グラフ） | 部分木を共有した木 |
+| RISC | 縮小命令セット計算機（RISC） | 初出で併記 |
+| recognizer / constructor | 判別子／構成子 | データ型の演算子 |
+| microcode | マイクロコード | |
+| paging | ページング | 仮想記憶 |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -376,8 +398,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter9.md` | 完了 |
-| `chapter10.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter10.md` | 完了 |
+| `chapter11.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証

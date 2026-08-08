@@ -264,7 +264,7 @@ bignum を足すコードは複雑すぎてインラインに置けないので�
 ベクタの型指定子の形式は `(vector *型 大きさ*)` です。
 
 これらの宣言のいくつかは一度にまとめて適用できることに注意してください。
-For example, in
+たとえば次では、
 
 ```lisp
 (position # \ . (the simple-string file-name))
@@ -733,7 +733,7 @@ X               ; But AREF can see beyond the fill pointer
    (t fail)))))
 ```
 
-An example of its use:
+その使用例を示します。
 
 ```lisp
 >(efficient-pat-match '(?x + ?x = ?y . ?z)
@@ -741,9 +741,9 @@ An example of its use:
 (#(?X ?Y ?Z) . #(2 (3 + 1) (IS TRUE)))
 ```
 
-Extensible vectors with fill pointers are convenient, and much more efficient than consing up lists.
-However, there is some overhead involved in using them, and for those sections of code that must be most efficient, it is best to stick with simple vectors.
-The following version of `efficient-pat-match` explicitly manages the size of the vectors and explicitly replaces them with new ones when the size is exceeded:
+フィルポインタを持つ拡張可能なベクタは便利で、リストをコンスするよりずっと効率的です。
+ただしそれらを使うにはいくらか間接費が伴うので、最も効率的でなければならないコードの部分では、単純ベクタを使い続けるのが最善です。
+次の版の `efficient-pat-match` は、ベクタの大きさを明示的に管理し、大きさを超えたときには明示的に新しいものに置き換えます。
 
 ```lisp
 (let* ((current-size 0)
@@ -777,9 +777,9 @@ The following version of `efficient-pat-match` explicitly manages the size of th
    (t fail)))))
 ```
 
-In conclusion, replacing lists with vectors can often save garbage.
-But when you must use lists, it pays to use a version of cons that avoids consing when possible.
-The following is such a version:
+結論として、リストをベクタに置き換えると、しばしばごみを節約できます。
+しかしリストを使わねばならないときは、可能なときにコンスを避ける版の cons を使う値打ちがあります。
+以下がそうした版です。
 
 ```lisp
 (proclaim '(inline reuse-cons))
@@ -790,8 +790,8 @@ The following is such a version:
    (cons x y)))
 ```
 
-The trick is based on the definition of subst in Steele's *Common Lisp the Language*.
-Here is a definition for a version of `remove` that uses `reuse-cons`:
+この仕掛けは、Steeleの *Common Lisp the Language* の subst の定義に基づいています。
+`reuse-cons` を使う `remove` の版の定義を示します。
 
 ```lisp
 (defun remq (item list)
@@ -803,17 +803,17 @@ Here is a definition for a version of `remove` that uses `reuse-cons`:
         list))))
 ```
 
-### Avoid Consing: Unique Lists
+### コンスを避ける: 一意なリスト
 
-Of course, `reuse-cons` only works when you have candidate cons cells around.
-That is, (`reuse-cons a b c`) only saves space when `c` is (or might be) equal to (`cons a b`).
-For some applications, it is useful to have a version of `cons` that returns a unique cons cell without needing `c` as a hint.
-We will call this version `ucons` for "unique cons."
-`ucons` maintains a double hash table: `*uniq-cons-table*` is a hash table whose keys are the `cars` of cons cells.
-The value for each `car` is another hash table whose keys are the `cdrs` of cons cells.
-The value of each `cdr` in this second table is the original cons cell.
-So two different cons cells with the same `car` and `cdr` will retrieve the same value.
-Here is an implementation of `ucons`:
+もちろん `reuse-cons` は、候補となるコンスセルが手元にあるときにしか働きません。
+つまり (`reuse-cons a b c`) が領域を節約するのは、`c` が (`cons a b`) に等しい（あるいは等しいかもしれない）ときだけです。
+応用によっては、`c` を手がかりとして必要とせずに一意なコンスセルを返す `cons` の版があると役立ちます。
+この版を「一意な cons」の意で `ucons` と呼びます。
+`ucons` は二重のハッシュ表を保ちます。`*uniq-cons-table*` は、コンスセルの `car` をキーとするハッシュ表です。
+各 `car` の値は、コンスセルの `cdr` をキーとする別のハッシュ表です。
+この2つ目の表における各 `cdr` の値が、元のコンスセルです。
+ですから、同じ `car` と `cdr` を持つ2つの異なるコンスセルは、同じ値を引き当てます。
+`ucons` の実装を示します。
 
 ```lisp
 (defvar *uniq-cons-table* (make-hash-table :test #'eq))
@@ -826,13 +826,13 @@ Here is an implementation of `ucons`:
     (setf (gethash y car-table) (cons x y)))))
 ```
 
-`ucons`, unlike `cons`, is a true function: it will always return the same value, given the same arguments, where "same" is measured by `eq`.
-However, if `ucons` is given arguments that are `equal` but not `eq`, it will not return a unique result.
-For that we need the function `unique`.
-It has the property that `(unique x)` is eq to `(unique y)` whenever `x` and `y` are equal.
-`unique` uses a hash table for atoms in addition to the double hash table for conses.
-This is necessary because strings and arrays can be equal without being eq.
-Besides `unique`, we also define `ulist` and uappend for convenience.
+`ucons` は `cons` と違って本物の関数です。同じ引数を与えれば常に同じ値を返します。ここで「同じ」は `eq` で測られます。
+ただし `ucons` に、`equal` だが `eq` でない引数を与えると、一意な結果は返しません。
+それには関数 `unique` が要ります。
+これは、`x` と `y` が equal であればいつでも `(unique x)` が `(unique y)` と eq である、という性質を持ちます。
+`unique` は、cons のための二重のハッシュ表に加えて、アトムのためのハッシュ表も使います。
+これは、文字列や配列が eq でなくても equal でありうるので必要です。
+`unique` のほかに、便宜のため `ulist` と uappend も定義します。
 
 ```lisp
 (defvar *uniq-atom-table* (make-hash-table :test #'equal))
@@ -859,10 +859,10 @@ Besides `unique`, we also define `ulist` and uappend for convenience.
     (ucons (first x) (uappend (rest x) y))))
 ```
 
-The above code works, but it can be improved.
-The problem is that when `unique` is applied to a tree, it always traverses the tree all the way to the leaves.
-The function `unique-cons` is like `ucons,` except that `unique-cons` assumes its arguments are not yet unique.
-We can modify `unique-cons` so that it first checks to see if its arguments are unique, by looking in the appropriate hash tables:
+上のコードは働きますが、改善できます。
+問題は、`unique` が木に適用されると、常に木を葉まですっかりたどることです。
+関数 `unique-cons` は `ucons` に似ていますが、`unique-cons` は引数がまだ一意でないと仮定する点が違います。
+`unique-cons` を、適切なハッシュ表を見て引数が一意かどうかをまず調べるよう変えられます。
 
 ```lisp
 (defun unique-cons (x y)
@@ -880,15 +880,15 @@ We can modify `unique-cons` so that it first checks to see if its arguments are 
       (cons ux uy))))))
 ```
 
-Another advantage of `unique` is that it can help in indexing.
-If lists are unique, then they can be stored in an `eq` hash table instead of a equal hash table.
-This can lead to significant savings when the list structures are large.
-An `eq` hash table for lists is almost as good as a property list on symbols.
+`unique` のもう1つの利点は、索引付けの助けになることです。
+リストが一意なら、equal のハッシュ表ではなく `eq` のハッシュ表に格納できます。
+リストの構造が大きいとき、これは相当な節約につながりえます。
+リストのための `eq` のハッシュ表は、シンボルの属性リストとほぼ同じくらいよいものです。
 
-### Avoid Consing: Multiple Values
+### コンスを避ける: 多値
 
-Parameters and multiple values can also be used to pass around values, rather than building up lists.
-For example, instead of:
+引数と多値も、リストを組み立てるのではなく値を持ち回るのに使えます。
+たとえば次の代わりに、
 
 ```lisp
 (defstruct point "A point in 3-D cartesian space." x y z)
@@ -899,7 +899,7 @@ For example, instead of:
          :z (* k (point-z pt))))
 ```
 
-one could use the following approach, which doesn't generate structures:
+構造を生成しない次の方式を使えます。
 
 ```lisp
 (defun scale-point (k x y z)
@@ -907,23 +907,23 @@ one could use the following approach, which doesn't generate structures:
  (values (* k x) (* k y) (* k z)))
 ```
 
-### Avoid Consing: Resources
+### コンスを避ける: 資源プール
 
-Sometimes it pays to manage explicitly the storage of instances of some data type.
-A pool of these instances may be called a *resource*.
-Explicit management of a resource is appropriate when: (1) instances are frequently created, and are needed only temporarily; (2) it is easy/possible to be sure when instances are no longer needed; and (3) instances are fairly large structures or take a long time to initialize, so that it is worth reusing them instead of creating new ones.
-Condition (2) is the crucial one: If you deallocate an instance that is still being used, that instance will mysteriously be altered when it is reallocated.
-Conversely, if you fail to deallocate unneeded instances, then you are wasting valuable memory space.
-(The memory management scheme is said to leak in this case.)
+あるデータ型の実体の記憶を明示的に管理する値打ちがあることもあります。
+こうした実体のプールを*資源*と呼ぶことにします。
+資源の明示的な管理が適切なのは次のときです。(1) 実体が頻繁に作られ、一時的にしか必要とされない。(2) 実体がもう必要でなくなる時を確かめるのが容易／可能である。(3) 実体がかなり大きな構造か、初期化に長い時間がかかるので、新しく作るより再利用する値打ちがある。
+肝心なのは条件(2)です。まだ使われている実体を解放すると、その実体は再び割り当てられたときに不可解に書き換わってしまいます。
+逆に、不要な実体の解放を怠れば、貴重なメモリ領域を無駄にしていることになります。
+（この場合、メモリ管理の仕組みは漏れていると言われます。）
 
-The beauty of using Lisp's built-in memory management is that it is guaranteed never to leak and never to deallocate structures that are in use.
-This eliminates two potential bug sources.
-The penalty you pay for this guarantee is some inefficiency of the general-purpose memory management as compared to a custom user-supplied management scheme.
-But beware: modern garbage-collection techniques are highly optimized.
-In particular, the so-called *generation scavenging* or *ephemeral* garbage collectors look more often at recently allocated storage, on the grounds that recently made objects are more likely to become garbage.
-If you hold on to garbage in your own data structures, you may end up with worse performance.
+Lispの組み込みのメモリ管理を使うことの美点は、決して漏れず、使用中の構造を決して解放しないと保証されていることです。
+これは2つの潜在的なバグの源をなくします。
+この保証のために払う代価は、利用者が用意した専用の管理の仕組みに比べたときの、汎用のメモリ管理のいくらかの非効率です。
+しかし気をつけてください。現代のごみ集めの技法は高度に最適化されています。
+とくに、いわゆる*世代掃討*あるいは*短命*のごみ集めは、最近作られたオブジェクトのほうがごみになりやすいという理由から、最近割り当てられた記憶をより頻繁に見ます。
+自分のデータ構造の中にごみを抱え込むと、かえって性能が悪くなるかもしれません。
 
-With all these warnings in mind, here is some code to manage resources:
+これらの警告をすべて念頭に置いて、資源を管理するコードを示します。
 
 ```lisp
 (defmacro defresource (name &key constructor (initial-copies 0)
@@ -946,16 +946,16 @@ With all these warnings in mind, here is some code to manage resources:
    ',name)))
 ```
 
-Let's say we had some structure called a buffer which we were constantly making instances of and then discarding.
-Furthermore, suppose that buffers are fairly complex objects to build, that we know we'll need at least 10 of them at a time, and that we probably won't ever need more than 100 at a time.
-We might use the buffer resource as follows:
+buffer という構造があり、その実体を絶えず作っては捨てているとしましょう。
+さらに、buffer は組み立てるのがかなり複雑なオブジェクトで、一度に少なくとも10個は必要だと分かっており、一度に100個を超えて必要になることはおそらくない、としましょう。
+buffer の資源を次のように使えるでしょう。
 
 ```lisp
 (defresource buffer :constructor (make-buffer)
       :size 100 : initial-copies 10)
 ```
 
-This expands into the following code:
+これは次のコードに展開されます。
 
 ```lisp
 (let ((buffer-resource (make-array 100 :fill-pointer 0)))
@@ -972,7 +972,7 @@ This expands into the following code:
  'buffer)
 ```
 
-We could then use:
+そして次のように使えます。
 
 ```lisp
 (let ((b (allocate-buffer)))
@@ -982,10 +982,10 @@ We could then use:
  (deallocate-buffer b)))
 ```
 
-The important thing to remember is that this works only if the buffer `b` really can be deallocated.
-If the function `process` stored away a pointer to `b` somewhere, then it would be a mistake to deallocate `b,` because a subsequent allocation could unpredictably alter the stored buffer.
-Of course, if `process` stored a *copy* of `b,` then everything is alright.
-This pattern of allocation and deallocation is so common that we can provide a macro for it:
+覚えておくべき大切なことは、これは buffer `b` が本当に解放できる場合にのみ働く、ということです。
+もし関数 `process` が `b` へのポインタをどこかに保存していたら、`b` を解放するのは間違いです。あとの割り当てが、保存された buffer を予測できない形で書き換えうるからです。
+もちろん `process` が `b` の*複製*を保存していたなら、すべて問題ありません。
+この割り当てと解放の型はとてもよくあるので、そのためのマクロを用意できます。
 
 ```lisp
 (defmacro with-resource ((var resource &optional protect) &rest body)
@@ -1001,8 +1001,8 @@ This pattern of allocation and deallocation is so common that we can provide a m
            (,deallocate var)))))
 ```
 
-The macro allows for an optional argument that sets up an `unwind-protect` environment, so that the buffer gets deallocated even when the body is abnormally exited.
-The following expansions should make this clearer:
+このマクロは `unwind-protect` の環境を整える省略可能な引数を許し、本体が異常に抜けたときでも buffer が解放されるようにします。
+次の展開を見れば、これがよりはっきりするはずです。
 
 ```lisp
 > (macroexpand '(with-resource (b buffer)
@@ -1024,30 +1024,30 @@ The following expansions should make this clearer:
             (deallocate-buffer b))))
 ```
 
-An alternative to full resources is to just save a single data object.
-Such an approach is simpler because there is no need to index into a vector of objects, but it is sufficient for some applications, such as a tail-recursive function call that only uses one object at a time.
+本格的な資源プールの代わりに、単一のデータオブジェクトだけを保存する手もあります。
+この方式は、オブジェクトのベクタを索引する必要がないので単純ですが、一度に1つのオブジェクトしか使わない末尾再帰の関数呼び出しのような、いくつかの応用には十分です。
 
-Another possibility is to make the system slower but safer by having the `deallocate` function check that its argument is indeed an object of the correct type.
+もう1つの可能性は、`deallocate` 関数に、引数が確かに正しい型のオブジェクトかを調べさせることで、システムを遅くする代わりに安全にすることです。
 
-Keep in mind that using resources may put you at odds with the Lisp system's own storage management scheme.
-In particular, you should be concerned with paging performance on virtual memory systems.
-A common problem is to have only a few live objects on each page, thus forcing the system to do a lot of paging to get any work done.
-Compacting garbage collectors can collect live objects onto the same page, but using resources may interfere with this.
+資源プールを使うと、Lispシステム自身の記憶管理の仕組みと相容れなくなるかもしれないことを心に留めておいてください。
+とくに、仮想記憶のシステムでのページングの性能に気を配るべきです。
+よくある問題は、各ページに生きたオブジェクトが少ししかなく、そのためシステムが何か仕事をするのに多くのページングを強いられることです。
+詰め込み型のごみ集めは生きたオブジェクトを同じページに集められますが、資源プールを使うとこれを妨げるかもしれません。
 
-## 10.5 Use the Right Data Structures
+## 10.5 適切なデータ構造を使う
 
-It is important to implement key data types with the most efficient implementation.
-This can vary from machine to machine, but there are a few techniques that are universal.
-Here we consider three case studies.
+鍵となるデータ型を、最も効率的な実装で実装することが重要です。
+これは計算機ごとに異なりえますが、普遍的な技法もいくつかあります。
+ここでは3つの事例研究を考えます。
 
-### The Right Data Structure: Variables
+### 適切なデータ構造: 変数
 
-As an example, consider the implementation of pattern-matching variables.
-We saw from the instrumentation of `simplify` that `variable-p` was one of the most frequently used functions.
-In compiling the matching expressions, I did away with all calls to `variable-p`, but let's suppose we had an application that required run-time use of variables.
-The specification of the data type `variable` will include two operators, the recognizer `variable-p`, and the constructor `make-variable`, which gives a new, previously unused variable.
-(This was not needed in the pattern matchers shown so far, but will be needed for unification with backward chaining.)
-One implementation of variables is as symbols that begin with the character `#\?`:
+例として、パターン照合の変数の実装を考えてみましょう。
+`simplify` の計測から、`variable-p` が最もよく使われる関数の1つだと分かりました。
+照合の式をコンパイルする際に `variable-p` の呼び出しはすべて取り除きましたが、変数を実行時に使う必要のある応用があるとしましょう。
+データ型 `variable` の仕様には2つの演算子が含まれます。判別子 `variable-p` と、以前使われていない新しい変数を与える構成子 `make-variable` です。
+（これはここまで示したパターン照合器では要りませんでしたが、後ろ向き連鎖を伴う単一化には必要になります。）
+変数の1つの実装は、文字 `#\?` で始まるシンボルとするものです。
 
 ```lisp
 (defun variable-p (x)
@@ -1056,7 +1056,7 @@ One implementation of variables is as symbols that begin with the character `#\?
 (defun make-variable O "Generate a new variable" (gentemp "?"))
 ```
 
-We could try to speed things up by changing the implementation of variables to be keywords and making the functions inline:
+変数の実装をキーワードに変え、関数をインラインにすることで、速くしようとすることもできます。
 
 ```lisp
 (proclaim '(inline variable-p make-variable))
@@ -1064,10 +1064,10 @@ We could try to speed things up by changing the implementation of variables to b
 (defun make-variable O (gentemp "X" #.(find-package "KEYWORD")))
 ```
 
-(The reader character sequence `#.` means to evaluate at read time, rather than at execution time.)
-On my machine, this implementation is pretty fast, and I accepted it as a viable compromise.
-However, other implementations were also considered.
-One was to have variables as structures, and provide a read macro and print function:
+（リーダの文字列 `#.` は、実行時ではなく読み取り時に評価することを意味します。）
+私の計算機では、この実装はかなり速く、実行可能な妥協として受け入れました。
+しかし他の実装も検討しました。
+1つは、変数を構造体とし、読み取りマクロと表示関数を用意するものです。
 
 ```lisp
 (defstruct (variable (:print-function print-variable)) name)
@@ -1087,18 +1087,18 @@ One was to have variables as structures, and provide a read macro and print func
   (format stream "?~a" (var-name var)))
 ```
 
-It turned out that, on all three Lisps tested, structures were slower than keywords or symbols.
-Another alternative is to have the `?` read macro return a cons whose first is, say, `:var`.
-This requires a special output routine to translate back to the `?` notation.
-Yet another alternative, which turned out to be the fastest of all, was to implement variables as negative integers.
-Of course, this means that the user cannot use negative integers elsewhere in patterns, but that turned out to be acceptable for the application at hand.
-The moral is to know which features are done well in your particular implementation and to go out of your way to use them in critical situations, but to stick with the most straightforward implementation in noncritical sections.
+試した3つのLispすべてで、構造体はキーワードやシンボルより遅いことが分かりました。
+もう1つの代案は、`?` の読み取りマクロに、first がたとえば `:var` である cons を返させることです。
+これには `?` 記法に翻訳し戻す特別な出力の手続きが要ります。
+さらに別の代案 — これが最も速いと分かったのですが — は、変数を負の整数として実装することでした。
+もちろんこれは、利用者がパターンの他の場所で負の整数を使えないということですが、目の前の応用ではそれが受け入れられると分かりました。
+教訓は、あなたの特定の処理系でどの機能がうまく実装されているかを知り、肝心な場面ではわざわざそれらを使い、肝心でない部分では最も素直な実装を使い続けることです。
 
-Lisp makes it easy to rely on lists, but one must avoid the temptation to overuse lists; to use them where another data structure is more appropriate.
-For example, if you need to access elements of a sequence in arbitrary order, then a vector is more appropriate than list.
-If the sequence can grow, use an adjustable vector.
-Consider the problem of maintaining information about a set of people, and searching that set.
-A naive implementation might look like this:
+Lispはリストに頼るのを容易にしますが、リストを使いすぎる誘惑 — 別のデータ構造のほうが適切な場所でリストを使う誘惑 — は避けねばなりません。
+たとえば列の要素に任意の順序でアクセスする必要があるなら、リストよりベクタが適切です。
+列が大きくなりうるなら、大きさを変えられるベクタを使ってください。
+人々の集合についての情報を保ち、その集合を探索する問題を考えてみましょう。
+素朴な実装は次のようになるでしょう。
 
 ```lisp
 (defvar *people* nil "Will hold a list of people")
@@ -1107,8 +1107,8 @@ A naive implementation might look like this:
  (find id *people* :key #'person-id-number))
 ```
 
-In a traditional language like C, the natural solution is to include in the person structure a pointer to the next person, and to write a loop to follow these pointers.
-Of course, we can do that in Lisp too:
+Cのような伝統的な言語では、自然な解決は person の構造に次の person へのポインタを含め、それらのポインタをたどるループを書くことです。
+もちろんLispでもそれはできます。
 
 ```lisp
 (defstruct person name address id-number next)
@@ -1119,29 +1119,29 @@ Of course, we can do that in Lisp too:
      (RETURN person))))
 ```
 
-This solution takes less space and is probably faster, because it requires less memory accesses: one for each person rather than one for each person plus one for each cons cell.
-So there is a small price to pay for using lists.
-But Lisp programmers feel that price is worth it, because of the convenience and ease of coding and debugging afforded by general-purpose functions like `find`.
+この解は領域が少なく、おそらく速いのです。メモリアクセスが少なくて済むからです。person ごとに1回に加えてコンスセルごとに1回ではなく、person ごとに1回だけです。
+ですからリストを使うことには小さな代価があります。
+しかしLispプログラマは、`find` のような汎用の関数がもたらすコーディングとデバッグの便利さと容易さゆえに、その代価は見合うと感じています。
 
-In any case, if there are going to be a large number of people, the list is definitely the wrong data structure.
-Fortunately, Lisp makes it easy to switch to more efficient data structures, for example:
+いずれにせよ、person が多数になるなら、リストは間違いなく誤ったデータ構造です。
+幸い、Lispはより効率的なデータ構造への切り替えを容易にします。たとえば次のようにです。
 
 ```lisp
 (defun person-with-id (id)
  (gethash id *people*))
 ```
 
-### The Right Data Structure: Queues
+### 適切なデータ構造: キュー
 
-A *queue* is a data structure where one can add elements at the rear and remove them from the front.
-This is almost like a stack, except that in a stack, elements are both added and removed at the same end.
+*キュー*は、後ろに要素を加え、前から取り除けるデータ構造です。
+これはスタックにほぼ似ていますが、スタックでは要素が同じ端で加えられも取り除かれもする点が違います。
 
-Lists can be used to implement stacks, but there is a problem in using lists to implement queues: adding an element to the rear requires traversing the entire list.
-So collecting *n* elements would be *O*(*n<sup>2</sup>*) instead of *O*(*n*).
+リストはスタックの実装に使えますが、キューの実装にリストを使うのには問題があります。後ろに要素を加えるにはリスト全体をたどる必要があるのです。
+ですから *n* 個の要素を集めるのは *O*(*n*) ではなく *O*(*n<sup>2</sup>*) になってしまいます。
 
-An alternative implementation of queues is as a cons of two pointers: one to the list of elements of the queue (the contents), and one to the last cons cell in the list.
-Initially, both pointers would be nil.
-This implementation in fact existed in BBN Lisp and UCI Lisp under the function name `tconc`:
+キューの別の実装は、2つのポインタの cons とするものです。1つはキューの要素の並び（中身）への、もう1つはその並びの最後のコンスセルへのポインタです。
+最初、両方のポインタは nil です。
+この実装は実際、BBN LispとUCI Lispに `tconc` という関数名で存在しました。
 
 ```lisp
 ;;; A queue is a (contents . last) pair
@@ -1154,12 +1154,12 @@ This implementation in fact existed in BBN Lisp and UCI Lisp under the function 
        (cons item nil)))))
 ```
 
-The `tconc` implementation has the disadvantage that adding the first element to the contents is different from adding subsequent elements, so an `if` statement is required to decide which action to take.
-The definition of queues given below avoids this disadvantage with a clever trick.
-First, the order of the two fields is reversed.
-The `car` of the cons cell is the last element, and the `cdr` is the contents.
-Second, the empty queue is a cons cell where the `cdr` (the contents field) is nil, and the `car` (the last field) is the cons itself.
-In the definitions below, we change the name `tconc` to the more standard `enqueue`, and provide the other queue functions as well:
+`tconc` の実装には、中身に最初の要素を加えるのが以降の要素を加えるのと異なるという欠点があり、そのためどちらの動作を取るかを決める `if` 文が要ります。
+以下に示すキューの定義は、巧みな仕掛けでこの欠点を避けます。
+第一に、2つの欄の順序を逆にします。
+コンスセルの `car` が最後の要素で、`cdr` が中身です。
+第二に、空のキューは、`cdr`（中身の欄）が nil で、`car`（最後の欄）がその cons 自身であるコンスセルです。
+以下の定義では、`tconc` という名をより標準的な `enqueue` に変え、他のキューの関数も用意します。
 
 ```lisp
 ;;; A queue is a (last . contents) pair
@@ -1196,40 +1196,40 @@ In the definitions below, we change the name `tconc` to the more standard `enque
      (last (setf (rest (car q)) list))))
 ```
 
-### The Right Data Structure: Tables
+### 適切なデータ構造: 表
 
-A *table* is a data structure to which one can insert a key and associate it with a value, and later use the key to look up the value.
-Tables may have other operations, like counting the number of keys, clearing out all keys, or mapping a function over each key/value pair.
+*表*は、キーを挿入して値と結び付け、あとでそのキーを使って値を引けるデータ構造です。
+表には、キーの数を数える、すべてのキーを消し去る、各キーと値の対に関数を写す、といった他の操作もありえます。
 
-Lisp provides a wide variety of choices to implement tables.
-An association list is perhaps the simplest: it is just a list of key/value pairs.
-It is appropriate for small tables, up to a few dozen pairs.
-The hash table is designed to be efficient for large tables, but may have significant overhead for small ones.
-If the keys are symbols, property lists can be used.
-If the keys are integers in a narrow range (or can be mapped into them), then a vector may be the most efficient choice.
+Lispは表を実装する多種多様な選択肢を提供します。
+連想リストがおそらく最も単純です。キーと値の対の並びにすぎません。
+数十組までの小さな表に適しています。
+ハッシュ表は大きな表に効率的であるよう設計されていますが、小さなものには相当な間接費があるかもしれません。
+キーがシンボルなら、属性リストが使えます。
+キーが狭い範囲の整数なら（あるいはそれに対応づけられるなら）、ベクタが最も効率的な選択かもしれません。
 
-Here we implement an alternative data structure, the *trie*.
-A trie implements a table for keys that are composed of a finite sequence of components.
-For example, if we were implementing a dictionary as a trie, each key would be a word, and each letter of the word would be a component.
-The value of the key would be the word's definition.
-At the top of the dictionary trie is a multiway branch, one for each possible first letter.
-Each second-level node has a branch for every possible second letter, and so on.
-To find an *n*-letter word requires *n* reads.
-This kind of organization is especially good when the information is stored on secondary storage, because a single read can bring in a node with all its possible branches.
+ここでは別のデータ構造、*トライ*を実装します。
+トライは、有限個の構成要素の並びからなるキーのための表を実装します。
+たとえば辞書をトライとして実装するなら、各キーは単語で、単語の各文字が構成要素になります。
+キーの値はその単語の定義でしょう。
+辞書のトライの頂上には多分岐があり、ありうる最初の文字ごとに1つずつです。
+第2水準の各ノードは、ありうる2番目の文字ごとに分岐を持ち、以下同様です。
+*n* 文字の単語を見つけるには *n* 回の読み取りが要ります。
+この種の構成は、情報が二次記憶に格納されているときにとくに優れています。1回の読み取りで、ありうる分岐をすべて持つノードを持ってこられるからです。
 
-If the keys can be arbitrary list structures, rather than a simple sequence of letters, we need to regularize the keys, transforming them into a simple sequence.
-One way to do that makes use of the fact that any tree can be written as a linear sequence of atoms and cons operations, in prefix form.
-Thus, we would make the following transformation:
+キーが単純な文字の並びではなく任意のリスト構造でありうるなら、キーを正規化し、単純な並びに変える必要があります。
+それを行う1つの方法は、どんな木もアトムと cons 演算の線形な並びとして前置形で書ける、という事実を使います。
+こうして、次の変換を行います。
 
 `(a (b c) d)` &Congruent;
 `(cons a (cons (cons b (cons c nil)) (cons d nil)))` &Congruent;
 `(cons a cons cons b cons c nil cons d nil)`
 
-In the implementation of tries below, this transformation is done on the fly: The four user-level functions are `make-trie` to create a new trie, `put-trie` and `get-trie` to add and retrieve key/value pairs, and `delete-trie` to remove them.
+以下のトライの実装では、この変換をその場で行います。利用者水準の4つの関数は、新しいトライを作る `make-trie`、キーと値の対を加え取り出す `put-trie` と `get-trie`、そしてそれらを取り除く `delete-trie` です。
 
-Notice that we use a distinguished value to mark deleted elements, and that `get-trie` returns two values: the actual value found, and a flag saying if anything was found or not.
-This is consistent with the interface to `gethash` and `find`, and allows us to store null values in the trie.
-It is an inobtrusive choice, because the programmer who decides not to store null values can just ignore the second value, and everything will work properly.
+削除された要素を印すのに特別な値を使うこと、そして `get-trie` が2つの値 — 実際に見つかった値と、何か見つかったかどうかを示す旗 — を返すことに注目してください。
+これは `gethash` や `find` のインタフェースと一貫しており、トライに空の値を格納することを可能にします。
+これは出しゃばらない選択です。空の値を格納しないと決めたプログラマは2つ目の値を無視するだけでよく、すべて正しく働くからです。
 
 ```lisp
 (defstruct trie (value nil) (arcs nil))
@@ -1271,53 +1271,53 @@ It is an inobtrusive choice, because the programmer who decides not to store nul
        new-trie)))))
 ```
 
-There are a few subtleties in the implementation.
-First, we test for deleted entries with an `eq` comparison to a distinguished marker, the string `trie-deleted`.
-No other object will be `eq` to this string except `trie-deleted` itself, so this is a good test.
-We also use a distinguished marker, the string `"."` to mark cons cells.
-Components are implicitly compared against this marker with an `eql` test by the `assoc` in `follow-arc`.
-Maintaining the identity of this string is crucial; if, for example, you recompiled the definition of `find-trie` (without changing the definition at all), then you could no longer find keys that were indexed in an existing trie, because the `"."` used by `find-trie` would be a different one from the `"."` in the existing trie.
+この実装にはいくつか微妙な点があります。
+第一に、削除された項目を、特別な目印である文字列 `trie-deleted` との `eq` の比較で調べます。
+`trie-deleted` 自身を除いて、この文字列と `eq` になる他のオブジェクトはないので、これはよい判定です。
+コンスセルを印すのにも、特別な目印である文字列 `"."` を使います。
+構成要素は、`follow-arc` の中の `assoc` によって、この目印と `eql` の判定で暗黙のうちに比べられます。
+この文字列の同一性を保つことは肝心です。たとえば `find-trie` の定義を（まったく変えずに）再コンパイルすると、既存のトライに索引づけられたキーをもう見つけられなくなります。`find-trie` が使う `"."` が、既存のトライの `"."` とは別のものになるからです。
 
-*Artificial Intelligence Programming* ([Charniak et al.
-1987](bibliography.md#bb0180)) discusses variations on the trie, particularly in the indexing scheme.
-If we always use proper lists (no non-null `cdrs`), then a more efficient encoding is possible.
-As usual, the best type of indexing depends on the data to be indexed.
-It should be noted that Charniak et al.
-call the trie a *discrimination net*.
-In general, that term refers to any tree with tests at the nodes.
+*Artificial Intelligence Programming*（[Charniak ら
+1987](bibliography.md#bb0180)）は、トライの変種を、とくに索引付けの仕組みについて論じています。
+常に真リスト（nil でない `cdr` を持たない）を使うなら、より効率的な符号化が可能です。
+いつものように、最良の索引付けの種類は、索引づけるデータによります。
+Charniak らは
+トライを*判別ネット*と呼んでいることに留意すべきです。
+一般にこの語は、ノードに判定を持つ任意の木を指します。
 
-A trie is, of course, a kind of tree, but there are cases where it pays to convert a trie into a *dag*-a directed acyclic graph.
-A dag is a tree where some of the subtrees are shared.
-Imagine you have a spelling corrector program with a list of some 50,000 or so words.
-You could put them into a trie, each word with the value `t`.
-But there would be many subtrees repeated in this trie.
-For example, given a word list containing *look*, *looks*, *looked*, and *looking* as well as *show*, *shows*, *showed*, and *showing*, there would be repetition of the subtree containing *-s*, *-ed* and *-ing*.
-After the trie is built, we could pass the whole trie to `unique`, and it would collapse the shared subtrees, saving storage.
-Of course, you can no longer add or delete keys from the dag without risking unintended side effects.
+トライはもちろん木の一種ですが、トライを*dag* — 有向非巡回グラフ — に変える値打ちがある場合もあります。
+dag とは、部分木のいくつかが共有された木です。
+5万ほどの単語の並びを持つ綴り訂正プログラムがあると想像してください。
+それらをトライに入れ、各単語に値 `t` を持たせられます。
+しかしこのトライには、繰り返される部分木が多くあるでしょう。
+たとえば *look*、*looks*、*looked*、*looking* と、*show*、*shows*、*showed*、*showing* を含む単語の並びが与えられると、*-s*、*-ed*、*-ing* を含む部分木の繰り返しが生じます。
+トライを組み立てたあと、トライ全体を `unique` に渡せば、共有された部分木を潰して記憶を節約します。
+もちろん、意図しない副作用の危険を冒さずに dag からキーを加えたり削除したりすることは、もうできません。
 
-This process was carried out for a 56,000 word list.
-The trie took up 3.2Mbytes, while the dag was 1.1Mbytes.
-This was still deemed unacceptable, so a more compact encoding of the dag was created, using a .2Mbytes vector.
-Encoding the same word list in a hash table took twice this space, even with a special format for encoding suffixes.
+この処理を5万6000語の並びに対して行いました。
+トライは3.2Mバイトを占めましたが、dag は1.1Mバイトでした。
+これでもなお受け入れがたいと見なされたので、.2Mバイトのベクタを使って、dag のより小さな符号化を作りました。
+同じ単語の並びをハッシュ表に符号化すると、接尾辞を符号化する特別な形式を使ってさえ、この2倍の領域を取りました。
 
-Tries work best when neither the indexing key nor the retrieval key contains variables.
-They work reasonably well when the variables are near the end of the sequence.
-Consider looking up the pattern `yello?` in the dictionary, where the `?` character indicates a match of any letter.
-Following the branches for `yello` leads quickly to the only possible match, `yellow`.
-In contrast, fetching with the pattern `??llow` is much less efficient.
-The table lookup function would have to search all 26 top-level branches, and for each of those consider all possible second letters, and for each of those consider the path `llow`.
-Quite a bit of searching is required before arriving at the complete set of matches: bellow, billow, fallow, fellow, follow, hallow, hollow, mallow, mellow, pillow, sallow, tallow, wallow, willow, and yellow.
+トライは、索引づけるキーにも取り出しのキーにも変数が含まれないときに最もうまく働きます。
+変数が並びの終わり近くにあるときは、それなりにうまく働きます。
+辞書でパターン `yello?` を引くことを考えてみましょう。ここで `?` の文字は任意の文字への合致を示します。
+`yello` の分岐をたどれば、唯一ありうる合致 `yellow` に素早くたどり着きます。
+これに対し、パターン `??llow` で取ってくるのはずっと効率が悪いのです。
+表を引く関数は26の最上位の分岐すべてを探し、そのそれぞれについてありうる2番目の文字すべてを考え、そのそれぞれについて経路 `llow` を考えねばなりません。
+合致の完全な集合 — bellow, billow, fallow, fellow, follow, hallow, hollow, mallow, mellow, pillow, sallow, tallow, wallow, willow, yellow — にたどり着く前に、かなりの探索が要ります。
 
-We will return to the problem of discrimination nets with variables in [section 14.8](chapter14.md#s0040), [page 472](chapter14.md#p472).
+変数を含む判別ネットの問題には、[14.8節](chapter14.md#s0040)・[472ページ](chapter14.md#p472)で立ち戻ります。
 
-## 10.6 Exercises
+## 10.6 練習問題
 
-**Exercise 10.1 [h]** Define the macro `deftable,` such that `(deftable person assoc`) will act much like a `defstruct` - it will define a set of functions for manipulating a table of people: `get-person`, `put-person`, `clear-person,` and `map-person`.
-The table should be implemented as an association list.
-Later on, you can change the representation of the table simply by changing the form to `(deftable person hash)`, without having to change anything else in your code.
-Other implementation options include property lists and vectors.
-`deftable` should also take three keyword arguments: `inline`, `size` and `test`.
-Here is a possible macroexpansion:
+**練習問題 10.1 [h]** マクロ `deftable` を定義せよ。`(deftable person assoc`) が `defstruct` によく似た働きをし、人々の表を操作する関数の組 — `get-person`、`put-person`、`clear-person`、`map-person` — を定義するようにせよ。
+表は連想リストとして実装すべきである。
+のちに、コードの他の部分を何も変えることなく、単に形を `(deftable person hash)` に変えるだけで表の表現を変えられる。
+他の実装の選択肢には属性リストとベクタがある。
+`deftable` は3つのキーワード引数 `inline`、`size`、`test` もとるべきである。
+ありうるマクロ展開を示す。
 
 ```
 
@@ -1336,27 +1336,27 @@ Here is a possible macroexpansion:
  'person)
 ```
 
-**Exercise 10.2 [m]** We can use the `:type` option to `defstruct` to define structures implemented as lists.
-However, often we have a two-field structure that we would like to implement as a cons cell rather than a two-element list, thereby cutting storage in half.
-Since `defstruct` does not allow this, define a new macro that does.
+**練習問題 10.2 [m]** `defstruct` の `:type` の選択肢を使えば、リストとして実装された構造体を定義できる。
+しかし、2つの欄の構造体を2要素のリストではなくコンスセルとして実装し、記憶を半分に削りたいことがよくある。
+`defstruct` はこれを許さないので、それを許す新しいマクロを定義せよ。
 
-**Exercise 10.3 [m]** Use `reuse-cons` to write a version of `flatten` (see [page 329](chapter10.md#p329)) that shares as much of its input with its output as possible.
+**練習問題 10.3 [m]** `reuse-cons` を使って、入力をできるだけ多く出力と共有する `flatten`（[329ページ](chapter10.md#p329)を参照）の版を書け。
 
-**Exercise 10.4 [h]** Consider the data type *set*.
-A set has two main operations: adjoin an element and test for membership.
-It is convenient to also add a map-over-elements operation.
-With these primitive operations it is possible to build up more complex operations like union and intersection.
+**練習問題 10.4 [h]** データ型*集合*を考えよ。
+集合には主な操作が2つある。要素を付け加えることと、所属を調べることである。
+要素にわたって写す操作も加えると便利である。
+これらの基本操作から、和集合や共通部分のようなより複雑な操作を組み上げられる。
 
-As mentioned in [section 3.9](chapter3.md#s0095), Common Lisp provides several implementations of sets.
-The simplest uses lists as the underlying representation, and provides the functions `adjoin, member, union, intersection`, and `set-difference`.
-Another uses bit vectors, and a similar one uses integers viewed as bit sequences.
-Analyze the time complexity of each implementation for each operation.
+[3.9節](chapter3.md#s0095)で述べたとおり、Common Lispは集合のいくつかの実装を提供する。
+最も単純なものはリストを土台の表現として使い、関数 `adjoin`、`member`、`union`、`intersection`、`set-difference` を提供する。
+別のものはビットベクタを使い、似たものはビット列と見た整数を使う。
+各操作について、各実装の時間計算量を分析せよ。
 
-Next, show how *sorted lists* can be used to implement sets, and compare the operations on sorted lists to their counterparts on unsorted lists.
+次に、*整列したリスト*で集合をどう実装できるかを示し、整列したリストに対する操作を、整列していないリストに対する対応するものと比べよ。
 
-## 10.7 Answers
+## 10.7 解答
 
-**Answer 10.2**
+**解答 10.2**
 
 ```lisp
 (defmacro def-cons-struct (cons car cdr &optional inline?)
@@ -1370,7 +1370,7 @@ Next, show how *sorted lists* can be used to implement sets, and compare the ope
      (defun ,cons (x y) (cons x y))))
 ```
 
-**Answer 10.3**
+**解答 10.3**
 
 ```lisp
 (defun flatten (exp &optional (so-far nil) last-cons)
@@ -1386,5 +1386,5 @@ Next, show how *sorted lists* can be used to implement sets, and compare the ope
 ----------------------
 
 <a id="fn10-1"></a><sup>[1](#tfn10-1)</sup>
-These are all done with safety 0 and speed 3.
+これらはすべて safety 0 と speed 3 で行っています。
 
