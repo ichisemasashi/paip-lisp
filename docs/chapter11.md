@@ -1425,100 +1425,100 @@ Prologは一般にアセンブリ言語ほど効率的ではありませんが�
 プログラマはPrologの探索戦略を意識し、それを使って目の前の問題に適切なアルゴリズムを実装せねばなりません。
 
 PrologもLispと同じく、いくつかのよくある俗説から不当な被害を受けてきました。
-It has been thought to be an inefficient language because early implementations were interpreted, and because it has been used to write interpreters.
-But modern compiled Prolog can be quite efficient (see [Warren et al.
-1977](bibliography.md#bb1335) and Van Roy 1990).
-There is a temptation to see Prolog as a solution in itself rather than as a programming language.
-Those who take that view object that Prolog's depth-first search strategy and basis in predicate calculus is too inflexible.
-This objection is countered by Prolog programmers who use the facilities provided by the language to build more powerful search strategies and representations, just as one would do in Lisp or any other language.
+初期の処理系が解釈実行されたこと、そしてインタプリタを書くのに使われてきたことから、非効率な言語だと思われてきました。
+しかし現代のコンパイルされたPrologはかなり効率的でありえます（[Warren ら
+1977](bibliography.md#bb1335) と Van Roy 1990 を参照）。
+Prologを、プログラミング言語としてではなく、それ自体が解決策であるかのように見たくなる誘惑があります。
+その見方を採る人は、Prologの深さ優先の探索戦略と述語論理という基盤が融通が利かなすぎると異を唱えます。
+この異議には、Lispや他のどの言語でもするのとちょうど同じように、言語が提供する仕組みを使ってより強力な探索戦略や表現を組み立てるPrologプログラマが反論します。
 
-## 11.9 History and References
+## 11.9 歴史と参考文献
 
-Cordell [Green (1968)](bibliography.md#bb0490) was the first to articulate the view that mathematical results on theorem proving could be used to make deductions and thereby answer queries.
-However, the major technique in use at the time, resolution theorem proving (see [Robinson 1965](bibliography.md#bb0995)), did not adequately constrain search, and thus was not practical.
-The idea of goal-directed computing was developed in Carl Hewitt's work (1971) on the PLANNER language for robot problem solving.
-He suggested that the user provide explicit hints on how to control deduction.
+定理証明についての数学的な成果を、演繹を行い、それによって問い合わせに答えるのに使えるという見方を最初に明確に述べたのは、Cordell [Green（1968）](bibliography.md#bb0490)でした。
+しかし当時使われていた主要な技法である導出による定理証明（[Robinson 1965](bibliography.md#bb0995)を参照）は、探索を十分に制約せず、そのため実用的ではありませんでした。
+目標指向の計算という考えは、ロボットの問題解決のためのPLANNER言語についてのCarl Hewittの仕事（1971）で発展しました。
+彼は、演繹をどう制御するかについて利用者が明示的な手がかりを与えることを提案しました。
 
-At about the same time and independently, Alain Colmerauer was developing a system to perform natural language analysis.
-His approach was to weaken the logical language so that computationally complex statements (such as logical disjunctions) could not be made.
-Colmerauer and his group implemented the first Prolog interpreter using Algol-W in the summer of 1972 (see [Roussel 1975](bibliography.md#bb1005)).
-It was Roussel's wife, Jacqueline, who came up with the name Prolog as an abbreviation for "programmation en logique." The first large Prolog program was their natural language system, also completed that year ([Colmerauer et al.
-1973](bibliography.md#bb0255)).
-For those who read English better than French, [Colmerauer (1985)](bibliography.md#bb0245) presents an overview of Prolog.
-Robert Kowalski is generally considered the co-inventor of Prolog.
-His 1974 article outlines his approach, and his 1988 article is a historical review on the early logic programming work.
+ほぼ同じ頃、独立に、Alain Colmerauerが自然言語解析を行うシステムを開発していました。
+彼の方式は、（論理的な選言のような）計算的に複雑な文を作れないよう、論理の言語を弱めることでした。
+Colmerauerと彼のグループは、1972年の夏にAlgol-Wを使って最初のPrologインタプリタを実装しました（[Roussel 1975](bibliography.md#bb1005)を参照）。
+Prologという名を「programmation en logique（論理によるプログラミング）」の略として思いついたのは、Rousselの妻Jacquelineでした。最初の大きなPrologプログラムは彼らの自然言語システムで、これも同じ年に完成しました（[Colmerauer ら
+1973](bibliography.md#bb0255)）。
+フランス語より英語のほうが読みやすい方には、[Colmerauer（1985）](bibliography.md#bb0245)がPrologの概観を示しています。
+Robert Kowalskiは一般にPrologの共同考案者と見なされています。
+彼の1974年の論文は彼の方式を概説し、1988年の論文は初期の論理プログラミングの仕事についての歴史的な総説です。
 
-There are now dozens of text books on Prolog.
-In my mind, six of these stand out.
-Clocksin and Mellish's *Programming in Prolog* (1987) was the first and remains one of the best.
-Sterling and Shapiro's *The Art of Prolog* (1986) has more substantial examples but is not as complete as a reference.
-An excellent overview from a slightly more mathematical perspective is Pereira and Shieber's *Prolog and Natural-Language Analysis* (1987).
-The book is worthwhile for its coverage of Prolog alone, and it also provides a good introduction to the use of logic programming for language understanding (see part V for more on this subject).
-O'Keefe's *The Craft of Prolog* (1990) shows a number of advanced techniques.
-O'Keefe is certainly one of the most influential voices in the Prolog community.
-He has definite views on what makes for good and bad coding style and is not shy about sharing his opinions.
-The reader is warned that this book evolved from a set of notes on the Clocksin and Mellish book, and the lack of organization shows in places.
-However, it contains advanced material that can be found nowhere else.
-Another collection of notes that has been organized into a book is Coelho and Cotta's *Prolog by Example.* Published in 1988, this is an update of their 1980 book, *How to Solve it in Prolog.* The earlier book was an underground classic in the field, serving to educate a generation of Prolog programmers.
-Both versions include a wealth of examples, unfortunately with little documentation and many typos.
-Finally, Ivan Bratko's *Prolog Programming for Artificial Intelligence* (1990) covers some introductory AI material from the Prolog perspective.
+いまやPrologの教科書は数十冊あります。
+私の考えでは、そのうち6冊が際立っています。
+ClocksinとMellishの *Programming in Prolog*（1987）は最初のものであり、今なお最良の1冊です。
+SterlingとShapiroの *The Art of Prolog*（1986）はより本格的な例を持ちますが、参考書としては完全ではありません。
+やや数学寄りの視点からの優れた概観が、PereiraとShieberの *Prolog and Natural-Language Analysis*（1987）です。
+この本はPrologを扱っているだけでも値打ちがあり、言語理解への論理プログラミングの使用についてもよい入門になっています（この主題については第V部を参照）。
+O'Keefeの *The Craft of Prolog*（1990）は、進んだ技法をいくつも示しています。
+O'Keefeは間違いなく、Prologのコミュニティで最も影響力のある声の1つです。
+何がよいコーディングの流儀で何が悪いかについて明確な見解を持ち、その意見を述べるのをためらいません。
+この本がClocksinとMellishの本についての覚え書きから育ったもので、構成の欠如が所々に表れていることは、読者に警告しておきます。
+しかし、他のどこにも見つからない進んだ内容を含んでいます。
+覚え書きを本にまとめたもう1つのものが、CoelhoとCottaの *Prolog by Example* です。1988年に出版されたこれは、彼らの1980年の本 *How to Solve it in Prolog* の改訂版です。前の本はこの分野の隠れた古典であり、一世代のPrologプログラマを育てるのに役立ちました。
+どちらの版も豊富な例を含みますが、あいにく説明はほとんどなく、誤植も多いのです。
+最後に、Ivan Bratkoの *Prolog Programming for Artificial Intelligence*（1990）は、入門的なAIの内容をPrologの視点から扱っています。
 
-Maier and Warren's *Computing with Logic* (1988) is the best reference for those interested in implementing Prolog.
-It starts with a simple interpreter for a variable-free version of Prolog, and then moves up to the full language, adding improvements to the interpreter along the way.
-(Note that the second author, David S.
-Warren of Stonybrook, is different from David H.
+MaierとWarrenの *Computing with Logic*（1988）は、Prologの実装に関心のある方にとって最良の参考書です。
+変数のない版のPrologの単純なインタプリタから始め、途中でインタプリタに改良を加えながら、完全な言語へと進みます。
+（第2著者のDavid S.
+Warren（Stony Brook）は、David H.
 D.
-Warren, formerly at Edinburgh and now at Bristol.
-Both are experts on Prolog.)
+Warren（かつてエジンバラ、現在はブリストル）とは別人であることに注意してください。
+両者ともPrologの専門家です。）
 
-Lloyd's *Foundations of Logic Programming* (1987) provides a theoretical explanation of the formal semantics of Prolog and related languages.
+Lloydの *Foundations of Logic Programming*（1987）は、Prologと関連する言語の形式的な意味論を理論的に説明しています。
 [Lassez et al.
-(1988)](bibliography.md#bb0705) and [Knight (1989)](bibliography.md#bb0625) provide overviews of unification.
+(1988)](bibliography.md#bb0705) と [Knight（1989）](bibliography.md#bb0625) が、単一化の概観を与えています。
 
-There have been many attempts to extend Prolog to be closer to the ideal of Logic Programming.
-The language MU-Prolog and NU-Prolog ([Naish 1986](bibliography.md#bb0890)) and Prolog III ([Colmerauer 1990](bibliography.md#bb0250)) are particularly interesting.
-The latter includes a systematic treatment of the &ne; relation and an interpretation of infinite trees.
+Prologを論理プログラミングの理想により近づけようとする試みは、数多くなされてきました。
+MU-PrologとNU-Prolog（[Naish 1986](bibliography.md#bb0890)）、そしてProlog III（[Colmerauer 1990](bibliography.md#bb0250)）という言語がとくに興味深いものです。
+後者は &ne; の関係の体系的な扱いと、無限の木の解釈を含みます。
 
-## 11.10 Exercises
+## 11.10 練習問題
 
-**Exercise  11.4 [m]** It is somewhat confusing to see "no" printed after one or more valid answers have appeared.
-Modify the program to print "no" only when there are no answers at all, and "no more" in other cases.
+**練習問題 11.4 [m]** 1つ以上の正しい答えが現れたあとに「no」が表示されるのは、いくぶん紛らわしい。
+答えがまったくないときにのみ「no」を、それ以外の場合には「no more」を表示するようプログラムを変えよ。
 
-**Exercise  11.5 [h]** At least six books (Abelson and Sussman 1985, [Charniak and McDermott 1985](bibliography.md#bb0175), Charniak et al.
-1986, [Hennessey 1989](bibliography.md#bb0530), [Wilensky 1986](bibliography.md#bb1390), and [Winston and Horn 1988](bibliography.md#bb1410)) present unification algorithms with a common error.
-They all have problems unifying (`?x ?y a`) with (`?y ?x ?x`).
-Some of these texts assume that `unify` will be called in a context where no variables are shared between the two arguments.
-However, they are still suspect to the bug, as the following example points out:
+**練習問題 11.5 [h]** 少なくとも6冊の本（Abelson and Sussman 1985、[Charniak and McDermott 1985](bibliography.md#bb0175)、Charniak ら
+1986、[Hennessey 1989](bibliography.md#bb0530)、[Wilensky 1986](bibliography.md#bb1390)、[Winston and Horn 1988](bibliography.md#bb1410)）が、共通の誤りを持つ単一化アルゴリズムを示している。
+どれも (`?x ?y a`) を (`?y ?x ?x`) と単一化するのに問題を抱えている。
+これらの教科書のいくつかは、`unify` が2つの引数のあいだで変数が共有されない文脈で呼ばれると仮定している。
+しかしそれでも、次の例が指摘するように、このバグの疑いが残る。
 
 ```lisp
 > (unify '(f (?x ?y a) (?y ?x ?x)) '(f ?z ?z))
 ((?Y . A) (?X . ?Y) (?Z ?X ?Y A))
 ```
 
-Despite this subtle bug, I highly recommend each of the books to the reader.
-It is interesting to compare different implementations of the same algorithm.
-It turns out there are more similarities than differences.
-This indicates two things: (1) there is a generally agreed-upon style for writing these functions, and (2) good programmers sometimes take advantage of opportunities to look at other's code.
+この微妙なバグにもかかわらず、これらの本はどれも読者に強く薦める。
+同じアルゴリズムの異なる実装を比べるのは興味深いことである。
+違いよりも似ている点のほうが多いことが分かる。
+これは2つのことを示している。(1) これらの関数を書くには、おおむね合意された流儀がある。(2) よいプログラマは、他人のコードを見る機会をときに活かす。
 
-The question is: Can you give an informal proof of the correctness of the algorithm presented in this chapter?
-Start by making a clear statement of the specification.
-Apply that to the other algorithms, and show where they go wrong.
-Then see if you can prove that the `unify` function in this chapter is correct.
-Failing a complete proof, can you at least prove that the algorithm will always terminate?
-See [Norvig 1991](bibliography.md#bb0915) for more on this problem.
+問題はこうだ。この章で示したアルゴリズムの正しさの略式の証明を与えられるか。
+まず仕様を明確に述べることから始めよ。
+それを他のアルゴリズムに適用し、それらがどこで間違うかを示せ。
+そのうえで、この章の `unify` 関数が正しいことを証明できるか試せ。
+完全な証明ができなくても、少なくともそのアルゴリズムが常に終わることは証明できるか。
+この問題についてさらには [Norvig 1991](bibliography.md#bb0915) を参照せよ。
 
-**Exercise  11.6 [h]** Since logic variables are so basic to Prolog, we would like them to be efficient.
-In most implementations, structures are not the best choice for small objects.
-Note that variables only have two slots: the name and the binding.
-The binding is crucial, but the name is only needed for printing and is arbitrary for most variables.
-This suggests an alternative implementation.
-Each variable will be a cons cell of the variable's binding and an arbitrary marker to indicate the type.
-This marker would be checked by `variable-p`.
-Variable names can be stored in a hash table that is cleared before each query.
-Implement this representation for variables and compare it to the structure representation.
+**練習問題 11.6 [h]** 論理変数はPrologの根幹をなすので、効率的であってほしい。
+たいていの処理系では、小さなオブジェクトに構造体は最良の選択ではない。
+変数がスロットを2つ — 名前と束縛 — しか持たないことに注意せよ。
+束縛は肝心だが、名前は表示にのみ必要で、たいていの変数については任意である。
+これは別の実装を示唆する。
+各変数を、その変数の束縛と、型を示す任意の目印とのコンスセルとする。
+この目印は `variable-p` によって調べられる。
+変数名は、各問い合わせの前に空にされるハッシュ表に格納できる。
+この変数の表現を実装し、構造体の表現と比べよ。
 
-**Exercise 11.7 [m]** Consider the following alternative implementation for anonymous variables: Leave the macros `<-` and `?-` alone, so that anonymous variables are allowed in assertions and queries.
-Instead, change `unify` so that it lets anything match against an anonymous variable:
+**練習問題 11.7 [m]** 無名変数の次の別の実装を考えよ。マクロ `<-` と `?-` はそのままにして、表明と問い合わせで無名変数を許す。
+代わりに、`unify` を変えて、何でも無名変数に合致できるようにする。
 
 ```lisp
 (defun unify (x y &optional (bindings no-bindings))
@@ -1534,17 +1534,17 @@ Instead, change `unify` so that it lets anything match against an anonymous vari
               (t fail)))
 ```
 
-Is this alternative correct?
-If so, give an informal proof.
-If not, give a counterexample.
+この代案は正しいか。
+正しければ略式の証明を与えよ。
+正しくなければ反例を与えよ。
 
-**Exercise  11.8 [h]** Write a version of the Prolog interpreter that uses destructive unification instead of binding lists.
+**練習問題 11.8 [h]** 束縛の並びの代わりに破壊的な単一化を使うPrologインタプリタの版を書け。
 
-**Exercise  11.9 [m]** Write Prolog rules to express the terms father, mother, son, daughter, and grand- versions of each of them.
-Also define parent, child, wife, husband, brother, sister, uncle, and aunt.
-You will need to decide which relations are primitive (stored in the Prolog data base) and which are derived by rules.
+**練習問題 11.9 [m]** father、mother、son、daughter、そしてそれぞれの grand- 版を表すPrologの規則を書け。
+parent、child、wife、husband、brother、sister、uncle、aunt も定義せよ。
+どの関係が基本（Prologのデータベースに格納される）で、どれが規則によって導かれるかを決める必要がある。
 
-For example, here's a definition of grandfather that says that G is the grandfather of C if G is the father of some P, who is the parent of C:
+たとえば、G が C の grandfather であるのは、G がある P の father であり、その P が C の parent であるとき、と述べる grandfather の定義を示す。
 
 ```lisp
 (<- (grandfather ?g ?c)
@@ -1552,36 +1552,36 @@ For example, here's a definition of grandfather that says that G is the grandfat
         (parent ?p ?c))
 ```
 
-**Exercise 11.10 [m]** The following problem is presented in [Wirth 1976](bibliography.md#bb1415):
+**練習問題 11.10 [m]** 次の問題が [Wirth 1976](bibliography.md#bb1415) で示されている。
 
-*I married a widow (let's call her W) who has a grown-up daughter (call her D).
-My father (F), who visited us often, fell in love with my step-daughter and married her.
-Hence my father became my son-in-law and my step-daughter became my mother.
-Some months later, my wife gave birth to a son (S<sub>1</sub>), who became the brother-in-law of my father, as well as my uncle.
-The wife of my father, that is, my step-daughter, also had a son (S<sub>2</sub>).*
+*私はある未亡人（W と呼ぼう）と結婚した。彼女には成人した娘（D と呼ぼう）がいた。
+よく私たちを訪ねてきた私の父（F）は、私の継娘に恋をして彼女と結婚した。
+かくして私の父は私の義理の息子となり、私の継娘は私の母となった。
+数か月後、私の妻は息子（S<sub>1</sub>）を産み、その子は私の父の義理の兄弟となり、また私の伯父ともなった。
+私の父の妻、すなわち私の継娘もまた息子（S<sub>2</sub>）を産んだ。*
 
-Represent this situation using the predicates defined in the previous exercise, verify its conclusions, and prove that the narrator of this tale is his own grandfather.
+前問で定義した述語を使ってこの状況を表し、その結論を確かめ、この話の語り手が自分自身の grandfather であることを証明せよ。
 
-**Exercise 11.11 [d]** Recall the example:
+**練習問題 11.11 [d]** 次の例を思い出せ。
 
 ```lisp
 > (?- (length (a b` c `d) ?n))
 ?N = (1 + (1 + (1 + (1 + 0))));
 ```
 
-It is possible to produce 4 instead of `(1+ (1+ (1+ (1+ 0))))` by extending the notion of unification.
+単一化の考えを拡張することで、`(1+ (1+ (1+ (1+ 0))))` の代わりに 4 を生み出すことが可能である。
 [A&iuml;t-Kaci et al.
-1987](bibliography.md#bb0025) might give you some ideas how to do this.
+1987](bibliography.md#bb0025) が、これをどう行うかの着想をいくらか与えてくれるかもしれない。
 
-**Exercise  11.12 [h]** The function `rename-variables` was necessary to avoid confusion between the variables in the first argument to `unify` and those in the second argument.
-An alternative is to change the `unify` so that it takes two binding lists, one for each argument, and keeps them separate.
-Implement this alternative.
+**練習問題 11.12 [h]** 関数 `rename-variables` は、`unify` の第1引数の変数と第2引数の変数のあいだの混同を避けるために必要だった。
+代わりに、`unify` を変えて、各引数に1つずつ、2つの束縛の並びをとり、それらを別々に保つ手がある。
+この代案を実装せよ。
 
-## 11.11 Answers
+## 11.11 解答
 
-**Answer 11.9** We will choose as primitives the unary predicates `male` and `female` and the binary predicates `child` and `married`.
-The former takes the child first; the latter takes the husband first.
-Given these primitives, we can make the following definitions:
+**解答 11.9** 基本として、1引数の述語 `male` と `female`、2引数の述語 `child` と `married` を選ぶ。
+前者は子を先にとり、後者は夫を先にとる。
+これらの基本があれば、次の定義ができる。
 
 ```lisp
 (<- (father ?f ?e)   (male ?f) (parent ?f ?c))
@@ -1605,14 +1605,14 @@ Given these primitives, we can make the following definitions:
 (<- (aunt ?a ?n)     (sister ?a ?p) (parent ?p ?n  ))
 ```
 
-Note that there is no way in Prolog to express a *true* definition.
-We would like to say that "P is the parent of C if and only if C is the child of P," but Prolog makes us express the biconditional in one direction only.
+Prologには*真の*定義を表す手立てがないことに注意せよ。
+「P が C の parent であるのは、C が P の child であるとき、かつそのときにかぎる」と言いたいのだが、Prologでは双条件を一方向にしか表せない。
 
-**Answer 11.10** Because we haven't considered step-relations in the prior definitions, we have to extend the notion of parent to include step-parents.
-The definitions have to be written very carefully to avoid infinite loops.
-The strategy is to structure the defined terms into a strict hierarchy: the four primitives are at the bottom, then parent is defined in terms of the primitives, then the other terms are defined in terms of parent and the primitives.
+**解答 11.10** 前の定義では継の関係を考えていなかったので、parent の考えを継親も含むよう拡張せねばならない。
+無限の循環を避けるため、定義はよくよく注意して書かねばならない。
+戦略は、定義される項を厳密な階層に構造化することである。4つの基本が底にあり、次に parent が基本を使って定義され、次に他の項が parent と基本を使って定義される。
 
-We also provide a definition for son-in-law:
+son-in-law の定義も与える。
 
 ```lisp
 (<- (parent ?p ?c) (married ?p ?w) (child ?c ?w))
@@ -1620,8 +1620,8 @@ We also provide a definition for son-in-law:
 (<- (son-in-law ?s ?p) (parent ?p ?w) (married ?s ?w))
 ```
 
-Now we add the information from the story.
-Note that we only use the four primitives male, female, married, and child:
+次に、話の情報を加える。
+male、female、married、child の4つの基本しか使っていないことに注意せよ。
 
 ```lisp
 (<- (male I)) (<- (male F)) (<- (male S1)) (<- (male S2))
@@ -1634,7 +1634,7 @@ Note that we only use the four primitives male, female, married, and child:
 (<- (child S2 F))
 ```
 
-Now we are ready to make the queries:
+これで問い合わせを行う準備が整った。
 
 ```lisp
 > (?- (son-in-law F I)) Yes.
@@ -1646,14 +1646,14 @@ Now we are ready to make the queries:
 ----------------------
 
 <a id="fn11-1"></a><sup>[1](#tfn11-1)</sup>
-Actually, *programmation en logique*, since it was invented by a French group (see page 382).
+実のところ *programmation en logique* です。フランスのグループが考案したものだからです（382ページを参照）。
 
 <a id="fn11-2"></a><sup>[2](#tfn11-2)</sup>
-Actually, this is more like the Lisp `find` than the Lisp `member`.
-In this chapter we have adopted the traditional Prolog definition of `member`.
+実のところ、これはLispの `member` よりLispの `find` に近いものです。
+この章では、`member` の伝統的なPrologの定義を採用しました。
 
 <a id="fn11-3"></a><sup>[3](#tfn11-3)</sup>
-See exercise 11.12 for an alternative approach.
+別の方式については練習問題11.12を参照してください。
 
 <a id="fn11-4"></a><sup>[4](#tfn11-4)</sup>
-See the MU-Prolog and NU-Prolog languages ([Naish 1986](bibliography.md#bb0890)).
+MU-PrologとNU-Prologという言語（[Naish 1986](bibliography.md#bb0890)）を参照してください。

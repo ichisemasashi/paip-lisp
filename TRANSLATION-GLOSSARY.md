@@ -330,6 +330,32 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | microcode | マイクロコード | |
 | paging | ページング | 仮想記憶 |
 
+### 第11章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| logic programming | 論理プログラミング | |
+| unification | 単一化 | Prologの中核。定訳 |
+| logic variable | 論理変数 | |
+| clause | 節 | Prologの表明の単位 |
+| fact / rule | 事実／規則 | 節の2種類 |
+| head / body | 頭部／本体 | 節の構成 |
+| forward / backward chaining | 前向き／後ろ向き連鎖 | |
+| declarative / procedural | 宣言的／手続き的 | 節の2つの解釈 |
+| relational / functional | 関係的／関数的 | PrologとLispの対比 |
+| query | 問い合わせ | `?-` |
+| occurs check | 出現検査 | 循環する単一化を防ぐ |
+| primitive (procedure) | 基本手続き | Prologの組み込み手続き。第III部の「基本要素」と区別 |
+| anonymous variable | 無名変数 | `?`（本物のPrologでは `_`） |
+| generate-and-test | 生成と検査 | |
+| logical inference (LIPS) | 論理推論（LIPS） | 毎秒の推論数 |
+| destructive unification | 破壊的な単一化 | |
+| deref | deref | 束縛の参照解決。原語のまま |
+| metainterpreter | メタインタプリタ | Prolog上のProlog |
+| resolution theorem proving | 導出による定理証明 | Robinson由来 |
+| goal-directed computing | 目標指向の計算 | |
+| step-relation | 継の関係 | step-parent など（練習問題11.10） |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -398,8 +424,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter10.md` | 完了 |
-| `chapter11.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter11.md` | 完了 |
+| `chapter12.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
