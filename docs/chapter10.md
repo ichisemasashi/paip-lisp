@@ -1,35 +1,35 @@
-# Chapter 10
-## Low-Level Efficiency Issues
+# 第10章
+## 低水準の効率の問題
 
-> There are only two qualities in the world: efficiency and inefficiency; and only two sorts of people: the efficient and the inefficient.
+> 世に性質は2つしかない。効率と非効率だ。そして人も2種類しかいない。効率のよい者と、悪い者だ。
 >
 > -George Bernard Shaw \
 > John Bull's Other Island (1904)
 
-The efficiency techniques of the previous chapter all involved fairly significant changes to an algorithm.
-But what happens when you already are using the best imaginable algorithms, and performance is still a problem?
-One answer is to find what parts of the program are used most frequently and make micro-optimizations to those parts.
-This chapter covers the following six optimization techniques.
-If your programs all run quickly enough, then feel free to skip this chapter.
-But if you would like your programs to run faster, the techniques described here can lead to speed-ups of 40 times or more.
+前章の効率の技法は、どれもアルゴリズムへのかなり大きな変更を伴っていました。
+しかし、考えうる最良のアルゴリズムをすでに使っているのに、なお性能が問題であるときはどうなるでしょうか。
+1つの答えは、プログラムのどの部分が最も頻繁に使われるかを見つけ、その部分に細かな最適化を施すことです。
+この章は次の6つの最適化の技法を扱います。
+あなたのプログラムがどれも十分に速く走るなら、この章は遠慮なく飛ばして構いません。
+しかしプログラムをもっと速く走らせたいなら、ここで述べる技法は40倍以上の高速化につながりえます。
 
-*   Use declarations.
+*   宣言を使う。
 
-*   Avoid generic functions.
+*   総称関数を避ける。
 
-*   Avoid complex argument lists.
+*   複雑な引数リストを避ける。
 
-*   Provide compiler macros.
+*   コンパイラマクロを用意する。
 
-*   Avoid unnecessary consing.
+*   不要なコンスを避ける。
 
-*   Use the right data structure.
+*   適切なデータ構造を使う。
 
-## 10.1 Use Declarations
+## 10.1 宣言を使う
 
-On general-purpose computers running Lisp, much time is spent on type-checking.
-You can gain efficiency at the cost of robustness by declaring, or promising, that certain variables will always be of a given type.
-For example, consider the following function to compute the sum of the squares of a sequence of numbers:
+Lispを走らせる汎用の計算機では、多くの時間が型検査に費やされます。
+特定の変数が常に与えた型であると宣言する — すなわち約束する — ことで、頑健さを代償に効率を得られます。
+たとえば、数の列の二乗の和を計算する次の関数を考えてみましょう。
 
 ```lisp
 (defun sum-squares (seq)
@@ -40,7 +40,7 @@ For example, consider the following function to compute the sum of the squares o
 (defun square (x) (* x x))
 ```
 
-If this function will only be used to sum vectors of fixnums, we can make it a lot faster by adding declarations:
+この関数が fixnum のベクタの和だけに使われるなら、宣言を加えることでずっと速くできます。
 
 ```lisp
 (defun sum-squares (vect)
@@ -54,22 +54,22 @@ If this function will only be used to sum vectors of fixnums, we can make it a l
   sum))
 ```
 
-The fixnum declarations let the compiler use integer arithmetic directly, rather than checking the type of each addend.
-The (`the fixnum`... ) special form is a promise that the argument is a fixnum.
-The (`optimize speed (safety 0))` declaration tells the compiler to make the function run as fast as possible, at the possible expense of making the code less safe (by ignoring type checks and so on).
-Other quantities that can be optimized are `compilation-speed, space` and in ANSI Common Lisp only, `debug` (ease of debugging).
-Quantities can be given a number from 0 to 3 indicating how important they are; 3 is most important and is the default if the number is left out.
+fixnum の宣言は、加数それぞれの型を調べる代わりに、コンパイラに整数の算術を直に使わせます。
+(`the fixnum`... ) という特殊形式は、引数が fixnum であるという約束です。
+(`optimize speed (safety 0))` の宣言は、（型検査などを無視して）コードの安全性を落とすことになりうるのを承知で、関数をできるかぎり速く走らせるようコンパイラに指示します。
+最適化できる他の量は `compilation-speed`（コンパイルの速さ）、`space`（領域）、そしてANSI Common Lispにのみある `debug`（デバッグのしやすさ）です。
+各量には、どれだけ重要かを示す0から3までの数を与えられます。3が最も重要で、数を省くとこれが既定になります。
 
-The (`inline square`) declaration allows the compiler to generate the multiplication specified by `square` right in the loop, without explicitly making a function call to square.
-The compiler will create a local variable for (`svref vect i`) and will not execute the reference twice-inline functions do not have any of the problems associated with macros as discussed on [page 853](chapter24.md#p853).
-However, there is one drawback: when you redefine an inline function, you may need to recompile all the functions that call it.
+(`inline square`) の宣言は、square への明示的な関数呼び出しをせずに、`square` が指定する乗算をループの中にそのまま生成することをコンパイラに許します。
+コンパイラは (`svref vect i`) のための局所変数を作り、その参照を2度は実行しません。インライン関数は、[853ページ](chapter24.md#p853)で論じるマクロにまつわる問題を一切持ちません。
+ただし1つ欠点があります。インライン関数を再定義したとき、それを呼ぶすべての関数を再コンパイルする必要があるかもしれません。
 
-You should declare a function `inline` when it is short and the function-calling overhead will thus be a significant part of the total execution time.
-You should not declare a function `inline` when the function is recursive, when its definition is likely to change, or when the function's definition is long and it is called from many places.
+関数を `inline` と宣言すべきなのは、それが短く、したがって関数呼び出しの間接費が総実行時間の相当な部分を占めるときです。
+関数を `inline` と宣言すべきでないのは、その関数が再帰的なとき、定義が変わりそうなとき、あるいは定義が長く多くの場所から呼ばれるときです。
 
-In the example at hand, declaring the function inline saves the overhead of a function call.
-In some cases, further optimizations are possible.
-Consider the predicate `starts-with`:
+目の前の例では、関数をインラインと宣言することで関数呼び出しの間接費が省けます。
+場合によっては、さらなる最適化が可能です。
+述語 `starts-with` を考えてみましょう。
 
 ```lisp
 (defun starts-with (list x)
@@ -77,31 +77,31 @@ Consider the predicate `starts-with`:
  (and (consp list) (eql (first list) x)))
 ```
 
-Suppose we have a code fragment like the following:
+次のようなコード片があるとしましょう。
 
 ```lisp
 (if (consp list) (starts-with list x) ...)
 ```
 
-If `starts-with` is declared `inline` this will expand to:
+`starts-with` が `inline` と宣言されていれば、これは次に展開されます。
 
 ```lisp
 (if (consp list) (and (consp list) (eql (first list) x)) ...)
 ```
 
-which many compilers will simplify to:
+多くのコンパイラは、これを次に簡約します。
 
 ```lisp
 (if (consp list) (eql (first list) x) ...)
 ```
 
-Very few compilers do this kind of simplification across functions without the hint provided by `inline`.
+`inline` が与える手がかりなしに、この種の関数をまたいだ簡約を行うコンパイラはごくわずかです。
 
-Besides eliminating run-time type checks, declarations also allow the compiler to choose the most efficient representation of data objects.
-Many compilers support both *boxed* and *unboxed* representations of data objects.
-A boxed representation includes enough information to determine the type of the object.
-An unboxed representation is just the "raw bits" that the computer can deal with directly.
-Consider the following function, which is used to clear a 1024 x 1024 array of floating point numbers, setting each one to zero:
+実行時の型検査をなくすことに加えて、宣言はコンパイラにデータオブジェクトの最も効率的な表現を選ばせもします。
+多くのコンパイラは、データオブジェクトの*箱入り*と*箱なし*の両方の表現を支えています。
+箱入りの表現は、オブジェクトの型を判定するのに十分な情報を含みます。
+箱なしの表現は、計算機が直に扱える「生のビット」にすぎません。
+次の関数を考えてみましょう。1024×1024の浮動小数点数の配列を、各要素を0に設定して空にするのに使います。
 
 ```lisp
 (defun clear-m-array (array)
@@ -112,18 +112,18 @@ Consider the following function, which is used to clear a 1024 x 1024 array of f
       (setf (aref array i j) 0.0))))
 ```
 
-In Allegro Common Lisp on a Sun SPARCstation, this compiles into quite good code, comparable to that produced by the C compiler for an equivalent C program.
-If the declarations are omitted, however, the performance is about 40 times worse.
+Sun SPARCstation上のAllegro Common Lispでは、これはかなりよいコードにコンパイルされ、等価なCプログラムに対してCコンパイラが生むコードに匹敵します。
+しかし宣言を省くと、性能は約40倍悪くなります。
 
-The problem is that without the declarations, it is not safe to store the raw floating point representation of `0.0` in each location of the array.
-Instead, the program has to box the `0.0`, allocating storage for a typed pointer to the raw bits.
-This is done inside the nested loops, so the result is that each call to the version of `clear-m-array` without declarations calls the floating-point-boxing function 1048567 times, allocating a megaword of storage.
-Needless to say, this is to be avoided.
+問題は、宣言がないと、`0.0` の生の浮動小数点表現を配列の各位置に格納するのが安全でないことです。
+代わりにプログラムは `0.0` を箱に入れ、生のビットへの型付きポインタのための記憶を割り当てねばなりません。
+これは入れ子のループの中で行われるので、その結果、宣言のない版の `clear-m-array` の呼び出しはそのたびに浮動小数点を箱に入れる関数を1048567回呼び、1メガワードの記憶を割り当てます。
+言うまでもなく、これは避けるべきです。
 
-Not all compilers heed all declarations; you should check before wasting time with declarations your compiler may ignore.
-The function `disassemble` can be used to show what a function compiles into.
-For example, consider the trivial function to add two numbers together.
-Here it is with and without declarations:
+すべてのコンパイラがすべての宣言に従うわけではありません。コンパイラが無視するかもしれない宣言で時間を無駄にする前に、確かめるべきです。
+関数 `disassemble` は、関数が何にコンパイルされるかを示すのに使えます。
+たとえば、2つの数を足し合わせる自明な関数を考えてみましょう。
+宣言ありとなしで示します。
 
 ```lisp
 (defun f (x y)
@@ -132,7 +132,7 @@ Here it is with and without declarations:
 (defun g (x y) (+ x y))
 ```
 
-Here is the disassembled code for f from Allegro Common Lisp for a Motorola 68000-series processor:
+Motorola 68000系のプロセッサ向けのAllegro Common Lispによる f の逆アセンブルしたコードを示します。
 
 ```
 > (disassemble 'f)
@@ -151,18 +151,18 @@ Here is the disassembled code for f from Allegro Common Lisp for a Motorola 6800
 28:     rtd     #8
 ```
 
-This may look intimidating at first glance, but you don't have to be an expert at 68000 assembler to gain some appreciation of what is going on here.
-The instructions labeled 0-8 (labels are in the leftmost column) comprise the typical function preamble for the 68000.
-They do subroutine linkage and store the new function object and constant vector into registers.
-Since f uses no constants, instructions 6, 8, and 22 are really unnecessary and could be omitted.
-Instructions 0,4, and 26 could also be omitted if you don't care about seeing this function in a stack trace during debugging.
-More recent versions of the compiler will omit these instructions.
+一見すると怖じ気づくかもしれませんが、ここで何が起きているかをいくらか理解するのに、68000のアセンブラの達人である必要はありません。
+0から8のラベルの付いた命令（ラベルは一番左の列にあります）が、68000の典型的な関数の前口上をなします。
+サブルーチンの連結を行い、新しい関数オブジェクトと定数ベクタをレジスタに格納します。
+f は定数を使わないので、命令6、8、22は実のところ不要で、省けます。
+命令0、4、26も、デバッグ中にこの関数をスタックトレースで見ることを気にしないなら省けます。
+より新しい版のコンパイラは、これらの命令を省きます。
 
-The heart of function `f` is the two-instruction sequence 12-16.
-Instruction 12 retrieves `y`, and 16 adds `y` to `x`, leaving the result in `d4`, which is the "result" register.
-Instruction 20 sets `d1`, the "number of values returned" register, to 1.
+関数 `f` の心臓部は、12から16の2命令の並びです。
+命令12は `y` を取り出し、16は `y` を `x` に足して、結果を「結果」レジスタである `d4` に残します。
+命令20は「返る値の数」レジスタである `d1` を1に設定します。
 
-Contrast this to the code for `g`, which has no declarations and is compiled at default speed and safety settings:
+これを、宣言がなく既定の速さと安全性の設定でコンパイルされた `g` のコードと対比してみましょう。
 
 ```
 > (disassemble 'g)
@@ -200,21 +200,21 @@ Contrast this to the code for `g`, which has no declarations and is compiled at 
 84:     rtd     #8
 ```
 
-See how much more work is done.
-The first four instructions ensure that the right number of arguments have been passed to `g`.
-If not, there is a jump to `wnaerr` (wrong-number-of-arguments-error).
-Instructions 12-20 have the argument loading code that was at 0-8 in `f`.
-At 24-30 there is a check for asynchronous signals, such as the user hitting the abort key.
-After `x` and `y` are loaded, there is a type check (42-48).
-If the arguments are not both fixnums, then the code at instructions 62-74 sets up a call to  `+_2op`, which handles type coercion and non-fixnum addition.
-If all goes well, we don't have to call this routine, and do the addition at instruction 50 instead.
-But even then we are not done-just because the two arguments were fixnums does not mean the result will be.
-Instructions 54-56 check and branch to an overflow routine if needed.
-Finally, instructions 76-84 return the final value, just as in `f`.
+どれだけ多くの仕事が行われるか見てください。
+最初の4つの命令は、正しい数の引数が `g` に渡されたことを確かめます。
+そうでなければ `wnaerr`（引数の数が誤り、というエラー）へ飛びます。
+命令12から20には、`f` では0から8にあった引数を読み込むコードがあります。
+24から30には、利用者が中止キーを押すといった非同期のシグナルの検査があります。
+`x` と `y` が読み込まれたあと、型検査があります（42から48）。
+引数が両方とも fixnum でなければ、命令62から74のコードが `+_2op` の呼び出しを整えます。これは型の強制と fixnum でない加算を扱います。
+すべてうまくいけば、この手続きを呼ぶ必要はなく、代わりに命令50で加算を行います。
+しかしそれでも終わりではありません。2つの引数が fixnum だったからといって、結果もそうだとはかぎらないのです。
+命令54から56は検査を行い、必要なら桁あふれの手続きへ分岐します。
+最後に、命令76から84が、`f` と同じく最終的な値を返します。
 
-Some low-quality compilers ignore declarations altogether.
-Other compilers don't need certain declarations, because they can rely on special instructions in the underlying architecture.
-On a Lisp Machine, both `f` and `g` compile into the same code:
+質の低いコンパイラには、宣言を丸ごと無視するものもあります。
+別のコンパイラは、土台のアーキテクチャの特別な命令に頼れるので、特定の宣言を必要としません。
+Lisp Machineでは、`f` も `g` も同じコードにコンパイルされます。
 
 ```
 6 PUSH    ARG|0    ; X
@@ -222,82 +222,82 @@ On a Lisp Machine, both `f` and `g` compile into the same code:
 8 RETURN  PDL-POP
 ```
 
-The Lisp Machine has a microcoded `+` instruction that simultaneously does a fixnum add and checks for non-fixnum arguments, branching to a subroutine if either argument is not a fixnum.
-The hardware does the work that the compiler has to do on a conventional processor.
-This makes the Lisp Machine compiler simpler, so compiling a function is faster.
-However, on modern pipelined computers with instruction caches, there is little or no advantage to microcoding.
-The current trend is away from microcode toward reduced instruction set computers (RISC).
+Lisp Machineには、マイクロコードで実装された `+` 命令があり、fixnum の加算と、fixnum でない引数の検査を同時に行い、どちらかの引数が fixnum でなければサブルーチンへ分岐します。
+従来のプロセッサでコンパイラがせねばならない仕事を、ハードウェアが行うのです。
+これはLisp Machineのコンパイラを単純にするので、関数のコンパイルが速くなります。
+しかし命令キャッシュを持つ現代のパイプライン化された計算機では、マイクロコード化の利点はほとんど、あるいはまったくありません。
+現在の潮流は、マイクロコードから離れて縮小命令セット計算機（RISC）へ向かっています。
 
-On most computers, the following declarations are most likely to be helpful:
+たいていの計算機では、次の宣言が最も役立つ見込みが高いものです。
 
-*   `fixnum and float`.
-Numbers declared as fixnums or floating-point numbers can be handled directly by the host computer's arithmetic instructions.
-On some systems, `float` by itself is not enough; you have to say `single-float` or `double-float`.
-Other numeric declarations will probably be ignored.
-For example, declaring a variable as integer does not help the compiler much, because bignums are integers.
-The code to add bignums is too complex to put inline, so the compiler will branch to a general-purpose routine (like `+_2op` in Allegro), the same routine it would use if no declarations were given.
+*   `fixnum` と `float`。
+fixnum あるいは浮動小数点数と宣言された数は、ホスト計算機の算術命令で直に扱えます。
+システムによっては `float` だけでは足りず、`single-float` か `double-float` と言わねばなりません。
+他の数値の宣言はおそらく無視されるでしょう。
+たとえば変数を integer と宣言してもコンパイラをあまり助けません。bignum も整数だからです。
+bignum を足すコードは複雑すぎてインラインに置けないので、コンパイラは汎用の手続き（Allegroの `+_2op` のような）へ分岐します。宣言がなければ使うのと同じ手続きです。
 
-*   `list and array`.
-Many Lisp systems provide separate functions for the list- and array- versions of commonly used sequence functions.
-For example, `(delete x (the list l))` compiles into `(sys: delete-list-eql x l)` on a TI Explorer Lisp Machine.
-Another function, `sys:delete-vector`, is used for arrays, and the generic function `delete` is used only when the compiler can't tell what type the sequence is.
-So if you know that the argument to a generic function is either a `list` or an `array`, then declare it as such.
+*   `list` と `array`。
+多くのLispシステムは、よく使う列の関数について、リスト版と配列版に別々の関数を用意しています。
+たとえば `(delete x (the list l))` は、TI Explorer Lisp Machineでは `(sys: delete-list-eql x l)` にコンパイルされます。
+別の関数 `sys:delete-vector` が配列に使われ、総称関数 `delete` はコンパイラが列の型を判別できないときにのみ使われます。
+ですから総称関数の引数が `list` か `array` のいずれかだと分かっているなら、そう宣言してください。
 
-*   `simple-vector and simple-array`.
-Simple vectors and arrays are those that do not share structure with other arrays, do not have fill pointers, and are not adjustable.
-In many implementations it is faster to aref a `simple-vector` than a `vector`.
-It is certainly much faster than taking an `elt` of a sequence of unknown type.
-Declare your arrays to be simple (if they in fact are).
+*   `simple-vector` と `simple-array`。
+単純ベクタと単純配列とは、他の配列と構造を共有せず、フィルポインタを持たず、大きさを変えられないもののことです。
+多くの処理系では、`vector` より `simple-vector` を aref するほうが速いのです。
+型の分からない列の `elt` を取るよりは、確実にずっと速いのです。
+配列は（実際に単純なら）単純だと宣言してください。
 
-*   `(array *type*)`.
-It is often important to specialize the type of array elements.
-For example, an `(array short-float)` may take only half the storage of a general array, and such a declaration will usually allow computations to be done using the CPU's native floating-point instructions, rather than converting into and out of Common Lisp's representation of floating points.
-This is very important because the conversion normally requires allocating storage, but the direct computation does not.
-The specifiers `(simple-array *type*)` and `(vector *type*)` should be used instead of `(array *type*)` when appropriate.
-A very common mistake is to declare `(simple-vector *type*)`.
-This is an error because Common Lisp expects `(simple-vector *size*)`-don't ask me why.
+*   `(array *type*)`。
+配列の要素の型を特殊化することが重要な場合はよくあります。
+たとえば `(array short-float)` は汎用の配列の半分の記憶しか取らないかもしれず、そうした宣言はたいてい、Common Lispの浮動小数点表現へ変換したり戻したりするのではなく、CPU本来の浮動小数点命令を使って計算を行わせます。
+これはとても重要です。変換は通常、記憶の割り当てを要しますが、直接の計算は要さないからです。
+ふさわしいときは、`(array *type*)` の代わりに指定子 `(simple-array *type*)` と `(vector *type*)` を使うべきです。
+よくある間違いが `(simple-vector *type*)` と宣言することです。
+これが誤りなのは、Common Lispが `(simple-vector *size*)` を期待するからです。なぜかは聞かないでください。
 
-*   `(array **dimensions*)`.
-The full form of an array or `simple-array` type specifier is `(array *type dimensions*)`.
-So, for example, `(array bit (* *))` is a two-dimensional bit array, and `(array bit (1024 1024))` is a 1024  x  1024 bit array.
-It is very important to specify the number of dimensions when known, and less important to specify the exact size, although with multidimensional arrays, declaring the size is more important.
-The format for a vector type specifier is `(vector *type size*)`.
+*   `(array **次元*)`。
+配列や `simple-array` の型指定子の完全な形は `(array *型 次元*)` です。
+ですからたとえば `(array bit (* *))` は二次元のビット配列、`(array bit (1024 1024))` は 1024×1024 のビット配列です。
+次元の数は分かっているなら指定するのがとても重要で、正確な大きさの指定はそれほど重要ではありません。ただし多次元配列では、大きさを宣言することのほうが重要になります。
+ベクタの型指定子の形式は `(vector *型 大きさ*)` です。
 
-Note that several of these declarations can apply all at once.
+これらの宣言のいくつかは一度にまとめて適用できることに注意してください。
 For example, in
 
 ```lisp
 (position # \ . (the simple-string file-name))
 ```
 
-the variable `filename` has been declared to be a vector, a simple array, and a sequence of type `string-char`.
-All three of these declarations are helpful.
-The type `simple-string` is an abbreviation for `(simple-array string-char)`.
+変数 `filename` は、ベクタであり、単純配列であり、`string-char` 型の列である、と宣言されています。
+この3つの宣言はいずれも役立ちます。
+型 `simple-string` は `(simple-array string-char)` の略記です。
 
-This guide applies to most Common Lisp systems, but you should look in the implementation notes for your particular system for more advice on how to fine-tune your code.
+この手引きはたいていのCommon Lispシステムに当てはまりますが、コードを細かく調整する方法についてのさらなる助言は、お使いのシステムの実装ノートを見るべきです。
 
-## 10.2 Avoid Generic Functions
+## 10.2 総称関数を避ける
 
-Common Lisp provides functions with great generality, but someone must pay the price for this generality.
-For example, if you write `(elt x 0)`, different machine instruction will be executed depending on if x is a list, string, or vector.
-Without declarations, checks will have to be done at runtime.
-You can either provide declarations, as in `(elt (the list x) 0)`, or use a more specific function, such as `(first x)` in the case of lists, `(char x 0)` for strings, `(aref x 0)` for vectors, and `(svref x 0)` for simple vectors.
-Of course, generic functions are useful-I wrote `random-elt` as shown following to work on lists, when I could have written the more efficient `random-mem` instead.
-The choice paid off when I wanted a function to choose a random character from a string-`random-elt` does the job unchanged, while `random-mem` does not.
+Common Lispは高い汎用性を持つ関数を提供しますが、その汎用性の代価は誰かが払わねばなりません。
+たとえば `(elt x 0)` と書くと、x がリストか文字列かベクタかに応じて異なる機械命令が実行されます。
+宣言がなければ、実行時に検査をせねばなりません。
+`(elt (the list x) 0)` のように宣言を与えるか、より個別の関数 — リストなら `(first x)`、文字列なら `(char x 0)`、ベクタなら `(aref x 0)`、単純ベクタなら `(svref x 0)` — を使うかのいずれかができます。
+もちろん総称関数は役に立ちます。私は次に示す `random-elt` をリストに働くように書きましたが、代わりにより効率的な `random-mem` を書くこともできたのです。
+文字列から無作為に文字を選ぶ関数が欲しくなったとき、この選択は報われました。`random-elt` は変えずに用が足りますが、`random-mem` はそうはいきません。
 
 ```lisp
 (defun random-elt (s) (elt s (random (length s))))
 (defun random-mem (l) (nth (random (length (the list l))) l))
 ```
 
-This example was simple, but in more complicated cases you can make your sequence functions more efficient by having them explicitly check if their arguments are lists or vectors.
-See the definition of `map-into` on [page 857](chapter24.md#p857).
+この例は単純でしたが、もっと込み入った場合には、列の関数に引数がリストかベクタかを明示的に調べさせることで、より効率的にできます。
+[857ページ](chapter24.md#p857)の `map-into` の定義を参照してください。
 
-## 10.3 Avoid Complex Argument Lists
+## 10.3 複雑な引数リストを避ける
 
-Functions with keyword arguments suffer a large degree of overhead.
-This may also be true for optional and rest arguments, although usually to a lesser degree.
-Let's look at some simple examples:
+キーワード引数を持つ関数は、大きな間接費を被ります。
+これは省略可能な引数や rest 引数にも当てはまるかもしれませんが、たいていはその度合いは小さくなります。
+単純な例をいくつか見てみましょう。
 
 ```lisp
 (defun reg (a b c d) (list a b c d))
@@ -306,7 +306,7 @@ Let's look at some simple examples:
 (defun key (&key a b (c 1) (d (sqrt a))) (list a b c d))
 ```
 
-We can see what these compile into for the TI Explorer, but remember that your compiler may be quite different.
+これらがTI Explorer向けに何にコンパイルされるかを見られますが、あなたのコンパイラはかなり違うかもしれないことを忘れないでください。
 
 ```
 > (disassemble 'reg)
@@ -324,12 +324,12 @@ We can see what these compile into for the TI Explorer, but remember that your c
    12 RETURN CALL-4   FEF|3     ; #'LIST*
 ```
 
-With the regular argument list, we just push the four variables on the argument stack and branch to the list function.
-([Chapter 22](chapter22.md) explains why a tail-recursive call is just a branch statement.)
+通常の引数リストなら、4つの変数を引数スタックに積んで list 関数へ分岐するだけです。
+（[第22章](chapter22.md)で、末尾再帰の呼び出しがなぜただの分岐文であるかを説明します。）
 
-With a rest argument, things are almost as easy.
-It turns out that on this machine, the microcode for the calling sequence automatically handles rest arguments, storing them in local variable 0.
-Let's compare with optional arguments:
+rest 引数でも、ほぼ同じくらい簡単です。
+この計算機では、呼び出しの手順のマイクロコードが rest 引数を自動的に扱い、それを局所変数0に格納することが分かります。
+省略可能な引数と比べてみましょう。
 
 ```
 (defun opt (&optional a b (c 1) (d (sqrt a))) (list a b c d))
@@ -348,11 +348,11 @@ Let's compare with optional arguments:
   34 TAIL-REC CALL-4  FEF|4   ; #'LIST
 ```
 
-Although this assembly language may be harder to read, it turns out that optional arguments are handled very efficiently.
-The calling sequence stores the number of optional arguments on top of the stack, and the `DISPATCH` instruction uses this to index into a table stored at location `FEF|5` (an offset five words from the start of the function).
-The result is that in one instruction the function branches to just the right place to initialize any unspecified arguments.
-Thus, a function with optional arguments that are all supplied takes only one more instruction (the dispatch) than the "regular" case.
-Unfortunately, keyword arguments don't fare as well:
+このアセンブリ言語は読みにくいかもしれませんが、省略可能な引数はとても効率的に扱われることが分かります。
+呼び出しの手順は省略可能な引数の数をスタックの一番上に格納し、`DISPATCH` 命令はこれを使って `FEF|5`（関数の先頭から5語のオフセット）に格納された表を索引します。
+その結果、1つの命令で、関数は指定されなかった引数を初期化するちょうど正しい場所へ分岐します。
+ですから、省略可能な引数がすべて与えられた関数は、「通常」の場合より命令が1つ（振り分け）多いだけです。
+あいにく、キーワード引数はそこまでうまくいきません。
 
 ```
 (defun key (&key a b` (`c 1`) `(d (sqrt a))) (list a b c d))
@@ -380,11 +380,11 @@ Unfortunately, keyword arguments don't fare as well:
   34 RETURN CALL-4  FEF|6     ; #'LIST
 ```
 
-It is not important to be able to read all this assembly language.
-The point is that there is considerable overhead, even though this architecture has a specific instruction `(%STORE-KEY-WORD-ARGS)` to help deal with keyword arguments.
+このアセンブリ言語をすべて読めることは重要ではありません。
+要点は、このアーキテクチャがキーワード引数の扱いを助ける専用の命令 `(%STORE-KEY-WORD-ARGS)` を持っているにもかかわらず、相当な間接費があることです。
 
-Now let's look at the results on another system, the Allegro compiler for the 68000.
-First, here's the assembly code for `reg`, to give you an idea of the minimal calling sequence:<a id="tfn10-1"></a><sup>[1](#fn10-1)</sup>
+では別のシステム、68000向けのAllegroコンパイラでの結果を見てみましょう。
+まず、最小限の呼び出しの手順の見当をつけてもらうために、`reg` のアセンブリコードを示します。<a id="tfn10-1"></a><sup>[1](#fn10-1)</sup>
 
 ```
 > (disassemble 'reg)
@@ -406,7 +406,7 @@ First, here's the assembly code for `reg`, to give you an idea of the minimal ca
 40:     rtd     #10
 ```
 
-Now we see that `&rest` arguments take a lot more code in this system:
+次に、このシステムでは `&rest` 引数がずっと多くのコードを要することが分かります。
 
 ```
 > (disassemble 'rst)
@@ -438,13 +438,13 @@ Now we see that `&rest` arguments take a lot more code in this system:
 64:     jmp     (a4)
 ```
 
-The loop from 20-26 builds up the `&rest` list one cons at a time.
-Part of the difficulty is that `cons` could initiate a garbage collection at any time, so the list has to be built in a place that the garbage collector will know about.
-The function with optional arguments is even worse, taking 34 instructions (104 bytes), and keywords are worst of all, weighing in at 71 instructions (178 bytes), and including a loop.
-The overhead for optional arguments is proportional to the number of optional arguments, while for keywords it is proportional to the product of the number of parameters allowed and the number of arguments actually supplied.
+20から26のループが、`&rest` のリストを1コンスずつ組み立てます。
+難しさの一因は、`cons` がいつでもごみ集めを開始しうるので、リストをごみ集めが把握できる場所に組み立てねばならないことです。
+省略可能な引数を持つ関数はさらに悪く、34命令（104バイト）を要し、キーワードは最悪で、71命令（178バイト）に達し、ループも含みます。
+省略可能な引数の間接費は省略可能な引数の数に比例しますが、キーワードでは、許される引数の数と実際に与えられた引数の数の積に比例します。
 
-A good guideline to follow is to use keyword arguments primarily as an interface to infrequently used functions, and to provide versions of these functions without keywords that can be used in places where efficiency is important.
-Consider:
+従うべきよい指針は、キーワード引数を主に、あまり使われない関数へのインタフェースとして使い、効率が重要な場所で使えるキーワードなしの版も用意することです。
+次を考えてみましょう。
 
 ```lisp
 (proclaim '(inline key))
@@ -452,8 +452,8 @@ Consider:
 (defun *no-key (a b c d) (list a b c d))
 ```
 
-Here the function `key` is used as an interface to the function `no-key`, which does the real work.
-The inline proclamation should allow the compiler to compile a call to `key` as a call to `no-key` with the appropriate arguments:
+ここでは関数 `key` が、本当の仕事をする関数 `no-key` へのインタフェースとして使われています。
+インラインの宣言により、コンパイラは `key` の呼び出しを、適切な引数を伴う `no-key` の呼び出しとしてコンパイルできるはずです。
 
 ```
 > (disassemble #'(lambda (x y) (key :b x :a y)))
@@ -465,8 +465,8 @@ The inline proclamation should allow the compiler to compile a call to `key` as 
   15 TAIL-REC CALL-4  FEF|4   ; #'NO-KEY
 ```
 
-The overhead only comes into play when the keywords are not known at compile time.
-In the following example, the compiler is forced to call key, not `no-key`, because it doesn't know what the keyword `k` will be at run time:
+間接費が効いてくるのは、キーワードがコンパイル時に分からないときだけです。
+次の例では、コンパイラはキーワード `k` が実行時に何になるか分からないので、`no-key` ではなく key を呼ばざるをえません。
 
 ```
 > (disassemble #'(lambda (k x y) (key k x :a y)))
@@ -477,8 +477,8 @@ In the following example, the compiler is forced to call key, not `no-key`, beca
   14 TAIL-REC CALL-4  FEF|4   ;  #'KEY
 ```
 
-Of course, in this simple example I could have replaced `no-key` with `list`, but in general there will be some more complex processing.
-If I had proclaimed `no-key` inline as well, then I would get the following:
+もちろんこの単純な例では `no-key` を `list` に置き換えられましたが、一般にはもっと込み入った処理があるでしょう。
+`no-key` もインラインと宣言していたら、次が得られたでしょう。
 
 ```
 > (disassemble #'(lambda (x y) (key :b x :a y)))
@@ -490,7 +490,7 @@ If I had proclaimed `no-key` inline as well, then I would get the following:
   15 TAIL-REC CALL-4  FEF|4 ; #'LIST
 ```
 
-If you like, you can define a macro to automatically define the interface to the keyword-less function:
+望むなら、キーワードなしの関数へのインタフェースを自動的に定義するマクロを定義できます。
 
 ```lisp
 (defmacro defun* (fn-name arg-list &rest body)
@@ -521,12 +521,12 @@ If you like, you can define a macro to automatically define the interface to the
 (DEFUN REG (A B C D) (LIST A B C D))
 ```
 
-There is one disadvantage to this approach: a user who wants to declare `key` inline or not inline does not get the expected result.
-The user has to know that `key` is implemented with `key*no-key`, and declare `key*no-key` inline.
+この方式には1つ欠点があります。`key` をインラインとする、あるいはしないと宣言したい利用者が、期待した結果を得られないのです。
+利用者は `key` が `key*no-key` で実装されていることを知り、`key*no-key` をインラインと宣言せねばなりません。
 
-An alternative is just to proclaim the function that uses `&key` to be inline.
-Rob MacLachlan provides an example.
-In CMU Lisp, the function `member` has the following definition, which is proclaimed inline:
+代わりの手は、単に `&key` を使う関数をインラインと宣言することです。
+Rob MacLachlanが例を挙げています。
+CMU Lispでは、関数 `member` は次の定義を持ち、インラインと宣言されています。
 
 ```lisp
 (defun member (item list &key (key #'identity)
@@ -548,8 +548,8 @@ In CMU Lisp, the function `member` has the following definition, which is procla
  (return list)))))
 ```
 
-A call like `(member ch 1 :key #'first-letter :test #'char =)` expands into the equivalent of the following code.
-Unfortunately, not all compilers are this clever with inline declarations.
+`(member ch 1 :key #'first-letter :test #'char =)` のような呼び出しは、次のコードに相当するものに展開されます。
+あいにく、すべてのコンパイラがインラインの宣言についてこれほど賢いわけではありません。
 
 ```lisp
 (do ((list list (cdr list)))
@@ -559,28 +559,28 @@ Unfortunately, not all compilers are this clever with inline declarations.
     (return list))))
 ```
 
-This chapter is concerned with efficiency and so has taken a stand against the use of keyword parameters in frequently used functions.
-But when maintainability is considered, keyword parameters look much better.
-When a program is being developed, and it is not clear if a function will eventually need additional arguments, keyword parameters may be the best choice.
+この章は効率に関わるので、よく使われる関数でのキーワード引数の使用に反対する立場を取ってきました。
+しかし保守しやすさを考えると、キーワード引数はずっとよく見えます。
+プログラムを開発中で、関数がいずれ追加の引数を必要とするかがはっきりしないときには、キーワード引数が最良の選択かもしれません。
 
-## 10.4 Avoid Unnecessary Consing
+## 10.4 不要なコンスを避ける
 
-The `cons` function may appear to execute quite quickly, but like all functions that allocate new storage, it has a hidden cost.
-When large amounts of storage are used, eventually the system must spend time garbage collecting.
-We have not mentioned it earlier, but there are actually two relevant measures of the amount of space consumed by a program: the amount of storage allocated, and the amount of storage retained.
-The difference is storage that is used temporarily but eventually freed.
-Lisp guarantees that unused space will eventually be reclaimed by the garbage collector.
-This happens automatically-the programmer need not and indeed can not explicitly free storage.
-The problem is that the efficiency of garbage collection can vary widely.
-Garbage collection is particularly worrisome for real-time systems, because it can happen at any time.
+`cons` 関数はかなり速く実行されるように見えるかもしれませんが、新しい記憶を割り当てるすべての関数と同じく、隠れた費用があります。
+大量の記憶が使われると、システムはいずれごみ集めに時間を費やさねばなりません。
+これまで触れませんでしたが、プログラムが消費する領域の量には、実は2つの関わりのある尺度があります。割り当てられた記憶の量と、保持された記憶の量です。
+その差は、一時的に使われるがいずれ解放される記憶です。
+Lispは、使われていない領域がいずれごみ集めによって回収されることを保証します。
+これは自動的に起こります。プログラマは記憶を明示的に解放する必要がなく、実際できません。
+問題は、ごみ集めの効率が大きくばらつきうることです。
+ごみ集めは実時間のシステムではとくに気がかりです。いつでも起こりうるからです。
 
-The antidote to garbage woes is to avoid unnecessary copying of objects in often-used code.
-Try using destructive operations, like `nreverse, delete`, and `nconc`, rather than their nondestructive counterparts, (like reverse, remove, and append) whenever it is safe to do so.
-Or use vectors instead of lists, and reuse values rather than creating copies.
-As usual, this gain in efficiency may lead to errors that can be difficult to debug.
-However, the most common kind of unnecessary copying can be eliminated by simple reorganization of your code.
-Consider the following version of `flatten`, which returns a list of all the atoms in its input, preserving order.
-Unlike the version in [chapter 5](chapter5.md), this version returns a single list of atoms, with no embedded lists.
+ごみの悩みへの解毒剤は、よく使われるコードでオブジェクトを不必要に複製するのを避けることです。
+安全にできるときはいつでも、非破壊的な対応物（reverse、remove、append など）ではなく、`nreverse`、`delete`、`nconc` のような破壊的な操作を使ってみてください。
+あるいはリストの代わりにベクタを使い、複製を作るのではなく値を再利用してください。
+いつものように、この効率の向上は、デバッグの難しい誤りを招きうるかもしれません。
+しかし最もよくある種類の不必要な複製は、コードを単純に組み直すことでなくせます。
+入力中のすべてのアトムを順序を保って並びで返す、次の版の `flatten` を考えてみましょう。
+[第5章](chapter5.md)の版と違い、この版は入れ子のリストのない、アトムの1つの並びを返します。
 
 ```lisp
 (defun flatten (input)
@@ -592,13 +592,13 @@ Unlike the version in [chapter 5](chapter5.md), this version returns a single li
       (flatten (rest input))))))
 ```
 
-This definition is quite simple, and it is easy to see that it is correct.
-However, each call to `append` requires copying the first argument, so this version can cons *O*(*n*<sup>2</sup>) cells on an input with *n* atoms.
-The problem with this approach is that it computes the list of atoms in the `first` and `rest` of each subcomponent of the input.
-But the `first` sublist by itself is not part of the final answer-that's why we have to call `append.` We could avoid generating garbage by replacing `append` with `nconc,` but even then we would still be wasting time, because `nconc` would have to scan through each sublist to find its end.
+この定義はかなり単純で、正しいことも簡単に分かります。
+しかし `append` の呼び出しはそのたびに第1引数の複製を要するので、この版は *n* 個のアトムの入力に対して *O*(*n*<sup>2</sup>) 個のセルをコンスしうるのです。
+この方式の問題は、入力の各部分の `first` と `rest` のアトムの並びを計算することです。
+しかし `first` の部分リストそれ自体は最終的な答えの一部ではありません。だから `append` を呼ばねばならないのです。`append` を `nconc` に置き換えればごみの生成は避けられますが、それでもなお時間を無駄にします。`nconc` は各部分リストの末尾を見つけるためにそれを走査せねばならないからです。
 
-The version below makes use of an *accumulator* to keep track of the atoms that have been collected in the rest, and to add the atoms in the `first` one at a time with cons, rather than building up unnecessary sublists and appending them.
-This way no garbage is generated, and no subcomponent is traversed more than once.
+下の版は*累算器*を使って、rest で集めたアトムを記録し、不必要な部分リストを組み立てて連結する代わりに、`first` のアトムを cons で1つずつ加えます。
+こうすればごみは生成されず、どの部分も2回以上たどられません。
 
 ```lisp
 (defun flatten (input &optional accumulator)
@@ -610,43 +610,43 @@ This way no garbage is generated, and no subcomponent is traversed more than onc
       (flatten (rest input) accumulator)))))
 ```
 
-The version with the accumulator may be a little harder to understand, but it is far more efficient than the original version.
-Experienced Lisp programmers become quite skilled at replacing calls to `append` with accumulators.
+累算器を使った版は少し理解しにくいかもしれませんが、元の版よりはるかに効率的です。
+経験を積んだLispプログラマは、`append` の呼び出しを累算器に置き換えることにかなり熟達します。
 
-Some of the early Lisp machines had unreliable garbage-collection, so users just turned garbage collection off, used the machine for a few days, and rebooted when they ran out of space.
-With a large virtual memory system this is a feasible approach, because virtual memory is a cheap resource.
-The problem is that real memory is still an expensive resource.
-When each page contains mostly garbage and only a little live data, the system will spend a lot of time paging data in and out.
-Compacting garbage-collection algorithms can relocate live data, packing it into a minimum number of pages.
+初期のLisp Machineには当てにならないごみ集めを持つものもあったので、利用者はごみ集めを単に切り、数日間その計算機を使い、領域が尽きたら再起動していました。
+大きな仮想記憶のシステムなら、これは実行可能な方式です。仮想記憶は安価な資源だからです。
+問題は、実記憶がなお高価な資源であることです。
+各ページがほとんどごみで、生きたデータがわずかしかないとき、システムはデータの出し入れ（ページング）に多くの時間を費やします。
+詰め込み型のごみ集めのアルゴリズムは、生きたデータを移動して最小限の数のページに詰め込めます。
 
-Some garbage-collection algorithms have been optimized to deal particularly well with just this case.
-If your system has an *ephemeral* or *generational* garbage collector, you need not be so concerned with short-lived objects.
-Instead, it will be the medium-aged objects that cause problems.
-The other problem with such systems arises when an object in an old generation is changed to point to an object in a newer generation.
-This is to be avoided, and it may be that `reverse` is actually faster than `nreverse` in such cases.
-To decide what works best on your particular system, design some test cases and time them.
+ちょうどこの場合をとりわけうまく扱うよう最適化されたごみ集めのアルゴリズムもあります。
+お使いのシステムが*短命*あるいは*世代別*のごみ集めを持つなら、短命なオブジェクトをそれほど気にする必要はありません。
+代わりに、問題を起こすのは中くらいの寿命のオブジェクトになります。
+そうしたシステムのもう1つの問題は、古い世代のオブジェクトが、より新しい世代のオブジェクトを指すよう変えられたときに生じます。
+これは避けるべきで、そうした場合には実は `reverse` のほうが `nreverse` より速いかもしれません。
+あなたの特定のシステムで何が最もうまくいくかを決めるには、いくつか試験例を設計して計時してください。
 
-As an example of efficient use of storage, here is a version of `pat-match` that eliminates (almost) all consing.
-The original version of `pat-match,` as used in ELIZA ([page 180](chapter6.md#p180)), used an association list of variable/value pairs to represent the binding list.
-This version uses two sequences: a sequence of variables and a sequence of values.
-The sequences are implemented as vectors instead of lists.
-In general, vectors take half as much space as lists to store the same information, since half of every list is just pointing to the next element.
+記憶の効率的な使用の例として、（ほぼ）すべてのコンスをなくす `pat-match` の版を示します。
+ELIZA（[180ページ](chapter6.md#p180)）で使われた元の版の `pat-match` は、束縛の並びを表すのに変数と値の対の連想リストを使いました。
+この版は2つの列を使います。変数の列と値の列です。
+これらの列はリストではなくベクタとして実装されます。
+一般に、同じ情報を格納するのにベクタはリストの半分の領域しか取りません。どのリストも半分は次の要素を指しているだけだからです。
 
-In this case, the savings are much more substantial than just half.
-Instead of building up small binding lists for each partial match and adding to them when the match is extended, we will allocate a sufficiently large vector of variables and values just once, and use them over and over for each partial match, and even for each invocation of `pat-match.` To do this, we need to know how many variables we are currently using.
-We could initialize a counter variable to zero and increment it each time we found a new variable in the pattern.
-The only difficulty would be when the counter variable exceeds the size of the vector.
-We could just give up and print an error message, but there are more user-friendly alternatives.
-For example, we could allocate a larger vector for the variables, copy over the existing ones, and then add in the new one.
+この場合、節約は半分どころかずっと大きくなります。
+部分照合ごとに小さな束縛の並びを組み立て、照合が伸びるたびにそれに加えるのではなく、変数と値の十分に大きなベクタを一度だけ割り当て、それを部分照合ごとに、そして `pat-match` の呼び出しごとにさえ、何度も使います。これを行うには、今いくつの変数を使っているかを知る必要があります。
+計数の変数を0に初期化し、パターンに新しい変数を見つけるたびに増やすこともできます。
+唯一の難しさは、計数の変数がベクタの大きさを超えたときでしょう。
+あきらめてエラーメッセージを表示することもできますが、もっと利用者に優しい代案があります。
+たとえば、変数のためにより大きなベクタを割り当て、既存のものを写してから、新しいものを加えられます。
 
-It turns out that Common Lisp has a built-in facility to do just this.
-When a vector is created, it can be given a *fill pointer*.
-This is a counter variable, but one that is conceptually stored inside the vector.
-Vectors with fill pointers act like a cross between a vector and a stack.
-You can push new elements onto the stack with the functions `vector-push` or `vector-push-extend`.
-The latter will automatically allocate a larger vector and copy over elements if necessary.
-You can remove elements with `vector-pop`, or you can explicitly look at the fill pointer with `fill-pointer`, or change it with a `setf`.
-Here are some examples (with `*print-array*` set to `t` so we can see the results):
+Common Lispには、まさにこれを行う組み込みの仕組みがあることが分かります。
+ベクタが作られるとき、それに*フィルポインタ*を与えられます。
+これは計数の変数ですが、概念上はベクタの内側に格納されるものです。
+フィルポインタを持つベクタは、ベクタとスタックの中間のように振る舞います。
+関数 `vector-push` か `vector-push-extend` で、新しい要素をスタックに積めます。
+後者は必要ならより大きなベクタを自動的に割り当て、要素を写します。
+`vector-pop` で要素を取り除けますし、`fill-pointer` でフィルポインタを明示的に見たり、`setf` で変えたりできます。
+例をいくつか示します（結果が見えるよう `*print-array*` を `t` に設定してあります）。
 
 ```lisp
 > (setf a (make-array 5 :fill-pointer 0))
@@ -690,22 +690,22 @@ X               ; But AREF can see beyond the fill pointer
 ```
 
 
-Using vectors with fill pointers in `pat-match,` the total storage for binding lists is just twice the number of variables in the largest pattern.
-I have arbitrarily picked 10 as the maximum number of variables, but even this is not a hard limit, because `vector-push-extend` can increase it.
-In any case, the total storage is small, fixed in size, and amortized over all calls to `pat-match.` These are just the features that indicate a responsible use of storage.
+`pat-match` でフィルポインタを持つベクタを使うと、束縛の並びのための記憶の総量は、最大のパターンの変数の数のちょうど2倍です。
+最大の変数の数として勝手に10を選びましたが、これさえ厳格な上限ではありません。`vector-push-extend` がそれを増やせるからです。
+いずれにせよ記憶の総量は小さく、大きさが固定され、`pat-match` のすべての呼び出しにわたって割り勘にされます。これらはまさに、記憶の責任ある使用を示す特徴です。
 
-However, there is a grave danger with this approach: the value returned must be managed carefully.
-The new `pat-match` returns the value of `success` when it matches.
-`success` is bound to a cons of the variable and value vectors.
-These can be freely manipulated by the calling routine, but only up until the next call to `pat-match`.
-At that time, the contents of the two vectors can change.
-Therefore, if any calling function needs to hang on to the returned value after another call to `pat-match,` it should make a copy of the returned value.
-So it is not quite right to say that this version of `pat-match` eliminates all consing.
-It will cons when `vector-push-extend` runs out of space, or when the user needs to make a copy of a returned value.
+ただしこの方式には重大な危険があります。返される値を注意深く管理せねばなりません。
+新しい `pat-match` は、合致すると `success` の値を返します。
+`success` は、変数のベクタと値のベクタの cons に束縛されています。
+これらは呼び出し側の手続きが自由に操作できますが、次に `pat-match` を呼ぶまでのあいだだけです。
+そのとき、2つのベクタの中身は変わりうるのです。
+ですから、`pat-match` を再び呼んだあとも返された値を持ち続ける必要のある呼び出し側の関数は、返された値の複製を作るべきです。
+ですから、この版の `pat-match` がすべてのコンスをなくすと言うのは、正確ではありません。
+`vector-push-extend` が領域を使い果たしたとき、あるいは利用者が返された値の複製を作る必要があるときには、コンスします。
 
-Here is the new definition of `pat-match.` It is implemented by closing the definition of `pat-match` and its two auxiliary functions inside a `let` that establishes the bindings of `vars, vals`, and `success`, but that is not crucial.
-Those three variables could have been implemented as global variables instead.
-Note that it does not support segment variables, or any of the other options implemented in the `pat-match` of [chapter 6](chapter6.md).
+`pat-match` の新しい定義を示します。これは、`pat-match` とその2つの補助関数の定義を、`vars`、`vals`、`success` の束縛を設ける `let` の中に閉じ込めることで実装されていますが、それが肝心なわけではありません。
+その3つの変数は、代わりに大域変数として実装することもできました。
+これが区間変数や、[第6章](chapter6.md)の `pat-match` で実装した他の選択肢を支えていないことに注意してください。
 
 ```lisp
 (let* ((vars (make-array 10 :fill-pointer 0 :adjustable t))
