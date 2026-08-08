@@ -1011,21 +1011,21 @@ Lispはとても優れた素早い試作の言語なので、動く実装を手�
 
 その結果、`f` へのどの呼び出しも、結局は元の `f` を呼びますが、数を2回増やしてからになってしまいます。
 
-Another consideration is what happens when a profiled function is redefined by the user.
-The only way we could ensure that a redefined function would continue profiling would be to change the definition of the macro defun to look for functions that should be profiled.
-Changing system functions like defun is a risky prospect, and in *Common Lisp the Language*, 2d edition, it is explicitly disallowed.
-Instead, we'll do the next best thing: ensure that the next call to `profile` will reprofile any functions that have been redefined.
-We do this by keeping track of both the original unprofiled function and the profiled function.
-We also keep a list of all functions that are currently profiled.
+もう1つ考えるべきは、プロファイリングした関数が利用者によって再定義されたときに何が起こるかです。
+再定義された関数がプロファイリングを続けることを保証できる唯一の方法は、マクロ defun の定義を変えて、プロファイリングすべき関数を探させることでしょう。
+defun のようなシステム関数を変えるのは危うい試みであり、*Common Lisp the Language* 第2版では明示的に禁じられています。
+代わりに次善の策をとります。次に `profile` を呼んだとき、再定義された関数を再びプロファイリングすることを保証するのです。
+これは、元のプロファイリングしていない関数と、プロファイリングした関数の両方を記録することで行います。
+また、現在プロファイリングしているすべての関数の並びも保ちます。
 
-In addition, we will count the amount of time spent in each function.
-However, the user is cautioned not to trust the timing figures too much.
-First, they include the overhead cost of the profiling facility.
-This can be significant, particularly because the facility conses, and thus can force garbage collections that would not otherwise have been done.
-Second, the resolution of the system clock may not be fine enough to make accurate timings.
-For functions that take about 1/10 of a second or more, the figures will be reliable, but for quick functions they may not be.
+加えて、各関数で費やした時間の量も数えます。
+ただし利用者は、その時間の数値を信じすぎないよう注意してください。
+第一に、それらはプロファイリングの仕組みの間接費を含んでいます。
+これは相当なものになりえます。とくに、この仕組みはコンスを行うので、そうでなければ起きなかったごみ集めを引き起こしうるからです。
+第二に、システムの時計の分解能が、正確な計時をするほど細かくないかもしれません。
+1/10秒ほど以上かかる関数なら数値は当てになりますが、速い関数ではそうでないかもしれません。
 
-Here is the basic code for `profile` and `unprofile:`
+`profile` と `unprofile` の基本のコードを示します。
 
 ```lisp
 (defvar *profiled-functions* nil
@@ -1049,19 +1049,19 @@ Here is the basic code for `profile` and `unprofile:`
             ',fn-names)))))
 ```
 
-The idiom `'',fn-names` deserves comment, since it is common but can be confusing at first.
-It may be easier to understand when written in the equivalent form `'(quote ,fn-names)`.
-As always, the backquote builds a structure with both constant and evaluated components.
-In this case, the `quote` is constant and the variable `fn-names` is evaluated.
-In MacLisp, the function `kwote` was defined to serve this purpose:
+`'',fn-names` という慣用句は、よく使われるが最初は分かりにくいので、説明しておく値打ちがあります。
+等価な形 `'(quote ,fn-names)` で書くと理解しやすいかもしれません。
+いつものように、逆引用符は定数の部分と評価される部分の両方を持つ構造を組み立てます。
+この場合、`quote` は定数で、変数 `fn-names` は評価されます。
+MacLispでは、この目的のために関数 `kwote` が定義されていました。
 
 ```lisp
 (defun kwote (x) (list 'quote x))
 ```
 
-Now we need to change `profile1` and `unprofile1` to do the additional bookkeeping: For `profile1`, there are two cases.
-If the user does a `profile1` on the same function name twice in a row, then on the second time we will notice that the current function is the same as the functioned stored under the `profiled-fn` property, so nothing more needs to be done.
-Otherwise, we create the profiled function, store it as the current definition of the name under the `profiled-fn` property, save the unprofiled function, and initialize the counts.
+次に、`profile1` と `unprofile1` を変えて、追加の帳簿づけをさせる必要があります。`profile1` には2つの場合があります。
+利用者が同じ関数名に対して `profile1` を続けて2回行った場合、2度目には現在の関数が `profiled-fn` 属性のもとに格納された関数と同じだと気づくので、それ以上することはありません。
+そうでなければ、プロファイリングした関数を作り、それを `profiled-fn` 属性のもとに名前の現在の定義として格納し、プロファイリングしていない関数を保存し、数を初期化します。
 
 ```lisp
 (defun profile1 (fn-name)
@@ -1089,24 +1089,24 @@ Otherwise, we create the profiled function, store it as the current definition o
  fn-name)
 ```
 
-Now we look into the question of timing.
-There is a built-in Common Lisp function, `get-internal-real-time`, that returns the elapsed time since the Lisp session started.
-Because this can quickly become a bignum, some implementations provide another timing function that wraps around rather than increasing forever, but which may have a higher resolution than `get-internal-real-time`.
-For example, on TI Explorer Lisp Machines, `get-internal-real-time` measures 1/60-second intervals, while `time:microsecond-time` measures 1/1,000,000-second intervals, but the value returned wraps around to zero every hour or so.
-The function `time:microsecond-time-difference` is used to compare two of these numbers with compensation for wraparound, as long as no more than one wraparound has occurred.
+次に計時の問題を見ていきます。
+組み込みのCommon Lisp関数 `get-internal-real-time` があり、Lispのセッションが始まってからの経過時間を返します。
+これはすぐに bignum になりうるので、処理系によっては、際限なく増えるのではなく折り返す別の計時関数を用意しており、それは `get-internal-real-time` より高い分解能を持つかもしれません。
+たとえばTI Explorer Lisp Machineでは、`get-internal-real-time` は1/60秒の間隔を測りますが、`time:microsecond-time` は1/1,000,000秒の間隔を測ります。ただし返る値は1時間ほどごとに0に折り返します。
+関数 `time:microsecond-time-difference` は、折り返しが1回を超えて起きていないかぎり、折り返しを補正してこれらの数を2つ比べるのに使います。
 
-In the code below, I use the conditional read macro characters `#+` and `#-` to define the right behavior on both Explorer and non-Explorer machines.
-We have seen that `#` is a special character to the reader that takes different action depending on the following character.
-For example, `#'fn` is read as `(function fn)`.
-The character sequence `#+` is defined so that `#+`*feature expression* reads as *expression* if the *feature* is defined in the current implementation, and as nothing at all if it is not.
-The sequence `#-` acts in just the opposite way.
-For example, on a TI Explorer, we would get the following:
+以下のコードでは、条件つき読み取りマクロ文字 `#+` と `#-` を使って、Explorerと非Explorerの両方の計算機で正しい振る舞いを定義します。
+`#` がリーダにとって特別な文字で、続く文字に応じて異なる動作をすることはすでに見ました。
+たとえば `#'fn` は `(function fn)` として読まれます。
+文字列 `#+` は、`#+`*機能 式* が、その*機能*が現在の処理系で定義されていれば*式*として、そうでなければまったく何もないものとして読まれるよう定義されています。
+`#-` はちょうど逆の働きをします。
+たとえばTI Explorerでは、次のようになります。
 
 ```lisp
 >'(hi #+TI t #+Symbolics s #-Explorer e #-Mac m) => (HI T M)
 ```
 
-The conditional read macro characters are used in the following definitions:
+条件つき読み取りマクロ文字は、次の定義で使います。
 
 ```lisp
 (defun get-fast-time ()
@@ -1124,24 +1124,24 @@ The conditional read macro characters are used in the following definitions:
  #-Explorer (/ time internal-time-units-per-second))
 ```
 
-The next step is to update `profiled-fn` to keep track of the timing data.
-The simplest way to do this would be to set a variable, say `start`, to the time when a function is entered, run the function, and then increment the function's time by the difference between the current time and `start`.
-The problem with this approach is that every function in the call stack gets credit for the time of each called function.
-Suppose the function `f` calls itself recursively five times, with each call and return taking place a second apart, so that the whole computation takes nine seconds.
-Then `f` will be charged nine seconds for the outer call, seven seconds for the next call, and so on, for a total of 25 seconds, even though in reality it only took nine seconds for all of them together.
+次の段階は、`profiled-fn` を更新して計時のデータを記録させることです。
+これを行う最も単純な方法は、`start` などの変数を関数に入ったときの時刻に設定し、関数を走らせ、それから現在の時刻と `start` の差だけ関数の時間を増やすことでしょう。
+この方式の問題は、呼び出しスタックのすべての関数が、呼ばれた各関数の時間を自分の手柄にしてしまうことです。
+関数 `f` が自分自身を5回再帰的に呼び、各呼び出しと復帰が1秒ずつ隔たって起こり、計算全体で9秒かかるとしましょう。
+すると `f` は、外側の呼び出しに9秒、次の呼び出しに7秒、という具合に、合計25秒を課されます。実際には全部あわせて9秒しかかからなかったのにです。
 
-A better algorithm would be to charge each function only for the time since the last call or return.
-Then `f` would only be charged the nine seconds.
-The variable `*profile-call-stack*` is used to hold a stack of function name/entry time pairs.
-This stack is manipulated by `profile-enter` and `profile-exit` to get the right timings.
+よりよいアルゴリズムは、各関数に、最後の呼び出しか復帰からの時間だけを課すことでしょう。
+そうすれば `f` に課されるのは9秒だけです。
+変数 `*profile-call-stack*` は、関数名と入場時刻の対のスタックを保持するのに使います。
+このスタックは `profile-enter` と `profile-exit` によって操作され、正しい計時を得ます。
 
-The functions that are used on each call to a profiled function are declared `inline`.
-In most cases, a call to a function compiles into machine instructions that set up the argument list and branch to the location of the function's definition.
-With an `inline` function, the body of the function is compiled in line at the place of the function call.
-Thus, there is no overhead for setting up the argument list and branching to the definition.
-An `inline` declaration can appear anywhere any other declaration can appear.
-In this case, the function `proclaim` is used to register a global declaration.
-Inline declarations are discussed in more depth on [page 317](chapter10.md#p317).
+プロファイリングした関数の呼び出しごとに使われる関数は `inline` と宣言してあります。
+たいていの場合、関数の呼び出しは、引数の並びを整えて関数の定義の位置へ分岐する機械命令にコンパイルされます。
+`inline` の関数では、関数の本体が関数呼び出しの場所にその場でコンパイルされます。
+ですから、引数の並びを整えて定義へ分岐する間接費がありません。
+`inline` の宣言は、他のどの宣言も現れうる場所ならどこにでも現れられます。
+この場合、大域的な宣言を登録するのに関数 `proclaim` を使います。
+インラインの宣言は [317ページ](chapter10.md#p317) でより深く論じます。
 
 ```lisp
 (proclaim '(inline profile-enter profile-exit inc-profile-time))
@@ -1175,10 +1175,10 @@ Inline declarations are discussed in more depth on [page 317](chapter10.md#p317)
             (fast-time-difference (get-fast-time) (cdr entry))))
 ```
 
-Finally, we need to update `profile-report` to print the timing data as well as the counts.
-Note that the default `fn-names` is a copy of the global list.
-That is because we pass `fn-names` to `sort`, which is a destructive function.
-We don't want the global list to be modified as a result of this sort.
+最後に、`profile-report` を更新して、数だけでなく計時のデータも表示させる必要があります。
+既定の `fn-names` が大域的な並びの複製であることに注意してください。
+それは `fn-names` を破壊的な関数 `sort` に渡すからです。
+このソートの結果として大域的な並びが書き換えられては困ります。
 
 ```lisp
 (defun profile-report (&optional
@@ -1200,8 +1200,8 @@ We don't want the global list to be modified as a result of this sort.
 (defun profile-time (fn-name) (get fn-name 'profile-time))
 ```
 
-These functions can be used by calling `profile`, then doing some representative computation, then calling `profile-report`, and finally `unprofile`.
-It can be convenient to provide a single macro for doing all of these at once:
+これらの関数は、`profile` を呼び、次に代表的な計算を行い、次に `profile-report` を呼び、最後に `unprofile` を呼ぶことで使えます。
+これらすべてを一度に行う単一のマクロを用意すると便利なことがあります。
 
 ```lisp
 (defmacro with-profiling (fn-names &rest body)
@@ -1215,19 +1215,19 @@ It can be convenient to provide a single macro for doing all of these at once:
             (unprofile . ,fn-names))))
 ```
 
-Note the use of `unwind-protect` to produce the report and call `unprofile` even if the computation is aborted.
-`unwind-protect` is a special form that takes any number of arguments.
-It evaluates the first argument, and if all goes well it then evaluates the other arguments and returns the first one, just like `progl`.
-But if an error occurs during the evaluation of the first argument and computation is aborted, then the subsequent arguments (called cleanup forms) are evaluated anyway.
+計算が中断されても報告を生み `unprofile` を呼ぶために `unwind-protect` を使っている点に注目してください。
+`unwind-protect` は任意個の引数をとる特殊形式です。
+第1引数を評価し、すべてうまくいけば他の引数を評価して、`prog1` と同じように最初のものを返します。
+しかし第1引数の評価中に誤りが起きて計算が中断された場合でも、後続の引数（後始末の形と呼ばれます）はとにかく評価されます。
 
-## 9.6 A Case Study in Efficiency: The SIMPLIFY Program
+## 9.6 効率の事例研究: SIMPLIFYプログラム
 
-Suppose we wanted to speed up the `simplify` program of [chapter 8](chapter8.md).
-This section shows how a combination of general techniques-memoizing, indexing, and compiling-can be used to speed up the program by a factor of 130.
-[Chapter 15](chapter15.md) will show another approach: replace the algorithm with an entirely different one.
+[第8章](chapter8.md)の `simplify` プログラムを速くしたいとしましょう。
+この節では、一般的な技法の組み合わせ — メモ化、索引付け、コンパイル — を使って、このプログラムを130倍速くする方法を示します。
+[第15章](chapter15.md)では別の方式 — アルゴリズムをまったく別のものに置き換えること — を示します。
 
-The first step to a faster program is defining a *benchmark*, a test suite representing a typical work load.
-The following is a short list of test problems (and their answers) that are typical of the `simplify` task.
+より速いプログラムへの最初の段階は、典型的な作業負荷を代表する試験一式である*ベンチマーク*を定めることです。
+以下は、`simplify` の課題に典型的な試験問題（とその答え）の短い並びです。
 
 ```lisp
 (defvar *test-data* (mapcar #'infix-> prefix
@@ -1239,7 +1239,7 @@ The following is a short list of test problems (and their answers) that are typi
 (defvar *answers* (mapcar #'simplify *test-data*))
 ```
 
-The function `test-it` runs through the test data, making sure that each answer is correct and optionally printing profiling data.
+関数 `test-it` は試験データを一通り走らせ、各答えが正しいことを確かめ、必要に応じてプロファイリングのデータを表示します。
 
 ```lisp
 (defun test-it (&optional (with-profiling t))
@@ -1258,7 +1258,7 @@ The function `test-it` runs through the test data, making sure that each answer 
                     "Expected ~a to be equal to ~a" x y))
 ```
 
-Here are the results of (`test-it`) with and without profiling:
+プロファイリングありとなしの (`test-it`) の結果を示します。
 
 ```lisp
 > (test-it nil)
@@ -1276,28 +1276,28 @@ Total elapsed time: 22.819614 seconds
 | `906`   | `0.20`  | `1%`    | `SIMPLIFY`       |
 | `274`   | `1.98`  | `9%`    | `SIMPLIFY-EXP`   |
 
-Running the test takes 6.6 seconds normally, although the time triples when the profiling overhead is added in.
-It should be clear that to speed things up, we have to either speed up or cut down on the number of calls to `pat-match` or `variable-p`, since together they account for 89% of the calls (and 89% of the time as well).
-We will look at three methods for achieving both those goals.
+試験の実行は通常6.6秒かかりますが、プロファイリングの間接費が加わると時間は3倍になります。
+速くするには、`pat-match` か `variable-p` の呼び出しを速くするか、その回数を減らすかせねばならないのは明らかでしょう。この2つで呼び出しの89%（そして時間の89%も）を占めているからです。
+その両方の目標を達成する3つの手法を見ていきます。
 
-#### Memoization
+#### メモ化
 
-Consider the rule that transforms (`x + x`) into (`2 * x`).
-Once this is done, we have to simplify the result, which involves resimplifying the components.
-If `x` were some complex expression, this could be time-consuming, and it will certainly be wasteful, because `x` is already simplified and cannot change.
-We have seen this type of problem before, and the solution is memoization: make `simplify` remember the work it has done, rather than repeating the work.
-We can just say:
+(`x + x`) を (`2 * x`) に変形する規則を考えましょう。
+これが済むと、結果を簡約せねばならず、それには構成要素を再び簡約することが伴います。
+`x` が何か複雑な式なら、これは時間がかかりうるし、確かに無駄です。`x` はすでに簡約されていて変わりようがないからです。
+この種の問題は以前に見ました。解決はメモ化です。`simplify` に、作業を繰り返すのではなく、行った作業を覚えさせるのです。
+次のように書くだけです。
 
 ```lisp
 (memoize 'simplify :test #'equal)
 ```
 
-Two questions are unclear: what kind of hash table to use, and whether we should clear the hash table between problems.
-The simplifier was timed for all four combinations of `eq` or `equal` hash tables and resetting or nonresetting between problems.
-The fastest result was `equal` hashing and nonresetting.
-Note that with `eq` hashing, the resetting version was faster, presumably because it couldn't take advantage of the common subexpressions between examples (since they aren't `eq`).
+2つの問いがはっきりしません。どんな種類のハッシュ表を使うか、そして問題ごとにハッシュ表を空にすべきかどうかです。
+簡約器を、`eq` か `equal` のハッシュ表と、問題ごとに再設定するかしないかの4通りの組み合わせすべてで計時しました。
+最も速かったのは `equal` のハッシュと、再設定しないことでした。
+`eq` のハッシュでは再設定する版のほうが速かったことに注意してください。おそらく、例のあいだの共通の部分式を活かせなかったから（それらは `eq` ではないので）でしょう。
 
-| hashing | resetting | time |
+| ハッシュ | 再設定 | 時間 |
 |---------|-----------|------|
 | none    | -         | 6.6  |
 | `equal` | yes       | 3.8  |
@@ -1305,25 +1305,25 @@ Note that with `eq` hashing, the resetting version was faster, presumably becaus
 | `eq`    | yes       | 7.0  |
 | `eq`    | no        | 10.2 |
 
-This approach makes the function `simplify` remember the work it has done, in a hash table.
-If the overhead of hash table maintenance becomes too large, there is an alternative: make the data remember what `simplify` has done.
-This approach was taken in MACSYMA: it represented operators as lists rather than as atoms.
-Thus, instead of `(* 2 x)`, MACSYMA would use `((*) 2 x)`.
-The simplification function would destructively insert a marker into the operator list.
-Thus, the result of simplifying 2*x* would be `((* simp) 2 x)`.
-Then, when the simplifier was called recursively on this expression, it would notice the `simp` marker and return the expression as is.
+この方式は、関数 `simplify` に、行った作業をハッシュ表の中で覚えさせます。
+ハッシュ表の保守の間接費が大きくなりすぎるなら、代わりの手があります。`simplify` が行ったことを、データに覚えさせるのです。
+この方式はMACSYMAで採られました。演算子をアトムではなくリストとして表したのです。
+ですから `(* 2 x)` の代わりに、MACSYMAは `((*) 2 x)` を使いました。
+簡約の関数は、演算子のリストに印を破壊的に差し込みます。
+ですから 2*x* を簡約した結果は `((* simp) 2 x)` になります。
+そして、この式に対して簡約器が再帰的に呼ばれると、`simp` の印に気づいて式をそのまま返します。
 
-The idea of associating memoization information with the data instead of with the function will be more efficient unless there are many functions that all want to place their marks on the same data.
-The data-oriented approach has two drawbacks: it doesn't identify structures that are `equal` but not `eq`, and, because it requires explicitly altering the data, it requires every other operation that manipulates the data to know about the markers.
-The beauty of the hash table approach is that it is transparent; no code needs to know that memoization is taking place.
+メモ化の情報を関数ではなくデータに結び付けるという考えは、同じデータに自分の印を付けたい関数が多くないかぎり、より効率的です。
+データ寄りの方式には2つの欠点があります。`equal` だが `eq` でない構造を同一と見なさないこと、そしてデータを明示的に書き換える必要があるため、データを操作する他のすべての操作がその印について知っている必要があることです。
+ハッシュ表の方式の美点は、それが透明なことです。メモ化が行われていることを、どのコードも知る必要がありません。
 
-#### Indexing
+#### 索引付け
 
-We currently go through the entire list of rules one at a time, checking each rule.
-This is inefficient because most of the rules could be trivially ruled out-if only they were indexed properly.
-The simplest indexing scheme would be to have a separate list of rules indexed under each operator.
-Instead of having `simplify-exp` check each member of `*simplification-rules*`, it could look only at the smaller list of rules for the appropriate operator.
-Here's how:
+今のところ、規則の並び全体を1つずつたどり、各規則を調べています。
+これは非効率です。規則がきちんと索引づけられてさえいれば、大半の規則は造作もなく除外できるからです。
+最も単純な索引付けの仕組みは、各演算子のもとに索引づけた別々の規則の並びを持つことでしょう。
+`simplify-exp` に `*simplification-rules*` の各要素を調べさせる代わりに、適切な演算子のためのより小さな規則の並びだけを見させられます。
+やり方は次のとおりです。
 
 ```lisp
 (defun simplify-exp (exp)
@@ -1351,20 +1351,20 @@ Here's how:
 (index-rules *simplification-rules*)
 ```
 
-Timing the memoized, indexed version gets us to .98 seconds, down from 6.6 seconds for the original code and 3 seconds for the memoized code.
-If this hadn't helped, we could have considered more sophisticated indexing schemes.
-Instead, we move on to consider other means of gaining efficiency.
+メモ化して索引づけた版を計時すると .98秒に達します。元のコードの6.6秒、メモ化したコードの3秒からの短縮です。
+これで助けにならなかったら、もっと洗練された索引付けの仕組みを考えられたでしょう。
+代わりに、効率を得る他の手立てを考えることに移ります。
 
-**Exercise 9.2 [m]** The list of rules for each operator is stored in a hash table with the operator as key.
-An alternative would be to store the rules on the property list of each operator, assuming operators must be symbols.
-Implement this alternative, and time it against the hash table approach.
-Remember that you need some way of clearing the old rules-trivial with a hash table, but not automatic with property lists.
+**練習問題 9.2 [m]** 各演算子のための規則の並びは、演算子をキーとするハッシュ表に格納されている。
+代わりに、演算子がシンボルでなければならないと仮定して、規則を各演算子の属性リストに格納することもできる。
+この代案を実装し、ハッシュ表の方式と計時して比べよ。
+古い規則を空にする手立てが要ることを忘れるな。ハッシュ表なら造作もないが、属性リストでは自動ではない。
 
-#### Compilation
+#### コンパイル
 
-You can look at `simplify-exp` as an interpreter for the simplification rule language.
-One proven technique for improving efficiency is to replace the interpreter with a compiler.
-For example, the rule `(x + x = 2 * x)` could be compiled into something like:
+`simplify-exp` は、簡約規則の言語のインタプリタと見なせます。
+効率を高める確かな技法の1つは、インタプリタをコンパイラに置き換えることです。
+たとえば規則 `(x + x = 2 * x)` は、次のようなものにコンパイルできるでしょう。
 
 ```lisp
 (lambda (exp)
@@ -1372,9 +1372,9 @@ For example, the rule `(x + x = 2 * x)` could be compiled into something like:
             (make-exp :op '* :lhs 2 :rhs (exp-rhs exp))))
 ```
 
-This eliminates the need for consing up and passing around variable bindings, and should be faster than the general matching procedure.
-When used in conjunction with indexing, the individual rules can be simpler, because we already know we have the right operator.
-For example, with the above rule indexed under `+`, it could now be compiled as:
+これは変数の束縛をコンスして持ち回る必要をなくし、一般的な照合の手続きより速いはずです。
+索引付けと併せて使えば、正しい演算子を持っていることがすでに分かっているので、個々の規則はより単純にできます。
+たとえば上の規則を `+` のもとに索引づければ、今度は次のようにコンパイルできます。
 
 ```lisp
 (lambda (exp)
@@ -1382,19 +1382,19 @@ For example, with the above rule indexed under `+`, it could now be compiled as:
             (make-exp :op '* :lhs 2 :rhs (exp-lhs exp))))
 ```
 
-It is important to note that when these functions return nil, it means that they have failed to simplify the expression, and we have to consider another means of simplification.
+これらの関数が nil を返すとき、それは式の簡約に失敗したことを意味し、別の簡約の手立てを考えねばならない、という点に注意するのが重要です。
 
-Another possibility is to compile a set of rules all at the same time, so that the indexing is in effect part of the compiled code.
-As an example, I show here a small set of rules and a possible compilation of the rule set.
-The generated function assumes that `x` is not an atom.
-This is appropriate because we are replacing `simplify-exp`, not `simplify`.
-Also, we will return nil to indicate that `x` is already simplified.
-I have chosen a slightly different format for the code; the main difference is the let to introduce variable names for subexpressions.
-This is useful especially for deeply nested patterns.
-The other difference is that I explicitly build up the answer with a call to `list`, rather than `make-exp`.
-This is normally considered bad style, but since this is code generated by a compiler, I wanted it to be as efficient as possible.
-If the representation of the `exp` data type changed, we could simply change the compiler; a much easier task than hunting down all the references spread throughout a human-written program.
-The comments following were not generated by the compiler.
+もう1つの可能性は、規則の組を一度にまとめてコンパイルし、索引付けが事実上コンパイルされたコードの一部となるようにすることです。
+例として、ここでは小さな規則の組と、その規則の組のありうるコンパイル結果を示します。
+生成された関数は `x` がアトムでないことを前提とします。
+これは適切です。私たちは `simplify` ではなく `simplify-exp` を置き換えているのですから。
+また、`x` がすでに簡約されていることを示すために nil を返します。
+コードには少し違う書式を選びました。主な違いは、部分式に変数名を導入する let です。
+これは、深く入れ子になったパターンにとくに役立ちます。
+もう1つの違いは、`make-exp` ではなく `list` の呼び出しで明示的に答えを組み立てていることです。
+これは通常はよくない流儀とされますが、これはコンパイラが生成するコードなので、できるかぎり効率的にしたかったのです。
+`exp` データ型の表現が変わっても、コンパイラを変えるだけで済みます。人が書いたプログラム全体に散らばった参照をすべて探し出すよりずっと楽な仕事です。
+以下のコメントはコンパイラが生成したものではありません。
 
 ```lisp
 (x * 1  =  x)
@@ -1418,11 +1418,11 @@ The comments following were not generated by the compiler.
             (list '^ xl '2)))))
 ```
 
-I chose this format for the code because I imagined (and later *show*) that it would be fairly easy to write the compiler for it.
+このコードの書式を選んだのは、そのコンパイラを書くのがかなり簡単だろうと思ったから（そしてのちに*示す*から）です。
 
-#### The Single-Rule Compiler
+#### 単一規則のコンパイラ
 
-Here I show the complete single-rule compiler, to be followed by the indexed-rule-set compiler.
+ここでは完全な単一規則のコンパイラを示し、続いて索引づけた規則の組のコンパイラを示します。
 The single-rule compiler works like this:
 
 ```lisp
