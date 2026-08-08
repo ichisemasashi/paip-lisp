@@ -1372,18 +1372,18 @@ Prologは演算子 `is` で算術を支えます。
 ```
 
 is の基本手続きは、第2引数のどこかが未束縛なら失敗します。
-However, there are expressions with variables that can be solved, although not with a direct call to `eval`.
-For example, the following goal could be solved by binding `?x` to `2`:
+しかし、`eval` を直に呼ぶことではないにせよ、解ける変数を含む式もあります。
+たとえば次の目標は、`?x` を `2` に束縛することで解けるでしょう。
 
 ```lisp
 (solve (=  12 (* (+ ?x 1) 4)))
 ```
 
-We might want to have more direct access to Lisp from Prolog.
-The problem with `is` is that it requires a check for unbound variables, and it calls `eval` to evaluate arguments recursively.
-In some cases, we just want to get at Lisp's `apply`, without going through the safety net provided by is.
-The primitive `lisp` does that.
-Needless to say, `lisp` is not a part of standard Prolog.
+PrologからLispへ、もっと直接にアクセスしたいこともあるかもしれません。
+`is` の問題は、未束縛の変数の検査を要し、引数を再帰的に評価するために `eval` を呼ぶことです。
+場合によっては、is が提供する安全網を通さずに、Lispの `apply` にただ手を届かせたいのです。
+基本手続き `lisp` がそれを行います。
+言うまでもなく、`lisp` は標準のPrologの一部ではありません。
 
 ```lisp
 (defun lisp/2 (?result exp cont)
@@ -1393,92 +1393,92 @@ Needless to say, `lisp` is not a part of standard Prolog.
  (funcall cont)))
 ```
 
-**Exercise  12.7 [m]** Define the primitive `solve/1`, which works like the function `solve` used in student ([page 225](chapter7.md#p225)).
-Decide if it should take a single equation as argument or a list of equations.
+**練習問題 12.7 [m]** student（[225ページ](chapter7.md#p225)）で使った関数 `solve` のように働く基本手続き `solve/1` を定義せよ。
+それが1つの方程式を引数にとるべきか、方程式の並びをとるべきかを決めよ。
 
-**Exercise  12.8 [h]** Assume we had a goal of the form `(solve (=  12 (* (+ ?x 1) 4)))`.
-Rather than manipulate the equation when `solve/1` is called at run time, we might prefer to do part of the work at compile time, treating the call as if it were `(solve (= ?x 2))`.
-Write a Prolog compiler macro for `solve`.
-Notice that even when you have defined a compiler macro, you still need the underlying primitive, because the predicate might be invoked through a `call/1`.
-The same thing happens in Lisp: even when you supply a compiler macro, you still need the actual function, in case of a `funcall` or `apply`.
+**練習問題 12.8 [h]** `(solve (=  12 (* (+ ?x 1) 4)))` の形の目標があるとしよう。
+`solve/1` が実行時に呼ばれるときに方程式を操作するのではなく、その呼び出しを `(solve (= ?x 2))` であるかのように扱い、仕事の一部をコンパイル時に行うほうを好むかもしれない。
+`solve` のためのPrologのコンパイラマクロを書け。
+コンパイラマクロを定義しても、なお土台の基本手続きが必要なことに注意せよ。その述語が `call/1` を通じて呼び出されるかもしれないからだ。
+Lispでも同じことが起こる。コンパイラマクロを用意しても、`funcall` や `apply` の場合に備えて、なお実際の関数が必要なのだ。
 
-**Exercise  12.9 [h]** Which of the predicates `call`, `and`, `or`, `not`, or `repeat` could benefit from compiler macros?
-Write compiler macros for those predicates that could use one.
+**練習問題 12.9 [h]** 述語 `call`、`and`、`or`、`not`、`repeat` のうち、どれがコンパイラマクロの恩恵を受けられるか。
+コンパイラマクロを使える述語について、それを書け。
 
-**Exercise  12.10 [m]** You might have noticed that `call/1` is inefficient in two important ways.
-First, it calls `make-predicate`, which must build a symbol by appending strings and then look the string up in the Lisp symbol table.
-Alter `make-predicate` to store the predicate symbol the first time it is created, so it can do a faster lookup on subsequent calls.
-The second inefficiency is the call to append.
-Change the whole compiler so that the continuation argument comes first, not last, thus eliminating the need for append in `call`.
+**練習問題 12.10 [m]** `call/1` が2つの重要な点で非効率なことに気づいたかもしれない。
+第一に、`make-predicate` を呼ぶが、これは文字列を連結してシンボルを組み立て、その文字列をLispのシンボル表で引かねばならない。
+`make-predicate` を変えて、述語のシンボルが最初に作られたときにそれを格納し、以降の呼び出しでより速く引けるようにせよ。
+2つ目の非効率は append の呼び出しである。
+継続の引数が最後ではなく最初に来るようコンパイラ全体を変え、`call` での append の必要をなくせ。
 
-**Exercise  12.11 [s]** The primitive `true/0` always succeeds, and `fail/0` always fails.
-Define these primitives.
-Hint: the first corresponds to a Common Lisp function, and the second is a function already defined in this chapter.
+**練習問題 12.11 [s]** 基本手続き `true/0` は常に成功し、`fail/0` は常に失敗する。
+これらの基本手続きを定義せよ。
+手がかり: 最初のものはCommon Lispの関数に対応し、2つ目はこの章ですでに定義した関数である。
 
-**Exercise 12.12 [s]** Would it be possible to write `==/2` as a list of clauses rather than as a primitive?
+**練習問題 12.12 [s]** `==/2` を基本手続きとしてではなく、節の並びとして書くことは可能か。
 
-**Exercise  12.13 [m]** Write a version of `deref-copy` that traverses the argument expression only once.
+**練習問題 12.13 [m]** 引数の式を1回だけたどる `deref-copy` の版を書け。
 
-## 12.9 The Cut
+## 12.9 カット
 
-In Lisp, it is possible to write programs that backtrack explicitly, although it can be awkward when there are more than one or two backtrack points.
-In Prolog, backtracking is automatic and implicit, but we don't yet know of any way to *avoid* backtracking.
-There are two reasons why a Prolog programmer might want to disable backtracking.
-First, keeping track of the backtrack points takes up time and space.
-A programmer who knows that a certain problem has only one solution should be able to speed up the computation by telling the program not to consider the other possible branches.
-Second, sometimes a simple logical specification of a problem will yield redundant solutions, or even some unintended solutions.
-It may be that simply pruning the search space to eliminate some backtracking will yield only the desired answers, while restructuring the program to give all and only the right answers would be more difficult.
-Here's an example.
-Suppose we wanted to define a predicate, `max/3`, which holds when the third argument is the maximum of the first two arguments, where the first two arguments will always be instantiated to numbers.
-The straightforward definition is:
+Lispでは明示的にバックトラックするプログラムを書けますが、バックトラックの点が1つか2つを超えると厄介になりえます。
+Prologではバックトラックは自動的かつ暗黙的ですが、まだバックトラックを*避ける*手立てを何も知りません。
+Prologプログラマがバックトラックを無効にしたいと思う理由は2つあります。
+第一に、バックトラックの点を記録するのは時間と領域を食います。
+ある問題に解が1つしかないと知っているプログラマは、他のありうる枝を考えないようプログラムに告げることで、計算を速められるべきです。
+第二に、問題の単純な論理的な仕様が、冗長な解、はては意図しない解を生むこともあります。
+バックトラックの一部をなくすよう探索空間を刈り込むだけで望んだ答えだけが得られる一方、正しい答えのすべてを、しかもそれだけを与えるようプログラムを組み直すのはより難しい、ということもありえます。
+例を示します。
+述語 `max/3` を定義したいとしましょう。これは第3引数が最初の2つの引数の最大値であるときに成り立ち、最初の2つの引数は常に数に具体化されているものとします。
+素直な定義は次のとおりです。
 
 ```lisp
 (<- (max ?x ?y ?x) (>= ?x ?y))
 (<- (max ?x ?y ?y) (< ?x ?y))
 ```
 
-Declaratively, this is correct, but procedurally it is a waste of time to compute the `<` relation if the `>=` has succeeded: in that case the `<` can never succeed.
-The cut symbol, written `!`, can be used to stop the wasteful computation.
-We could write:
+宣言的にはこれは正しいのですが、手続き的には、`>=` が成功したなら `<` の関係を計算するのは時間の無駄です。その場合 `<` が成功することは決してないからです。
+`!` と書くカットの記号を使えば、この無駄な計算を止められます。
+次のように書けます。
 
 ```lisp
 (<- (max ?x ?y ?x) (>= ?x ?y) !)
 (<- (max ?x ?y ?y))
 ```
 
-The cut in the first clause says that if the first clause succeeds, then no other clauses will be considered.
-So now the second clause can not be interpreted on its own.
-Rather, it is interpreted as "if the first clause fails, then the `max` of two numbers is the second one."
+最初の節のカットは、最初の節が成功すれば他の節は考えられない、と述べています。
+ですから今や2番目の節は、それ自体では解釈できません。
+むしろ「最初の節が失敗すれば、2つの数の `max` は2番目のものである」と解釈されます。
 
-In general, a cut can occur anywhere in the body of a clause, not just at the end.
-There is no good declarative interpretation of a cut, but the procedural interpretation is two-fold.
-First, when a cut is "executed" as a goal, it always succeeds.
-But in addition to succeeding, it sets up a fence that cannot be crossed by subsequent backtracking.
-The cut serves to cut off backtracking both from goals to the right of the cut (in the same clause) and from clauses below the cut (in the same predicate).
-Let's look at a more abstract example:
+一般に、カットは節の本体のどこにでも現れられ、末尾だけではありません。
+カットにはよい宣言的な解釈がありませんが、手続き的な解釈は二重です。
+第一に、カットが目標として「実行」されるとき、それは常に成功します。
+しかし成功することに加えて、以降のバックトラックが越えられない柵を設けます。
+カットは、（同じ節の中で）カットの右の目標からのバックトラックと、（同じ述語の中で）カットより下の節からのバックトラックの両方を断ち切る役目を果たします。
+もっと抽象的な例を見てみましょう。
 
 ```lisp
 (<- (p) (q) (r) ! (s) (t))
 (<- (p) (s))
 ```
 
-In processing the first clause of `p`, backtracking can occur freely while attempting to solve `q` and `r`.
-Once `r` is solved, the cut is encountered.
-From that point on, backtracking can occur freely while solving `s` and `t`, but Prolog will never backtrack past the cut into `r`, nor will the second clause be considered.
-On the other hand, if `q` or `r` failed (before the cut is encountered), then Prolog would go on to the second clause.
+`p` の最初の節を処理する際、`q` と `r` を解こうとするあいだはバックトラックが自由に起こりえます。
+`r` が解かれると、カットに出くわします。
+その時点からは、`s` と `t` を解くあいだはバックトラックが自由に起こりえますが、Prologはカットを越えて `r` へバックトラックすることは決してなく、2番目の節が考えられることもありません。
+一方、（カットに出くわす前に）`q` か `r` が失敗すれば、Prologは2番目の節へ進むでしょう。
 
-Now that the intent of the cut is clear, let's think of how it should be implemented.
-We'll look at a slightly more complex predicate, one with variables and multiple cuts:
+カットの意図がはっきりしたので、それをどう実装すべきかを考えましょう。
+少し複雑な述語、変数と複数のカットを持つものを見てみましょう。
 
 ```lisp
 (<- (p ?x a) ! (q ?x))
 (<- (p ?x b) (r ?x) ! (s ?x))
 ```
 
-We have to arrange it so that as soon as we backtrack into a cut, no more goals are considered.
-In the first clause, when `q/1` fails, we want to return from `p/2` immediately, rather than considering the second clause.
-Similarly, the first time `s/1` fails, we want to return from `p/2`, rather than going on to consider other solutions to `r/1`.
-Thus, we want code that looks something like this:
+カットにバックトラックしたとたん、それ以上の目標が考えられないようにせねばなりません。
+最初の節では、`q/1` が失敗したとき、2番目の節を考えるのではなく、`p/2` から即座に返りたいのです。
+同様に、`s/1` が最初に失敗したとき、`r/1` の他の解を考え続けるのではなく、`p/2` から返りたいのです。
+ですから、次のようなコードが欲しいのです。
 
 ```lisp
 (defun p/2 (argl arg2 cont)
@@ -1493,10 +1493,10 @@ Thus, we want code that looks something like this:
         (return-from p/2 nil)))))))
 ```
 
-We can get this code by making a single change to `compile-body`: when the first goal in a body (or what remains of the body) is the cut symbol, then we should generate a `progn` that contains the code for the rest of the body, followed by a `return-from` the predicate being compiled.
-Unfortunately, the name of the predicate is not available to `compile-body`.
-We could change `compile-clause` and `compile-body` to take the predicate name as an extra argument, or we could bind the predicate as a special variable in `compile-predicate`.
-I choose the latter:
+このコードは `compile-body` に1つ変更を加えれば得られます。本体（あるいは本体の残り）の最初の目標がカットの記号であるとき、本体の残りのコードと、それに続くコンパイル中の述語からの `return-from` を含む `progn` を生成すべきです。
+あいにく、述語の名前は `compile-body` からは使えません。
+`compile-clause` と `compile-body` を、述語名を追加の引数にとるよう変えることも、`compile-predicate` で述語をスペシャル変数として束縛することもできます。
+私は後者を選びます。
 
 ```lisp
 (defvar *predicate* nil
@@ -1543,7 +1543,7 @@ I choose the latter:
                            (bind-new-variables bindings goal))))))))))
 ```
 
-**Exercise  12.14 [m]** Given the definitions below, figure out what a call to `test-cut` will do, and what it will write:
+**練習問題 12.14 [m]** 下の定義のもとで、`test-cut` の呼び出しが何をし、何を書き出すかを見定めよ。
 
 ```lisp
 (<- (test-cut) (p a) (p b) ! (p c) (p d))
@@ -1552,23 +1552,23 @@ I choose the latter:
 (<- (p ?x) (write (?x 2)))
 ```
 
-Another way to use the cut is in a *repeat/fail* loop.
-The predicate `repeat` is defined with the following two clauses:
+カットのもう1つの使い方が、*repeat/fail* のループです。
+述語 `repeat` は次の2つの節で定義されます。
 
 ```lisp
 (<- (repeat))
 (<- (repeat) (repeat))
 ```
 
-An alternate definition as a primitive is:
+基本手続きとしての別の定義は次のとおりです。
 
 ```lisp
 (defun repeat/0 (cont)
   (loop (funcall cont)))
 ```
 
-Unfortunately, `repeat` is one of the most abused predicates.
-Several Prolog books present programs like this:
+あいにく、`repeat` は最も乱用される述語の1つです。
+Prologの本のいくつかは、こういうプログラムを示しています。
 
 ```lisp
 (<- (main)
@@ -1581,19 +1581,19 @@ Several Prolog books present programs like this:
   (write "Good bye."))
 ```
 
-The intent is that commands are read one at a time, and then processed.
-For each command except `exit`, `process` takes the appropriate action and then fails.
-This causes a backtrack to the repeat goal, and a new command is read and processed.
-When the command is `exit`, the procedure returns.
+意図は、コマンドが1つずつ読まれ、それから処理されることです。
+`exit` を除く各コマンドについて、`process` は適切な動作を取り、そのあと失敗します。
+これが repeat の目標へのバックトラックを起こし、新しいコマンドが読まれ処理されます。
+コマンドが `exit` のとき、この手続きは返ります。
 
-There are two reasons why this is a poor program.
-First, it violates the principle of referential transparency.
-Things that look alike are supposed to be alike, regardless of the context in which they are used.
-But here there is no way to tell that four of the six goals in the body comprise a loop, and the other goals are outside the loop.
-Second, it violates the principle of abstraction.
-A predicate should be understandable as a separate unit.
-But here the predicate process can only be understood by considering the context in which it is called: a context that requires it to fail after processing each command.
-As [Richard O'Keefe 1990](bibliography.md#bb0925) points out, the correct way to write this clause is as follows:
+これが粗末なプログラムである理由は2つあります。
+第一に、参照透過性の原則に反します。
+同じに見えるものは、使われる文脈に関わりなく、同じであるべきです。
+しかしここでは、本体の6つの目標のうち4つがループをなし、他の目標がループの外にあることを見分ける手立てがありません。
+第二に、抽象の原則に反します。
+述語は、独立した1つの単位として理解できるべきです。
+しかしここでは、述語 process は、それが呼ばれる文脈 — 各コマンドを処理したあとに失敗することを求める文脈 — を考えることでしか理解できません。
+[Richard O'Keefe 1990](bibliography.md#bb0925) が指摘するとおり、この節を書く正しいやり方は次のとおりです。
 
 ```lisp
 (<- (main)
@@ -1607,13 +1607,13 @@ As [Richard O'Keefe 1990](bibliography.md#bb0925) points out, the correct way to
   (write "Good bye."))
 ```
 
-The indentation clearly indicates the limits of the repeat loop.
-The loop is terminated by an explicit test and is followed by a cut, so that a calling program won't accidently backtrack into the loop after it has exited.
-Personally, I prefer a language like Lisp, where the parentheses make constructs like loops explicit and indentation can be done automatically.
-But O'Keefe shows that well-structured readable programs can be written in Prolog.
+字下げが repeat のループの範囲をはっきり示しています。
+ループは明示的な判定によって終わり、そのあとにカットが続くので、呼び出し側のプログラムが、ループを抜けたあとに誤ってループへバックトラックすることがありません。
+個人的には、括弧がループのような構文を明示的にし、字下げを自動でできるLispのような言語のほうが好きです。
+しかしO'Keefeは、よく構造化された読みやすいプログラムがPrologで書けることを示しています。
 
-The if-then and if-then-else constructions can easily be written as clauses.
-Note that the if-then-else uses a cut to commit to the `then` part if the test is satisfied.
+if-then と if-then-else の構文は、節として簡単に書けます。
+if-then-else が、判定が満たされたときに `then` の部分に確定するためにカットを使っていることに注意してください。
 
 ```lisp
 (<- (if ?test ?then) (if ?then ?else (fail)))
@@ -1625,49 +1625,49 @@ Note that the if-then-else uses a cut to commit to the `then` part if the test i
   (call ?else))
 ```
 
-The cut can be used to implement the nonlogical `not`.
-The following two clauses are often given before as the definition of `not`.
-Our compiler successfully turns these two clauses into exactly the same code as was given before for the primitive `not/1`:
+カットは、論理的でない `not` を実装するのに使えます。
+次の2つの節は、`not` の定義として先によく与えられるものです。
+私たちのコンパイラは、この2つの節を、基本手続き `not/1` について先に示したのとまったく同じコードにうまく変えます。
 
 ```lisp
 (<- (not ?p) (call ?p) ! (fail))
 (<- (not ?p))
 ```
 
-## 12.10 "Real" Prolog
+## 12.10 「本物の」Prolog
 
-The Prolog-In-Lisp system developed in this chapter uses Lisp syntax because it is intended to be embedded in a Lisp system.
-Other Prolog implementations using Lisp syntax include micro-Prolog, Symbolics Prolog, and LMI Prolog.
+この章で作ったLisp上のPrologは、Lispシステムに埋め込むことを意図しているので、Lispの構文を使っています。
+Lispの構文を使う他のProlog実装には、micro-Prolog、Symbolics Prolog、LMI Prologがあります。
 
-However, the majority of Prolog systems use a syntax closer to traditional mathematical notation.
-The following table compares the syntax of "standard" Prolog to the syntax of Prolog-In-Lisp.
-While there is currently an international committee working on standardizing Prolog, the final report has not yet been released, so different dialects may have slightly different syntax.
-However, most implementations follow the notation summarized here.
-They derive from the Prolog developed at the University of Edinburgh for the DEC-10 by David H.
+しかしPrologシステムの大半は、伝統的な数学の記法により近い構文を使います。
+次の表は、「標準的な」Prologの構文をLisp上のPrologの構文と比べたものです。
+現在Prologを標準化する国際委員会が活動していますが、最終報告はまだ公表されていないので、方言によって構文が少し異なるかもしれません。
+とはいえ、たいていの処理系はここにまとめた記法に従っています。
+これらは、David H.
 D.
-Warren and his colleagues.
-The names for the primitives in the last section are also taken from Edinburgh Prolog.
+Warrenと彼の同僚がDEC-10向けにエジンバラ大学で開発したPrologに由来します。
+前節の基本手続きの名前も、エジンバラPrologから取ったものです。
 
-|           | Prolog          | Prolog-In-Lisp        |
+|           | Prolog          | Lisp上のProlog        |
 |-----------|-----------------|-----------------------|
-| atom      | `lower`         | `const`               |
-| variable  | `Upper`         | `?var`                |
-| anonymous | `-`             | `?`                   |
-| goal      | `p(Var,const)`  | `(p ?var const)`      |
-| rule      | `p(X) :- q(X).` | `(<- (p ?x) (q ?x))`  |
-| fact      | `p(a).`         | `(<- (p a))`          |
-| query     | `?- p(X).`      | `(?- (p ?x))`         |
-| list      | `[a,b,c]`       | `(a b c)`             |
+| アトム    | `lower`         | `const`               |
+| 変数      | `Upper`         | `?var`                |
+| 無名      | `-`             | `?`                   |
+| 目標      | `p(Var,const)`  | `(p ?var const)`      |
+| 規則      | `p(X) :- q(X).` | `(<- (p ?x) (q ?x))`  |
+| 事実      | `p(a).`         | `(<- (p a))`          |
+| 問い合わせ | `?- p(X).`      | `(?- (p ?x))`         |
+| リスト    | `[a,b,c]`       | `(a b c)`             |
 | cons      | `[a| Rest]`     | `(a . ?rest)`         |
 | nil       | `[]`            | `()`                  |
 | and       | `p(X). q(X)`    | `(and (p ?x) (q ?x)>` |
 | or        | `P(X): q(X)`    | `(or (p ?x) (q ?x))`  |
 | not       | `\+ p(X)`       | `(not (p ?x))`        |
 
-We have adopted Lisp's bias toward lists; terms are built out of atoms, variables, and conses of other terms.
-In real Prolog cons cells are provided, but terms are usually built out of *structures*, not lists.
-The Prolog term `p(a,b)` corresponds to the Lisp vector `#(p/2 a b)`, not the list `(p a b)`.
-A minority of Prolog implementations use *structure sharing.* In this approach, every non-atomic term is represented by a skeleton that contains place holders for variables and a header that points to the skeleton and also contains the variables that will fill the place holders.
+私たちはリストへのLispの傾きを採り入れました。項はアトム、変数、他の項の cons から組み立てられます。
+本物のPrologではコンスセルが提供されますが、項はふつうリストではなく*構造体*から組み立てられます。
+Prologの項 `p(a,b)` は、リスト `(p a b)` ではなくLispのベクタ `#(p/2 a b)` に対応します。
+少数のProlog実装は*構造共有*を使います。この方式では、アトムでないすべての項が、変数のためのプレースホルダを含む骨格と、その骨格を指し、プレースホルダを埋める変数も含むヘッダとで表されます。
 With structure sharing, making a copy is easy: just copy the header, regardless of the size of the skeleton.
 However, manipulating terms is complicated by the need to keep track of both skeleton and header.
 See [Boyer and Moore 1972](bibliography.md#bb0110) for more on structure sharing.
