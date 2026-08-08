@@ -891,38 +891,38 @@ prolog-compile
 もちろん、これは生成されるコードを長くするので、プログラムがコードをプロセッサへ運ぶのに時間をかけすぎることになれば、かえって遅くなりえます。
 
 **練習問題 12.1 [h]** `consp-or-variable-p`、`unify-first!`、`unify-rest!` の定義を書き、先に概説したようなコードを生成するようコンパイラを変えよ。
-You might want to look at the function `compile-rule` in [section 9.6](chapter9.md#s0035), starting on [page 300](chapter9.md#p300).
-This function compiled a call to `pat-match` into individual tests; now we want to do the same thing to `unify!`.
-Run some benchmarks to compare the altered compiler to the original version.
+[9.6節](chapter9.md#s0035)・[300ページ](chapter9.md#p300)から始まる関数 `compile-rule` を見るとよいだろう。
+この関数は `pat-match` の呼び出しを個々の判定にコンパイルした。今度は `unify!` に対して同じことをしたいのだ。
+改変したコンパイラを元の版と比べるベンチマークをいくつか走らせよ。
 
-**Exercise  12.2 [h]** We can gain some more efficiency by keeping track of which variables have been dereferenced and calling an appropriate unification function: either one that dereferences the argument or one that assumes the argument has already been dereferenced.
-Implement this approach.
+**練習問題 12.2 [h]** どの変数が参照解決済みかを記録し、適切な単一化の関数 — 引数を参照解決するものか、引数がすでに参照解決済みだと仮定するもの — を呼ぶことで、さらに効率を得られる。
+この方式を実装せよ。
 
-**Exercise  12.3 [m]** What code is generated for `(= (f (g ?x) ?y) (f ?y (?p a)))?`What more efficient code represents the same unification?
-How easy is it to change the compiler to get this more efficient result?
+**練習問題 12.3 [m]** `(= (f (g ?x) ?y) (f ?y (?p a)))` にはどんなコードが生成されるか。同じ単一化を表す、より効率的なコードは何か。
+このより効率的な結果を得るようコンパイラを変えるのは、どれほど容易か。
 
-**Exercise  12.4 [h]** In retrospect, it seems that binding variables to themselves, as in `(?argl . ?argl`), was not such a good idea.
-It complicates the meaning of bindings, and prohibits us from using existing tools.
-For example, I had to use `find-anywhere` instead of `occur-check` for case 11, because `occur-check` expects a noncircular binding list.
-But find-anywhere does not do as complete a job as `occur-check`.
-Write a version of `compile-unify` that returns three values: the code, a noncircular binding list, and a list of variables that are bound to unknown values.
+**練習問題 12.4 [h]** 振り返ってみると、`(?arg1 . ?arg1`) のように変数を自分自身に束縛するのは、あまりよい考えではなかったようだ。
+それは束縛の意味を複雑にし、既存の道具を使うのを妨げる。
+たとえば場合11では、`occur-check` が循環しない束縛の並びを期待するので、`occur-check` の代わりに `find-anywhere` を使わねばならなかった。
+しかし find-anywhere は `occur-check` ほど完全な仕事はしない。
+3つの値 — コード、循環しない束縛の並び、未知の値に束縛された変数の並び — を返す `compile-unify` の版を書け。
 
-**Exercise  12.5 [h]** An alternative to the previous exercise is not to use binding lists at all.
-Instead, we could pass in a list of equivalence classes-that is, a list of lists, where each sublist contains one or more elements that have been unified.
-In this approach, the initial equivalence class list would be `((?arg1) (?arg2))`.
-After unifying `?arg1` with `?x`, `?arg2` with `?y`, and `?x` with 4, the list would be ( `(4 ?arg1 ?x) (?arg2 ?y))`.
-This assumes the convention that the canonical member of an equivalence class (the one that will be substituted for all others) comes first.
-Implement this approach.
-What advantages and disadvantages does it have?
+**練習問題 12.5 [h]** 前問の代案は、束縛の並びをまったく使わないことである。
+代わりに、同値類の並び — つまりリストの並びで、各部分リストが単一化された1つ以上の要素を含むもの — を渡せる。
+この方式では、最初の同値類の並びは `((?arg1) (?arg2))` になるだろう。
+`?arg1` を `?x` と、`?arg2` を `?y` と、`?x` を 4 と単一化したあと、その並びは ( `(4 ?arg1 ?x) (?arg2 ?y))` になるだろう。
+これは、同値類の代表となる要素（他のすべてに代わって差し込まれるもの）が先頭に来る、という流儀を前提とする。
+この方式を実装せよ。
+それにはどんな利点と欠点があるか。
 
-## 12.6 The User Interface to the Compiler
+## 12.6 コンパイラの利用者インタフェース
 
-The compiler can translate Prolog to Lisp, but that does us no good unless we can conveniently arrange to compile the right Prolog relations and call the right Lisp functions.
-In other words, we have to integrate the compiler with the `<-` and `?` macros.
-Surprisingly, we don't need to change these macros at all.
-Rather, we will change the functions these macros call.
-When a new clause is entered, we will enter the clause's predicate in the list `*uncompiled*`.
-This is a one-line addition to `add-clause:`
+コンパイラはPrologをLispに翻訳できますが、正しいPrologの関係をコンパイルし正しいLisp関数を呼ぶよう都合よく手配できなければ、何の役にも立ちません。
+言い換えれば、コンパイラを `<-` と `?` のマクロに統合せねばなりません。
+意外にも、これらのマクロを変える必要はまったくありません。
+むしろ、これらのマクロが呼ぶ関数を変えます。
+新しい節が入力されると、その節の述語を並び `*uncompiled*` に入れます。
+これは `add-clause` への1行の追加です。
 
 ```lisp
 (defvar *uncompiled* nil
@@ -940,10 +940,10 @@ This is a one-line addition to `add-clause:`
     pred))
 ```
 
-Now when a query is made, the `?-` macro expands into a call to `top-level-prove`.
-The list of goals in the query, along with the `show-prolog-vars` goal, is added as the sole clause for the relation `top-level-query`.
-Next, that query, along with any others that are on the uncompiled list, are compiled.
-Finally, the newly compiled top-level query function is called.
+さて問い合わせが行われると、`?-` マクロは `top-level-prove` の呼び出しに展開されます。
+問い合わせの目標の並びは、`show-prolog-vars` の目標とともに、関係 `top-level-query` の唯一の節として加えられます。
+次に、その問い合わせは、未コンパイルの並びにある他のものとともにコンパイルされます。
+最後に、新しくコンパイルされた最上位の問い合わせの関数が呼ばれます。
 
 ```lisp
 (defun top-level-prove (goals)
@@ -982,9 +982,9 @@ Finally, the newly compiled top-level query function is called.
   nil)
 ```
 
-Note that at the top level, we don't need the continuation to do anything.
-Arbitrarily, we chose to pass in the function `ignore`, which is defined to ignore its arguments.
-This function is useful in a variety of places; some programmers will proclaim it inline and then use a call to `ignore` in place of an ignore declaration:
+最上位では、継続に何かをさせる必要がないことに注意してください。
+任意に、引数を無視するよう定義された関数 `ignore` を渡すことにしました。
+この関数はさまざまな場所で役立ちます。これをインラインと宣言し、ignore 宣言の代わりに `ignore` の呼び出しを使うプログラマもいます。
 
 ```lisp
 (defun third-arg (x y z)
@@ -992,12 +992,12 @@ This function is useful in a variety of places; some programmers will proclaim i
   z)
 ```
 
-The compiler's calling convention is different from the interpreter, so the primitives need to be redefined.
-The old definition of the primitive `show-prolog-vars` had three parameters: the list of arguments to the goal, a binding list, and a list of pending goals.
-The new definition of `show-prolog-vars/2` also has three parameters, but that is just a coincidence.
-The first two parameters are the two separate arguments to the goal: a list of variable names and a list of variable values.
-The last parameter is a continuation function.
-To continue, we call that function, but to fail, we throw to the catch point set up in `top-level-prove`.
+コンパイラの呼び出しの流儀はインタプリタと異なるので、基本手続きを定義し直す必要があります。
+基本手続き `show-prolog-vars` の古い定義は3つの引数を持ちました。目標への引数の並び、束縛の並び、未処理の目標の並びです。
+`show-prolog-vars/2` の新しい定義も3つの引数を持ちますが、それはただの偶然です。
+最初の2つの引数は、目標への2つの別々の引数 — 変数名の並びと変数の値の並び — です。
+最後の引数は継続の関数です。
+続行するにはその関数を呼び、失敗するには `top-level-prove` で設けた catch の点へ throw します。
 
 ```lisp
 (defun show-prolog-vars/2 (var-names vars cont)
@@ -1022,20 +1022,20 @@ To continue, we call that function, but to fail, we throw to the catch point set
         exp)))
 ```
 
-With these definitions in place, we can invoke the compiler automatically just by making a query with the `?-` macro.
+これらの定義が据わっていれば、`?-` マクロで問い合わせを行うだけで、コンパイラを自動的に呼び出せます。
 
-**Exercise 12.6 [m]** Suppose you define a predicate `p`, which calls `q`, and then define `q`.
-In some implementations of Lisp, when you make a query like `(?- (p ?x))`, you may get a warning message like `"function q/1 undefined"` before getting the correct answer.
-The problem is that each function is compiled separately, so warnings detected during the compilation of `p/1` will be printed right away, even if the function `q/1` will be defined later.
-In ANSI Common Lisp there is a way to delay the printing of warnings until a series of compilations are done: wrap the compilation with the macro `with-compilation-unit`.
-Even if your implementation does not provide this macro, it may provide the same functionality under a different name.
-Find out if `with-compilation-unit` is already defined in your implementation, or if it can be defined.
+**練習問題 12.6 [m]** 述語 `p` を定義し、それが `q` を呼び、そのあと `q` を定義するとしよう。
+Lispの処理系によっては、`(?- (p ?x))` のような問い合わせをすると、正しい答えを得る前に `"function q/1 undefined"` のような警告メッセージが出るかもしれない。
+問題は、各関数が別々にコンパイルされるので、`p/1` のコンパイル中に検出された警告は、関数 `q/1` がのちに定義されるとしても、すぐに表示されることである。
+ANSI Common Lispには、一連のコンパイルが済むまで警告の表示を遅らせる方法がある。コンパイルをマクロ `with-compilation-unit` で包むのだ。
+あなたの処理系がこのマクロを提供していなくても、同じ機能を別の名前で提供しているかもしれない。
+`with-compilation-unit` があなたの処理系ですでに定義されているか、あるいは定義できるかを調べよ。
 
-## 12.7 Benchmarking the Compiler
+## 12.7 コンパイラの性能を測る
 
-Our compiled Prolog code runs the zebra puzzle in 17.4 seconds, a 16-fold speed-up over the interpreted version, for a rate of 740 LIPS.
+私たちのコンパイルしたPrologコードは、シマウマのパズルを17.4秒で走らせます。解釈実行の版より16倍の高速化で、740 LIPSの速さです。
 
-Another popular benchmark is Lisp's `reverse` function, which we can code as the `rev` relation:
+もう1つのよく使われるベンチマークがLispの `reverse` 関数で、これを `rev` の関係として書けます。
 
 ```lisp
 (<- (rev () ()))
@@ -1045,10 +1045,10 @@ Another popular benchmark is Lisp's `reverse` function, which we can code as the
 (<- (concat (?x . ?a) ?b (?x . ?c)) (concat ?a ?b ?c))
 ```
 
-`rev` uses the relation `concat`, which stands for concatenation.
-`(concat ?a ?b ?c)` is true when `?a` concatenated to `?b` yields `?c`.
-This relationlike name is preferred over more procedural names like append.
-But `rev` is very similar to the following Lisp definitions:
+`rev` は連結を表す関係 `concat` を使います。
+`(concat ?a ?b ?c)` は、`?a` を `?b` に連結すると `?c` になるとき真です。
+この関係らしい名前は、append のようなより手続き的な名前より好まれます。
+しかし `rev` は次のLispの定義にとてもよく似ています。
 
 ```lisp
 (defun rev (1)
@@ -1064,8 +1064,8 @@ But `rev` is very similar to the following Lisp definitions:
         (app (rest x) y))))
 ```
 
-Both versions are inefficient.
-It is possible to write an iterative version of `reverse` that does no extra consing and is tail-recursive:
+どちらの版も非効率です。
+余分なコンスをせず、末尾再帰である `reverse` の繰り返し版を書けます。
 
 ```lisp
 (<- (irev ?l ?r) (irev3 ?l () ?r))
@@ -1073,7 +1073,7 @@ It is possible to write an iterative version of `reverse` that does no extra con
 (<- (irev3 () ?r ?r))
 ```
 
-The Prolog `irev` is equivalent to this Lisp program:
+Prologの `irev` はこのLispプログラムと等価です。
 
 ```lisp
 (defun irev (list) (irev2 list nil))
@@ -1084,10 +1084,10 @@ The Prolog `irev` is equivalent to this Lisp program:
       so-far))
 ```
 
-The following table shows times in seconds to execute these routines on lists of length 20 and 100, for both Prolog and Lisp, both interpreted and compiled.
-(Only compiled Lisp could execute rev on a 100-element list without running out of stack space.) Times for the zebra puzzle are also included, although there is no Lisp version of this program.
+次の表は、これらの手続きを長さ20と100のリストで実行する秒数を、PrologとLispの両方、解釈実行とコンパイルの両方について示したものです。
+（100要素のリストで rev をスタック領域を使い果たさずに実行できたのは、コンパイルしたLispだけでした。）このプログラムのLisp版はありませんが、シマウマのパズルの時間も含めてあります。
 
-| Problem    | Interp. Prolog | Comp. Prolog | Speed-up | Interp. Lisp | Comp. Lisp |
+| 問題       | 解釈Prolog     | コンパイルProlog | 高速化 | 解釈Lisp     | コンパイルLisp |
 |------------|----------------|--------------|----------|--------------|------------|
 | `zebra`    | 278.000        | 17.241       | 16       | -            | -          |
 | `rev 20`   | 4.24           | .208         | 20       | .241         | .0023      |
@@ -1095,13 +1095,13 @@ The following table shows times in seconds to execute these routines on lists of
 | `irev 20`  | .22            | .010         | 22       | .028         | .0005      |
 | `irev 100` | 9.81           | .054         | 181      | .139         | .0014      |
 
-This benchmark is too small to be conclusive, but on these examples the Prolog compiler is 16 to 181 times faster than the Prolog interpreter, slightly faster than interpreted Lisp, but still 17 to 90 times slower than compiled Lisp.
-This suggests that the Prolog interpreter cannot be used as a practical programming tool, but the Prolog compiler can.
+このベンチマークは決定的なことを言うには小さすぎますが、これらの例ではPrologコンパイラはPrologインタプリタより16倍から181倍速く、解釈実行のLispよりわずかに速いものの、コンパイルしたLispよりはなお17倍から90倍遅いのです。
+これは、Prologインタプリタは実用的なプログラミングの道具としては使えないが、Prologコンパイラなら使えることを示唆しています。
 
-Before moving on, it is interesting to note that Prolog provides for optional arguments automatically.
-Although there is no special syntax for optional arguments, an often-used convention is to have two versions of a relation, one with *n* arguments and one with *n* - 1.
-A single clause for the *n* - 1 case provides the missing, and therefore "optional," argument.
-In the following example, `irev/2` can be considered as a version of `irev/3` where the missing optional argument is ().
+先へ進む前に、Prologが省略可能な引数を自動的に用意することに触れておくのは興味深いことです。
+省略可能な引数のための特別な構文はありませんが、よく使われる流儀は、関係を2つの版 — *n* 個の引数を持つものと *n* - 1 個のものと — 持つことです。
+*n* - 1 の場合の1つの節が、欠けている、したがって「省略可能な」引数を提供します。
+次の例では、`irev/2` は、欠けている省略可能な引数が () である `irev/3` の版と見なせます。
 
 ```lisp
 (<- (irev ?l ?r) (irev ?l () ?r))
@@ -1109,7 +1109,7 @@ In the following example, `irev/2` can be considered as a version of `irev/3` wh
 (<- (irev () ?r ?r))
 ```
 
-This is roughly equivalent to the following Lisp verison:
+これはおおよそ次のLisp版と等価です。
 
 ```lisp
 (defun irev (list &optional (so-far nil))
@@ -1118,12 +1118,12 @@ This is roughly equivalent to the following Lisp verison:
       so-far))
 ```
 
-## 12.8 Adding More Primitives
+## 12.8 基本手続きを追加する
 
-Just as a Lisp compiler needs machine instructions to do input/output, arithmetic, and the like, so our Prolog system needs to be able to perform certain primitive actions.
-For the Prolog interpreter, primitives were implemented by function symbols.
-When the interpreter went to fetch a list of clauses, if it got a function instead, it called that function, passing it the arguments to the current relation, the current bindings, and a list of unsatisfied goals.
-For the Prolog compiler, primitives can be installed simply by writing a Lisp function that respects the convention of taking a continuation as the final argument and has a name of the form *symbol/arity.* For example, here's an easy way to handle input and output:
+Lispコンパイラが入出力や算術などを行うのに機械命令を必要とするのとちょうど同じように、私たちのPrologシステムも特定の基本的な動作を行えなければなりません。
+Prologインタプリタでは、基本手続きは関数のシンボルによって実装されました。
+インタプリタが節の並びを取ってこようとしたとき、代わりに関数を得た場合は、現在の関係への引数、現在の束縛、満たされていない目標の並びを渡して、その関数を呼びました。
+Prologコンパイラでは、最後の引数として継続をとるという流儀を守り、*symbol/arity* の形の名前を持つLisp関数を書くだけで、基本手続きを組み込めます。たとえば入出力を扱う簡単な方法を示します。
 
 ```lisp
 (defun read/1 (exp cont)
@@ -1134,22 +1134,22 @@ For the Prolog compiler, primitives can be installed simply by writing a Lisp fu
  (funcall cont))
 ```
 
-Calling `(write ?x)` will always succeed, so the continuation will always be called.
-Similarly, one could use `(read ?x)` to read a value and unify it with `?x`.
-If `?x` is unbound, this is the same as assigning the value.
-However, it is also possible to make a call like `(read (?x + ?y))`, which succeeds only if the input is a three-element list with + in the middle.
-It is an easy extension to define `read/2` and `write/2` as relations that indicate what stream to use.
-To make this useful, one would need to define `open/2` as a relation that takes a pathname as one argument and gives a stream back as the other.
-Other optional arguments could also be supported, if desired.
+`(write ?x)` の呼び出しは常に成功するので、継続は常に呼ばれます。
+同様に、`(read ?x)` を使って値を読み、それを `?x` と単一化できます。
+`?x` が未束縛なら、これは値を割り当てるのと同じです。
+しかし `(read (?x + ?y))` のような呼び出しもでき、これは入力が真ん中に + のある3要素のリストのときにのみ成功します。
+どのストリームを使うかを示す関係として `read/2` と `write/2` を定義するのは、簡単な拡張です。
+これを役立てるには、パス名を一方の引数にとり、もう一方でストリームを返す関係として `open/2` を定義する必要があるでしょう。
+望むなら、他の省略可能な引数も支えられます。
 
-The primitive `nl` outputs a newline:
+基本手続き `nl` は改行を出力します。
 
 ```lisp
 (defun nl/0 (cont) (terpri) (funcall cont))
 ```
 
-We provided special support for the unification predicate, `=`.
-However, we could have simplified the compiler greatly by having a simple definition for `=/2`:
+単一化の述語 `=` には特別な支援を用意しました。
+しかし、`=/2` の単純な定義を持たせることで、コンパイラを大いに単純にすることもできました。
 
 ```lisp
 (defun =/2 (?arg1 ?arg2 cont)
@@ -1157,16 +1157,16 @@ However, we could have simplified the compiler greatly by having a simple defini
   (funcall cont)))
 ```
 
-In fact, if we give our compiler the single clause:
+実際、私たちのコンパイラに次の1つの節を与えると、
 
 `(<- (= ?x ?x))`
 
-it produces just this code for the definition of `=/2`.
-There are other equality predicates to worry about.
-The predicate `==/2` is more like equal in Lisp.
-It does no unification, but instead tests if two structures are equal with regard to their elements.
-A variable is considered equal only to itself.
-Here's an implementation:
+`=/2` の定義としてまさにこのコードを生みます。
+気にすべき他の等価性の述語もあります。
+述語 `==/2` はLispの equal により近いものです。
+単一化は行わず、代わりに2つの構造がその要素に関して等しいかを調べます。
+変数は自分自身にのみ等しいと見なされます。
+実装を示します。
 
 ```lisp
 (defun =/2 (?arg1 ?arg2 cont)
@@ -1184,8 +1184,8 @@ Here's an implementation:
    (deref-equal (rest x) (rest y)))))
 ```
 
-One of the most important primitives is `call`.
-Like `funcall` in Lisp, `call` allows us to build up a goal and then try to prove it.
+最も重要な基本手続きの1つが `call` です。
+Lispの `funcall` と同じく、`call` は目標を組み立ててからそれを証明しようとすることを可能にします。
 
 ```lisp
 (defun call/1 (goal cont)
@@ -1196,8 +1196,8 @@ Like `funcall` in Lisp, `call` allows us to build up a goal and then try to prov
       (append (args goal) (list cont))))
 ```
 
-This version of `call` will give a run-time error if the goal is not instantiated to a list whose first element is a properly defined predicate; one might want to check for that, and fail silently if there is no defined predicate.
-Here's an example of `call` where the goal is legal:
+この版の `call` は、目標が、最初の要素が正しく定義された述語であるリストに具体化されていない場合、実行時エラーを出します。それを調べて、定義された述語がなければ黙って失敗するようにしたいかもしれません。
+目標が正しい場合の `call` の例を示します。
 
 ```lisp
 > (?- (= ?p member) (call (?p ?x (a b c))))
@@ -1210,8 +1210,8 @@ Here's an example of `call` where the goal is legal:
 No.
 ```
 
-Now that we have `call`, a lot of new things can be implemented.
-Here are the logical connectives and and or:
+`call` があれば、多くの新しいものを実装できます。
+論理結合子 and と or を示します。
 
 ```lisp
 (<- (or ?a ?b) (call ?a))
@@ -1220,18 +1220,18 @@ Here are the logical connectives and and or:
 (<- (and ?a ?b) (call ?a) (call ?b))
 ```
 
-Note that these are only binary connectives, not the *n*-ary special forms used in Lisp.
-Also, this definition negates most of the advantage of compilation.
-The goals inside an `and` or `or` will be interpreted by `call`, rather than being compiled.
+これらが、Lispで使う *n* 項の特殊形式ではなく、2項の結合子でしかないことに注意してください。
+また、この定義はコンパイルの利点の大半を打ち消します。
+`and` や `or` の中の目標は、コンパイルされるのではなく `call` によって解釈されます。
 
-We can also define `not,` or at least the normal Prolog `not,` which is quite distinct from the logical `not.`
-In fact, in some dialects, `not` is written `\+`, which is supposed to be &#x22AC;, that is, "can not be derived."
-The interpretation is that if goal G can not be proved, then (`not G` ) is true.
-Logically, there is a difference between (`not G` ) being true and being unknown, but ignoring that difference makes Prolog a more practical programming language.
-See [Lloyd 1987](bibliography.md#bb0745) for more on the formal semantics of negation in Prolog.
+`not`、少なくとも通常のPrologの `not` も定義できます。これは論理的な `not` とはかなり異なります。
+実際、方言によっては `not` は `\+` と書かれます。これは &#x22AC;、すなわち「導けない」を表すことになっています。
+その解釈は、目標 G が証明できなければ (`not G` ) は真である、というものです。
+論理的には、(`not G` ) が真であることと未知であることには違いがありますが、その違いを無視することが、Prologをより実用的なプログラミング言語にしています。
+Prologにおける否定の形式的な意味論についてさらには [Lloyd 1987](bibliography.md#bb0745) を参照してください。
 
-Here's an implementation of `not/1`.
-Since it has to manipulate the trail, and we may have other predicates that will want to do the same, we'll package up what was done in `maybe-add-undo-bindings` into the macro `with-undo-bindings:`
+`not/1` の実装を示します。
+これはトレイルを操作せねばならず、同じことをしたい他の述語もあるかもしれないので、`maybe-add-undo-bindings` で行ったことをマクロ `with-undo-bindings` にまとめます。
 
 ```lisp
 (defmacro with-undo-bindings (&body body)
@@ -1251,7 +1251,7 @@ Since it has to manipulate the trail, and we may have other predicates that will
     (funcall cont)))
 ```
 
-Here's an example where `not` works fine:
+`not` がうまく働く例を示します。
 
 ```lisp
 > (?- (member ?x (a b c)) (not (= ?x b)))
@@ -1260,30 +1260,30 @@ Here's an example where `not` works fine:
 No.
 ```
 
-Now see what happens when we simply reverse the order of the two goals:
+次に、2つの目標の順序を単に逆にするとどうなるか見てください。
 
 ```lisp
 > (?- (not (= ?x b)) (member ?x (a b c)))
 No.
 ```
 
-The first example succeeds unless `?x` is bound to `b`.
-In the second example, `?x` is unbound at the start, so `(= ?x b )` succeeds, the `not` fails, and the `member` goal is never reached.
-So our implementation of `not` has a consistent procedural interpretation, but it is not equivalent to the declarative interpretation usually given to logical negation.
-Normally, one would expect that `a` and `c` would be valid solutions to the query, regardless of the order of the goals.
+最初の例は、`?x` が `b` に束縛されていないかぎり成功します。
+2つ目の例では、`?x` が最初は未束縛なので `(= ?x b )` が成功し、`not` が失敗して、`member` の目標には決してたどり着きません。
+ですから私たちの `not` の実装は一貫した手続き的な解釈を持ちますが、論理的な否定にふつう与えられる宣言的な解釈とは等価ではありません。
+ふつうなら、目標の順序に関わりなく、`a` と `c` が問い合わせの正しい解になると期待するでしょう。
 
-One of the fundamental differences between Prolog and Lisp is that Prolog is relational: you can easily express individual relations.
-Lisp, on the other hand, is good at expressing collections of things as lists.
-So far we don't have any way of forming a collection of objects that satisfy a relation in Prolog.
-We can easily iterate over the objects; we just can't gather them together.
-The primitive `bagof` is one way of doing the collection.
-In general, `(bagof ?x (p ?x) ?bag)` unifies `?bag` with a list of all `?x's` that satisfy `(p ?x)`.
-If there are no such `?x's`, then the call to `bagof` fails.
-A *bag* is an unordered collection with duplicates allowed.
-For example, the bag {*a*, *b, a*} is the same as the bag {*a*, *a*, *b*}, but different from {*a*, *b*}.
-Bags stands in contrast to *sets,* which are unordered collections with no duplicates.
-The set {*a*, *b*} is the same as the set {*b*, *a*}.
-Here is an implementation of `bagof`:
+PrologとLispの根本的な違いの1つは、Prologが関係的であることです。個々の関係を容易に表せます。
+一方Lispは、ものの集まりをリストとして表すのが得意です。
+ここまで、Prologで関係を満たすオブジェクトの集まりを作る手立てを何も持っていません。
+オブジェクトにわたって繰り返すのは容易ですが、それらを1つに集めることができないのです。
+基本手続き `bagof` が、その集めることを行う1つの方法です。
+一般に `(bagof ?x (p ?x) ?bag)` は、`(p ?x)` を満たすすべての `?x` の並びと `?bag` を単一化します。
+そうした `?x` がなければ、`bagof` の呼び出しは失敗します。
+*バッグ*は、重複を許す順序のない集まりです。
+たとえばバッグ {*a*, *b, a*} はバッグ {*a*, *a*, *b*} と同じですが、{*a*, *b*} とは異なります。
+バッグは、重複のない順序のない集まりである*集合*と対をなします。
+集合 {*a*, *b*} は集合 {*b*, *a*} と同じです。
+`bagof` の実装を示します。
 
 ```lisp
 (defun bagof/3 (exp goal result cont)
@@ -1305,8 +1305,8 @@ Here is an implementation of `bagof`:
  exp))
 ```
 
-Below we use `bagof` to collect a list of everyone Sandy likes.
-Note that the result is a bag, not a set: Sandy appears more than once.
+以下では `bagof` を使って、Sandy が好むすべての人の並びを集めます。
+結果が集合ではなくバッグであることに注意してください。Sandy が2回以上現れます。
 
 ```lisp
 > (?- (bagof ?who (likes Sandy ?who) ?bag))
@@ -1315,7 +1315,7 @@ Note that the result is a bag, not a set: Sandy appears more than once.
 No.
 ```
 
-In the next example, we form the bag of every list of length three that has `A` and `B` as members:
+次の例では、`A` と `B` を member として持つ、長さ3のあらゆるリストのバッグを作ります。
 
 ```lisp
 > (?- (bagof ?l (and (length ?l (1  + (1  + (1  + 0))))
@@ -1326,7 +1326,7 @@ In the next example, we form the bag of every list of length three that has `A` 
 No.
 ```
 
-Those who are disappointed with a bag containing multiple versions of the same answer may prefer the primitive `setof`, which does the same computation as `bagof` but then discards the duplicates.
+同じ答えの複数の版を含むバッグに落胆する方には、`bagof` と同じ計算をしてから重複を捨てる基本手続き `setof` のほうが好まれるかもしれません。
 
 ```lisp
 (defun setof/3 (exp goal result cont)
@@ -1344,10 +1344,10 @@ Those who are disappointed with a bag containing multiple versions of the same a
  (funcall cont))))
 ```
 
-Prolog supports arithmetic with the operator `is`.
-For example, `(is ?x (+ ?y 1))` unifies `?x` with the value of `?y` plus one.
-This expression fails if `?y` is unbound, and it gives a run-time error if `?y` is not a number.
-For our version of Prolog, we can support not just arithmetic but any Lisp expression:
+Prologは演算子 `is` で算術を支えます。
+たとえば `(is ?x (+ ?y 1))` は、`?x` を `?y` の値に1を足したものと単一化します。
+この式は `?y` が未束縛なら失敗し、`?y` が数でなければ実行時エラーを出します。
+私たちの版のPrologでは、算術だけでなく任意のLispの式を支えられます。
 
 ```lisp
 (defun is/2 (var exp cont)
@@ -1361,8 +1361,8 @@ For our version of Prolog, we can support not just arithmetic but any Lisp expre
  (and (var-p exp) (not (bound-p exp))))
 ```
 
-As an aside, we might as well give the Prolog programmer access to the function `unbound-var-p`.
-The standard name for this predicate is `var/1`:
+余談ですが、ついでにPrologプログラマに関数 `unbound-var-p` へのアクセスを与えておいてもよいでしょう。
+この述語の標準的な名前は `var/1` です。
 
 ```lisp
 (defun var/1 (?arg1 cont)
@@ -1371,7 +1371,7 @@ The standard name for this predicate is `var/1`:
   (funcall cont)))
 ```
 
-The is primitive fails if any part of the second argument is unbound.
+is の基本手続きは、第2引数のどこかが未束縛なら失敗します。
 However, there are expressions with variables that can be solved, although not with a direct call to `eval`.
 For example, the following goal could be solved by binding `?x` to `2`:
 
