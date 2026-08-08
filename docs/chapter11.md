@@ -683,15 +683,15 @@ Robin が答えだと分かるには、束縛をほどく必要があります�
 cats が答えになるのは段階(2)のためで、最後に Sandy がもう一度答えになるのは、自分自身を好むことについての節のためです。
 問い合わせの結果が解の並びであり、各解が問い合わせを真と証明する異なるやり方に対応していることに注目してください。
 Sandy が2回現れるのは、Sandy が Sandy を好むことを示すやり方が2通りあるからです。
-The order in which solutions appear is determined by the order of the search.
-Prolog searches for solutions in a top-down, left-to-right fashion.
-The clauses are searched from the top down, so the first clauses entered are the first ones tried.
-Within a clause, the body is searched left to right.
-In using the (`likes Kim ?x`) clause, Prolog would first try to find an `x` who likes Lee, and then see if `x` likes Kim.
+解が現れる順序は、探索の順序によって決まります。
+Prologは、上から下へ、左から右へという流儀で解を探します。
+節は上から下へ探されるので、最初に入力された節が最初に試されます。
+節の中では、本体が左から右へ探されます。
+(`likes Kim ?x`) の節を使うとき、Prologはまず Lee を好む `x` を見つけようとし、次に `x` が Kim を好むかを見ます。
 
-The output from `prove-all` is not very pretty.
-We can fix that by defining a new function, `top-level-prove,` which calls `prove-all` as before, but then passes the list of solutions to `show-prolog-solutions,` which prints them in a more readable format.
-Note that `show-prolog-solutions` returns no values: `(values).` This means the read-eval-print loop will not print anything when `(values)` is the result of a top-level call.
+`prove-all` からの出力はあまり美しくありません。
+これは新しい関数 `top-level-prove` を定義することで直せます。これは以前と同じく `prove-all` を呼び、そのあと解の並びを `show-prolog-solutions` に渡します。`show-prolog-solutions` はそれをより読みやすい形式で表示します。
+`show-prolog-solutions` は値を返さない `(values)` であることに注意してください。これは、`(values)` が最上位の呼び出しの結果のとき、read-eval-printループが何も表示しないことを意味します。
 
 ```lisp
 (defmacro ?- (&rest goals) `(top-level-prove ',goals))
@@ -720,7 +720,7 @@ Note that `show-prolog-solutions` returns no values: `(values).` This means the 
   (princ ";"))
 ```
 
-Now let's try some queries:
+では問い合わせをいくつか試してみましょう。
 
 ```lisp
 > (?- (likes Sandy ?who))
@@ -738,11 +738,11 @@ Now let's try some queries:
 No.
 ```
 
-The first query asks again whom Sandy likes, and the second asks who likes Sandy.
-The third asks for confirmation of a fact.
-The answer is "no," because there are no clauses or facts that say Robin likes Lee.
-Here's another example, a list of pairs of people who are in a mutual liking relation.
-The last answer has an uninstantiated variable, indicating that everyone likes themselves.
+最初の問い合わせは再び Sandy が誰を好むかを尋ね、2つ目は誰が Sandy を好むかを尋ねます。
+3つ目は事実の確認を求めます。
+答えは「no」です。Robin が Lee を好むと述べる節や事実がないからです。
+別の例を示します。たがいに好き合う関係にある人々の対の並びです。
+最後の答えは具体化されていない変数を持ち、誰もが自分自身を好むことを示しています。
 
 ```lisp
 > (?- (likes ?x ?y) (likes ?y ?x))
@@ -760,57 +760,57 @@ The last answer has an uninstantiated variable, indicating that everyone likes t
 ?X = ?X3251;
 ```
 
-It makes sense in Prolog to ask open-ended queries like "what lists is 2 a member of ?" or even "what items are elements of what lists?"
+Prologでは、「2はどんなリストの member か」、さらには「どんな要素がどんなリストの要素か」といった、答えの開かれた問い合わせを尋ねることに意味があります。
 
 ```lisp
 (?- (member 2 ?list))
 (?- (member ?item ?list))
 ```
 
-These queries are valid Prolog and will return solutions, but there will be an infinite number of them.
-Since our interpreter collects all the solutions into a single list before showing any of them, we will never get to see the solutions.
-The next section shows how to write a new interpreter that fixes this problem.
+これらの問い合わせは正しいPrologであり解を返しますが、その数は無限になります。
+私たちのインタプリタは、どれかを示す前にすべての解を1つの並びに集めるので、解を目にすることは決してありません。
+次の節では、この問題を直す新しいインタプリタの書き方を示します。
 
-**Exercise  11.1 [m]** The representation of relations has been a list whose first element is a symbol.
-However, for relations with no arguments, some people prefer to write `(<- p q r)` rather than `(<- (p) (q) (r))`.
-Make changes so that either form is acceptable.
+**練習問題 11.1 [m]** 関係の表現は、最初の要素がシンボルであるリストとしてきた。
+しかし引数のない関係については、`(<- (p) (q) (r))` ではなく `(<- p q r)` と書くのを好む人もいる。
+どちらの形も受け入れられるよう変更せよ。
 
-**Exercise  11.2 [m]** Some people find the `<-` notation difficult to read.
-Define macros `rule` and `fact` so that we can write:
+**練習問題 11.2 [m]** `<-` の記法を読みにくいと感じる人もいる。
+次のように書けるよう、マクロ `rule` と `fact` を定義せよ。
 
 ```lisp
 (fact (likes Robin cats))
 (rule (likes Sandy ?x) if (likes ?x cats))
 ```
 
-## 11.3 Idea 3: Automatic Backtracking
+## 11.3 着想3: 自動バックトラック
 
-The Prolog interpreter implemented in the last section solves problems by returning a list of all possible solutions.
-We'll call this a *batch* approach, because the answers are retrieved in one uninterrupted batch of processing.
-Sometimes that is just what you want, but other times a single solution will do.
-In real Prolog, solutions are presented one at a time, as they are found.
-After each solution is printed, the user has the option of asking for more solutions, or stopping.
-This is an *incremental* approach.
-The incremental approach will be faster when the desired solution is one of the first out of many alternatives.
-The incremental approach will even work when there is an infinite number of solutions.
-And if that is not enough, the incremental approach can be implemented so that it searches depth-first.
-This means that at any point it will require less storage space than the batch approach, which must keep all solutions in memory at once.
+前節で実装したPrologインタプリタは、ありうるすべての解の並びを返すことで問題を解きます。
+これを*一括*の方式と呼びます。答えが、中断のない1回の処理のまとまりで取り出されるからです。
+それがまさに望むものであることもありますが、1つの解で足りることもあります。
+本物のPrologでは、解は見つかるにつれて1つずつ示されます。
+各解が表示されたあと、利用者はもっと解を求めるか、止めるかを選べます。
+これは*逐次的*な方式です。
+逐次的な方式は、望む解が多くの選択肢のうち最初のほうの1つであるとき、より速くなります。
+逐次的な方式は、解が無限個あるときでさえ働きます。
+それでも足りなければ、逐次的な方式は深さ優先で探索するよう実装できます。
+つまり、どの時点でも、すべての解を一度にメモリに保持せねばならない一括の方式より、必要な記憶領域が少なくて済むということです。
 
-In this section we implement an incremental Prolog interpreter.
-One approach would be to modify the interpreter of the last section to use pipes rather than lists.
-With pipes, unnecessary computation is delayed, and even infinite lists can be expressed in a finite amount of time and space.
-We could change to pipes simply by changing the `mapcan` in `prove` and `prove-all` to `mappend-pipe` (page 286).
-The books by [Winston and Horn (1988)](bibliography.md#bb1410) and by [Abelson and Sussman (1985)](bibliography.md#bb0010) take this approach.
-We take a different one.
+この節では逐次的なPrologインタプリタを実装します。
+1つの方式は、前節のインタプリタを、リストではなくパイプを使うよう変えることでしょう。
+パイプなら、不要な計算は遅らされ、無限のリストでさえ有限の時間と領域で表せます。
+`prove` と `prove-all` の `mapcan` を `mappend-pipe`（286ページ）に変えるだけで、パイプに切り替えられます。
+[Winston and Horn（1988）](bibliography.md#bb1410) と [Abelson and Sussman（1985）](bibliography.md#bb0010) の本は、この方式を採っています。
+私たちは別の方式を採ります。
 
-The first step is a version of `prove` and `prove-all` that return a single solution rather than a list of all possible solutions.
-This should be reminiscent of `achieve` and `achieve-all` from `gps` ([chapter 4](chapter4.md)).
-Unlike `gps`, recursive subgoals and clobbered sibling goals are not checked for.
-However, `prove` is required to search systematically through all solutions, so it is passed an additional parameter: a list of other goals to achieve after achieving the first goal.
-This is equivalent to passing a continuation to `prove`.
-The result is that if `prove` ever succeeds, it means the entire top-level goal has succeeded.
-If it fails, it just means the program is backtracking and trying another sequence of choices.
-Note that `prove` relies on the fact that `fail` is `nil`, because of the way it uses some.
+最初の段階は、ありうるすべての解の並びではなく、1つの解を返す `prove` と `prove-all` の版です。
+これは `gps`（[第4章](chapter4.md)）の `achieve` と `achieve-all` を思い起こさせるはずです。
+`gps` と違い、再帰する部分ゴールや潰された同胞ゴールは調べません。
+しかし `prove` はすべての解を体系的に探すことが求められるので、追加の引数が渡されます。最初の目標を達成したあとに達成すべき他の目標の並びです。
+これは `prove` に継続を渡すのと等価です。
+その結果、`prove` が成功すれば、それは最上位の目標全体が成功したことを意味します。
+失敗すれば、それはプログラムがバックトラックして、別の選択の並びを試していることを意味するだけです。
+`prove` が some の使い方のために、`fail` が `nil` であるという事実に頼っていることに注意してください。
 
 ```lisp
 (defun prove-all (goals bindings)
@@ -828,18 +828,18 @@ Note that `prove` relies on the fact that `fail` is `nil`, because of the way it
   (get-clauses (predicate goal))))
 ```
 
-If `prove` does succeed, it means a solution has been found.
-If we want more solutions, we need some way of making the process fail, so that it will backtrack and try again.
-One way to do that is to extend every query with a goal that will print out the variables, and ask the user if the computation should be continued.
-If the user says yes, then the goal *fails,* and backtracking starts.
-If the user says no, the goal succeeds, and since it is the final goal, the computation ends.
-This requires a brand new type of goal: one that is not matched against the data base, but rather causes some procedure to take action.
-In Prolog, such procedures are called *primitives,* because they are built-in to the language, and new ones may not be defined by the user.
-The user may, of course, define non-primitive procedures that call upon the primitives.
+`prove` が成功すれば、それは解が見つかったことを意味します。
+もっと解が欲しければ、その過程を失敗させ、バックトラックして再び試させる手立てが要ります。
+それを行う1つの方法は、すべての問い合わせを、変数を表示して計算を続けるべきかを利用者に尋ねる目標で拡張することです。
+利用者が yes と言えば、その目標は*失敗し*、バックトラックが始まります。
+利用者が no と言えば、その目標は成功し、それが最後の目標なので計算は終わります。
+これにはまったく新しい型の目標が要ります。データベースに照合されるのではなく、何らかの手続きに動作を起こさせる目標です。
+Prologでは、そうした手続きは*基本手続き*と呼ばれます。言語に組み込まれており、新しいものを利用者が定義できないからです。
+もちろん利用者は、基本手続きを呼ぶ、基本手続きでない手続きを定義できます。
 
-In our implementation, primitives will be represented as Lisp functions.
-A predicate can be represented either as a list of clauses (as it has been so far) or as a single primitive.
-Here is a version of `prove` that calls primitives when appropriate:
+私たちの実装では、基本手続きはLisp関数として表されます。
+述語は、（これまでのように）節の並びとしても、単一の基本手続きとしても表せます。
+ふさわしいときに基本手続きを呼ぶ `prove` の版を示します。
 
 ```lisp
 (defun prove (goal bindings other-goals)
@@ -859,8 +859,8 @@ Here is a version of `prove` that calls primitives when appropriate:
                                 other-goals))))
 ```
 
-Here is the version of `top-level-prove` that adds the primitive goal `show-prolog-vars` to the end of the list of goals.
-Note that this version need not call `show-prolog-solutions` itself, since the printing will be handled by the primitive for `show-prolog-vars`.
+目標の並びの末尾に基本手続きの目標 `show-prolog-vars` を加える `top-level-prove` の版を示します。
+この版が `show-prolog-solutions` 自身を呼ぶ必要がないことに注意してください。表示は `show-prolog-vars` の基本手続きが扱うからです。
 
 ```lisp
 (defun top-level-prove (goals)
@@ -870,9 +870,9 @@ Note that this version need not call `show-prolog-solutions` itself, since the p
   (values))
 ```
 
-Here we define the primitive `show-prolog-vars`.
-All primitives must be functions of three arguments: a list of arguments to the primitive relation (here a list of variables to show), a binding list for these arguments, and a list of pending goals.
-A primitive should either return `fail` or call `prove-all` to continue.
+ここで基本手続き `show-prolog-vars` を定義します。
+すべての基本手続きは3つの引数の関数でなければなりません。基本手続きの関係への引数の並び（ここでは表示する変数の並び）、それらの引数の束縛の並び、そして未処理の目標の並びです。
+基本手続きは `fail` を返すか、続行するために `prove-all` を呼ぶかのいずれかをすべきです。
 
 ```lisp
 (defun show-prolog-vars (vars bindings other-goals)
@@ -888,13 +888,13 @@ A primitive should either return `fail` or call `prove-all` to continue.
           (prove-all other-goals bindings)))
 ```
 
-Since primitives are represented as entries on the `clauses` property of predicate symbols, we have to register `show-prolog-vars` as a primitive like this:
+基本手続きは述語のシンボルの `clauses` 属性の項目として表されるので、`show-prolog-vars` を次のように基本手続きとして登録せねばなりません。
 
 ```lisp
 (setf (get 'show-prolog-vars 'clauses) 'show-prolog-vars)
 ```
 
-Finally, the Lisp predicate `continue-p` asks the user if he or she wants to see more solutions:
+最後に、Lispの述語 `continue-p` は、もっと解を見たいかを利用者に尋ねます。
 
 ```lisp
 (defun continue-p ()
@@ -908,10 +908,10 @@ Finally, the Lisp predicate `continue-p` asks the user if he or she wants to see
    (continue-p))))
 ```
 
-This version works just as well as the previous version on finite problems.
-The only difference is that the user, not the system, types the semicolons.
-The advantage is that we can now use the system on infinite problems as well.
-First, we'll ask what lists 2 is a member of:
+この版は、有限の問題では前の版と同じくらいうまく働きます。
+唯一の違いは、セミコロンをシステムではなく利用者が打つことです。
+利点は、これでシステムを無限の問題にも使えることです。
+まず、2がどんなリストの member かを尋ねます。
 
 ```lisp
 > (?- (member 2 ?list))
@@ -922,12 +922,12 @@ First, we'll ask what lists 2 is a member of:
 No.
 ```
 
-The answers mean that 2 is a member of any list that starts with 2, or whose second element is 2, or whose third element is 2, and so on.
-The infinite computation was halted when the user typed a period rather than a semicolon.
-The "no" now means that there are no more answers to be printed; it will appear if there are no answers at all, if the user types a period, or if all the answers have been printed.
+答えは、2で始まるリスト、あるいは2番目の要素が2であるリスト、あるいは3番目の要素が2であるリスト、という具合の、どんなリストの member でも2はある、という意味です。
+無限の計算は、利用者がセミコロンではなくピリオドを打ったときに止まりました。
+ここでの「no」は、表示すべき答えがもうないという意味です。答えがまったくない場合、利用者がピリオドを打った場合、あるいはすべての答えが表示された場合に現れます。
 
-We can ask even more abstract queries.
-The answer to the next query says that an item is an element of a list when it is the the first element, or the second, or the third, or the fourth, and so on.
+もっと抽象的な問い合わせを尋ねることもできます。
+次の問い合わせへの答えは、ある要素がリストの要素であるのは、それが最初の要素、あるいは2番目、あるいは3番目、あるいは4番目、という具合であるとき、と述べています。
 
 ```lisp
 > (?- (member ?item ?list))
@@ -942,14 +942,14 @@ The answer to the next query says that an item is an element of a list when it i
 No.
 ```
 
-Now let's add the definition of the relation length:
+では length という関係の定義を加えましょう。
 
 ```lisp
 (<- (length () 0))
 (<- (length (?x . ?y) (1 + ?n)) (length ?y ?n))
 ```
 
-Here are some queries showing that length can be used to find the second argument, the first, or both:
+length が第2引数、第1引数、あるいは両方を求めるのに使えることを示す問い合わせをいくつか示します。
 
 ```lisp
 > (?- (length (a b c d) ?n))
@@ -968,9 +968,9 @@ No.
 No.
 ```
 
-The next two queries show the two lists of length two with `a` as a member.
-Both queries give the correct answer, a two-element list that either starts or ends with `a`.
-However, the behavior after generating these two solutions is quite different.
+次の2つの問い合わせは、`a` を member として持つ、長さ2の2つのリストを示します。
+どちらの問い合わせも正しい答え — `a` で始まるか終わるかの2要素のリスト — を与えます。
+しかし、この2つの解を生成したあとの振る舞いはかなり異なります。
 
 ```lisp
 > (?- (length ?l (1 + (1 + 0))) (member a ?l))
@@ -982,72 +982,72 @@ No.
 ?L = (?Y4085 A);[Abort]
 ```
 
-In the first query, length only generates one possible solution, the list with two unbound elements.
-`member` takes this solution and instantiates either the first or the second element to `a`.
+最初の問い合わせでは、length はありうる解を1つ — 2つの未束縛の要素を持つリスト — しか生成しません。
+`member` はこの解をとり、最初か2番目の要素を `a` に具体化します。
 
-In the second query, `member` keeps generating potential solutions.
-The first two partial solutions, where `a` is the first or second member of a list of unknown length, are extended by `length` to yield the solutions where the list has length two.
-After that, `member` keeps generating longer and longer lists, which `length` keeps rejecting.
-It is implicit in the definition of `member` that subsequent solutions will be longer, but because that is not explicitly known, they are all generated anyway and then explicitly tested and rejected by `length.`
+2つ目の問い合わせでは、`member` が候補となる解を生成し続けます。
+最初の2つの部分解 — `a` が未知の長さのリストの最初か2番目の member であるもの — は、`length` によって拡張され、リストの長さが2である解を生みます。
+そのあと、`member` はどんどん長いリストを生成し続け、`length` はそれを退け続けます。
+以降の解がより長くなることは `member` の定義に暗黙のうちに含まれていますが、それが明示的には分からないので、それらはとにかくすべて生成され、そのあと `length` によって明示的に調べられ退けられます。
 
-This example reveals the limitations of Prolog as a pure logic-programming language.
-It turns out the user must be concerned not only about the logic of the problem but also with the flow of control.
-Prolog is smart enough to backtrack and find all solutions when the search space is small enough, but when it is infinite (or even very large), the programmer still has a responsibility to guide the flow of control.
-It is possible to devise languages that do much more in terms of automatic flow of control.<a id="tfn11-4"></a><sup>[4](#fn11-4)</sup>
-Prolog is a convenient and efficient middle ground between imperative languages and pure logic.
+この例は、純粋な論理プログラミング言語としてのPrologの限界を明らかにします。
+利用者は、問題の論理だけでなく、制御の流れにも気を配らねばならないことが分かります。
+Prologは、探索空間が十分に小さいときにはバックトラックしてすべての解を見つけるだけの賢さを持ちますが、それが無限（あるいはきわめて大きい）のときには、プログラマにはなお制御の流れを導く責任があります。
+自動的な制御の流れという点で、はるかに多くを行う言語を考案することは可能です。<a id="tfn11-4"></a><sup>[4](#fn11-4)</sup>
+Prologは、命令型の言語と純粋な論理のあいだの、便利で効率的な中間地点です。
 
-### Approaches to Backtracking
+### バックトラックの実現方式
 
-Suppose you are asked to make a "small" change to an existing program.
-The problem is that some function, `f`, which was thought to be single-valued, is now known to return two or more valid answers in certain circumstances.
-In other words, `f` is nondeterministic.
-(Perhaps `f` is `sqrt`, and we now want to deal with negative numbers).
-What are your alternatives as a programmer?
-Five possibilities can be identified:
+既存のプログラムに「小さな」変更を加えるよう頼まれたとしましょう。
+問題は、単一の値を返すと思われていた関数 `f` が、ある状況では2つ以上の正しい答えを返すと今や分かったことです。
+言い換えれば、`f` は非決定的なのです。
+（おそらく `f` は `sqrt` で、今や負の数を扱いたいのでしょう。）
+プログラマとして、どんな選択肢があるでしょうか。
+5つの可能性が挙げられます。
 
-* Guess.
-Choose one possibility and discard the others.
-This requires a means of making the right guesses, or recovering from wrong guesses.
+* 当てる。
+1つの可能性を選び、他を捨てる。
+これには、正しく当てる手立てか、誤った推測から立て直す手立てが要る。
 
-* Know.
-Sometimes you can provide additional information that is enough to decide what the right choice is.
-This means changing the calling function(s) to provide the additional information.
+* 知る。
+どれが正しい選択かを決めるのに十分な追加の情報を、提供できることもある。
+これは、その追加の情報を提供するよう呼び出し側の関数を変えることを意味する。
 
-* Return a list.
-This means that the calling function(s) must be changed to expect a list of replies.
+* 並びを返す。
+これは、答えの並びを期待するよう呼び出し側の関数を変えねばならないことを意味する。
 
-* Return a *pipe,* as defined in [section 9.3](chapter9.md#s0020).
-Again, the calling function(s) must be changed to expect a pipe.
+* [9.3節](chapter9.md#s0020)で定義した*パイプ*を返す。
+やはり、パイプを期待するよう呼び出し側の関数を変えねばならない。
 
-* Guess and save.
-Choose one possibility and return it, but record enough information to allow computing the other possibilities later.
-This requires saving the current state of the computation as well as some information on the remaining possibilities.
+* 当てて保存する。
+1つの可能性を選んで返すが、あとで他の可能性を計算できるだけの情報を記録する。
+これには、計算の現在の状態と、残りの可能性についての情報を保存することが要る。
 
-The last alternative is the most desirable.
-It is efficient, because it doesn't require computing answers that are never used.
-It is unobtrusive, because it doesn't require changing the calling function (and the calling function's calling function) to expect a list or pipe of answers.
-Unfortunately, it does have one major difficulty: there has to be a way of packaging up the current state of the computation and saving it away so that it can be returned to when the first choice does not work.
-For our Prolog interpreter, the current state is succinctly represented as a list of goals.
-In other problems, it is not so easy to summarize the entire state.
+最後の選択肢が最も望ましいものです。
+決して使われない答えを計算する必要がないので、効率的です。
+答えの並びやパイプを期待するよう、呼び出し側の関数（とそのまた呼び出し側の関数）を変える必要がないので、出しゃばりません。
+あいにく、大きな難しさが1つあります。最初の選択がうまくいかないときに戻れるよう、計算の現在の状態を包んで取っておく手立てがなければならないのです。
+私たちのPrologインタプリタでは、現在の状態は目標の並びとして簡潔に表されます。
+他の問題では、状態全体を要約するのはそれほど簡単ではありません。
 
-We will see in [section 22.4](chapter22.md#s0025) that the Scheme dialect of Lisp provides a function, `call-with-current-continuation`, that does exactly what we want: it packages the current state of the computation into a function, which can be stored away and invoked later.
-Unfortunately, there is no corresponding function in Common Lisp.
+[22.4節](chapter22.md#s0025)で見るように、LispのScheme方言は、まさに私たちが望むことを行う関数 `call-with-current-continuation` を提供します。計算の現在の状態を関数に包み、それを取っておいてあとで呼び出せるのです。
+あいにく、Common Lispには対応する関数がありません。
 
-### Anonymous Variables
+### 無名変数
 
-Before moving on, it is useful to introduce the notion of an *anonymous variable.* This is a variable that is distinct from all others in a clause or query, but which the programmer does not want to bother to name.
-In real Prolog, the underscore is used for anonymous variables, but we will use a single question mark.
-The definition of `member` that follows uses anonymous variables for positions within terms that are not needed within a clause:
+先へ進む前に、*無名変数*という考えを導入しておくと役立ちます。これは、節や問い合わせの中で他のすべての変数とは別個だが、プログラマがわざわざ名前を付けたくない変数のことです。
+本物のPrologでは無名変数に下線が使われますが、私たちは疑問符1つを使います。
+次の `member` の定義は、節の中で必要とされない項の中の位置に無名変数を使っています。
 
 ```lisp
 (<- (member ?item (?item . ?)))
 (<- (member ?item (? . ?rest)) (member ?item ?rest))
 ```
 
-However, we also want to allow several anonymous variables in a clause but still be able to keep each anonymous variable distinct from all other variables.
-One way to do that is to replace each anonymous variable with a unique variable.
-The function `replace-?-vars` uses `gensym` to do just that.
-It is installed in the top-level macros `<-` and `?-` so that all clauses and queries get the proper treatment.
+しかし、1つの節に複数の無名変数を許しつつ、なお各無名変数を他のすべての変数と別個に保てるようにもしたいのです。
+それを行う1つの方法は、各無名変数を一意な変数で置き換えることです。
+関数 `replace-?-vars` は `gensym` を使ってまさにそれを行います。
+これは最上位のマクロ `<-` と `?-` に組み込まれ、すべての節と問い合わせが正しく扱われるようにします。
 
 ```lisp
 (defmacro <- (&rest clause)
@@ -1065,29 +1065,29 @@ It is installed in the top-level macros `<-` and `?-` so that all clauses and qu
                        exp))))
 ```
 
-A named variable that is used only once in a clause can also be considered an anonymous variable.
-This is addressed in a different way in [section 12.3](chapter12.md#s0020).
+1つの節で1回しか使われない名前つきの変数も、無名変数と見なせます。
+これは [12.3節](chapter12.md#s0020) で別のやり方で扱います。
 
-## 11.4 The Zebra Puzzle
+## 11.4 シマウマのパズル
 
-Here is an example of something Prolog is very good at: a logic puzzle.
-There are fifteen facts, or constraints, in the puzzle:
+Prologがとても得意とするものの例を示します。論理パズルです。
+このパズルには15の事実、すなわち制約があります。
 
-1.  There are five houses in a line, each with an owner, a pet, a cigarette, a drink, and a color.
+1.  一列に5軒の家があり、それぞれに持ち主・ペット・タバコ・飲み物・色がある。
 
-2.  The Englishman lives in the red house.
+2.  イギリス人は赤い家に住んでいる。
 
-3.  The Spaniard owns the dog.
+3.  スペイン人は犬を飼っている。
 
-4.  Coffee is drunk in the green house.
+4.  緑の家ではコーヒーが飲まれている。
 
-5.  The Ukrainian drinks tea.
+5.  ウクライナ人は紅茶を飲む。
 
-6.  The green house is immediately to the right of the ivory house.
+6.  緑の家は象牙色の家のすぐ右にある。
 
-7.  The Winston smoker owns snails.
+7.  ウィンストンを吸う人はカタツムリを飼っている。
 
-8.  Kools are smoked in the yellow house.
+8.  クールは黄色い家で吸われている。
 
 9.  Milk is drunk in the middle house.
 
