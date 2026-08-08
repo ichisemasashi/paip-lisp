@@ -283,6 +283,31 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | closed form | 閉じた形 | Rischのアルゴリズム |
 | running product | 走行積 | running sumに倣う |
 
+### 第9章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| memoization | メモ化 | 定訳 |
+| instrumentation | 計測 | プログラムのどこが重いかを見極める |
+| profiling | プロファイリング | 呼び出し回数・時間の計測。metering/monitoring も「計量／監視」 |
+| asymptotic complexity | 漸近的な計算量 | |
+| linear / exponential complexity | 線形／指数的な計算量 | |
+| benchmark | ベンチマーク | |
+| pipe | パイプ | delayed list。streamと訳し分け（原著が明示） |
+| delay / force | delay／force | Schemeの機構。原語のまま |
+| lazy evaluation | 遅延評価 | |
+| thunk | サンク | 名前呼びの引数を実装する仕組み |
+| dynamic programming | 動的計画法 | |
+| continuation | 継続 | コンパイラで「次に何をするか」を渡す関数 |
+| indexing | 索引付け | |
+| open hashing | 開番地法 | |
+| inline (declaration) | インライン（の宣言） | |
+| conditional read macro | 条件つき読み取りマクロ | `#+` / `#-` |
+| cleanup form | 後始末の形 | `unwind-protect` |
+| golden ratio / divine proportion | 黄金比／神聖比例 | φの歴史（解答9.4） |
+| extreme and mean ratio | 外中比 | ユークリッドの呼称 |
+| forced win / possible loss | 必勝／負けの可能性のある状態 | ニムの解析（解答9.5） |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -351,8 +376,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter8.md` | 完了 |
-| `chapter9.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter9.md` | 完了 |
+| `chapter10.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証

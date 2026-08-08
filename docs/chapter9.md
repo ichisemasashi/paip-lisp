@@ -1423,7 +1423,7 @@ Total elapsed time: 22.819614 seconds
 #### 単一規則のコンパイラ
 
 ここでは完全な単一規則のコンパイラを示し、続いて索引づけた規則の組のコンパイラを示します。
-The single-rule compiler works like this:
+単一規則のコンパイラは次のように働きます。
 
 ```lisp
 > (compile-rule '(= (+ x x) (* 2 x)))
@@ -1435,23 +1435,23 @@ The single-rule compiler works like this:
          (SIMPLIFY-EXP (LIST '* '2 XL))))))
 ```
 
-Given a rule, it generates code that first tests the pattern and then builds the right- hand side of the rule if the pattern matches.
-As the code is generated, correspondences are built between variables in the pattern, like `x`, and variables in the generated code, like `xl`.
-These are kept in the association list `*bindings*`.
-The matching can be broken down into four cases: variables that haven't been seen before, variables that have been seen before, atoms, and lists.
-For example, the first time we run across `x` in the rule above, no test is generated, since anything can match `x`.
-But the entry `(x.xl)` is added to the `*bindings*` list to mark the equivalence.
-When the second `x` is encountered, the test `(equal xr xl)` is generated.
+規則が与えられると、まずパターンを調べ、パターンが合致すれば規則の右辺を組み立てるコードを生成します。
+コードが生成されるにつれて、パターン中の `x` のような変数と、生成されたコード中の `xl` のような変数との対応が作られます。
+これらは連想リスト `*bindings*` に保たれます。
+照合は4つの場合に分けられます。まだ見ていない変数、すでに見た変数、アトム、リストです。
+たとえば上の規則で `x` に初めて出くわしたとき、何でも `x` に合致するので、判定は生成されません。
+しかし対応を印すために、項目 `(x.xl)` が `*bindings*` の並びに加えられます。
+2つ目の `x` に出くわすと、判定 `(equal xr xl)` が生成されます。
 
-Organizing the compiler is a little tricky, because we have to do three things at once: return the generated code, keep track of the `*bindings*`, and keep track of what to do "next"-that is, when a test succeeds, we need to generate more code, either to test further, or to build the result.
-This code needs to know about the bindings, so it can't be done *before* the first part of the test, but it also needs to know where it should be placed in the overall code, so it would be messy to do it *after* the first part of the test.
-The answer is to pass in a function that will tell us what code to generate later.
-This way, it gets done at the right time, and ends up in the right place as well.
-Such a function is often called a *continuation*, because it tells us where to continue computing.
-In our compiler, the variable `consequent` is a continuation function.
+コンパイラを組み立てるのは少し厄介です。3つのことを同時にせねばならないからです。生成したコードを返すこと、`*bindings*` を記録すること、そして「次に」何をするかを記録すること — つまり判定が成功したとき、さらに判定するか結果を組み立てるかのコードをもっと生成する必要があります。
+このコードは束縛について知る必要があるので、判定の最初の部分の*前*には行えません。しかし全体のコードのどこに置かれるべきかも知る必要があるので、判定の最初の部分の*後*に行うのも煩雑になります。
+答えは、あとでどんなコードを生成するかを教えてくれる関数を渡すことです。
+こうすれば、正しいときに行われ、正しい場所にも収まります。
+そうした関数はしばしば*継続*と呼ばれます。どこで計算を続けるかを教えてくれるからです。
+私たちのコンパイラでは、変数 `consequent` が継続の関数です。
 
-The compiler is called `compile-rule`.
-It takes a rule as an argument and returns a lambda expression that implements the rule.
+コンパイラは `compile-rule` と呼ばれます。
+規則を引数にとり、その規則を実装するラムダ式を返します。
 
 ```lisp
 (defvar *bindings* nil
@@ -1465,13 +1465,13 @@ It takes a rule as an argument and returns a lambda expression that implements t
                                                *bindings*))))))
 ```
 
-All the work is done by `compile-exp`, which takes three arguments: a variable that will represent the input in the generated code, a pattern that the input should be matched against, and a continuation for generating the code if the test passes.
-There are five cases: (1) If the pattern is a variable in the list of bindings, then we generate an equality test.
-(2) If the pattern is a variable that we have not seen before, then we add it to the binding list, generate no test (because anything matches a variable) and then generate the consequent code.
-(3) If the pattern is an atom, then the match succeeds only if the input is `eql` to that atom.
-(4) If the pattern is a conditional like `(?is n numberp)`, then we generate the test `(numberp n)`.
-Other such patterns could be included here but have not been, since they have not been used.
-Finally, (5) if the pattern is a list, we check that it has the right operator and arguments.
+仕事はすべて `compile-exp` が行います。これは3つの引数をとります。生成されたコードで入力を表す変数、入力を照合すべきパターン、そして判定が通ったときにコードを生成する継続です。
+5つの場合があります。(1) パターンが束縛の並びにある変数なら、等値の判定を生成します。
+(2) パターンがまだ見ていない変数なら、それを束縛の並びに加え、（何でも変数に合致するので）判定は生成せず、そのあと後続のコードを生成します。
+(3) パターンがアトムなら、入力がそのアトムと `eql` のときにのみ照合が成功します。
+(4) パターンが `(?is n numberp)` のような条件つきなら、判定 `(numberp n)` を生成します。
+この種の他のパターンもここに含められますが、使われていないので含めていません。
+最後に、(5) パターンがリストなら、正しい演算子と引数を持っているかを調べます。
 
 ```lisp
 (defun compile-exp (var pattern consequent)
@@ -1502,9 +1502,9 @@ Finally, (5) if the pattern is a list, we check that it has the right operator a
               ,(compile-args var pattern consequent)))))
 ```
 
-The function `compile-args` is used to check the arguments to a pattern.
-It generates a `let` form binding one or two new variables (for a unary or binary expression), and then calls `compile-exp` to generate code that actually makes the tests.
-It just passes along the continuation, `consequent`, to `compile-exp`.
+関数 `compile-args` は、パターンの引数を調べるのに使います。
+（単項の式か二項の式かに応じて）1つか2つの新しい変数を束縛する `let` の形を生成し、それから `compile-exp` を呼んで実際に判定を行うコードを生成します。
+継続 `consequent` を `compile-exp` にそのまま渡すだけです。
 
 ```lisp
 (defun compile-args (var pattern consequent)
@@ -1526,9 +1526,9 @@ It just passes along the continuation, `consequent`, to `compile-exp`.
            ,(compile-exp L (exp-lhs pattern) consequent)))))
 ```
 
-The remaining functions are simpler.
-`build-exp` generates code to build the right- hand side of a `rule, op?` tests if its first argument is an expression with a given operator, and `symbol` constructs a new symbol.
-Also given is `new-symbol`, although it is not used in this program.
+残りの関数はより単純です。
+`build-exp` は規則の右辺を組み立てるコードを生成し、`op?` は第1引数が与えた演算子を持つ式かを調べ、`symbol` は新しいシンボルを構成します。
+`new-symbol` も示しますが、このプログラムでは使いません。
 
 ```lisp
 (defun build-exp (exp bindings)
@@ -1553,7 +1553,7 @@ Also given is `new-symbol`, although it is not used in this program.
   (make-symbol (format nil "~{~a~}" args)))
 ```
 
-Here are some examples of the compiler:
+コンパイラの例をいくつか示します。
 
 ```lisp
 > (compile-rule '(= (log (^ e x)) x))
@@ -1581,17 +1581,17 @@ Here are some examples of the compiler:
                         XRR)))))))))
 ```
 
-#### The Rule-Set Compiler
+#### 規則集合のコンパイラ
 
-The next step is to combine the code generated by this single-rule compiler to generate more compact code for sets of rules.
-We'll divide up the complete set of rules into subsets based on the main operator (as we did with the `rules-for` function), and generate one big function for each operator.
-We need to preserve the order of the rules, so only certain optimizations are possible, but if we make the assumption that no function has side effects (a safe assumption in this application), we can still do pretty well.
-We'll use the `simp-fn` facility to install the one big function for each operator.
+次の段階は、この単一規則のコンパイラが生成したコードを組み合わせて、規則の組のためのより小さなコードを生成することです。
+（`rules-for` 関数でやったように）規則の全体を主たる演算子に基づいて部分集合に分け、各演算子に1つの大きな関数を生成します。
+規則の順序を保つ必要があるので、可能な最適化は限られますが、どの関数も副作用を持たないと仮定すれば（この応用では安全な仮定です）、それでもかなりうまくやれます。
+各演算子の1つの大きな関数を組み込むのに `simp-fn` の仕組みを使います。
 
-The function `compile-rule-set` takes an operator, finds all the rules for that operator, and compiles each rule individually.
-(It uses `compile-indexed-rule` rather than `compile-rule`, because it assumes we have already done the indexing for the main operator.)
-After each rule has been compiled, they are combined with `combine-rules`, which merges similar parts of rules and concatenates the different parts.
-The result is wrapped in a `lambda` expression and compiled as the final simplification function for the operator.
+関数 `compile-rule-set` は演算子をとり、その演算子のすべての規則を見つけ、各規則を個別にコンパイルします。
+（`compile-rule` ではなく `compile-indexed-rule` を使います。主たる演算子の索引付けはすでに済んでいると仮定するからです。）
+各規則がコンパイルされたあと、`combine-rules` で組み合わされます。これは規則の似た部分を融合し、異なる部分を連結します。
+結果は `lambda` 式で包まれ、その演算子の最終的な簡約の関数としてコンパイルされます。
 
 ```lisp
 (defun compile-rule-set (op)
@@ -1612,7 +1612,7 @@ The result is wrapped in a `lambda` expression and compiled as the final simplif
       (delay (build-exp (exp-rhs rule) *bindings*)))))
 ```
 
-Here are two examples of what `compile-indexed-rule` generates:
+`compile-indexed-rule` が生成するものの例を2つ示します。
 
 ```lisp
 > (compile-indexed-rule '(= (log 1) 0))
@@ -1628,8 +1628,8 @@ Here are two examples of what `compile-indexed-rule` generates:
              XLR))))
 ```
 
-The next step is to combine several of these rules into one.
-The function `combine-rules` takes two rules and merges them together as much as possible.
+次の段階は、これらの規則をいくつか1つに組み合わせることです。
+関数 `combine-rules` は2つの規則をとり、できるかぎり融合します。
 
 ```lisp
 (defun combine-rules (a b)
@@ -1669,7 +1669,7 @@ The function `combine-rules` takes two rules and merges them together as much as
   (first (last list)))
 ```
 
-Here is what `combine-rules` does with the two rules generated above:
+上で生成した2つの規則に対して `combine-rules` が何をするかを示します。
 
 ```lisp
 > (combine-rules
@@ -1687,8 +1687,8 @@ Here is what `combine-rules` does with the two rules generated above:
             (IF (EQL XLL 'E) XLR)))))
 ```
 
-Now we run the compiler by calling `compile-all-rules-indexed` and show the combined compiled simplification function for log.
-The comments were entered by hand to show what simplification rules are compiled where.
+では `compile-all-rules-indexed` を呼んでコンパイラを走らせ、log について組み合わされ、コンパイルされた簡約の関数を示します。
+コメントは、どの簡約規則がどこにコンパイルされたかを示すために手で入れたものです。
 
 ```lisp
 (defun compile-all-rules-indexed (rules)
@@ -1715,7 +1715,7 @@ The comments were entered by hand to show what simplification rules are compiled
                   XLR))))))       ;*log ex = x*
 ```
 
-If we want to bypass the rule-based simplifier altogether, we can change `simplify-exp` once again to eliminate the check for rules:
+規則に基づく簡約器を丸ごと迂回したいなら、もう一度 `simplify-exp` を変えて規則の検査をなくせます。
 
 ```lisp
 (defun simplify-exp (exp)
@@ -1726,115 +1726,115 @@ If we want to bypass the rule-based simplifier altogether, we can change `simpli
         (t exp)))
 ```
 
-At last, we are in a position to run the benchmark test on the new compiled code; the function `test-it` runs in about .15 seconds with memoization and .05 without.
-Why would memoization, which helped before, now hurt us?
-Probably because there is a lot of overhead in accessing the hash table, and that overhead is only worth it when there is a lot of other computation to do.
+ついに、新しいコンパイルされたコードでベンチマークの試験を走らせられる段になりました。関数 `test-it` は、メモ化ありで約.15秒、なしで.05秒で走ります。
+以前は助けになったメモ化が、なぜ今は妨げになるのでしょうか。
+おそらく、ハッシュ表へのアクセスに多くの間接費があり、その間接費は他に多くの計算があるときにのみ見合うからです。
 
-We've seen a great improvement since the original code, as the following table summarizes.
-Overall, the various efficiency improvements have resulted in a 130-fold speed-up-we can do now in a minute what used to take two hours.
-Of course, one must keep in mind that the statistics are only good for this one particular set of test data on this one machine.
-It is an open question what performance you will get on other problems and on other machines.
+次の表がまとめるように、元のコードから大きな改善を見てきました。
+全体として、さまざまな効率の改善により130倍の高速化が実現しました。かつて2時間かかったことが、今では1分でできます。
+もちろん、この統計はこの1台の計算機上のこの特定の試験データについてのみ有効だと肝に銘じておかねばなりません。
+他の問題や他の計算機でどんな性能が得られるかは未解決の問いです。
 
-The following table summarizes the execution time and number of function calls on the test data:
+次の表は、試験データにおける実行時間と関数呼び出しの回数をまとめたものです。
 
 | []()            |          |       |              |             |      |
 |-----------------|----------|-------|--------------|-------------|------|
-|                 | original | memo  | memo + index | memo + comp | comp |
-| run time (secs) | 6.6      | 3.0   | .98          | .15         | .05  |
-| speed-up        | -        | 2     | 7            | 44          | 130  |
-| calls           |
+|                 | 元       | メモ  | メモ+索引    | メモ+コンパイル | コンパイル |
+| 実行時間（秒） | 6.6      | 3.0   | .98          | .15         | .05  |
+| 高速化         | -        | 2     | 7            | 44          | 130  |
+| 呼び出し       |
 | pat-match       | 51690    | 20003 | 5159         | 0           | 0    |
 | variable-p      | 37908    | 14694 | 4798         | 0           | 0    |
 | match-variable  | 1393     | 551   | 551          | 0           | 0    |
 | simplify        | 906      | 408   | 408          | 545         | 906  |
 | simplify-exp    | 274      | 118   | 118          | 118         | 274  |
 
-## 9.7 History and References
+## 9.7 歴史と参考文献
 
-The idea of memoization was introduced by Donald Michie 1968.
-He proposed using a list of values rather than a hash table, so the savings was not as great.
-In mathematics, the field of dynamic programming is really just the study of how to compute values in the proper order so that partial results will already be cached away when needed.
+メモ化の考えは Donald Michie 1968 が導入しました。
+彼はハッシュ表ではなく値の並びを使うことを提案したので、節約はそれほど大きくありませんでした。
+数学において、動的計画法の分野は実のところ、途中の結果が必要になったときにすでにキャッシュされているよう、値を正しい順序でどう計算するかの研究にすぎません。
 
-A large part of academic computer science covers compilation; [Aho and Ullman 1972](bibliography.md#bb0015) is just one example.
-The technique of compiling embedded languages (such as the language of pattern-matching rules) is one that has achieved much more attention in the Lisp community than in the rest of computer science.
-See [Emanuelson and Haraldsson 1980](bibliography.md#bb0365), for an example.
+学術としての計算機科学の大きな部分がコンパイルを扱っています。[Aho and Ullman 1972](bibliography.md#bb0015) はその一例にすぎません。
+（パターン照合の規則の言語のような）組み込み言語をコンパイルする技法は、計算機科学の他の分野よりもLispのコミュニティで多くの注目を集めてきたものです。
+例としては [Emanuelson and Haraldsson 1980](bibliography.md#bb0365) を参照してください。
 
-Choosing the right data structure, indexing it properly, and defining algorithms to operate on it is another important branch of computer science; [Sedgewick 1988](bibliography.md#bb1065) is one example, but there are many worthy texts.
+正しいデータ構造を選び、それをきちんと索引づけ、それに働くアルゴリズムを定義することは、計算機科学のもう1つの重要な分野です。[Sedgewick 1988](bibliography.md#bb1065) はその一例ですが、値打ちのある教科書は多くあります。
 
-Delaying computation by packaging it up in a `lambda` expression is an idea that goes back to Algol's use of *thunks*-a mechanism to implement call-by-name parameters, essentially by passing functions of no arguments.
-The name *thunk* comes from the fact that these functions can be compiled: the system does not have to think about them at run time, because the compiler has already thunk about them.
-Peter [Ingerman 1961](bibliography.md#bb0570) describes thunks in detail.
-[Abelson and Sussman 1985](bibliography.md#bb0010) cover delays nicely.
-The idea of eliminating unneeded computation is so attractive that entire languages have built around the concept of *lazy evaluation*-don't evaluate an expression until its value is needed.
-See [Hughes 1985](bibliography.md#bb0565) or [Field and Harrison 1988](bibliography.md#bb0400).
+計算を `lambda` 式に包んで遅らせるという考えは、Algolの*サンク*の使用にさかのぼります。サンクとは、本質的に引数なしの関数を渡すことで名前呼びの引数を実装する仕組みです。
+*thunk*（サンク）という名は、これらの関数がコンパイルできるという事実に由来します。システムは実行時にそれらについて think（考える）必要がありません。コンパイラがすでに thunk（考え）済みだからです。
+Peter [Ingerman 1961](bibliography.md#bb0570) がサンクを詳しく述べています。
+[Abelson and Sussman 1985](bibliography.md#bb0010) が delay をうまく扱っています。
+不要な計算をなくすという考えはあまりに魅力的なので、*遅延評価*（式の値が必要になるまでその式を評価しない）という概念を軸に築かれた言語が丸ごと存在します。
+[Hughes 1985](bibliography.md#bb0565) か [Field and Harrison 1988](bibliography.md#bb0400) を参照してください。
 
-## 9.8 Exercises
+## 9.8 練習問題
 
-**Exercise 9.3 [d]** In this chapter we presented a compiler for `simplify`.
-It is not too much harder to extend this compiler to handle the full power of `pat-match`.
-Instead of looking at expressions only, allow trees with variables in any position.
-Extend and generalize the definitions of `compile-rule` and `compile-rule-set` so that they can be used as a general tool for any application program that uses `pat-match` and/or `rule-based-translator`.
-Make sure that the compiler is data-driven, so that the programmer who adds a new kind of pattern to `pat-match` can also instruct the compiler how to deal with it.
-One hard part will be accounting for segment variables.
-It is worth spending a considerable amount of effort at compile time to make this efficient at run time.
+**練習問題 9.3 [d]** この章では `simplify` のコンパイラを示した。
+このコンパイラを、`pat-match` の力を余さず扱えるよう拡張するのは、さほど難しくはない。
+式だけを見るのではなく、どの位置にも変数を持つ木を許せ。
+`compile-rule` と `compile-rule-set` の定義を拡張し一般化して、`pat-match` や `rule-based-translator` を使うどんな応用プログラムにも汎用の道具として使えるようにせよ。
+コンパイラがデータ駆動であることを確かめ、`pat-match` に新しい種類のパターンを加えるプログラマが、それをどう扱うかをコンパイラにも指示できるようにせよ。
+難しいところの1つは区間変数への対応だろう。
+これを実行時に効率的にするために、コンパイル時にかなりの労を費やす値打ちがある。
 
-**Exercise 9.4 [m]** Define the time to compute `(fib n)` without memoization as *T<sub>n</sub>*.
-Write a formula to express *T<sub>n</sub>*.
-Given that *T*<sub>25</sub> &asymp; 1.1 seconds, predict *T*<sub>100</sub>.
+**練習問題 9.4 [m]** メモ化なしで `(fib n)` を計算する時間を *T<sub>n</sub>* と定義せよ。
+*T<sub>n</sub>* を表す式を書け。
+*T*<sub>25</sub> &asymp; 1.1秒だとして、*T*<sub>100</sub> を予測せよ。
 
-**Exercise 9.5 [m]** Consider a version of the game of Nim played as follows: there is a pile of *n* tokens.
-Two players alternate removing tokens from the pile; on each turn a player must take either one, two, or three tokens.
-Whoever takes the last token wins.
-Write a program that, given *n*, returns the number of tokens to take to insure a win, if possible.
-Analyze the execution times for your program, with and without memoization.
+**練習問題 9.5 [m]** 次のように遊ぶニムというゲームの一種を考えよ。*n* 個のトークンの山がある。
+2人の対局者が交互に山からトークンを取り除く。各手番で対局者は1個、2個、3個のいずれかを取らねばならない。
+最後のトークンを取った者が勝ちである。
+*n* が与えられたとき、可能なら勝ちを確実にするために取るトークンの数を返すプログラムを書け。
+メモ化ありとなしで、プログラムの実行時間を分析せよ。
 
-**Exercise 9.6 [m]** A more complicated Nim-like game is known as Grundy's game.
-The game starts with a single pile of *n* tokens.
-Each player must choose one pile and split it into two uneven piles.
-The first player to be unable to move loses.
-Write a program to play Grundy's game, and see how memoization helps.
+**練習問題 9.6 [m]** より込み入ったニムに似たゲームがグランディのゲームとして知られている。
+ゲームは *n* 個のトークンの1つの山から始まる。
+各対局者は山を1つ選び、それを大きさの異なる2つの山に分けねばならない。
+最初に動けなくなった対局者が負けである。
+グランディのゲームを指すプログラムを書き、メモ化がどう助けになるかを見よ。
 
-**Exercise 9.7 [h]** This exercise describes a more challenging one-person game.
-In this game the player rolls a six-sided die eight times.
-The player forms four two-digit decimal numbers such that the total of the four numbers is as high as possible, but not higher than 170.
-A total of 171 or more gets scored as zero.
+**練習問題 9.7 [h]** この問題は、より歯ごたえのある1人用のゲームを述べる。
+このゲームで対局者は6面のサイコロを8回振る。
+対局者は4つの2桁の十進数を作り、その4つの数の合計をできるだけ高く、ただし170を超えないようにする。
+合計が171以上だと得点は0になる。
 
-The game would be deterministic and completely boring if not for the requirement that after each roll the player must immediately place the digit in either the ones or tens column of one of the four numbers.
+各回の後、対局者はその数字を直ちに4つの数のいずれかの一の位か十の位に置かねばならない、という決まりがなければ、このゲームは決定的でまったく退屈なものになるだろう。
 
-Here is a sample game.
-The player first rolls a 3 and places it in the ones column of the first number, then rolls a 4 and places it in the tens column, and so on.
-On the last roll the player rolls a 6 and ends up with a total of 180.
-Since this is over the limit of 170, the player's final score is 0.
+ゲームの例を示す。
+対局者はまず3を振って1つ目の数の一の位に置き、次に4を振って十の位に置く、という具合である。
+最後の回で対局者は6を振り、合計180になってしまう。
+これは170の上限を超えているので、対局者の最終得点は0である。
 
 | []()     |    |    |    |    |    |    |     |    |
 |----------|----|----|----|----|----|----|-----|----|
-| roll     | 3  | 4  | 6  | 6  | 3  | 5  | 3   | 6  |
-| lst num. | -3 | 43 | 43 | 43 | 43 | 43 | 43  | 43 |
-| 2nd num. | -  | -  | -6 | -6 | 36 | 36 | 36  | 36 |
-| 3rd num. | -  | -  | -  | -6 | -6 | -6 | 36  | 36 |
-| 4th num. | -  | -  | -  | -  | -  | -5 | -5  | 65 |
-| total    | 03 | 43 | 49 | 55 | 85 | 90 | 120 | 0  |
+| 出目     | 3  | 4  | 6  | 6  | 3  | 5  | 3   | 6  |
+| 1つ目    | -3 | 43 | 43 | 43 | 43 | 43 | 43  | 43 |
+| 2つ目    | -  | -  | -6 | -6 | 36 | 36 | 36  | 36 |
+| 3つ目    | -  | -  | -  | -6 | -6 | -6 | 36  | 36 |
+| 4つ目    | -  | -  | -  | -  | -  | -5 | -5  | 65 |
+| 合計     | 03 | 43 | 49 | 55 | 85 | 90 | 120 | 0  |
 
-Write a function that allows you to play a game or a series of games.
-The function should take as argument a function representing a strategy for playing the game.
+1回のゲーム、あるいは一連のゲームを遊べる関数を書け。
+その関数は、ゲームを遊ぶ戦略を表す関数を引数にとるべきである。
 
-**Exercise 9.8 [h]** Define a good strategy for the dice game described above.
-(Hint: my strategy scores an average of 143.7.)
+**練習問題 9.8 [h]** 上で述べたサイコロのゲームのよい戦略を定義せよ。
+（手がかり: 私の戦略は平均143.7点を取る。）
 
-**Exercise 9.9 [m]** One problem with playing games involving random numbers is the possibility that a player can cheat by figuring out what `random` is going to do next.
-Read the definition of the function `random` and describe how a player could cheat.
-Then describe a countermeasure.
+**練習問題 9.9 [m]** 乱数を使うゲームを遊ぶときの1つの問題は、`random` が次に何をするかを見抜くことで対局者がいかさまをできる可能性である。
+関数 `random` の定義を読み、対局者がどういかさまをできるかを述べよ。
+それから対策を述べよ。
 
-**Exercise 9.10 [m]** On [page 292](chapter9.md#p292) we saw the use of the read-time conditionals, `#+` and `#-`, where `#+` is the read-time equivalent of when, and `#-` is the read-time equivalent of unless.
-Unfortunately, there is no read-time equivalent of case.
-Implement one.
+**練習問題 9.10 [m]** [292ページ](chapter9.md#p292)で、読み取り時の条件つき `#+` と `#-` の使用を見た。`#+` は when の読み取り時版、`#-` は unless の読み取り時版である。
+あいにく case の読み取り時版はない。
+それを実装せよ。
 
-**Exercise 9.11 [h]** Write a compiler for ELIZA that compiles all the rules at once into a single function.
-How much more efficient is the compiled version?
+**練習問題 9.11 [h]** すべての規則を一度に1つの関数にコンパイルするELIZAのコンパイラを書け。
+コンパイルした版はどれだけ効率がよいか。
 
-**Exercise 9.12 [d]** Write some rules to simplify Lisp code.
-Some of the algebraic simplification rules will still be valid, but new ones will be needed to simplify nonalgebraic functions and special forms.
-(Since `nil` is a valid expression in this domain, you will have to deal with the semipredicate problem.) Here are some example rules (using prefix notation):
+**練習問題 9.12 [d]** Lispのコードを簡約する規則をいくつか書け。
+代数の簡約規則のいくつかは依然として正しいが、代数的でない関数や特殊形式を簡約するには新しい規則が要る。
+（この領域では `nil` が正しい式なので、半述語の問題を扱わねばならない。）例となる規則をいくつか示す（前置記法を使う）。
 
 ```lisp
 (= (+ x 0) x)
@@ -1847,9 +1847,9 @@ Some of the algebraic simplification rules will still be valid, but new ones wil
 (= (expt y (?if x numberp)) (expt (expt y (/ x 2)) 2))
 ```
 
-**Exercise 9.13 [m]** Consider the following two versions of the sieve of Eratosthenes algorithm.
-The second explicitly binds a local variable.
-Is this worth it?
+**練習問題 9.13 [m]** エラトステネスのふるいのアルゴリズムの、次の2つの版を考えよ。
+2つ目は局所変数を明示的に束縛する。
+これは値打ちがあるか。
 
 ```lisp
 (defun sieve (pipe)
@@ -1863,48 +1863,48 @@ Is this worth it?
                       (sieve (tail pipe))))))
 ```
 
-## 9.9 Answers
+## 9.9 解答
 
-**Answer 9.4** Let *F<sub>n</sub>* denote (`fib n`).
-Then the time to compute *F<sub>n</sub>*, *T<sub>n</sub>*, is a small constant for *n* &le; 1, and is roughly equal to *T<sub>n-1</sub>* plus *T<sub>n-2</sub>* for larger *n*.
-Thus, *T<sub>n</sub>* is roughly proportional to *F<sub>n</sub>*:
+**解答 9.4** *F<sub>n</sub>* を (`fib n`) とする。
+すると *F<sub>n</sub>* を計算する時間 *T<sub>n</sub>* は、*n* &le; 1 では小さな定数であり、より大きな *n* では *T<sub>n-1</sub>* と *T<sub>n-2</sub>* の和にほぼ等しい。
+ですから *T<sub>n</sub>* はおよそ *F<sub>n</sub>* に比例する。
 
 <img src="images/chapter9/si1_e.svg"
 onerror="this.src='images/chapter9/si1_e.png'; this.onerror=null;"
 alt="T_{n}=F_{n}\frac{T_{i}}{F_{i}}" />
 
-We could use some small value of *T<sub>i</sub>* to calculate *T*<sub>100</sub> if we knew *F*<sub>100</sub>.
-Fortunately, we can use the equation:
+*F*<sub>100</sub> が分かれば、*T<sub>i</sub>* の小さな値を使って *T*<sub>100</sub> を計算できる。
+幸い、次の式が使える。
 
 <img src="images/chapter9/si2_e.svg"
 onerror="this.src='images/chapter9/si2_e.png'; this.onerror=null;"
 alt="F_{n} \alpha \phi^{n}" />
 
-Where &phi; = (1 + &radic;(5))/2 &asymp; 1.618.
-This equation was derived by de Moivre in 1718 (see Knuth, Donald E.
-*Fundamental Algorithms*, pp.
-78-83), but the number *&phi;* has a long interesting history.
-Euclid called it the "extreme and mean ratio," because the ratio of *A* to *B* is the ratio of *A* + *B* to *A* if *A*/*B* is *&phi;*.
-In the Renaissance it was called the "divine proportion," and in the last century it has been known as the "golden ratio," because a rectangle with sides in this ratio can be divided into two smaller rectangles that both have the same ratio between sides.
-It is said to be a pleasing proportion when employed in paintings and architecture.
-Putting history aside, given *T*<sub>25</sub> &asymp; 1.1 *sec* we can now calculate:
+ここで &phi; = (1 + &radic;(5))/2 &asymp; 1.618 である。
+この式は1718年に de Moivre が導いた（Knuth, Donald E.
+*Fundamental Algorithms*、
+78-83ページを参照）が、数 *&phi;* には長く興味深い歴史がある。
+ユークリッドはこれを「外中比」と呼んだ。*A*/*B* が *&phi;* なら、*A* 対 *B* の比が *A* + *B* 対 *A* の比に等しいからである。
+ルネサンスでは「神聖比例」と呼ばれ、前世紀には「黄金比」として知られてきた。辺がこの比の長方形は、辺の比が同じ2つの小さな長方形に分けられるからである。
+絵画や建築に用いると心地よい比例だと言われる。
+歴史はさておき、*T*<sub>25</sub> &asymp; 1.1秒だとして、これで次を計算できる。
 
 <img src="images/chapter9/si3_e.svg"
 onerror="this.src='images/chapter9/si3_e.png'; this.onerror=null;"
 alt="T_{100} \approx \phi^{100}\frac{1.1 \text{sec}}{\phi^{25}} \approx 5 \times 10^{15} \text{sec}" />
 
-which is roughly 150 million years.
-We can also see that the timing data in the table fits the equation fairly well.
-However, we would expect some additional time for larger numbers because it takes longer to add and garbage collect bignums than fixnums.
+これはおよそ1億5000万年である。
+表の計時データがこの式にかなりよく合っていることも分かる。
+ただし、より大きな数についてはいくらか余分な時間を見込む。fixnum より bignum のほうが加算とごみ集めに時間がかかるからである。
 
-**Answer 9.5** First we'll define the notion of a forced win.
-This occurs either when there are three or fewer tokens left or when you can make a move that gives your opponent a possible loss.
-A possible loss is any position that is not a forced win.
-If you play perfectly, then a possible loss for your opponent will in fact be a win for you, since there are no ties.
-See the functions `win` and `loss` below.
-Now your strategy should be to win the game outright if there are three or fewer tokens, or otherwise to choose the largest number resulting in a possible loss for your opponent.
-If there is no such move available to you, take only one, on the grounds that your opponent is more likely to make a mistake with a larger pile to contend with.
-This strategy is embodied in the function `nim` below.
+**解答 9.5** まず、必勝という概念を定義する。
+これは、残りのトークンが3個以下のとき、あるいは相手を負けの可能性のある状態にする手を打てるときに起こる。
+負けの可能性のある状態とは、必勝でない状態のことである。
+完璧に指せば、相手にとっての負けの可能性は実際にはこちらの勝ちになる。引き分けがないからである。
+以下の関数 `win` と `loss` を参照せよ。
+さて戦略は、トークンが3個以下ならゲームに直ちに勝つこと、そうでなければ相手を負けの可能性のある状態にする最大の数を選ぶことであるべきだ。
+そうした手がなければ1個だけ取る。相手はより大きな山を相手にするほど誤りを犯しやすい、という理由からである。
+この戦略は以下の関数 `nim` に体現されている。
 
 ```lisp
 (defun win (n)
@@ -1924,15 +1924,15 @@ This strategy is embodied in the function `nim` below.
 (memoize 'loss)
 ```
 
-From this we are able to produce a table of execution times (in seconds), with and without memoization.
-Only `loss` need be memoized.
-(Why?) Do you have a good explanation of the times for the unmemoized version?
-What happens if you change the order of the loss clauses in `win` and/or `nim?`
+これから、メモ化ありとなしの実行時間（秒）の表を作れる。
+メモ化する必要があるのは `loss` だけである。
+（なぜか。）メモ化していない版の時間について、よい説明を持っているか。
+`win` や `nim` の loss の節の順序を変えるとどうなるか。
 
-**Answer 9.6** We start by defining a function, `moves`, which generates all possible moves from a given position.
-This is done by considering each pile of *n* tokens within a set of piles *s*.
-Any pile bigger than two tokens can be split.
-We take care to eliminate duplicate positions by sorting each set of piles, and then removing the duplicates.
+**解答 9.6** まず、与えた状態からありうるすべての手を生成する関数 `moves` を定義することから始める。
+これは、山の集合 *s* の中の *n* 個のトークンからなる各山を考えることで行う。
+2個より大きい山はどれも分けられる。
+各山の集合を並べ替えてから重複を取り除くことで、重複する状態をなくすよう気をつける。
 
 ```lisp
 (defun moves (s)
@@ -1952,8 +1952,8 @@ We take care to eliminate duplicate positions by sorting each set of piles, and 
   (sort (copy-seq seq) pred :key key))
 ```
 
-This time a loss is defined as a position from which you have no moves, or one from which your opponent can force a win no matter what you do.
-A winning position is one that is not a loss, and the strategy is to pick a move that is a loss for your opponent, or if you can't, just to play anything (here we arbitrarily pick the first move generated).
+今度は負けを、手がない状態、あるいは何をしても相手が勝ちを確実にできる状態と定義する。
+勝ちの状態とは負けでない状態であり、戦略は相手にとって負けとなる手を選ぶこと、それができなければ何でも指すこと（ここでは生成された最初の手を勝手に選ぶ）である。
 
 ```lisp
 (defun loss (s)
@@ -1967,8 +1967,8 @@ A winning position is one that is not a loss, and the strategy is to pick a move
         (first choices))))
 ```
 
-**Answer 9.7** The answer assumes that a strategy function takes four arguments: the current die roll, the score so far, the number of remaining positions in the tens column, and the number of remaining positions in the ones column.
-The strategy function should return 1 or 10.
+**解答 9.7** この解答は、戦略の関数が4つの引数をとると仮定する。現在の出目、ここまでの得点、十の位の残りの位置の数、一の位の残りの位置の数である。
+戦略の関数は1か10を返すべきである。
 
 ```lisp
 (defun play-games (&optional (n-games 10) (player 'make-move))
@@ -1994,8 +1994,8 @@ The strategy function should return 1 or 10.
 (defun roll-die () (+ 1 (random 6)))
 ```
 
-So, the expression `(play-games 5 #'make-move)` would play five games with a strategy called `make-move`.
-This returns only the average score of the games; if you want to see each move as it is played, use this function:
+ですから式 `(play-games 5 #'make-move)` は、`make-move` という戦略で5回のゲームを遊ぶ。
+これはゲームの平均得点だけを返す。各手を指すたびに見たいなら、この関数を使え。
 
 ```lisp
 (defun show (player)
@@ -2008,18 +2008,18 @@ This returns only the average score of the games; if you want to see each move a
          move)))
 ```
 
-and call `(play-games 5 (show #'make-moves))`.
+そして `(play-games 5 (show #'make-moves))` を呼べ。
 
-**Answer 9.9** The expression `(random 6 (make-random-state))` returns the next number that `roll-die` will return.
-To guard against this, we can make `roll-die` use a random state that is not accessible through a global variable:
+**解答 9.9** 式 `(random 6 (make-random-state))` は、`roll-die` が次に返す数を返す。
+これに対して守るには、`roll-die` に、大域変数を通してアクセスできない乱数の状態を使わせられる。
 
 ```lisp
 (let ((state (make-random-state t)))
   (defun roll-die () (+ 1 (random 6 state))))
 ```
 
-**Answer 9.10** Because this has to do with read-time evaluation, it must be implemented as a macro or read macro.
-Here's one way to do it:
+**解答 9.10** これは読み取り時の評価に関わるので、マクロか読み取りマクロとして実装せねばならない。
+やり方の1つを示す。
 
 ```lisp
   (defmacro read-time-case (first-case &rest other-cases)
@@ -2029,7 +2029,7 @@ Here's one way to do it:
     first-case)
 ```
 
-A fanciful example, resurrecting a number of obsolete Lisps, follows:
+廃れたLispをいくつも蘇らせた、遊び心のある例を示す。
 
 ```lisp
 (defun get-fast-time ()
@@ -2048,20 +2048,20 @@ A fanciful example, resurrecting a number of obsolete Lisps, follows:
 | `;; otherwise`   |                              |
 |                  | `(get-internal-real-time)))` |
 
-**Answer 9.13** Yes.
-Computing (`head pipe`) may be a trivial computation, but it will be done many times.
-Binding the local variable makes sure that it is only done once.
-In general, things that you expect to be done multiple times should be moved out of delayed functions, while things that may not be done at all should be moved inside a delay.
+**解答 9.13** はい。
+(`head pipe`) の計算は自明な計算かもしれないが、何度も行われる。
+局所変数を束縛すれば、それが一度だけ行われることが保証される。
+一般に、何度も行われると見込まれるものは遅延された関数の外へ、まったく行われないかもしれないものは delay の中へ移すべきである。
 
 ----------------------
 
 <a id="fn09-1"></a><sup>[1](#tfn09-1)</sup>
-One could say that the FORTRAN compiler was "broken." This underscores the problem of defining the efficiency of a language-do we judge by the most popular compiler, by the best compiler available, or by the best compiler imaginable?
+FORTRANのコンパイラが「壊れていた」と言うこともできます。これは言語の効率を定義することの問題を際立たせます。最も広く使われているコンパイラで判断するのか、入手できる最良のコンパイラで判断するのか、それとも想像しうる最良のコンパイラで判断するのか。
 
 <a id="fn09-2"></a><sup>[2](#tfn09-2)</sup>
-In KCL, the symbol `lambda-closure` is used, and in Allegro, it is `excl:.
-lexical-closure`
+KCLではシンボル `lambda-closure` が使われ、Allegroでは `excl:.
+lexical-closure` です。
 
 <a id="fn09-3"></a><sup>[3](#tfn09-3)</sup>
-The terms *metering* and *monitoring* are sometimes used instead of profiling.
+プロファイリングの代わりに*計量*や*監視*という語が使われることもあります。
 
