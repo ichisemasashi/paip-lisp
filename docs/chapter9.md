@@ -548,16 +548,16 @@ NOUN
 文法を書く人は、既存のLisp関数の名前を使って、それを再定義してしまっていないことを確かめねばなりません。
 さらに悪いことに、複数の文法が同時に開発されている場合、それらは共通の関数を持てません。
 持ってしまえば、利用者は文法を切り替えるたびに再コンパイルせねばなりません。
-This may make it difficult to compare grammars.
-The best away around this problem is to use the Common Lisp idea of *packages*, but for small exercises name clashes can be avoided easily enough, so we will not explore packages until [section 24.1](chapter24.md#s0010).
+これは文法を比べるのを難しくするかもしれません。
+この問題を回避する最善の道はCommon Lispの*パッケージ*という考えを使うことですが、小さな演習では名前の衝突は十分に簡単に避けられるので、パッケージは [24.1節](chapter24.md#s0010) まで探究しません。
 
-The major advantage of a compiler is speed of execution, when that makes a difference.
-For identical grammars running in one particular implementation of Common Lisp on one machine, our interpreter generates about 75 sentences per second, while the compiled approach turns out about 200.
-Thus, it is more than twice as fast, but the difference is negligible unless we need to generate many thousands of sentences.
-In [section 9.6](#s0035) we will see another compiler with an even greater speed-up.
+コンパイラの主な利点は、それが違いを生む場面での実行の速さです。
+1台の計算機上の特定のCommon Lisp処理系で同一の文法を走らせると、私たちのインタプリタは毎秒約75文を生成しますが、コンパイルの方式は約200を生み出します。
+つまり2倍以上速いのですが、何千もの文を生成する必要がないかぎり、その差は無視できます。
+[9.6節](#s0035)では、さらに大きく速くなる別のコンパイラを見ます。
 
-The need to optimize the code produced by your macros and compilers ultimately depends on the quality of the underlying Lisp compiler.
-For example, consider the following code:
+自分のマクロやコンパイラが生むコードを最適化する必要があるかどうかは、結局のところ土台のLispコンパイラの質によります。
+たとえば次のコードを考えてみましょう。
 
 ```lisp
 (defun f1 (n l)
@@ -593,32 +593,32 @@ Fl
 F2
 ```
 
-This particular Lisp compiler generates the exact same code for `f1` and `f2`.
-Both functions square the argument `n`, and the four machine instructions say, "Take the 0th argument, make a copy of it, multiply those two numbers, and return the result." It's clear the compiler has some knowledge of the basic Lisp functions.
-In the case of `f1`, it was smart enough to get rid of the local variables `l1` and `l2` (and their initialization), as well as the calls to `first, second, length,` and `list` and most of the arithmetic.
-The compiler could do this because it has knowledge about the functions `length` and `list` and the arithmetic functions.
-Some of this knowledge might be in the form of simplification rules.
+この特定のLispコンパイラは、`f1` と `f2` にまったく同じコードを生成します。
+どちらの関数も引数 `n` を二乗し、4つの機械命令は「0番目の引数を取り、その複製を作り、その2つの数を掛け、結果を返す」と述べています。コンパイラが基本的なLisp関数についての知識をいくらか持っているのは明らかです。
+`f1` の場合、コンパイラは局所変数 `l1` と `l2`（とその初期化）、そして `first`、`second`、`length`、`list` の呼び出しと算術のほとんどを取り除くだけの賢さを持っていました。
+コンパイラがこれをできたのは、関数 `length` と `list`、そして算術の関数についての知識を持っているからです。
+この知識の一部は簡約規則の形かもしれません。
 
-As a user of this compiler, there's no need for me to write clever macros or compilers that generate streamlined code as seen in `f2`; I can blindly generate code with possible inefficiencies like those in `f1`, and assume that the Lisp compiler will cover up for my laziness.
-With another compiler that didn't know about such optimizations, I would have to be more careful about the code I generate.
+このコンパイラの利用者として、私は `f2` に見られるような無駄のないコードを生む賢いマクロやコンパイラを書く必要がありません。`f1` にあるような非効率を含みうるコードを何も考えずに生成し、Lispコンパイラが私の怠惰を取り繕ってくれると当てにできるのです。
+そうした最適化を知らない別のコンパイラなら、私は自分が生成するコードにもっと注意せねばならないでしょう。
 
-## 9.3 Delaying Computation
+## 9.3 計算を遅らせる
 
-Back on [page 45](chapter2.md#p45), we saw a program to generate all strings derivable from a grammar.
-One drawback of this program was that some grammars produce an infinite number of strings, so the program would not terminate on those grammars.
+[45ページ](chapter2.md#p45)で、文法から導けるすべての文字列を生成するプログラムを見ました。
+このプログラムの1つの欠点は、無限個の文字列を生む文法もあるので、そうした文法では終わらないことでした。
 
-It turns out that we often want to deal with infinite sets.
-Of course, we can't enumerate all the elements of an infinite set, but we should be able to represent the set and pick elements out one at a time.
-In other words, we want to be able to specify how a set (or other object) is constructed, but delay the actual construction, perhaps doing it incrementally over time.
-This sounds like a job for closures: we can specify the set constructor as a function, and then call the function some time later.
-We will implement this approach with the syntax used in Scheme-the macro `delay` builds a closure to be computed later, and the function `force` calls that function and caches away the value.
-We use structures of type `delay` to implement this.
-A delay structure has two fields: the value and the function.
-Initially, the value field is undefined, and the function field holds the closure that will compute the value.
-The first time the delay is forced, the function is called, and its result is stored in the value field.
-The function field is then set to nil to indicate that there is no need to call the function again.
-The function `force` checks if the function needs to be called, and returns the value.
-If `force` is passed an argument that is not a delay, it just returns the argument.
+私たちはしばしば無限集合を扱いたくなるものです。
+もちろん無限集合の要素をすべて列挙することはできませんが、集合を表現し、要素を1つずつ取り出すことはできるはずです。
+言い換えれば、集合（や他のオブジェクト）がどう構成されるかを指定しつつ、実際の構成は遅らせ、おそらく時間をかけて少しずつ行いたいのです。
+これはクロージャの出番のようです。集合の構成子を関数として指定し、その関数を後で呼べます。
+この方式をSchemeで使われる構文で実装します。マクロ `delay` は後で計算されるクロージャを組み立て、関数 `force` はその関数を呼んで値をキャッシュします。
+これを実装するのに `delay` 型の構造体を使います。
+delay の構造体は2つの欄を持ちます。値と関数です。
+最初、値の欄は未定義で、関数の欄が値を計算するクロージャを保持します。
+delay が最初に force されると、関数が呼ばれ、その結果が値の欄に格納されます。
+それから関数の欄は、もう関数を呼ぶ必要がないことを示すために nil に設定されます。
+関数 `force` は関数を呼ぶ必要があるかを調べ、値を返します。
+delay でない引数が `force` に渡されたら、その引数をそのまま返します。
 
 ```lisp
 (defstruct delay value (computed? nil))
@@ -641,9 +641,9 @@ If `force` is passed an argument that is not a delay, it just returns the argume
       (delay-value x))))
 ```
 
-Here's an example of the use of `delay`.
-The list `x` is constructed using a combination of normal evaluation and delayed evaluation.
-Thus, the `1` is printed when `x` is created, `but` the `2` is not:
+`delay` の使用例を示します。
+リスト `x` は、通常の評価と遅延評価の組み合わせで構成されます。
+ですから `1` は `x` が作られるときに表示されますが、`2` は表示されません。
 
 ```lisp
 (setf x (list (print 1) (delay (print 2)))) =>
@@ -651,8 +651,8 @@ Thus, the `1` is printed when `x` is created, `but` the `2` is not:
 (1 #S(DELAY .-FUNCTION (LAMBDA () (PRINT 2))))
 ```
 
-The second element is evaluated (and printed) when it is forced.
-But then forcing it again just retrieves the cached value, rather than calling the function again:
+2番目の要素は、force されたときに評価（そして表示）されます。
+しかしその後もう一度 force すると、関数を再び呼ぶのではなく、キャッシュされた値をただ取り出します。
 
 ```lisp
 > (force (second x)) =>
@@ -662,16 +662,16 @@ But then forcing it again just retrieves the cached value, rather than calling t
 > (force (second x)) => 2
 ```
 
-Now let's see how delays can be used to build infinite sets.
-An infinite set will be considered a special case of what we will call a *pipe*: a list with a `first` component that has been computed, and a `rest` component that is either a normal list or a delayed value.
-Pipes have also been called delayed lists, generated lists, and (most commonly) streams.
-We will use the term *pipe* because *stream* already has a meaning in Common Lisp.
-The book *Artificial Intelligence Programming* ([Charniak et al.
-1987](bibliography.md#bb0180)) also calls these structures pipes, reserving streams for delayed structures that do not cache computed results.
+では delay を使って無限集合を組み立てる方法を見てみましょう。
+無限集合は、*パイプ*と呼ぶものの特別な場合と見なします。パイプとは、計算済みの `first` の部分と、通常のリストか遅延された値のいずれかである `rest` の部分を持つリストです。
+パイプは、遅延リスト、生成リスト、そして（最もよく）ストリームとも呼ばれてきました。
+*stream* はCommon Lispですでに意味を持つので、*パイプ*という語を使います。
+*Artificial Intelligence Programming*（[Charniak ら
+1987](bibliography.md#bb0180)）も、これらの構造をパイプと呼び、streams（ストリーム）は計算結果をキャッシュしない遅延構造のために取っておいています。
 
-To distinguish pipes from lists, we will use the accessors `head` and `tail` instead of `first` and `rest`.
-We will also use `empty-pipe` instead of `nil, make-pipe` instead of `cons`, and `pipe-elt` instead of `elt`.
-Note that `make-pipe` is a macro that delays evaluation of the tail.
+パイプをリストと区別するため、`first` と `rest` の代わりにアクセス関数 `head` と `tail` を使います。
+また `nil` の代わりに `empty-pipe`、`cons` の代わりに `make-pipe`、`elt` の代わりに `pipe-elt` を使います。
+`make-pipe` は tail の評価を遅らせるマクロであることに注意してください。
 
 ```lisp
 (defmacro make-pipe (head tail)
@@ -687,7 +687,7 @@ Note that `make-pipe` is a macro that delays evaluation of the tail.
    (pipe-elt (tail pipe) (- i 1))))
 ```
 
-Here's a function that can be used to make a large or infinite sequence of integers with delayed evaluation:
+遅延評価で整数の大きな、あるいは無限の列を作るのに使える関数を示します。
 
 ```lisp
 (defun integers (&optional (start 0) end)
@@ -698,10 +698,10 @@ Here's a function that can be used to make a large or infinite sequence of integ
    nil))
 ```
 
-And here is an example of its use.
-The pipe `c` represents the numbers from 0 to infinity.
-When it is created, only the zeroth element, 0, is evaluated.
-The computation of the other elements is delayed.
+そして使用例を示します。
+パイプ `c` は0から無限までの数を表します。
+作られるときには、0番目の要素である0だけが評価されます。
+他の要素の計算は遅らされます。
 
 ```lisp
 > (setf c (integers 0)) => (0 . #S(DELAY :FUNCTION #<CLOSURE -77435477>))
@@ -709,9 +709,9 @@ The computation of the other elements is delayed.
 > (pipe-elt c 0) => 0
 ```
 
-Calling `pipe-elt` to look at the third element causes the first through third elements to be evaluated.
-The numbers 0 to 3 are cached in the correct positions, and further elements remain unevaluated.
-Another call to `pipe-elt` with a larger index would force them by evaluating the delayed function.
+`pipe-elt` を呼んで3番目の要素を見ると、1番目から3番目の要素が評価されます。
+0から3までの数が正しい位置にキャッシュされ、それ以降の要素は未評価のままです。
+より大きな添字で `pipe-elt` を再び呼べば、遅延された関数を評価してそれらを force します。
 
 ```lisp
 > (pipe-elt c 3) => 3
@@ -727,25 +727,25 @@ c =>
                                    #<CLOSURE -77432724 >))))))))
 ```
 
-While this seems to work fine, there is a heavy price to pay.
-Every delayed value must be stored in a two-element structure, where one of the elements is a closure.
-Thus, there is some storage wasted.
-There is also some time wasted, as `tail` or `pipe-elt` must traverse the structures.
+これはうまく働くように見えますが、重い代償を払っています。
+遅延された値はすべて2要素の構造体に格納せねばならず、その要素の1つはクロージャです。
+ですから記憶がいくらか無駄になります。
+時間もいくらか無駄になります。`tail` や `pipe-elt` がその構造をたどらねばならないからです。
 
-An alternate representation for pipes is as (*value . closure*) pairs, where the closure values are stored into the actual cons cells as they are computed.
-Previously we needed structures of type delay to distinguish a delayed from a nondelayed object, but in a pipe we know the rest can be only one of three things: nil, a list, or a delayed value.
-Thus, we can use the closures directly instead of using `delay` structures, if we have some way of distinguishing closures from lists.
-Compiled closures are atoms, so they can always be distinguished from lists.
-But sometimes closures are implemented as lists beginning with `lambda` or some other implementation-dependent symbol.<a id="tfn09-2"></a><sup>[2](#fn09-2)</sup>
-The built-in function `functionp` is defined to be true of such lists, as well as of all symbols and all objects returned by `compile`.
-But using `functionp` means that we cannot have a pipe that includes the symbol `lambda` as an element, because it will be confused for a closure:
+パイプの別の表現は (*value . closure*) の対としてのもので、クロージャの値は計算されるにつれて実際のコンスセルに格納されます。
+以前は、遅延されたオブジェクトと遅延されていないオブジェクトを区別するのに delay 型の構造体が必要でしたが、パイプでは rest が nil、リスト、遅延された値の3つのいずれかしかありえないと分かっています。
+ですからクロージャをリストと区別する手立てがあれば、`delay` の構造体を使う代わりにクロージャを直に使えます。
+コンパイルされたクロージャはアトムなので、常にリストと区別できます。
+しかしクロージャが `lambda` か、その他の処理系に依存するシンボルで始まるリストとして実装されることもあります。<a id="tfn09-2"></a><sup>[2](#fn09-2)</sup>
+組み込み関数 `functionp` は、そうしたリスト、そしてすべてのシンボルと `compile` が返すすべてのオブジェクトに対して真になるよう定義されています。
+しかし `functionp` を使うと、シンボル `lambda` を要素として含むパイプを持てません。クロージャと取り違えられてしまうからです。
 
 ```lisp
 > (functionp (last '(theta iota kappa lambda))) => T
 ```
 
-If we consistently use compiled functions, then we could eliminate the problem by testing with the built-in predicate `compiled-function-p`.
-The following definitions do not make this assumption:
+コンパイルされた関数を一貫して使うなら、組み込み述語 `compiled-function-p` で調べることでこの問題をなくせます。
+以下の定義はこの仮定を置きません。
 
 ```lisp
 (defmacro make-pipe (head tai1)
@@ -759,9 +759,9 @@ The following definitions do not make this assumption:
    (rest pipe)))
 ```
 
-Everything else remains the same.
-If we recompile `integers` (because it uses the macro `make-pipe`), we see the following behavior.
-First, creation of the infinite pipe `c` is similar:
+それ以外はすべて同じままです。
+（`integers` はマクロ `make-pipe` を使うので）これを再コンパイルすると、次の振る舞いが見られます。
+まず、無限のパイプ `c` の作成は同様です。
 
 ```lisp
 > (setf c (integers 0)) => (0 . #<CLOSURE 77350123>)
@@ -769,7 +769,7 @@ First, creation of the infinite pipe `c` is similar:
 > (pipe-elt c 0) => 0
 ```
 
-Accessing an element of the pipe forces evaluation of all the intervening elements, and as before leaves subsequent elements unevaluated:
+パイプの要素にアクセスすると、その間のすべての要素の評価が force され、以前と同じく後続の要素は未評価のまま残ります。
 
 ```lisp
 > (pipe-elt c 5) => 5
@@ -777,8 +777,8 @@ Accessing an element of the pipe forces evaluation of all the intervening elemen
 > c => (0 1 2 3 4 5 . #<CLOSURE 77351636>)
 ```
 
-Pipes can also be used for finite lists.
-Here we see a pipe of length 11:
+パイプは有限のリストにも使えます。
+ここでは長さ11のパイプを見ます。
 
 ```lisp
 > (setf i (integers 0 10)) => (0 . #<CLOSURE 77375357>)
@@ -790,13 +790,13 @@ Here we see a pipe of length 11:
 > i => (0 1 2 3 4 5 6 7 8 9 10)
 ```
 
-Clearly, this version wastes less space and is much neater about cleaning up after itself.
-In fact, a completely evaluated pipe turns itself into a list!
-This efficiency was gained at the sacrifice of a general principle of program design.
-Usually we strive to build more complicated abstractions, like pipes, out of simpler ones, like delays.
-But in this case, part of the functionality that delays were providing was duplicated by the cons cells that make up pipes, so the more efficient implementation of pipes does not use delays at all.
+明らかに、この版は領域の無駄が少なく、後始末もずっときれいです。
+実際、完全に評価されたパイプは自らをリストに変えてしまいます。
+この効率は、プログラム設計の一般的な原則を犠牲にして得られました。
+ふつう私たちは、パイプのようなより複雑な抽象を、delay のようなより単純な抽象から組み立てようと努めます。
+しかしこの場合、delay が提供していた機能の一部が、パイプをなすコンスセルによって重複していたので、より効率的なパイプの実装は delay をまったく使いません。
 
-Here are some more utility functions on pipes:
+パイプに対する便利な関数をもう少し示します。
 
 ```lisp
 (defun enumerate (pipe &key count key (result pipe))
@@ -817,7 +817,7 @@ Here are some more utility functions on pipes:
    (filter pred (tail pipe))))
 ```
 
-And here's an application of pipes: generating prime numbers using the sieve of Eratosthenes algorithm:
+そしてパイプの応用を示します。エラトステネスのふるいのアルゴリズムを使って素数を生成することです。
 
 ```lisp
 (defun sieve (pipe)
@@ -830,8 +830,8 @@ And here's an application of pipes: generating prime numbers using the sieve of 
 (2 3 5 7 11 13 17 19 23 29 31 . #<CLOSURE 5224472>)
 ```
 
-Finally, let's return to the problem of generating all strings in a grammar.
-First we're going to need some more utility functions:
+最後に、文法のすべての文字列を生成する問題に戻りましょう。
+まず便利な関数がもう少し要ります。
 
 ```lisp
 (defun map-pipe (fn pipe)
@@ -857,9 +857,9 @@ First we're going to need some more utility functions:
                                             fn (tail pipe)))))))
 ```
 
-Now we can rewrite `generate-all` and `combine-all` to use pipes instead of lists.
+これで `generate-all` と `combine-all` を、リストの代わりにパイプを使うよう書き直せます。
 
-Everything else is the same as on [page 45](chapter2.md#p45).
+それ以外はすべて [45ページ](chapter2.md#p45) と同じです。
 
 ```lisp
 (defun generate-all (phrase)
@@ -884,7 +884,7 @@ Everything else is the same as on [page 45](chapter2.md#p45).
    ypipe))
 ```
 
-With these definitions, here's the pipe of all sentences from `*grammar2*` (from [page 43](chapter2.md#p43)):
+これらの定義のもとで、`*grammar2*`（[43ページ](chapter2.md#p43)より）のすべての文からなるパイプを示します。
 
 ```lisp
 > (setf ss (generate-all 'sentence)) =>
@@ -908,52 +908,52 @@ With these definitions, here's the pipe of all sentences from `*grammar2*` (from
 (THE ADIABATIC GREEN BLUE MAN HIT THE MAN)
 ```
 
-While we were able to represent the infinite set of sentences and enumerate instances of it, we still haven't solved all the problems.
-For one, this enumeration will never get to a sentence that does not have "hit the man" as the verb phrase.
-We will see longer and longer lists of adjectives, but no other change.
-Another problem is that left-recursive rules will still cause infinite loops.
-For example, if the expansion for `Adj*` had been `(Adj* -> (Adj* Adj) ())` instead of `(Adj* -> () (Adj Adj*))`, then the enumeration would never terminate, because pipes need to generate a first element.
+無限の文の集合を表現し、その実例を列挙することはできましたが、すべての問題を解いたわけではまだありません。
+1つには、この列挙は動詞句が「hit the man」でない文には決してたどり着きません。
+どんどん長くなる形容詞の並びは見られますが、それ以外の変化はありません。
+もう1つの問題は、左再帰の規則が依然として無限の循環を起こすことです。
+たとえば `Adj*` の展開が `(Adj* -> () (Adj Adj*))` ではなく `(Adj* -> (Adj* Adj) ())` だったら、列挙は決して終わりません。パイプは最初の要素を生成する必要があるからです。
 
-We have used delays and pipes for two main purposes: to put off until later computations that may not be needed at all, and to have an explicit representation of large or infinite sets.
-It should be mentioned that the language Prolog has a different solution to the first problem (but not the second).
-As we shall see in [chapter 11](chapter11.md), Prolog generates solutions one at a time, automatically keeping track of possible backtrack points.
-Where pipes allow us to represent an infinite number of alternatives in the data, Prolog allows us to represent those alternatives in the program itself.
+delay とパイプを2つの主な目的に使ってきました。まったく必要にならないかもしれない計算を後回しにすることと、大きな、あるいは無限の集合を明示的に表現することです。
+Prolog言語が、1つ目の問題に（2つ目ではありませんが）別の解決を持っていることに触れておくべきでしょう。
+[第11章](chapter11.md)で見るように、Prologは解を1つずつ生成し、ありうるバックトラックの点を自動的に記録します。
+パイプが無限個の選択肢をデータの中に表現させてくれるのに対し、Prologはその選択肢をプログラム自身の中に表現させてくれます。
 
-**Exercise 9.1 [h]** When given a function `f` and a pipe `p`, `mappend-pipe` returns a new pipe that will eventually enumerate all of `(f (first p))`, then all of `(f (second p))`, and so on.
-This is deemed "unfair" if `(f (first p))` has an infinite number of elements.
-Define a function that will fairly interleave elements, so that all of them are eventually enumerated.
-Show that the function works by changing `generate-all` to work with it.
+**練習問題 9.1 [h]** 関数 `f` とパイプ `p` を与えられると、`mappend-pipe` は、やがて `(f (first p))` のすべて、次に `(f (second p))` のすべて、という具合に列挙する新しいパイプを返す。
+これは `(f (first p))` が無限個の要素を持つ場合、「不公平」と見なされる。
+要素を公平に織り交ぜ、そのすべてがやがて列挙されるような関数を定義せよ。
+`generate-all` をその関数で働くように変えて、関数が働くことを示せ。
 
-## 9.4 Indexing Data
+## 9.4 データに索引をつける
 
-Lisp makes it very easy to use lists as the universal data structure.
-A list can represent a set or an ordered sequence, and a list with sublists can represent a tree or graph.
-For rapid prototyping, it is often easiest to represent data in lists, but for efficiency this is not always the best idea.
-To find an element in a list of length *n* will take *n*/2 steps on average.
-This is true for a simple list, an association list, or a property list.
-If *n* can be large, it is worth looking at other data structures, such as hash tables, vectors, property lists, and trees.
+Lispはリストを万能のデータ構造として使うのをとても容易にします。
+リストは集合や順序のある並びを表せますし、部分リストを持つリストは木やグラフを表せます。
+素早い試作には、データをリストで表すのがしばしば最も楽ですが、効率のためには必ずしも最善の考えではありません。
+長さ *n* のリストで要素を見つけるには、平均で *n*/2 歩かかります。
+これは単純なリスト、連想リスト、属性リストのいずれにも当てはまります。
+*n* が大きくなりうるなら、ハッシュ表・ベクタ・属性リスト・木といった他のデータ構造に目を向ける値打ちがあります。
 
-Picking the right data structure and algorithm is as important in Lisp as it is in any other programming language.
-Even though Lisp offers a wide variety of data structures, it is often worthwhile to spend some effort on building just the right data structure for frequently used data.
-For example, Lisp's hash tables are very general and thus can be inefficient.
-You may want to build your own hash tables if, for example, you never need to delete elements, thus making open hashing an attractive possibility.
-We will see an example of efficient indexing in [section 9.6](#s0035) ([page 297](chapter9.md#p297)).
+正しいデータ構造とアルゴリズムを選ぶことは、Lispでも他のどのプログラミング言語でも同じく重要です。
+Lispは多種多様なデータ構造を提供しますが、よく使うデータのためにぴったりのデータ構造を組み立てる労を惜しまない値打ちは、しばしばあります。
+たとえばLispのハッシュ表はきわめて汎用なので、非効率でありえます。
+たとえば要素を削除する必要がまったくないなら、開番地法が魅力的な選択肢になるので、自分のハッシュ表を組み立てたくなるかもしれません。
+効率的な索引付けの例を [9.6節](#s0035)（[297ページ](chapter9.md#p297)）で見ます。
 
-## 9.5 Instrumentation: Deciding What to Optimize
+## 9.5 計測: 何を最適化するかを決める
 
-Because Lisp is such a good rapid-prototyping language, we can expect to get a working implementation quickly.
-Before we go about trying to improve the efficiency of the implementation, it is a good idea to see what parts are used most often.
-Improving little-used features is a waste of time.
+Lispはとても優れた素早い試作の言語なので、動く実装を手早く得られると期待できます。
+実装の効率を高めようとする前に、どの部分が最もよく使われるかを見ておくのがよい考えです。
+あまり使われない機能を改善するのは時間の無駄です。
 
-The minimal support we need is to count the number of calls to selected functions, and then print out the totals.
-This is called *profiling* the functions.<a id="tfn09-3"></a><sup>[3](#fn09-3)</sup>
-For each function to be profiled, we change the definition so that it increments a counter and then calls the original function.
+最低限必要なのは、選んだ関数への呼び出しの回数を数え、その合計を表示することです。
+これを関数の*プロファイリング*と呼びます。<a id="tfn09-3"></a><sup>[3](#fn09-3)</sup>
+プロファイリングする各関数について、計数器を増やしてから元の関数を呼ぶよう定義を変えます。
 
-Most Lisp systems have some built-in profiling mechanism.
-If your system has one, by all means use it.
-The code in this section is provided for those who lack such a feature, and as an example of how functions can be manipulated.
-The following is a simple profiling facility.
-For each profiled function, it keeps a count of the number of times it is called under the `profile-count` property of the function's name.
+たいていのLispシステムは何らかの組み込みのプロファイリングの仕組みを持っています。
+お使いのシステムにあるなら、ぜひそれを使ってください。
+この節のコードは、そうした機能を持たない方のため、そして関数がどう操作できるかの例として提供します。
+以下は単純なプロファイリングの仕組みです。
+プロファイリングした各関数について、それが呼ばれた回数の数を、関数名の `profile-count` 属性のもとに保ちます。
 
 ```lisp
 (defun profile1 (fn-name)
@@ -983,13 +983,13 @@ For each profiled function, it keeps a count of the number of times it is called
           (format t "~& ~ 7D ~ A" (profile-count name) name)))
 ```
 
-That's all we need for the bare-bones functionality.
-However, there are a few ways we could improve this.
-First, it would be nice to have macros that, like `trace` and `untrace`, allow the user to profile multiple functions at once and keep track of what has been profiled.
-Second, it can be helpful to see the length of time spent in each function, as well as the number of calls.
+必要最低限の機能に要るのはこれだけです。
+しかし、これを改善する方法がいくつかあります。
+第一に、`trace` や `untrace` のように、利用者が複数の関数を一度にプロファイリングし、何をプロファイリングしたかを記録できるマクロがあるとよいでしょう。
+第二に、呼び出しの回数だけでなく、各関数で費やした時間の長さも見られると役立ちます。
 
-Also, it is important to avoid profiling a function twice, since that would double the number of calls reported without alerting the user of any trouble.
-Suppose we entered the following sequence of commands:
+また、関数を二重にプロファイリングするのを避けることが重要です。そうすると、何の異常も利用者に知らせずに、報告される呼び出しの回数が倍になってしまうからです。
+次のコマンドの並びを入力したとしましょう。
 
 ```lisp
 (defun f (x) (g x))
@@ -997,7 +997,7 @@ Suppose we entered the following sequence of commands:
 (profile1 'f)
 ```
 
-Then the definition of `f` would be roughly:
+すると `f` の定義はおおよそ次のようになります。
 
 ```lisp
 (lambda (&rest args)
@@ -1009,7 +1009,7 @@ Then the definition of `f` would be roughly:
         args))
 ```
 
-The result is that any call to `f` will eventually call the original `f`, but only after incrementing the count twice.
+その結果、`f` へのどの呼び出しも、結局は元の `f` を呼びますが、数を2回増やしてからになってしまいます。
 
 Another consideration is what happens when a profiled function is redefined by the user.
 The only way we could ensure that a redefined function would continue profiling would be to change the definition of the macro defun to look for functions that should be profiled.
