@@ -1,137 +1,137 @@
-# Chapter 9
-## Efficiency Issues
+# 第9章
+## 効率の問題
 
-> A Lisp programmer knows the value of everything, but the cost of nothing.
+> Lispプログラマはあらゆるものの値打ちを知っているが、その費用は何一つ知らない。
 
 > -Alan J.
 Perlis
 
-> Lisp is not inherently less efficient than other high-level languages.
+> Lispは本質的に、他の高水準言語より効率が劣るわけではない。
 
 > -Richard J.
 Fateman
 
-One of the reasons Lisp has enjoyed a long history is because it is an ideal language for what is now called *rapid-prototyping*-developing a program quickly, with little regards for details.
-That is what we have done so far in this book: concentrated on getting a working algorithm.
-Unfortunately, when a prototype is to be turned into a production-quality program, details can no longer be ignored.
-Most "real" AI programs deal with large amounts of data, and with large search spaces.
-Thus, efficiency considerations become very important.
+Lispが長い歴史を享受してきた理由の1つは、いま*素早い試作*と呼ばれるもの — 細部をあまり気にせずにプログラムを手早く作ること — に理想的な言語だからです。
+本書でここまでやってきたのがまさにそれで、動くアルゴリズムを得ることに専念してきました。
+あいにく、試作を実用に耐える品質のプログラムに変えるとなると、細部はもう無視できません。
+「本物の」AIプログラムの大半は、大量のデータと、大きな探索空間を扱います。
+ですから効率の検討がきわめて重要になります。
 
-However, this does not mean that writing an efficient program is fundamentally different from writing a working program.
-Ideally, developing an efficient program should be a three-step process.
-First, develop a working program, using proper abstractions so that the program will be easy to change if necessary.
-Second, *instrument* the program to determine where it is spending most of the time.
-Third, replace the slow parts with faster versions, while maintaining the program's correctness.
+とはいえ、効率のよいプログラムを書くことが、動くプログラムを書くことと根本的に違うわけではありません。
+理想を言えば、効率のよいプログラムの開発は3段階の過程であるべきです。
+第一に、適切な抽象を使って動くプログラムを作り、必要なら変えやすいようにしておく。
+第二に、プログラムに*計測の手を入れ*、どこで最も時間を費やしているかを突き止める。
+第三に、プログラムの正しさを保ったまま、遅い部分をより速い版に置き換える。
 
-The term *efficiency* will be used primarily to talk about the *speed* or run time of a program.
-To a lesser extent, *efficiency* is also used to refer to the *space* or amount of storage consumed by a program.
-We will also talk about the cost of a program.
-This is partly a use of the metaphor "time is money," and partly rooted in actual monetary costs-if a critical program runs unacceptably slowly, you may need to buy a more expensive computer.
+*効率*という語は、主にプログラムの*速さ*、すなわち実行時間について語るのに使います。
+程度は劣りますが、*効率*はプログラムが消費する*領域*、すなわち記憶量を指すのにも使います。
+プログラムの費用についても語ります。
+これは一つには「時は金なり」という比喩の使用であり、一つには実際の金銭的な費用に根ざしています。肝心なプログラムが受け入れがたいほど遅く動くなら、より高価な計算機を買わねばならないかもしれません。
 
-Lisp has been saddled with a reputation as an "inefficient language." Strictly speaking, it makes no sense to call a *language* efficient or inefficient.
-Rather, it is only a particular *implementation* of the language executing a particular program that can be measured for efficiency.
-So saying Lisp is inefficient is partly a historical claim: some past implementations *have* been inefficient.
-It is also partly a prediction: there are some reasons why future implementations are expected to suffer from inefficiencies.
-These reasons mainly stem from Lisp's flexibility.
-Lisp allows many decisions to be delayed until run time, and that can make the run time take longer.
-In the past decade, the "efficiency gap" between Lisp and "conventional languages" like FORTRAN or C has narrowed.
-Here are the reasons-some deserved, some not-behind Lisp's reputation for inefficiency:
+Lispは「非効率な言語」という評判を背負わされてきました。厳密に言えば、*言語*を効率がよいとか悪いとか呼ぶのは意味をなしません。
+むしろ、効率を測れるのは、特定のプログラムを実行する言語の特定の*処理系*だけです。
+ですからLispは非効率だと言うのは、一つには歴史的な主張です。過去の処理系のいくつかは実際に非効率*でした*。
+また一つには予測でもあります。将来の処理系が非効率に悩まされると予想される理由がいくつかあるのです。
+これらの理由は主にLispの柔軟さに由来します。
+Lispは多くの決定を実行時まで遅らせることを許し、それが実行時間を長くしうるのです。
+この10年で、Lispと、FORTRANやCのような「従来の言語」との「効率の差」は縮まりました。
+Lispの非効率という評判の背後にある理由を挙げます。当を得たものもあれば、そうでないものもあります。
 
-*   Early implementations were interpreted rather than compiled, which made them inherently inefficient.
-Common Lisp implementations have compilers, so this is no longer a problem.
-While Lisp is (primarily) no longer an interpreted language, it is still an *interactive* language, so it retains its flexibility.
+*   初期の処理系はコンパイルされるのではなく解釈実行され、それが本質的に非効率でした。
+Common Lispの処理系はコンパイラを持つので、これはもう問題ではありません。
+Lispは（主として）もはや解釈実行される言語ではありませんが、依然として*対話的*な言語なので、その柔軟さは保たれています。
 
-*   Lisp has often been used to write interpreters for embedded languages, thereby compounding the problem.
-Consider this quote from [Cooper and Wogrin's (1988)](bibliography.md#bb0260) book on the rule-based programming language OPS5:
+*   Lispは組み込み言語のインタプリタを書くのにしばしば使われ、それが問題をこじらせてきました。
+規則に基づくプログラミング言語OPS5についての [Cooper and Wogrin（1988）](bibliography.md#bb0260) の本からの次の引用を考えてみてください。
 
-> The efficiency of implementations that compile rules into executable code compares favorably to that of programs written in most sequential languages such as FORTRAN or Pascal Implementations that compile rules into data structures to be interpreted, as do many Lisp-based ones, could be noticeably slower.
+> 規則を実行可能なコードにコンパイルする処理系の効率は、FORTRANやPascalのようなたいていの逐次言語で書かれたプログラムの効率に引けを取らない。規則を、解釈されるデータ構造にコンパイルする処理系は — 多くのLispベースのものがそうであるように — 目に見えて遅くなりうる。
 
-Here Lisp is guilty by association.
-The fallacious chain of reasoning is: Lisp has been used to write interpreters; interpreters are slow; therefore Lisp is slow.
-While it is true that Lisp makes it very easy to write interpreters, it also makes it easy to write compilers.
-This book is the first that concentrates on using Lisp as both the implementation and target language for compilers.
+ここでLispは連座で罪ありとされています。
+誤った推論の連鎖はこうです。Lispはインタプリタを書くのに使われてきた。インタプリタは遅い。ゆえにLispは遅い。
+Lispがインタプリタをとても書きやすくするのは本当ですが、コンパイラも書きやすくするのです。
+本書は、Lispをコンパイラの実装言語としても対象言語としても使うことに専念する最初の本です。
 
-*   Lisp encourages a style with lots of function calls, particularly recursive calls.
-In some older systems, function calls were expensive.
-But it is now understood that a function call can be compiled into a simple branch instruction, and that many recursive calls can be made no more expensive than an equivalent iterative loop (see [chapter 22](chapter22.md)).
-It is also possible to instruct a Common Lisp compiler to compile certain functions inline, so there is no calling overhead at all.
-On the other hand, many Lisp systems require two fetches instead of one to find the code for a function, and thus will be slower.
-This extra level of indirection is the price paid for the freedom of being able to redefine functions without reloading the whole program.
+*   Lispは関数呼び出しの多い流儀、とりわけ再帰呼び出しを促します。
+古いシステムには、関数呼び出しが高くつくものもありました。
+しかし今では、関数呼び出しが単純な分岐命令にコンパイルできること、そして多くの再帰呼び出しが等価な繰り返しのループと変わらない費用にできることが理解されています（[第22章](chapter22.md)を参照）。
+Common Lispのコンパイラに特定の関数をインラインでコンパイルするよう指示することもでき、その場合は呼び出しの間接費がまったくかかりません。
+一方で、多くのLispシステムは関数のコードを見つけるのに1回でなく2回の取り出しを要し、そのぶん遅くなります。
+この余分な一段の間接参照は、プログラム全体を読み込み直さずに関数を再定義できる自由の代償です。
 
-*   Run-time type-checking is slow.
-Lisp provides a repertoire of generic functions.
-For example, we can write `(+ x y)` without bothering to declare if `x` and `y` are integers, floating point, bignums, complex numbers, rationals, or some combination of the above.
-This is very convenient, but it means that type checks must be made at run time, so the generic  +  will be slower than, say, a 16-bit integer addition with no check for overflow.
-If efficiency is important, Common Lisp allows the programmer to include declarations that can eliminate run-time checks.
-In fact, once the proper declarations are added, Lisp can be as fast or faster than conventional languages.
-[Fateman (1973)](bibliography.md#bb0375) compared the FORTRAN cube root routine on the PDP-10 to a MacLisp transliteration.
-The MacLisp version produced almost identical numerical code, but was 18% faster overall, due to a superior function-calling sequence.<a id="tfn09-1"></a><sup>[1](#fn09-1)</sup>
-The epigraph at the beginning of this chapter is from this article.
-[Berlin and Weise (1990)](bibliography.md#bb0085) show that with a special compilation technique called *partial evaluation*, speeds 7 to 90 times faster than conventionally compiled code can be achieved.
-Of course, partial evaluation could be used in any language, but it is very easy to do in Lisp.
-The fact remains that Lisp objects must somehow represent their type, and even with declarations, not all of this overhead can be eliminated.
-Most Lisp implementations optimize access to lists and fixnums but pay the price for the other, less commonly used data types.
+*   実行時の型検査は遅い。
+Lispは総称関数の一揃いを備えています。
+たとえば `(+ x y)` と書くのに、`x` と `y` が整数か、浮動小数点数か、bignum か、複素数か、有理数か、あるいはそれらの組み合わせかを、わざわざ宣言しなくて済みます。
+これはとても便利ですが、型検査を実行時にせねばならないということでもあり、ですから総称の + は、たとえば桁あふれの検査のない16ビット整数の加算より遅くなります。
+効率が重要なら、Common Lispはプログラマが実行時の検査を省ける宣言を含めることを許します。
+実際、適切な宣言をいったん加えれば、Lispは従来の言語と同じか、それより速くなりえます。
+[Fateman（1973）](bibliography.md#bb0375) は、PDP-10上のFORTRANの立方根の手続きを、それをMacLispに書き写したものと比べました。
+MacLisp版はほぼ同一の数値コードを生成しましたが、優れた関数呼び出しの手順のおかげで全体として18%速かったのです。<a id="tfn09-1"></a><sup>[1](#fn09-1)</sup>
+この章の冒頭のエピグラフは、この論文からのものです。
+[Berlin and Weise（1990）](bibliography.md#bb0085) は、*部分評価*と呼ばれる特別なコンパイルの技法を使えば、従来通りにコンパイルしたコードより7倍から90倍速い速度を達成できることを示しています。
+もちろん部分評価はどんな言語でも使えますが、Lispではとても容易です。
+それでもLispのオブジェクトは何らかの形で自らの型を表さねばならず、宣言をもってしても、この間接費のすべてを取り除けるわけではない、という事実は変わりません。
+たいていのLisp処理系はリストと fixnum へのアクセスを最適化しますが、その他のあまり使われないデータ型については代償を払います。
 
-*   Lisp automatically manages storage, and so it must periodically stop and collect the unused storage, or *garbage*.
-In early systems, this was done by periodically sweeping through all of memory, resulting in an appreciable pause.
-Modern systems tend to use incremental garbage-collection techniques, so pauses are shorter and usually unnoticed by the user (although the pauses may still be too long for real-time applications such as controlling a laboratory instrument).
-The problem with automatic garbage collection these days is not that it is slow-in fact, the automatic systems do about as well as handcrafted storage allocation.
-The problem is that they make it convenient for the programmer to generate a lot of garbage in the first place.
-Programmers in conventional languages, who have to clean up their own garbage, tend to be more careful and use static rather than dynamic storage more often.
-If garbage becomes a problem, the Lisp programmer can just adopt these static techniques.
+*   Lispは記憶を自動で管理するので、周期的に止まって使われていない記憶、すなわち*ごみ*を集めねばなりません。
+初期のシステムでは、これはメモリ全体を周期的に掃くことで行われ、感じ取れるほどの停止を生みました。
+現代のシステムは逐次的なごみ集めの技法を使う傾向にあり、停止はより短く、たいてい利用者には気づかれません（もっとも、実験機器の制御のような実時間の応用には、その停止でもなお長すぎるかもしれません）。
+近ごろの自動のごみ集めの問題は、それが遅いことではありません。実際、自動のシステムは手作りの記憶割り当てとほぼ同じくらいうまくやります。
+問題は、そもそもプログラマが大量のごみを作り出すのを、それが手軽にしてしまうことです。
+自分のごみを自分で片づけねばならない従来の言語のプログラマは、より慎重になり、動的な記憶よりも静的な記憶をより多く使う傾向にあります。
+ごみが問題になれば、Lispプログラマはこうした静的な技法を採り入れればよいのです。
 
-*   Lisp systems are big and leave little room for other programs.
-Most Lisp systems are designed to be complete environments, within which the programmer does all program development and execution.
-For this kind of operation, it makes sense to have a large language like Common Lisp with a huge set of tools.
-However, it is becoming more common to use Lisp as just one component in a computing environment that may include UNIX, X Windows, emacs, and other interacting programs.
-In this kind of heterogeneous environment, it would be useful to be able to define and run small Lisp processes that do not include megabytes of unused tools.
-Some recent compilers support this option, but it is not widely available yet.
+*   Lispシステムは大きく、他のプログラムのための余地をほとんど残しません。
+たいていのLispシステムは、その中でプログラマがプログラムの開発と実行をすべて行う、完結した環境となるよう設計されています。
+この種の運用には、膨大な道具立てを持つCommon Lispのような大きな言語が理にかなっています。
+しかし、UNIX、X Windows、emacs、その他たがいにやりとりするプログラムを含みうる計算環境の、一部品としてLispを使うことが一般的になりつつあります。
+この種の異種混在の環境では、使われない道具を何メガバイトも含まない小さなLispのプロセスを定義して走らせられると便利でしょう。
+最近のコンパイラにはこの選択肢を支えるものもありますが、まだ広くは使えません。
 
-*   Lisp is a complicated high-level language, and it can be difficult for the programmer to anticipate the costs of various operations.
-In general, the problem is not that an efficient encoding is impossible but that it is difficult to arrive at that efficient encoding.
-In a language like C, the experienced programmer has a pretty good idea how each statement will compile into assembly language instructions.
-But in Lisp, very similar statements can compile into widely different assembly-level instructions, depending on subtle interactions between the declarations given and the capabilities of the compiler.
-[Page 318](chapter10.md#p318) gives an example where adding a declaration speeds up a trivial function by 40 times.
-Nonexperts do not understand when such declarations are necessary and are frustrated by the seeming inconsistencies.
-With experience, the expert Lisp programmer eventually develops a good "efficiency model," and the need for such declarations becomes obvious.
-Recent compilers such as CMU's Python provide feedback that eases this learning process.
+*   Lispは込み入った高水準言語であり、プログラマがさまざまな操作の費用を見通すのは難しいことがあります。
+一般に、問題は効率のよい書き方が不可能なことではなく、その効率のよい書き方にたどり着くのが難しいことです。
+Cのような言語では、経験を積んだプログラマは各文がどうアセンブリ言語の命令にコンパイルされるか、かなりよく分かっています。
+しかしLispでは、よく似た文どうしが、与えた宣言とコンパイラの能力との微妙な相互作用に応じて、まったく異なるアセンブリ水準の命令にコンパイルされうるのです。
+[318ページ](chapter10.md#p318)には、宣言を1つ加えることで自明な関数が40倍速くなる例があります。
+熟達していない者は、そうした宣言がいつ必要かを理解できず、一見した不整合に苛立ちます。
+経験を積むにつれ、熟練のLispプログラマはやがてよい「効率のモデル」を身につけ、そうした宣言の必要が自明になります。
+CMUのPythonのような最近のコンパイラは、この学びの過程を楽にする反応を返してくれます。
 
-In summary, Lisp makes it possible to write programs in a wide variety of styles, some efficient, some less so.
-The programmer who writes Lisp programs in the same style as C programs will probably find Lisp to be of comparable speed, perhaps slightly slower.
-The programmer who uses some of the more dynamic features of Lisp typically finds that it is much easier to develop a working program.
-Then, if the resulting program is not efficient enough, there will be more time to go back and improve critical sections.
-Deciding which parts of the program use the most resources is called *instrumentation*.
-It is foolhardy to try to improve the efficiency of a program without first checking if the improvement will make a real difference.
+まとめると、Lispはさまざまな流儀でプログラムを書くことを可能にし、効率のよいものもあれば、そうでないものもあります。
+Cのプログラムと同じ流儀でLispのプログラムを書くプログラマは、おそらくLispが同等の速さ、あるいは少し遅い程度だと気づくでしょう。
+Lispのより動的な機能をいくつか使うプログラマは、たいてい、動くプログラムを作るのがはるかに容易だと気づきます。
+そして、できたプログラムが十分に効率的でなければ、戻って肝心な部分を改善する時間がより多く残るのです。
+プログラムのどの部分が最も多くの資源を使うかを見極めることを*計測*と呼びます。
+その改善が本当に違いを生むかをまず確かめずにプログラムの効率を高めようとするのは、無謀です。
 
-One route to efficiency is to use the Lisp prototype as a specification and reimplement that specification in a lower-level language, such as C or C++.
-Some commercial AI vendors are taking this route.
-An alternative is to use Lisp as the language for both the prototype and the final implementation.
-By adding declarations and making minor changes to the original program, it is possible to end up with a Lisp program that is similar in efficiency to a C program.
+効率への1つの道は、Lispの試作を仕様として使い、その仕様をCやC++のようなより低水準の言語で再実装することです。
+一部の商用AIベンダーはこの道を採っています。
+もう1つの手は、試作にも最終的な実装にもLispを使うことです。
+宣言を加え、元のプログラムに小さな変更を施せば、Cのプログラムと効率の近いLispのプログラムに仕上げることができます。
 
-There are four very general and language-independent techniques for speeding up an algorithm:
+アルゴリズムを速くする、きわめて一般的で言語に依らない技法が4つあります。
 
-*   *Caching* the results of computations for later reuse.
+*   計算の結果をあとで再利用するために*キャッシュする*こと。
 
-*   *Compiling* so that less work is done at run time.
+*   実行時の仕事が減るよう*コンパイルする*こと。
 
-*   *Delaying* the computation of partial results that may never be needed.
+*   決して必要にならないかもしれない途中の結果の計算を*遅らせる*こと。
 
-*   *Indexing* a data structure for quicker retrieval.
+*   より速く取り出せるようデータ構造に*索引をつける*こと。
 
-This chapter covers each of the four techniques in order.
-It then addresses the important problem of *instrumentation*.
-The chapter concludes with a case study of the simplify program.
-The techniques outlined here result in a 130-fold speed-up in this program.
+この章は、この4つの技法を順に扱います。
+続いて*計測*という重要な問題に取り組みます。
+章の締めくくりは、simplifyプログラムの事例研究です。
+ここで述べる技法により、このプログラムは130倍速くなります。
 
-[Chapter 10](chapter10.md) concentrates on lower-level "tricks" for improving efficiency further.
+[第10章](chapter10.md)は、効率をさらに高めるための、より低水準の「小技」に専念します。
 
-## 9.1 Caching Results of Previous Computations: Memoization
+## 9.1 過去の計算結果をためる: メモ化
 
-We start with a simple mathematical function to demonstrate the advantages of caching techniques.
-Later we will demonstrate more complex examples.
+キャッシュの技法の利点を示すため、単純な数学の関数から始めます。
+のちにもっと複雑な例を示します。
 
-The Fibonacci sequence is defined as the numbers 1, 1, 2, 3, 5, 8, ... where each number is the sum of the two previous numbers.
-The most straightforward function to compute the nth number in this sequence is as follows:
+フィボナッチ数列は 1, 1, 2, 3, 5, 8, ... という数として定義され、各数は前の2つの数の和です。
+この数列のn番目の数を計算する最も素直な関数は次のとおりです。
 
 ```lisp
 (defun fib (n)
@@ -140,13 +140,13 @@ The most straightforward function to compute the nth number in this sequence is 
    (+ (fib (- n 1)) (fib (- n 2)))))
 ```
 
-The problem with this function is that it computes the same thing over and over again.
-To compute (`fib 5`) means computing (`fib 4`) and (`fib 3`), but (`fib 4`) also requires (`fib 3`), they both require (`fib 2`), and so on.
-There are ways to rewrite the function to do less computation, but wouldn't it be nice to write the function as is, and have it automatically avoid redundant computation?
-Amazingly, there is a way to do just that.
-The idea is to use the function `fib` to build a new function that remembers previously computed results and uses them, rather than recompute them.
-This process is called *memoization*.
-The function `memo` below is a higher-order function that takes a function as input and returns a new function that will compute the same results, but not do the same computation twice.
+この関数の問題は、同じものを何度も繰り返し計算することです。
+(`fib 5`) を計算するとは (`fib 4`) と (`fib 3`) を計算することですが、(`fib 4`) も (`fib 3`) を要し、どちらも (`fib 2`) を要する、という具合です。
+計算を減らすよう関数を書き直す方法もありますが、関数はこのまま書いて、冗長な計算を自動的に避けてくれたらよいとは思いませんか。
+驚いたことに、まさにそれを行う方法があります。
+考えは、関数 `fib` を使って、過去に計算した結果を覚えておき、それを計算し直すのではなく使う新しい関数を組み立てることです。
+この過程を*メモ化*と呼びます。
+以下の関数 `memo` は、関数を入力にとり、同じ結果を計算するが同じ計算を2度は行わない新しい関数を返す高階関数です。
 
 ```lisp
 (defun memo (fn &key (key #'first) (test #'eql) name)
@@ -161,8 +161,8 @@ The function `memo` below is a higher-order function that takes a function as in
                 (setf (gethash k table) (apply fn args))))))))
 ```
 
-The expression (`memo #'fib`) will produce a function that remembers its results between calls, so that, for example, if we apply it to 3 twice, the first call will do the computation of (`fib 3`), but the second will just look up the result in a hash table.
-With `fib` traced, it would look like this:
+式 (`memo #'fib`) は、呼び出しのあいだで結果を覚える関数を生みます。ですからたとえば3に2回適用すると、最初の呼び出しは (`fib 3`) の計算を行いますが、2度目はハッシュ表で結果を引くだけです。
+`fib` を追跡すると、次のようになります。
 
 ```lisp
 > (setf memo-fib (memo #'fib)) => #<CLOSURE -67300731>
@@ -181,10 +181,10 @@ With `fib` traced, it would look like this:
 > (funcall memo-fib 3) = > 3
 ```
 
-The second time we call `memo-fib` with 3 as the argument, the answer is just retrieved rather than recomputed.
-But the problem is that during the computation of (`fib 3`), we still compute (`fib 2`) multiple times.
-It would be better if even the internal, recursive calls were memoized, but they are calls to fib, which is unchanged, not to `memo-fib`.
-We can solve this problem easily enough with the function `memoize`:
+引数3で `memo-fib` を2度目に呼ぶと、答えは計算し直されるのではなく、ただ取り出されます。
+しかし問題は、(`fib 3`) の計算の間に、なお (`fib 2`) を何度も計算することです。
+内部の再帰呼び出しもメモ化されていればよいのですが、それらは変わっていない fib への呼び出しであって、`memo-fib` への呼び出しではありません。
+この問題は関数 `memoize` で十分に簡単に解けます。
 
 ```lisp
 (defun memoize (fn-name &key (key #'first) (test #'eql))
@@ -192,11 +192,11 @@ We can solve this problem easily enough with the function `memoize`:
   (setf (symbol-function fn-name) (memo (symbol-function fn-name))))
 ```
 
-When passed a symbol that names a function, `memoize` changes the global definition of the function to a memo-function.
-Thus, any recursive calls will go first to the memo-function, rather than to the original function.
-This is just what we want.
-In the following, we contrast the memoized and unmemoized versions of `fib`.
-First, a call to (`fib 5`) with `fib` traced:
+関数を名づけるシンボルが渡されると、`memoize` はその関数の大域的な定義をメモ関数に変えます。
+こうして、どの再帰呼び出しも、元の関数ではなく、まずメモ関数に向かいます。
+まさに望んだとおりです。
+以下では、`fib` のメモ化した版としていない版を対比します。
+まず、`fib` を追跡した状態で (`fib 5`) を呼びます。
 
 ```lisp
 > (fib 5) =>
@@ -233,10 +233,10 @@ First, a call to (`fib 5`) with `fib` traced:
 8
 ```
 
-We see that `(fib 5)` and `(fib 4)` are each computed once, but `(fib 3)` is computed twice, `(fib 2)` three times, and `(fib 1)` five times.
-Below we call `(memoize 'fib)` and repeat the calculation.
-This time, each computation is done only once.
-Furthermore, when the computation of `(fib 5)` is repeated, the answer is returned immediately with no intermediate computation, and a further call to `(fib 6)` can make use of the value of `(fib 5)`.
+`(fib 5)` と `(fib 4)` はそれぞれ1回計算されますが、`(fib 3)` は2回、`(fib 2)` は3回、`(fib 1)` は5回計算されるのが分かります。
+以下では `(memoize 'fib)` を呼び、同じ計算を繰り返します。
+今度は、各計算は1回だけ行われます。
+さらに、`(fib 5)` の計算が繰り返されるとき、答えは途中の計算なしに直ちに返され、続く `(fib 6)` の呼び出しは `(fib 5)` の値を使えます。
 
 ```lisp
 > (memoize 'fib) => #<CLOSURE 76626607>
@@ -261,19 +261,19 @@ Furthermore, when the computation of `(fib 5)` is repeated, the answer is return
 13
 ```
 
-Understanding why this works requires a clear understanding of the distinction between functions and function names.
-The original `(defun fib ...)` form does two things: builds a function and stores it as the `symbol-function` value of `fib`.
-Within that function there are two references to `fib`; these are compiled (or interpreted) as instructions to fetch the `symbol-function` of `fib` and apply it to the argument.
+なぜこれが働くのかを理解するには、関数と関数名の区別を明確に理解する必要があります。
+元の `(defun fib ...)` は2つのことをします。関数を組み立て、それを `fib` の `symbol-function` の値として格納するのです。
+その関数の中には `fib` への参照が2つあります。これらは、`fib` の `symbol-function` を取り出して引数に適用する命令としてコンパイル（あるいは解釈）されます。
 
-What `memoize` does is fetch the original function and transform it with `memo` to a function that, when called, will first look in the table to see if the answer is already known.
-If not, the original function is called, and a new value is placed in the table.
-The trick is that `memoize` takes this new function and makes it the `symbol-function` value of the function name.
-This means that all the references in the original function will now go to the new function, and the table will be properly checked on each recursive call.
-One further complication to `memo:` the function `gethash` returns both the value found in the table and an indicator of whether the key was present or not.
-We use `multiple-value-bind` to capture both values, so that we can distinguish the case when `nil` is the value of the function stored in the table from the case where there is no stored value.
+`memoize` がすることは、元の関数を取り出し、`memo` でそれを、呼ばれるとまず表を見て答えがすでに分かっているかを調べる関数に変えることです。
+分かっていなければ、元の関数が呼ばれ、新しい値が表に置かれます。
+仕掛けは、`memoize` がこの新しい関数を取り、それを関数名の `symbol-function` の値にすることです。
+つまり、元の関数の中のすべての参照が今や新しい関数に向かい、再帰呼び出しのたびに表が正しく調べられるということです。
+`memo` にもう1つ込み入った点があります。関数 `gethash` は、表で見つけた値と、キーがあったかどうかの印の両方を返します。
+`multiple-value-bind` で両方の値を捕まえ、表に格納された関数の値が `nil` である場合と、格納された値がない場合とを区別できるようにします。
 
-If you make a change to a memoized function, you need to recompile the original definition, and then redo the call to memoize.
-In developing your program, rather than saying `(memoize 'f)`, it might be easier to wrap appropriate definitions in a `memoize` form as follows:
+メモ化した関数に変更を加えたら、元の定義を再コンパイルし、それから memoize の呼び出しをやり直す必要があります。
+プログラムを開発する際は、`(memoize 'f)` と書くより、次のように適切な定義を `memoize` の形で包むほうが楽かもしれません。
 
 ```lisp
 (memoize
@@ -281,7 +281,7 @@ In developing your program, rather than saying `(memoize 'f)`, it might be easie
   )
 ```
 
-Or define a macro that combines `defun` and `memoize`:
+あるいは `defun` と `memoize` を組み合わせるマクロを定義します。
 
 ```lisp
 (defmacro defun-memo (fn args &body body)
@@ -291,11 +291,11 @@ Or define a macro that combines `defun` and `memoize`:
 (defun-memo f (x) ...)
 ```
 
-Both of these approaches rely on the fact that `defun` returns the name of the function defined.
+この2つの方式はどちらも、`defun` が定義された関数の名前を返すという事実に頼っています。
 
 | []() |             |            |          |                |
 |------|-------------|------------|----------|----------------|
-| *n*  | `(fib` *n*) | unmemoized | memoized | memoized up to |
+| *n*  | `(fib` *n*) | メモ化なし | メモ化あり | メモ化済みの上限 |
 | 25   | 121393      | 1.1        | .010     | 0              |
 | 26   | 196418      | 1.8        | .001     | 25             |
 | 27   | 317811      | 2.9        | .001     | 26             |
@@ -314,39 +314,39 @@ Both of these approaches rely on the fact that `defun` returns the name of the f
 | 1000 | 7.0e208     | -          | .001     | 1000           |
 | 1000 | 7.0e208     | -          | .876     | 0              |
 
-Now we show a table giving the values of `(fib` *n*) for certain *n*, and the time in seconds to compute the value, before and after `(memoize 'fib)`.
-For larger values of *n*, approximations are shown in the table, although `fib` actually returns an exact integer.
-With the unmemoized version, I stopped at *n*  =  34, because the times were getting too long.
-For the memoized version, even *n*  =  1000 took under a second.
+次に、特定の *n* についての `(fib` *n*) の値と、`(memoize 'fib)` の前後でその値を計算する秒数を示す表を掲げます。
+より大きな *n* の値については、`fib` は実際には厳密な整数を返しますが、表には近似値を示します。
+メモ化していない版では、時間が長くなりすぎたので *n* = 34 で止めました。
+メモ化した版では、*n* = 1000 でも1秒未満で済みました。
 
-Note there are three entries for (`fib 1000`).
-The first entry represents the incremental computation when the table contains the memoized values up to 500, the second entry shows the time for a table lookup when (`fib 1000`) is already computed, and the third entry is the time for a complete computation starting with an empty table.
+(`fib 1000`) の項目が3つあることに注意してください。
+1つ目の項目は、表が500までのメモ化された値を含むときの差分の計算を表し、2つ目は (`fib 1000`) がすでに計算済みのときの表引きの時間を、3つ目は空の表から始める完全な計算の時間を示します。
 
-It should be noted that there are two general approaches to discussing the efficiency of an algorithm.
-One is to time the algorithm on representative inputs, as we did in this table.
-The other is to analyze the *asymptotic complexity* of the algorithm.
-For the `fib` problem, an asymptotic analysis considers how long it takes to compute `(fib *n*)` as *n* approaches infinity.
-The notation *O*(*f*(*n*)) is used to describe the complexity.
-For example, the memoized version `fib` is an *O*(*n*) algorithm because the computation time is bounded by some constant times *n*, for any value of *n*.
-The unmemoized version, it turns out, is *O*(1.7*<sup>n</sup>*), meaning computing `fib` of `n+1` can take up to 1.7 times as long as `fib` of *n*.
-In simpler terms, the memoized version has *linear* complexity, while the unmemoized version has *exponential* complexity.
-[Exercise 9.4](chapter9.md#p4655) ([page 308](chapter9.md#p308)) describes where the 1.7 comes from, and gives a tighter bound on the complexity.
+アルゴリズムの効率を論じるには2つの一般的な方式があることに留意すべきです。
+1つは、この表でやったように、代表的な入力でアルゴリズムの時間を測ることです。
+もう1つは、アルゴリズムの*漸近的な計算量*を分析することです。
+`fib` の問題では、漸近的な分析は *n* が無限に近づくにつれて `(fib *n*)` の計算にどれだけかかるかを考えます。
+計算量を記述するのに *O*(*f*(*n*)) という記法を使います。
+たとえばメモ化した版の `fib` は *O*(*n*) のアルゴリズムです。どんな *n* の値についても、計算時間がある定数と *n* の積で抑えられるからです。
+メモ化していない版は *O*(1.7*<sup>n</sup>*) であることが分かります。つまり `n+1` の `fib` の計算は *n* の `fib` の最大1.7倍の時間がかかりうるということです。
+より平たく言えば、メモ化した版は*線形*の計算量を、メモ化していない版は*指数的*な計算量を持ちます。
+[練習問題9.4](chapter9.md#p4655)（[308ページ](chapter9.md#p308)）で、1.7 がどこから来るかを述べ、計算量のより厳しい上限を与えます。
 
-The version of `memo` presented above is inflexible in several ways.
-First, it only works for functions of one argument.
-Second, it only returns a stored value for arguments that are `eql`, because that is how hash tables work by default.
-For some applications we want to retrieve the stored value for arguments that are `equal`.
-Third, there is no way to delete entries from the hash table.
-In many applications there are times when it would be good to clear the hash table, either because it has grown too large or because we have finished a set of related problems and are moving on to a new problem.
+上で示した `memo` は、いくつかの点で融通が利きません。
+第一に、引数が1つの関数にしか働きません。
+第二に、`eql` である引数に対してのみ格納された値を返します。ハッシュ表が既定でそう働くからです。
+応用によっては、`equal` である引数に対して格納された値を取り出したいこともあります。
+第三に、ハッシュ表から項目を削除する手立てがありません。
+多くの応用では、ハッシュ表が大きくなりすぎたか、関連する一連の問題を終えて新しい問題へ移るかで、表を空にできるとよい場面があります。
 
-The versions of `memo` and `memoize` below handle these three problems.
-They are compatible with the previous version but add three new keywords for the extensions.
-The `name` keyword stores the hash table on the property list of that name, so it can be accessed by `clear-memoize`.
-The `test` keyword tells what kind of hash table to create: `eq, eql, or equal`.
-Finally, the `key` keyword tells which arguments of the function to index under.
-The default is the first argument (to be compatible with the previous version), but any combination of the arguments can be used.
-If you want to use all the arguments, specify `identity` as the key.
-Note that if the key is a list of arguments, then you will have to use `equal` hash tables.
+以下の版の `memo` と `memoize` は、この3つの問題を扱います。
+以前の版と互換ですが、拡張のための新しいキーワードを3つ加えています。
+`name` キーワードはハッシュ表をその名前の属性リストに格納するので、`clear-memoize` からアクセスできます。
+`test` キーワードは、どんな種類のハッシュ表を作るか — `eq`、`eql`、`equal` のいずれか — を指定します。
+最後に、`key` キーワードは、関数のどの引数を索引の対象とするかを指定します。
+既定は（以前の版と互換にするため）第1引数ですが、引数のどんな組み合わせも使えます。
+すべての引数を使いたいなら、キーとして `identity` を指定します。
+キーが引数の並びである場合は、`equal` のハッシュ表を使わねばならないことに注意してください。
 
 ```lisp
 (defun memo (fn &key (key #'first) (test #'eql) name)
@@ -377,19 +377,19 @@ Note that if the key is a list of arguments, then you will have to use `equal` h
     (when table (clrhash table))))
 ```
 
-## 9.2 Compiling One Language into Another
+## 9.2 ある言語を別の言語にコンパイルする
 
-In [chapter 2](chapter2.md) we defined a new language-the language of grammar rules-which was processed by an interpreter designed especially for that language.
-An *interpreter* is a program that looks at some data structure representing a "program" or sequence of rules of some sort and interprets or evaluates those rules.
-This is in contrast to a *compiler*, which translates some set of rules in one language into a program in another language.
+[第2章](chapter2.md)では新しい言語 — 文法規則の言語 — を定義し、それをその言語専用に設計したインタプリタで処理しました。
+*インタプリタ*とは、何らかの「プログラム」あるいは何らかの規則の並びを表すデータ構造を見て、その規則を解釈あるいは評価するプログラムのことです。
+これは、ある言語の規則の組を別の言語のプログラムに翻訳する*コンパイラ*とは対照的です。
 
-The function `generate` was an interpreter for the "language" defined by the set of grammar rules.
-Interpreting these rules is straightforward, but the process is somewhat inefficient, in that generate must continually search through the `*grammar*` to find the appropriate rule, then count the length of the right-hand side, and so on.
+関数 `generate` は、文法規則の組が定める「言語」のインタプリタでした。
+これらの規則を解釈するのは素直ですが、その過程はいくらか非効率です。generate は適切な規則を見つけるために `*grammar*` を絶えず探し、次に右辺の長さを数える、という具合だからです。
 
-A compiler for this rule-language would take each rule and translate it into a function.
-These functions could then call each other with no need to search through the `*grammar*`.
-We implement this approach with the function `compile-rule`.
-It makes use of the auxiliary functions `one-of` and `rule-lhs` and `rule-rhs` from [page 40](chapter2.md#p40), repeated here:
+この規則の言語のコンパイラなら、各規則をとって関数に翻訳するでしょう。
+そうすればこれらの関数は、`*grammar*` を探す必要なしにたがいを呼び合えます。
+この方式を関数 `compile-rule` で実装します。
+これは [40ページ](chapter2.md#p40) の補助関数 `one-of`、`rule-lhs`、`rule-rhs` を使います。ここに再掲します。
 
 ```lisp
 (defun rule-lhs (rule)
@@ -409,12 +409,12 @@ It makes use of the auxiliary functions `one-of` and `rule-lhs` and `rule-rhs` f
   (elt seq (random (length seq))))
 ```
 
-The function `compile-rule` turns a rule into a function definition by building up Lisp code that implements all the actions that generate would take in interpreting the rule.
-There are three cases.
-If every element of the right-hand side is an atom, then the rule is a lexical rule, which compiles into a call to `one-of` to pick a word at random.
-If there is only one element of the right-hand side, then `build-code` is called to generate code for it.
-Usually, this will be a call to append to build up a list.
-Finally, if there are several elements in the right-hand side, they are each turned into code by `build-code`; are given a number by `build-cases`; and then a `case` statement is constructed to choose one of the cases.
+関数 `compile-rule` は、generate が規則を解釈する際に取るはずのすべての動作を実装するLispコードを組み立てることで、規則を関数定義に変えます。
+3つの場合があります。
+右辺のすべての要素がアトムなら、その規則は語彙規則であり、語を無作為に選ぶ `one-of` の呼び出しにコンパイルされます。
+右辺の要素が1つだけなら、そのためのコードを生成するのに `build-code` が呼ばれます。
+たいていこれは、リストを組み立てる append の呼び出しになります。
+最後に、右辺に要素が複数あれば、それぞれが `build-code` でコードに変えられ、`build-cases` で番号を与えられ、そして場合の1つを選ぶ `case` 文が組み立てられます。
 
 ```lisp
 (defun compile-rule (rule)
@@ -444,18 +444,18 @@ Finally, if there are several elements in the right-hand side, they are each tur
   (and (consp x) (null (cdr x))))
 ```
 
-The Lisp code built by `compile-rule` must be compiled or interpreted to make it available to the Lisp system.
-We can do that with one of the following forms.
-Normally we would want to call `compile`, but during debugging it may be easier not to.
+`compile-rule` が組み立てたLispコードは、Lispシステムで使えるようにするためにコンパイルあるいは解釈せねばなりません。
+それは次の形のいずれかで行えます。
+通常は `compile` を呼びたいところですが、デバッグ中は呼ばないほうが楽なこともあります。
 
 ```lisp
 (dolist (rule *grammar*) (eval (compile-rule rule)))
 (dolist (rule *grammar*) (compile (eval (compile-rule rule))))
 ```
 
-One frequent way to use compilation is to define a macro that expands into the code generated by the compiler.
-That way, we just type in calls to the macro and don't have to worry about making sure all the latest rules have been compiled.
-We might implement this as follows:
+コンパイルのよくある使い方の1つは、コンパイラが生成するコードに展開されるマクロを定義することです。
+そうすれば、マクロの呼び出しを打ち込むだけで、最新の規則がすべてコンパイル済みかを気にせずに済みます。
+これは次のように実装できるでしょう。
 
 ```lisp
 (defmacro defrule (&rest rule)
@@ -469,12 +469,12 @@ We might implement this as follows:
 (defrule Verb -> hit took saw liked)
 ```
 
-Actually, the choice of using one big list of rules (like `*grammar*`) versus using individual macros to define rules is independent of the choice of compiler versus interpreter.
-We could just as easily define defrule simply to push the rule onto `*grammar*`.
-Macros like `defrule` are useful when you want to define rules in different places, perhaps in several separate files.
-The `defparameter` method is appropriate when all the rules can be defined in one place.
+実のところ、（`*grammar*` のような）1つの大きな規則の並びを使うか、個々のマクロで規則を定義するかの選択は、コンパイラかインタプリタかの選択とは独立しています。
+defrule を単に規則を `*grammar*` に push するものとして定義するのも同じくらい簡単です。
+`defrule` のようなマクロは、規則を別々の場所、おそらくいくつかの別々のファイルで定義したいときに役立ちます。
+`defparameter` の方法は、すべての規則を一箇所で定義できるときに適しています。
 
-We can see the Lisp code generated by `compile-rule` in two ways: by passing it a rule directly:
+`compile-rule` が生成するLispコードは、2通りの方法で見られます。1つは規則を直に渡すことです。
 
 ```lisp
 > (compile-rule '(Sentence -> (NP VP)))
@@ -485,8 +485,8 @@ We can see the Lisp code generated by `compile-rule` in two ways: by passing it 
    (ONE-OF '(MAN BALL WOMAN TABLE)))
 ```
 
-or by macroexpanding a `defrule` expression.
-The compiler was designed to produce the same code we were writing in our first approach to the generation problem (see [page 35](chapter2.md#p35)).
+もう1つは `defrule` の式をマクロ展開することです。
+このコンパイラは、生成の問題への最初の方式で私たちが書いていたのと同じコードを生むよう設計されています（[35ページ](chapter2.md#p35)を参照）。
 
 ```lisp
 > (macroexpand '(defrule Adj* -> () Adj (Adj Adj*)))
@@ -497,17 +497,17 @@ The compiler was designed to produce the same code we were writing in our first 
    (2 (APPEND (ADJ) (ADJ*)))))
 ```
 
-Interpreters are usually easier to write than compilers, although in this case, even the compiler was not too difficult.
-Interpreters are also inherently more flexible than compilers, because they put off making decisions until the last possible moment.
-For example, our compiler considers the right-hand side of a rule to be a list of words only if every element is an atom.
-In all other cases, the elements are treated as nonterminals.
-This could cause problems if we extended the definition of `Noun` to include the compound noun "chow chow":
+インタプリタはたいていコンパイラより書きやすいものですが、この場合はコンパイラもさほど難しくありませんでした。
+インタプリタはまた、決定を可能なかぎり最後の瞬間まで先延ばしにするので、本質的にコンパイラより融通が利きます。
+たとえば私たちのコンパイラは、規則の右辺を、すべての要素がアトムのときにのみ語の並びと見なします。
+それ以外のすべての場合、要素は非終端記号として扱われます。
+`Noun` の定義を拡張して複合名詞「chow chow」を含めると、これは問題を起こしうるでしょう。
 
 ```lisp
 (defrule Noun -> man ball woman table (chow chow))
 ```
 
-The rule would expand into the following code:
+この規則は次のコードに展開されます。
 
 ```lisp
 (DEFUN NOUN ()
@@ -519,17 +519,17 @@ The rule would expand into the following code:
    (4 (APPEND (CHOW) (CHOW)))))
 ```
 
-The problem is that `man` and `ball` and all the others are suddenly treated as functions, not as literal words.
-So we would get a run-time error notifying us of undefined functions.
-The equivalent rule would cause no trouble for the interpreter, which waits until it actually needs to generate a symbol to decide if it is a word or a nonterminal.
-Thus, the semantics of rules are different for the interpreter and the compiler, and we as program implementors have to be very careful about how we specify the actual meaning of a rule.
-In fact, this was probably a bug in the interpreter version, since it effectively prohibits words like "noun" and "sentence" from occurring as words if they are also the names of categories.
-One possible resolution of the conflict is to say that an element of a right-hand side represents a word if it is an atom, and a list of categories if it is a list.
-If we did indeed settle on that convention, then we could modify both the interpreter and the compiler to comply with the convention.
-Another possibility would be to represent words as strings, and categories as symbols.
+問題は、`man` や `ball` その他すべてが、そのままの語ではなく突如として関数として扱われることです。
+ですから未定義の関数を知らせる実行時エラーが出るでしょう。
+等価な規則はインタプリタには何の問題も起こしません。インタプリタは、実際にシンボルを生成する必要が生じるまで、それが語か非終端記号かの判断を待つからです。
+つまり規則の意味論はインタプリタとコンパイラとで異なり、プログラムを実装する私たちは、規則の実際の意味をどう規定するかについて、よくよく注意せねばなりません。
+実のところ、これはおそらくインタプリタ版のバグでした。「noun」や「sentence」のような語が、それがカテゴリの名前でもある場合、語として現れることを事実上禁じてしまうからです。
+この衝突の1つの解決は、右辺の要素はアトムなら語を、リストならカテゴリの並びを表す、と定めることです。
+実際その流儀に決めるなら、インタプリタもコンパイラも、その流儀に従うよう変えられます。
+もう1つの可能性は、語を文字列として、カテゴリをシンボルとして表すことです。
 
-The flip side of losing run-time flexibility is gaining compile-time diagnostics.
-For example, it turns out that on the Common Lisp system I am currently using, I get some useful error messages when I try to compile the buggy version of `Noun:`
+実行時の柔軟さを失うことの裏面は、コンパイル時の診断を得ることです。
+たとえば、私が今使っているCommon Lispのシステムでは、バグのある版の `Noun` をコンパイルしようとすると、いくつか役立つエラーメッセージが得られます。
 
 ```lisp
 > (defrule Noun -> man ball woman table (chow chow))
@@ -542,12 +542,12 @@ The following functions were referenced but don't seem defined:
 NOUN
 ```
 
-Another problem with the compilation scheme outlined here is the possibility of *name clashes*.
-Under the interpretation scheme, the only names used were the function generate and the variable `*grammar*`.
-With compilation, every left-hand side of a rule becomes the name of a function.
-The grammar writer has to make sure he or she is not using the name of an existing Lisp function, and hence redefining it.
-Even worse, if more than one grammar is being developed at the same time, they cannot have any functions in common.
-If they do, the user will have to recompile with every switch from one grammar to another.
+ここで述べたコンパイルの仕組みのもう1つの問題は、*名前の衝突*の可能性です。
+解釈の仕組みでは、使われる名前は関数 generate と変数 `*grammar*` だけでした。
+コンパイルでは、規則の左辺のすべてが関数の名前になります。
+文法を書く人は、既存のLisp関数の名前を使って、それを再定義してしまっていないことを確かめねばなりません。
+さらに悪いことに、複数の文法が同時に開発されている場合、それらは共通の関数を持てません。
+持ってしまえば、利用者は文法を切り替えるたびに再コンパイルせねばなりません。
 This may make it difficult to compare grammars.
 The best away around this problem is to use the Common Lisp idea of *packages*, but for small exercises name clashes can be avoided easily enough, so we will not explore packages until [section 24.1](chapter24.md#s0010).
 
