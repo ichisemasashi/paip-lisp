@@ -377,6 +377,39 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | freeze | 「凍結」 | 練習問題12.22。述語名 `freeze` は原文のまま |
 | tracing event | トレース事象 | `call` `exit` `redo` `fail` は記号として原文のまま |
 
+### 第13章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| object-oriented programming | オブジェクト指向プログラミング | |
+| imperative programming | 命令型プログラミング | |
+| procedural / algorithmic programming | 手続き型／アルゴリズム的プログラミング | |
+| functional programming | 関数型プログラミング | |
+| declarative | 宣言的 | |
+| rule-based | 規則にもとづく | ELIZA、STUDENT |
+| information hiding | 情報隠蔽 | |
+| encapsulate | 包み込む | 名詞形が要るときは「カプセル化」ではなく文で言い換える |
+| class / instance | クラス／インスタンス | |
+| instance variable / class variable | インスタンス変数／クラス変数 | |
+| slot | スロット | CLOSの用語。第11章と同じ |
+| message | メッセージ | |
+| method | メソッド | |
+| multimethod | 多重メソッド | 2つ以上の引数で特殊化する |
+| generic function | 総称関数 | 第10章と同じ |
+| inheritance / multiple inheritance | 継承／多重継承 | |
+| superclass / subclass | 上位クラス／下位クラス | |
+| delegation | 委譲 | 構成要素のメソッドへ制御を渡すこと |
+| specialize | 特殊化する | メソッドを特定のクラスに絞ること |
+| dispatch | 振り分け | |
+| method combination | メソッド結合 | Flavors由来 |
+| mix-in | ミックスイン | Steve'sのアイスクリームの比喩を訳文でも残した |
+| flavor | フレーバー | Flavorsシステムの「型」。初出で原語を併記 |
+| coroutine | コルーチン | Simula |
+| garbage collection | ごみ集め | |
+| metaobject protocol | メタオブジェクトプロトコル | |
+| correctness / robustness | 正しさ／頑健さ | Meyerの5つの品質 |
+| extendability / reusability / compatibility | 拡張しやすさ／再利用しやすさ／つながりやすさ | 同上 |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -458,8 +491,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter12.md` | 完了 |
-| `chapter13.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter13.md` | 完了 |
+| `chapter14.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
