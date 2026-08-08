@@ -1,61 +1,61 @@
-# Chapter 11
-## Logic Programming
+# 第11章
+## 論理プログラミング
 
-> A language that doesn't affect the way you think about programming is not worth knowing.
+> プログラミングについての考え方を変えない言語は、知るに値しない。
 
 > -Alan Perlis
 
-Lisp is the major language for AI work, but it is by no means the only one.
-The other strong contender is Prolog, whose name derives from "programming in logic."<a id="tfn11-1"></a><sup>[1](#fn11-1)</sup>
-The idea behind logic programming is that the programmer should state the relationships that describe a problem and its solution.
-These relationships act as constraints on the algorithms that can solve the problem, but the system itself, rather than the programmer, is responsible for the details of the algorithm.
-The tension between the "programming" and "logic" will be covered in [chapter 14](chapter14.md), but for now it is safe to say that Prolog is an approximation to the ideal goal of logic programming.
-Prolog has arrived at a comfortable niche between a traditional programming language and a logical specification language.
-It relies on three important ideas:
+LispはAIの仕事の主要な言語ですが、決して唯一のものではありません。
+もう1つの有力な候補がPrologで、その名は「programming in logic（論理によるプログラミング）」に由来します。<a id="tfn11-1"></a><sup>[1](#fn11-1)</sup>
+論理プログラミングの背後にある考えは、プログラマは問題とその解を記述する関係を述べるべきだ、というものです。
+これらの関係は、問題を解けるアルゴリズムへの制約として働きますが、アルゴリズムの細部はプログラマではなくシステム自身が受け持ちます。
+「プログラミング」と「論理」のあいだの緊張は [第14章](chapter14.md) で扱いますが、今のところ、Prologは論理プログラミングの理想の目標への近似だと言っておけば無難でしょう。
+Prologは、伝統的なプログラミング言語と論理的な仕様記述言語のあいだの、心地よい居場所にたどり着いています。
+3つの重要な考えに立脚しています。
 
-* Prolog encourages the use of a single *uniform data base.*
-Good compilers provide efficient access to this data base, reducing the need for vectors, hash tables, property lists, and other data structures that the Lisp programmer must deal with in detail.
-Because it is based on the idea of a data base, Prolog is *relational,* while Lisp (and most languages) are *functional.* In Prolog we would represent a fact like "the population of San Francisco is 750,000" as a relation.
-In Lisp, we would be inclined to write a function, `population,` which takes a city as input and returns a number.
-Relations are more flexible; they can be used not only to find the population of San Francisco but also, say, to find the cities with populations over 500,000.
+* Prologは、単一の*一様なデータベース*の使用を促す。
+よいコンパイラはこのデータベースへの効率的なアクセスを提供し、Lispプログラマが細かく扱わねばならないベクタ・ハッシュ表・属性リストその他のデータ構造の必要を減らします。
+データベースという考えに基づいているので、Prologは*関係的*であり、一方Lisp（とたいていの言語）は*関数的*です。Prologでは「サンフランシスコの人口は750,000である」のような事実を関係として表します。
+Lispでは、都市を入力にとって数を返す関数 `population` を書きたくなるでしょう。
+関係のほうが融通が利きます。サンフランシスコの人口を求めるだけでなく、たとえば人口が500,000を超える都市を求めるのにも使えるのです。
 
-* Prolog provides *logic variables* instead of "normal" variables.
-A logic variable is bound by *unification* rather than by assignment.
-Once bound, a logic variable can never change.
-Thus, they are more like the variables of mathematics.
-The existence of logic variables and unification allow the logic programmer to state equations that constrain the problem (as in mathematics), without having to state an order of evaluation (as with assignment statements).
+* Prologは「普通の」変数の代わりに*論理変数*を提供する。
+論理変数は、代入ではなく*単一化*によって束縛される。
+いったん束縛されると、論理変数は決して変わらない。
+ですからこれらは、数学の変数により近いのです。
+論理変数と単一化があることで、論理プログラマは（代入文のように）評価の順序を述べることなく、（数学のように）問題を制約する等式を述べられます。
 
-* Prolog provides *automatic backtracking.*
-In Lisp each function call returns a single value (unless the programmer makes special arrangements to have it return multiple values, or a list of values).
-In Prolog, each query leads to a search for relations in the data base that satisfy the query.
-If there are several, they are considered one at a time.
-If a query involves multiple relations, as in "what city has a population over 500,000 and is a state capital?," Prolog will go through the population relation to find a city with a population over 500,000.
-For each one it finds, it then checks the `capital` relation to see if the city is a capital.
-If it is, Prolog prints the city; otherwise it *backtracks,* trying to find another city in the `population` relation.
-So Prolog frees the programmer from worrying about both how data is stored and how it is searched.
-For some problems, the naive automatic search will be too inefficient, and the programmer will have to restate the problem.
-But the ideal is that Prolog programs state constraints on the solution, without spelling out in detail how the solutions are achieved.
+* Prologは*自動バックトラック*を提供する。
+Lispでは、各関数呼び出しは（多値や値の並びを返すようプログラマが特別に手配しないかぎり）1つの値を返します。
+Prologでは、各問い合わせは、その問い合わせを満たす関係をデータベースの中から探すことにつながります。
+複数あれば、一度に1つずつ検討されます。
+「人口が500,000を超え、かつ州都である都市はどれか」のように問い合わせが複数の関係にまたがる場合、Prologは population の関係をたどって人口が500,000を超える都市を探します。
+見つけたそれぞれについて、次に `capital` の関係を調べ、その都市が州都かどうかを見ます。
+州都なら、Prologはその都市を表示します。そうでなければ*バックトラック*し、`population` の関係の中で別の都市を探そうとします。
+ですからPrologは、データがどう格納され、どう探索されるかの両方をプログラマが気にする必要から解放します。
+問題によっては、素朴な自動の探索は非効率すぎ、プログラマは問題を述べ直さねばならないでしょう。
+しかし理想は、Prologのプログラムが、解がどう達成されるかを細かく綴らずに、解への制約を述べることです。
 
-This chapter serves two purposes: it alerts the reader to the possibility of writing certain programs in Prolog rather than Lisp, and it presents implementations of the three important Prolog ideas, so that they may be used (independently or together) within Lisp programs.
-Prolog represents an interesting, different way of looking at the programming process.
-For that reason it is worth knowing.
-In subsequent chapters we will see several useful applications of the Prolog approach.
+この章は2つの目的を果たします。ある種のプログラムをLispではなくPrologで書ける可能性を読者に気づかせること、そして3つの重要なPrologの考えの実装を示し、それらがLispのプログラムの中で（独立にでも一緒にでも）使えるようにすることです。
+Prologは、プログラミングという営みを見る、興味深い別のやり方を表しています。
+そのために知る値打ちがあります。
+以降の章では、Prologの方式の役立つ応用をいくつか見ます。
 
-## 11.1 Idea 1: A Uniform Data Base
+## 11.1 着想1: 一様なデータベース
 
-The first important Prolog idea should be familiar to readers of this book: manipulating a stored data base of assertions.
-In Prolog the assertions are called *clauses,* and they can be divided into two types: *facts,* which state a relationship that holds between some objects, and *rules,* which are used to state contingent facts.
-Here are representations of two facts about the population of San Francisco and the capital of California.
-The relations are `population` and `capital,` and the objects that participate in these relations are `SF, 750000`, `Sacramento,` and `CA`:
+最初の重要なPrologの考えは、本書の読者にはなじみがあるはずです。格納された表明のデータベースを操作することです。
+Prologでは表明は*節*と呼ばれ、2つの型に分けられます。いくつかのオブジェクトのあいだに成り立つ関係を述べる*事実*と、条件つきの事実を述べるのに使う*規則*です。
+サンフランシスコの人口と、カリフォルニアの州都についての2つの事実の表現を示します。
+関係は `population` と `capital` で、これらの関係に参加するオブジェクトは `SF`、`750000`、`Sacramento`、`CA` です。
 
 ```lisp
 (population SF 750000)
 (capital Sacramento CA)
 ```
 
-We are using Lisp syntax, because we want a Prolog interpreter that can be embedded in Lisp.
-The actual Prolog notation would be `population(sf,750000)`.
-Here are some facts pertaining to the `likes` relation:
+Lispに埋め込めるPrologインタプリタが欲しいので、Lispの構文を使っています。
+実際のPrologの記法なら `population(sf,750000)` になります。
+`likes` の関係に関わる事実をいくつか示します。
 
 ```lisp
 (likes Kim Robin)
@@ -64,10 +64,10 @@ Here are some facts pertaining to the `likes` relation:
 (likes Robin cats)
 ```
 
-These facts could be interpreted as meaning that Kim likes Robin, Sandy likes both Lee and Kim, and Robin likes cats.
-We need some way of telling Lisp that these are to be interpreted as Prolog facts, not a Lisp function call.
-We will use the macro `<-` to mark facts.
-Think of this as an assignment arrow which adds a fact to the data base:
+これらの事実は、KimはRobinを好み、SandyはLeeとKimの両方を好み、Robinは猫を好む、という意味に解釈できます。
+これらがLispの関数呼び出しではなくPrologの事実として解釈されるべきだと、Lispに伝える手立てが要ります。
+事実を印すのにマクロ `<-` を使います。
+これを、データベースに事実を加える代入の矢印だと考えてください。
 
 ```lisp
 (<- (likes Kim Robin))
@@ -76,82 +76,82 @@ Think of this as an assignment arrow which adds a fact to the data base:
 (<- (likes Robin cats))
 ```
 
-One of the major differences between Prolog and Lisp hinges on the difference between relations and functions.
-In Lisp, we would define a function `likes`, so that (`likes 'Sandy`) would return the list (`Lee Kim`).
-If we wanted to access the information the other way, we would define another function, say, `likers-of`, so that (`likers-of 'Lee`) returns (`Sandy`).
-In Prolog, we have a single `likes` relation instead of multiple functions.
-This single relation can be used as if it were multiple functions by posing different queries.
-For example, the query (`likes Sandy ?who`) succeeds with `?who` bound to `Lee or Kim`, and the query (`likes ?who Lee`) succeeds with `?who` bound to `Sandy.`
+PrologとLispの大きな違いの1つは、関係と関数の違いに拠っています。
+Lispでは関数 `likes` を定義し、(`likes 'Sandy`) が並び (`Lee Kim`) を返すようにするでしょう。
+逆向きに情報にアクセスしたいなら、別の関数 — たとえば `likers-of` — を定義し、(`likers-of 'Lee`) が (`Sandy`) を返すようにするでしょう。
+Prologでは、複数の関数の代わりに単一の `likes` 関係を持ちます。
+この単一の関係は、異なる問い合わせを立てることで、あたかも複数の関数であるかのように使えます。
+たとえば問い合わせ (`likes Sandy ?who`) は `?who` が `Lee` か `Kim` に束縛されて成功し、問い合わせ (`likes ?who Lee`) は `?who` が `Sandy` に束縛されて成功します。
 
-The second type of clause in a Prolog data base is the *rule.* Rules state contingent facts.
-For example, we can represent the rule that Sandy likes anyone who likes cats as follows:
+Prologのデータベースにおける2つ目の型の節が*規則*です。規則は条件つきの事実を述べます。
+たとえば、Sandyは猫を好む者なら誰でも好む、という規則を次のように表せます。
 
 ```lisp
 (<- (likes Sandy ?x) (likes ?x cats))
 ```
 
-This can be read in two ways.
-Viewed as a logical assertion, it is read, "For any x, Sandy likes x if x likes cats." This is a *declarative* interpretation.
-Viewed as a piece of a Prolog program, it is read, "If you ever want to show that Sandy likes some x, one way to do it is to show that x likes cats." This is a *procedural* interpretation.
-It is called a *backward-chaining* interpretation, because one reasons backward from the goal (Sandy likes x) to the premises (x likes cats).
-The symbol `<-` is appropriate for both interpretations: it is an arrow indicating logical implication, and it points backwards to indicate backward chaining.
+これは2通りに読めます。
+論理的な表明と見ると、「任意の x について、x が猫を好むなら Sandy は x を好む」と読めます。これは*宣言的*な解釈です。
+Prologプログラムの一片と見ると、「Sandy がある x を好むことを示したくなったら、その1つのやり方は x が猫を好むことを示すことである」と読めます。これは*手続き的*な解釈です。
+これは*後ろ向き連鎖*の解釈と呼ばれます。目標（Sandy は x を好む）から前提（x は猫を好む）へ後ろ向きに推論するからです。
+記号 `<-` はどちらの解釈にもふさわしいものです。論理的な含意を示す矢印であり、後ろ向き連鎖を示すために後ろを指しています。
 
-It is possible to give more than one procedural interpretation to a declarative form.
-(We did that in [chapter 1](chapter1.md), where grammar rules were used to generate both strings of words and parse trees.)
-The rule above could have been interpreted procedurally as "If you ever find out that some `x` likes cats, then conclude that Sandy likes `x`."
-This would be *forward chaining:* reasoning from a premise to a conclusion.
-It turns out that Prolog does backward chaining exclusively.
-Many expert systems use forward chaining exclusively, and some systems use a mixture of the two.
+1つの宣言的な形に、複数の手続き的な解釈を与えることが可能です。
+（[第1章](chapter1.md)でそれを行いました。文法規則が語の並びと構文木の両方を生成するのに使われたのです。）
+上の規則は、手続き的に「ある `x` が猫を好むと分かったら、Sandy は `x` を好むと結論せよ」と解釈することもできました。
+これは*前向き連鎖* — 前提から結論へ推論すること — にあたるでしょう。
+Prologは後ろ向き連鎖だけを行うことが分かっています。
+多くのエキスパートシステムは前向き連鎖だけを使い、両方を混ぜて使うシステムもあります。
 
-The leftmost expression in a clause is called the *head*, and the remaining ones are called the *body.* In this view, a fact is just a rule that has no body; that is, a fact is true no matter what.
-In general, then, the form of a clause is:
+節の一番左の式を*頭部*と呼び、残りを*本体*と呼びます。この見方では、事実とは本体を持たない規則にすぎません。つまり、事実は何があろうと真なのです。
+では一般に、節の形は次のとおりです。
 
 `(<-` *head body*...)
 
-A clause asserts that the head is true only if all the goals in the body are true.
-For example, the following clause says that Kim likes anyone who likes both Lee and Kim:
+節は、本体のすべての目標が真である場合にのみ頭部が真である、と表明します。
+たとえば次の節は、Kim は Lee と Kim の両方を好む者なら誰でも好む、と述べています。
 
 ```lisp
 (<- (likes Kim ?x) (likes ?x Lee) (likes ?x Kim))
 ```
 
-This can be read as:
+これは次のように読めます。
 
-*For any* x, *deduce that* `Kim likes x`
+*任意の* x について、`Kim は x を好む` *と演繹せよ*
 
-*if it can be proved that* `x likes Lee` *and* x `likes Kim.`
+*もし* `x は Lee を好む` *かつ* x `は Kim を好む` *ことが証明できれば。*
 
-## 11.2 Idea 2: Unification of Logic Variables
+## 11.2 着想2: 論理変数の単一化
 
-Unification is a straightforward extension of the idea of pattern matching.
-The pattern-matching functions we have seen so far have always matched a pattern (an expression containing variables) against a constant expression (one with no variables).
-In unification, two patterns, each of which can contain variables, are matched against each other.
-Here's an example of the difference between pattern matching and unification:
+単一化は、パターン照合という考えの素直な拡張です。
+ここまで見てきたパターン照合の関数は、常にパターン（変数を含む式）を定数の式（変数を含まないもの）に照合してきました。
+単一化では、それぞれが変数を含みうる2つのパターンが、たがいに照合されます。
+パターン照合と単一化の違いの例を示します。
 
 ```lisp
 > (pat-match '(?x + ?y) '(2 + 1)) => ((?Y . 1) (?X . 2))
 > (unify '(?x + 1) '(2 + ?y)) => ((?Y . 1) (?X . 2))
 ```
 
-Within the unification framework, variables (such as `?x` and `?y` above) are called *logic variables.* Like normal variables, a logic variable can be assigned a value, or it can be unbound.
-The difference is that a logic variable can never be altered.
-Once it is assigned a value, it keeps that value.
-Any attempt to unify it with a different value leads to failure.
-It is possible to unify a variable with the same value more than once, just as it was possible to do a pattern match of `(?x + ?x`) with (`2 + 2`).
+単一化の枠組みでは、（上の `?x` や `?y` のような）変数は*論理変数*と呼ばれます。普通の変数と同じく、論理変数には値を割り当てられますし、未束縛のこともあります。
+違いは、論理変数は決して書き換えられないことです。
+いったん値が割り当てられると、その値を保ち続けます。
+それを別の値と単一化しようとすると、失敗に終わります。
+`(?x + ?x`) を (`2 + 2`) にパターン照合できたのと同じように、変数を同じ値と2回以上単一化することはできます。
 
-The difference between simple pattern matching and unification is that unification allows two variables to be matched against each other.
-The two variables remain unbound, but they become equivalent.
-If either variable is subsequently bound to a value, then both variables adopt that value.
-The following example equates the variables `?x` and `?y` by binding `?x` to `?y`:
+単純なパターン照合と単一化の違いは、単一化が2つの変数をたがいに照合させることを許す点です。
+2つの変数は未束縛のままですが、等価になります。
+どちらかの変数がのちに値に束縛されると、両方の変数がその値をとります。
+次の例は、`?x` を `?y` に束縛することで、変数 `?x` と `?y` を等しくします。
 
 ```lisp
 > (unify '(f ?x) '(f ?y)) => ((?X . ?Y))
 ```
 
-Unification can be used to do some sophisticated reasoning.
-For example, if we have two equations, *a* + *a* = 0 and *x* + *y* = *y,* and if we know that these two equations unify, then we can conclude that *a*, *x,* and *y* are all 0.
-The version of `unify` we will define shows this result by binding `?y` to `0`, `?x` to `?y`, and `?a` to `?x`.
-We will also define the function `unifier`, which shows the structure that results from unifying two structures.
+単一化は、いくぶん洗練された推論を行うのに使えます。
+たとえば *a* + *a* = 0 と *x* + *y* = *y* という2つの等式があり、この2つの等式が単一化されると分かれば、*a*、*x*、*y* がすべて0だと結論できます。
+私たちが定義する `unify` の版は、`?y` を `0` に、`?x` を `?y` に、`?a` を `?x` に束縛することで、この結果を示します。
+2つの構造を単一化した結果の構造を示す関数 `unifier` も定義します。
 
 ```
 > (unify '(?a + ?a = 0) '(?x + ?y = ?y)) =>
@@ -160,16 +160,16 @@ We will also define the function `unifier`, which shows the structure that resul
 > (unifier '(?a + ?a = 0) '(?x + ?y = ?y)) => (0 + 0 = 0)
 ```
 
-To avoid getting carried away by the power of unification, it is a good idea to take stock of exactly what unification provides.
-It *does* provide a way of stating that variables are equal to other variables or expressions.
-It does *not* provide a way of automatically solving equations or applying constraints other than equality.
-The following example makes it clear that unification treats the symbol + only as an uninterpreted atom, not as the addition operator:
+単一化の力に浮かれてしまわないよう、単一化が正確に何を提供するのかを見きわめておくのがよい考えです。
+変数が他の変数や式に等しいと述べる手立ては、確かに*提供します*。
+等式を自動的に解いたり、等しさ以外の制約を適用したりする手立ては、*提供しません*。
+次の例は、単一化が記号 + を加算の演算子としてではなく、解釈されないアトムとしてのみ扱うことを明らかにします。
 
 ```lisp
 > (unifier '(?a + ?a = 2) '(?x + ?y = ?y)) => (2 + 2 = 2)
 ```
 
-Before developing the code for `unify`, we repeat here the code taken from the pattern-matching utility ([chapter 6](chapter6.md)):
+`unify` のコードを作る前に、パターン照合の道具（[第6章](chapter6.md)）から取ったコードをここに再掲します。
 
 ```lisp
 (defconstant fail nil "Indicates pat-match failure")
@@ -203,8 +203,8 @@ Before developing the code for `unify`, we repeat here the code taken from the p
        (t fail))))
 ```
 
-The `unify` function follows; it is identical to `pat-match` (as defined on page 180) except for the addition of the line marked `***`.
-The function `unify-variable` also follows `match-variable` closely:
+`unify` 関数を次に示します。`***` を付けた行が加わっていることを除けば、（180ページで定義した）`pat-match` と同一です。
+関数 `unify-variable` も `match-variable` によく倣っています。
 
 ```lisp
 (defun unify (x y &optional (bindings no-bindings))
@@ -225,8 +225,8 @@ The function `unify-variable` also follows `match-variable` closely:
   (extend-bindings var x bindings)))
 ```
 
-Unfortunately, this definition is not quite right.
-It handles simple examples:
+あいにく、この定義は正確ではありません。
+単純な例は扱えます。
 
 ```lisp
 > (unify '(?x + 1) '(2 + ?y)) => ((?Y . 1) (?X . 2))
@@ -234,7 +234,7 @@ It handles simple examples:
 > (unify '(?x ?x) '(?y ?y)) => ((?Y . ?Y) (?X . ?Y))
 ```
 
-but there are several pathological cases that it can't contend with:
+しかし、対処できない病的な場合がいくつかあります。
 
 ```lisp
 > (unify '(?x ?x ?x) '(?y ?y ?y))
@@ -243,9 +243,9 @@ The regular push-down list has overflowed.
 While in the function GET-BINDING <= UNIFY-VARIABLE <= UNIFY
 ```
 
-The problem here is that once `?y` gets bound to itself, the call to `unify` inside `unify-variable` leads to an infinite loop.
-But matching `?y` against itself must always succeed, so we can move the equality test in `unify` before the variable test.
-This assumes that equal variables are `eql`, a valid assumption for variables implemented as symbols (but be careful if you ever decide to implement variables some other way).
+ここでの問題は、`?y` がいったん自分自身に束縛されると、`unify-variable` の中の `unify` の呼び出しが無限の循環に至ることです。
+しかし `?y` を自分自身に照合するのは常に成功せねばならないので、`unify` の等値の判定を変数の判定の前に移せます。
+これは、等しい変数が `eql` であると仮定しています。これはシンボルとして実装された変数には正しい仮定です（ただし、変数を何か別のやり方で実装することにしたときは気をつけてください）。
 
 ```lisp
 (defun unify (x y &optional (bindings no-bindings))
@@ -260,7 +260,7 @@ This assumes that equal variables are `eql`, a valid assumption for variables im
    (t fail)))
 ```
 
-Here are some test cases:
+試験例をいくつか示します。
 
 ```lisp
 > (unify '(?x ?x) '(?y ?y)) => ((?X . ?Y))
@@ -272,11 +272,11 @@ The regular push-down list has overflowed.
 While in the function GET-BINDING <= UNIFY-VARIABLE <= UNIFY
 ```
 
-We have pushed off the problem but not solved it.
-Allowing both `(?Y . ?X`) and (`?X . ?Y`) in the same binding list is as bad as allowing (`?Y . ?Y`).
-To avoid the problem, the policy should be never to deal with bound variables, but rather with their values, as specified in the binding list.
-The function `unify-variable` fails to implement this policy.
-It does have a check that gets the binding for var when it is a bound variable, but it should also have a check that gets the value of `x`, when `x` is a bound variable:
+問題を先送りしただけで、解いてはいません。
+同じ束縛の並びに (`?Y . ?X`) と (`?X . ?Y`) の両方を許すのは、(`?Y . ?Y`) を許すのと同じくらいまずいことです。
+この問題を避けるには、束縛された変数そのものではなく、束縛の並びに指定されたその値を扱う、という方針にすべきです。
+関数 `unify-variable` は、この方針を実装しそこねています。
+var が束縛された変数であるときにその束縛を得る検査は持っていますが、`x` が束縛された変数であるときに `x` の値を得る検査も持つべきです。
 
 ```lisp
 (defun unify-variable (var x bindings)
@@ -288,30 +288,30 @@ It does have a check that gets the binding for var when it is a bound variable, 
   (t (extend-bindings var x bindings))))
 ```
 
-Here are some more test cases:
+試験例をもう少し示します。
 
 ```lisp
 > (unify '(?x ?y) '(?y ?x)) => ((?X . ?Y))
 > (unify '(?x ?y a) '(?y ?x ?x)) => ((?Y . A) (?X . ?Y))
 ```
 
-It seems the problem is solved.
-Now let's try a new problem:
+問題は解けたようです。
+では新しい問題を試してみましょう。
 
 ```lisp
 > (unify '?x '(f ?x)) => ((?X F ?X))
 ```
 
-Here `((?X F ?X))` really means `((?X . ((F ?X))))`, so `?X` is bound to (`F ?X`).
-This represents a circular, infinite unification.
-Some versions of Prolog, notably Prolog II ([Giannesini et al.
-1986](bibliography.md#bb0460)), provide an interpretation for such structures, but it is tricky to define the semantics of infinite structures.
+ここで `((?X F ?X))` は実のところ `((?X . ((F ?X))))` を意味するので、`?X` は (`F ?X`) に束縛されます。
+これは循環する無限の単一化を表します。
+Prologのいくつかの版、とくにProlog II（[Giannesini ら
+1986](bibliography.md#bb0460)）は、こうした構造への解釈を提供しますが、無限の構造の意味論を定義するのは厄介です。
 
-The easiest way to deal with such infinite structures is just to ban them.
-This ban can be realized by modifying the unifier so that it fails whenever there is an attempt to unify a variable with a structure containing that variable.
-This is known in unification circles as the *occurs check.* In practice the problem rarely shows up, and since it can add a lot of computational complexity, most Prolog systems have ignored the occurs check.
-This means that these systems can potentially produce unsound answers.
-In the final version of `unify` following, a variable is provided to allow the user to turn occurs checking on or off.
+こうした無限の構造を扱う最も簡単な方法は、単にそれを禁じることです。
+この禁止は、ある変数を、その変数を含む構造と単一化しようとするときはいつでも失敗するよう、単一化器を変えることで実現できます。
+これは単一化の界隈では*出現検査*として知られています。実際にはこの問題が現れることはめったになく、多くの計算量を加えうるので、たいていのPrologシステムは出現検査を無視してきました。
+つまり、これらのシステムは健全でない答えを生みうるということです。
+次の `unify` の最終版では、利用者が出現検査を入切りできるよう変数を用意しています。
 
 ```lisp
 (defparameter *occurs-check* t "Should we do the occurs check?")
@@ -346,11 +346,11 @@ In the final version of `unify` following, a variable is provided to allow the u
      (t nil)))
 ```
 
-Now we consider how `unify` will be used.
-In particular, one thing we want is a function for substituting a binding list into an expression.
-We originally chose association lists as the implementation of bindings because of the availability of the function `sublis`.
-Ironically, `sublis` won't work any more, because variables can be bound to other variables, which are in turn bound to expressions.
-The `function subst-bindings` acts like `sublis`, except that it substitutes recursive bindings.
+次に `unify` がどう使われるかを考えます。
+とくに、欲しいものの1つは、束縛の並びを式に差し込む関数です。
+もともと束縛の実装に連想リストを選んだのは、関数 `sublis` が使えるからでした。
+皮肉なことに、`sublis` はもう働きません。変数が他の変数に束縛され、その変数がさらに式に束縛されうるからです。
+関数 `subst-bindings` は `sublis` のように働きますが、再帰的な束縛を差し込む点が違います。
 
 ```lisp
 (defun subst-bindings (bindings x)
@@ -366,7 +366,7 @@ The `function subst-bindings` acts like `sublis`, except that it substitutes rec
             x))))
 ```
 
-Now let's try `unify` on some examples:
+では `unify` をいくつかの例で試してみましょう。
 
 ```lisp
 > (unify '(?x ?y a) '(?y ?x ?x)) => ((?Y . A) (?X . ?Y))
@@ -376,8 +376,8 @@ Now let's try `unify` on some examples:
 > (unify 'a 'a) => ((T . T))
 ```
 
-Finally, the function `unifier` calls `unify` and substitutes the resulting binding list into one of the arguments.
-The choice of `x` is arbitrary; an equal result would come from substituting the binding list into `y`.
+最後に、関数 `unifier` は `unify` を呼び、その結果の束縛の並びを引数の1つに差し込みます。
+`x` を選ぶのは任意です。束縛の並びを `y` に差し込んでも等しい結果になります。
 
 ```lisp
 (defun unifier (x y)
@@ -385,7 +385,7 @@ The choice of `x` is arbitrary; an equal result would come from substituting the
  (subst-bindings (unify x y) x))
 ```
 
-Here are some examples of `unifier`:
+`unifier` の例をいくつか示します。
 
 ```lisp
 > (unifier '(?x ?y a) '(?y ?x ?x)) => (A A A)
@@ -394,7 +394,7 @@ Here are some examples of `unifier`:
 ((?A * 5 ^ 2) + (4 * 5) + 3)
 ```
 
-When `*occurs-check*` is false, we get the following answers:
+`*occurs-check*` が偽のとき、次の答えが得られます。
 
 ```lisp
 > (unify '?x '(f ?x)) => ((?X F ?X))
@@ -402,20 +402,20 @@ When `*occurs-check*` is false, we get the following answers:
 > (unify '(?x ?y ?z) '((?y ?z) (?x ?z) (?x ?y))) => ((?Z ?X ?Y) (?Y ?X ?Z) (?X ?Y ?Z))
 ```
 
-### Programming with Prolog
+### Prologでプログラムを書く
 
-The amazing thing about Prolog clauses is that they can be used to express relations that we would normally think of as "programs," not "data." For example, we can define the `member` relation, which holds between an item and a list that contains that item.
-More precisely, an item is a member of a list if it is either the first element of the list or a member of the rest of the list.
-This definition can be translated into Prolog almost verbatim:
+Prologの節の驚くべき点は、ふつうは「データ」ではなく「プログラム」と考える関係を表すのに使えることです。たとえば、ある要素と、その要素を含むリストのあいだに成り立つ `member` の関係を定義できます。
+より正確には、ある要素がリストの member であるのは、それがリストの最初の要素であるか、リストの残りの member であるかのいずれかのときです。
+この定義は、ほぼそのままPrologに翻訳できます。
 
 ```lisp
 (<- (member ?item (?item . ?rest)))
 (<- (member ?item (?x . ?rest)) (member ?item ?rest))
 ```
 
-Of course, we can write a similar definition in Lisp.
-The most visible difference is that Prolog allows us to put patterns in the head of a clause, so we don't need recognizers like `consp` or accessors like `first` and `rest`.
-Otherwise, the Lisp definition is similar:<a id="tfn11-2"></a><sup>[2](#fn11-2)</sup>
+もちろん、似た定義をLispでも書けます。
+最も目立つ違いは、Prologが節の頭部にパターンを置くことを許すので、`consp` のような判別子や `first`、`rest` のようなアクセス関数が要らないことです。
+それ以外は、Lispの定義も似ています。<a id="tfn11-2"></a><sup>[2](#fn11-2)</sup>
 
 ```lisp
 (defun lisp-member (item list)
@@ -424,7 +424,7 @@ Otherwise, the Lisp definition is similar:<a id="tfn11-2"></a><sup>[2](#fn11-2)<
     (lisp-member item (rest list)))))
 ```
 
-If we wrote the Prolog code without taking advantage of the pattern feature, it would look more like the Lisp version:
+パターンの機能を使わずにPrologのコードを書くと、Lispの版により近く見えます。
 
 ```lisp
 (<- (member ?item ?list)
@@ -434,7 +434,7 @@ If we wrote the Prolog code without taking advantage of the pattern feature, it 
   (member ?item ?rest))
 ```
 
-If we define or in Prolog, we would write a version that is clearly just a syntactic variant of the Lisp version.
+or をPrologで定義すると、明らかにLispの版の構文的な変種にすぎない版を書くことになります。
 
 ```lisp
 (<- (member ?item ?list)
@@ -443,9 +443,9 @@ If we define or in Prolog, we would write a version that is clearly just a synta
   (member ?item ?rest)))
 ```
 
-Let's see how the Prolog version of `member` works.
-Imagine that we have a Prolog interpreter that can be given a query using the macro `?-`, and that the definition of `member` has been entered.
-Then we would see:
+Prolog版の `member` がどう働くか見てみましょう。
+マクロ `?-` を使って問い合わせを与えられるPrologインタプリタがあり、`member` の定義が入力済みだと想像してください。
+すると、次のようになります。
 
 ```lisp
 > (?- (member 2 (1 2 3)))
@@ -455,9 +455,9 @@ Yes;
 Yes;
 ```
 
-The answer to the first query is "yes" because 2 is a member of the rest of the list.
-In the second query the answer is "yes" twice, because 2 appears in the list twice.
-This is a little surprising to Lisp programmers, but there still seems to be a fairly close correspondence between Prolog's and Lisp's `member.` However, there are things that the Prolog `member` can do that Lisp cannot:
+最初の問い合わせの答えが「yes」なのは、2がリストの残りの member だからです。
+2つ目の問い合わせで答えが「yes」を2回になるのは、2がリストに2回現れるからです。
+これはLispプログラマには少し意外ですが、それでもPrologとLispの `member` のあいだにはかなり近い対応があるように見えます。しかし、Prologの `member` にできてLispにできないこともあります。
 
 ```lisp
 > (?- (member ?x (1 2 3)))
@@ -466,60 +466,60 @@ This is a little surprising to Lisp programmers, but there still seems to be a f
 ?X = 3;
 ```
 
-Here `member` is used not as a predicate but as a generator of elements in a list.
-While Lisp functions always map from a specified input (or inputs) to a specified output, Prolog relations can be used in several ways.
-For `member,` we see that the first argument, `?x`, can be either an input or an output, depending on the goal that is specified.
-This power to use a single specification as a function going in several different directions is a very flexible feature of Prolog.
-(Unfortunately, while it works very well for simple relations like `member,` in practice it does not work well for large programs.
-It is very difficult to, say, design a compiler and automatically have it work as a disassembler as well.)
+ここで `member` は述語としてではなく、リストの要素の生成器として使われています。
+Lispの関数が常に、指定された入力から指定された出力への対応づけを行うのに対し、Prologの関係はいくつものやり方で使えます。
+`member` では、第1引数 `?x` が、指定された目標に応じて入力にも出力にもなりうるのが分かります。
+1つの仕様を、いくつもの異なる向きに進む関数として使えるこの力は、Prologのきわめて融通の利く特徴です。
+（あいにく、`member` のような単純な関係にはとてもうまく働きますが、実際には大きなプログラムではうまく働きません。
+たとえばコンパイラを設計して、それを自動的に逆アセンブラとしても働かせるのは、きわめて困難です。）
 
-Now we turn to the implementation of the Prolog interpreter, as summarized in [figure 11.1](#f0010).
-The first implementation choice is the representation of rules and facts.
-We will build a single uniform data base of clauses, without distinguishing rules from facts.
-The simplest representation of clauses is as a cons cell holding the head and the body.
-For facts, the body will be empty.
+では [図11.1](#f0010) にまとめた、Prologインタプリタの実装に取りかかります。
+最初の実装上の選択は、規則と事実の表現です。
+規則と事実を区別せず、節の単一の一様なデータベースを組み立てます。
+節の最も単純な表現は、頭部と本体を保持するコンスセルとするものです。
+事実の場合、本体は空になります。
 
 | Function                  | Description                                                 |
 |---------------------------|-------------------------------------------------------------|
 |                           | **Top-Level Macros**                                        |
-| `<-`                      | Add a clause to the database.                               |
-| `?-`                      | Prove a query and print answer(s).                          |
+| `<-`                      | 節をデータベースに加える。                                  |
+| `?-`                      | 問い合わせを証明し、答えを表示する。                        |
 |                           | **Special Variables**                                       |
-| `*db-predicates*`         | A list of all predicates.                                   |
-| `*occurs-check*`          | Should we check for circular unifications?                  |
+| `*db-predicates*`         | すべての述語の並び。                                        |
+| `*occurs-check*`          | 循環する単一化を調べるべきか。                              |
 |                           | **Data Types**                                              |
-| `clause`                  | Consists of a head and a body.                              |
-| `variable`                | A symbol starting with a `?`.                               |
+| `clause`                  | 頭部と本体からなる。                                        |
+| `variable`                | `?` で始まるシンボル。                                      |
 |                           | **Major Functions**                                         |
-| `add-clause`              | Add a clause to the data base.                              |
-| `prove`                   | Return a list of possible solutions to goal.                |
-| `prove-all`               | Return a list of solutions to the conjunction of goals.     |
-| `top-level-prove`         | Prove the goals, and print variables readably.              |
+| `add-clause`              | 節をデータベースに加える。                                  |
+| `prove`                   | 目標へのありうる解の並びを返す。                            |
+| `prove-all`               | 目標の連言への解の並びを返す。                              |
+| `top-level-prove`         | 目標を証明し、変数を読みやすく表示する。                    |
 |                           | **Auxiliary Functions**                                     |
-| `get-clauses`             | Find all the clauses for a predicate.                       |
-| `predicate`               | Pick out the predicate from a relation.                     |
-| `clear-db`                | Remove all clauses (for all predicates) from the data base. |
-| `clear-predicate`         | Remove the clauses for a single predicate.                  |
-| `rename-variables`        | Replace all variables in `x` with new ones.                 |
-| `unique-find-anywhere-if` | Find all unique leaves satisfying predicate.                |
-| `show-prolog-solutions`   | Print the variables in each of the solutions.               |
-| `show-prolog-vars`        | Print each variable with its binding.                       |
-| `variables-in`            | Return a list of all the variables in an expression.        |
+| `get-clauses`             | ある述語のすべての節を見つける。                            |
+| `predicate`               | 関係から述語を取り出す。                                    |
+| `clear-db`                | （すべての述語の）すべての節をデータベースから取り除く。    |
+| `clear-predicate`         | 単一の述語の節を取り除く。                                  |
+| `rename-variables`        | `x` のすべての変数を新しいものに置き換える。                |
+| `unique-find-anywhere-if` | 述語を満たす一意な葉をすべて見つける。                      |
+| `show-prolog-solutions`   | 各解の中の変数を表示する。                                  |
+| `show-prolog-vars`        | 各変数をその束縛とともに表示する。                          |
+| `variables-in`            | 式の中のすべての変数の並びを返す。                          |
 |                           | **Previously Defined Constants**                            |
-| `fail`                    | An indication that unification has failed.                  |
-| `no-bindings`             | A successful unification with no variables.                 |
+| `fail`                    | 単一化が失敗したことの印。                                  |
+| `no-bindings`             | 変数のない、成功した単一化。                                |
 |                           | **Previously Defined Functions**                            |
-| `unify`                   | Return bindings that unify two expressions (section 11.2).  |
-| `unify-variable`          | Unify a variable against an expression.                     |
-| `occurs-check`            | See if a particular variable occurs inside an expression.   |
-| `subst-bindings`          | Substitute bindings into an expression.                     |
-| `get-binding`             | Get the `(var . val)` binding for a variable.               |
-| `lookup`                  | Get the value for a variable.                               |
-| `extend-bindings`         | Add a new variable/value pair to a binding list.            |
-| `variable-p`              | Is the argument a variable?                                 |
-| `reuse-cons`              | Like `cons`, except will reuse an old value if possible.    |
+| `unify`                   | 2つの式を単一化する束縛を返す（11.2節）。                   |
+| `unify-variable`          | 変数を式に単一化する。                                      |
+| `occurs-check`            | 特定の変数が式の中に出現するかを見る。                      |
+| `subst-bindings`          | 束縛を式に差し込む。                                        |
+| `get-binding`             | 変数の `(var . val)` の束縛を得る。                         |
+| `lookup`                  | 変数の値を得る。                                            |
+| `extend-bindings`         | 束縛の並びに新しい変数と値の対を加える。                    |
+| `variable-p`              | 引数は変数か。                                              |
+| `reuse-cons`              | `cons` と同様だが、可能なら古い値を再利用する。             |
 
-Figure 11.1: Glossary for the Prolog Interpreter
+図11.1: Prologインタプリタの用語一覧
 
 ```lisp
 ;; Clauses are represented as (head . body) cons cells
@@ -527,11 +527,11 @@ Figure 11.1: Glossary for the Prolog Interpreter
 (defun clause-body (clause) (rest clause))
 ```
 
-The next question is how to index the clauses.
-Recall the procedural interpretation of a clause: when we want to prove the head, we can do it by proving the body.
-This suggests that clauses should be indexed in terms of their heads.
-Each clause will be stored on the property list of the predicate of the head of the clause.
-Since the data base is now distributed across the property list of various symbols, we represent the entire data base as a list of symbols stored as the value of `*db-predicates*`.
+次の問題は、節をどう索引づけるかです。
+節の手続き的な解釈を思い出してください。頭部を証明したいとき、本体を証明することでそれを行えます。
+これは、節をその頭部に基づいて索引づけるべきだと示唆します。
+各節は、節の頭部の述語の属性リストに格納されます。
+データベースがさまざまなシンボルの属性リストに散らばることになるので、データベース全体を、`*db-predicates*` の値として格納したシンボルの並びとして表します。
 
 ```lisp
 ;; Clauses are stored on the predicate's plist
@@ -542,10 +542,10 @@ Since the data base is now distributed across the property list of various symbo
   "A list of all predicates stored in the database.")
 ```
 
-Now we need a way of adding a new clause.
-The work is split up into the macro `<-`, which provides the user interface, and a function, `add-clause`, that does the work.
-It is worth defining a macro to add clauses because in effect we are defining a new language: Prolog-In-Lisp.
-This language has only two syntactic constructs: the `<-` macro to add clauses, and the `?-` macro to make queries.
+次に、新しい節を加える手立てが要ります。
+仕事は、利用者インタフェースを提供するマクロ `<-` と、実際の仕事をする関数 `add-clause` に分けられます。
+節を加えるマクロを定義する値打ちがあります。事実上、新しい言語 — Lisp上のProlog — を定義しているからです。
+この言語には構文構造が2つしかありません。節を加えるマクロ `<-` と、問い合わせを行うマクロ `?-` です。
 
 ```lisp
 (defmacro <- (&rest clause)
@@ -563,7 +563,7 @@ This language has only two syntactic constructs: the `<-` macro to add clauses, 
     pred))
 ```
 
-Now all we need is a way to remove clauses, and the data base will be complete.
+あとは節を取り除く手立てさえあれば、データベースは完成です。
 
 ```lisp
 (defun clear-db ()
@@ -575,14 +575,14 @@ Now all we need is a way to remove clauses, and the data base will be complete.
   (setf (get predicate 'clauses) nil))
 ```
 
-A data base is useless without a way of getting data out, as well as putting it in.
-The function prove will be used to prove that a given goal either matches a fact that is in the data base directly or can be derived from the rules.
-To prove a goal, first find all the candidate clauses for that goal.
-For each candidate, check if the goal unifies with the head of the clause.
-If it does, try to prove all the goals in the body of the clause.
-For facts, there will be no goals in the body, so success will be immediate.
-For rules, the goals in the body need to be proved one at a time, making sure that bindings from the previous step are maintained.
-The implementation is straightforward:
+データベースは、データを入れる手立てだけでなく取り出す手立てもなければ役に立ちません。
+関数 prove は、与えた目標が、データベースにある事実に直に合致するか、規則から導けるかのいずれかであることを証明するのに使います。
+目標を証明するには、まずその目標のための候補となる節をすべて見つけます。
+各候補について、目標が節の頭部と単一化するかを調べます。
+単一化するなら、その節の本体のすべての目標を証明しようとします。
+事実の場合、本体に目標がないので、成功は即座です。
+規則の場合、本体の目標を1つずつ、前の段階の束縛が保たれることを確かめながら証明する必要があります。
+実装は素直です。
 
 ```lisp
 (defun prove (goal bindings)
@@ -602,11 +602,11 @@ The implementation is straightforward:
                    (prove (first goals) bindings)))))
 ```
 
-The tricky part is that we need some way of distinguishing a variable `?x` in one clause from another variable `?x` in another clause.
-Otherwise, a variable used in two different clauses in the course of a proof would have to take on the same value in each clause, which would be a mistake.
-Just as arguments to a function can have different values in different recursive calls to the function, so the variables in a clause are allowed to take on different values in different recursive uses.
-The easiest way to keep variables distinct is just to rename all variables in each clause before it is used.
-The function `rename-variables` does this:<a id="tfn11-3"></a><sup>[3](#fn11-3)</sup>
+厄介なのは、ある節の変数 `?x` を、別の節の別の変数 `?x` と区別する手立てが要ることです。
+そうでなければ、証明の過程で2つの異なる節に使われた変数が各節で同じ値を取らねばならなくなり、それは誤りとなるでしょう。
+関数への引数が、その関数への異なる再帰呼び出しで異なる値を持ちうるのとちょうど同じように、節の変数も、異なる再帰的な使用で異なる値を取ることが許されます。
+変数を別々に保つ最も簡単な方法は、各節が使われる前に、その中のすべての変数の名前を付け替えることです。
+関数 `rename-variables` がこれを行います。<a id="tfn11-3"></a><sup>[3](#fn11-3)</sup>
 
 ```lisp
 (defun rename-variables (x)
@@ -616,9 +616,9 @@ The function `rename-variables` does this:<a id="tfn11-3"></a><sup>[3](#fn11-3)<
           x))
 ```
 
-`Rename-variables` makes use of `gensym`, a function that generates a new symbol each time it is called.
-The symbol is not interned in any package, which means that there is no danger of a programmer typing a symbol of the same name.
-The predicate `variables-in` and its auxiliary function are defined here:
+`rename-variables` は、呼ばれるたびに新しいシンボルを生成する関数 `gensym` を使います。
+そのシンボルはどのパッケージにもインターンされないので、プログラマが同じ名前のシンボルを打ち込む危険がありません。
+述語 `variables-in` とその補助関数をここに定義します。
 
 ```lisp
 (defun variables-in (exp)
@@ -640,16 +640,16 @@ The predicate `variables-in` and its auxiliary function are defined here:
                                  found-so-far))))
 ```
 
-Finally, we need a nice interface to the proving functions.
-We will use `?-` as a macro to introduce a query.
-The query might as well allow a conjunction of goals, so `?-` will call `prove-all`.
-Together, `<-` and `?-` define the complete syntax of our Prolog-In-Lisp language.
+最後に、証明の関数への気持ちのよいインタフェースが要ります。
+問い合わせを導入するマクロとして `?-` を使います。
+問い合わせは目標の連言も許してよいので、`?-` は `prove-all` を呼びます。
+`<-` と `?-` が合わさって、私たちのLisp上のPrologという言語の完全な構文を定義します。
 
 ```lisp
 (defmacro ?- (&rest goals) '(prove-all ',goals no-bindings))
 ```
 
-Now we can enter all the clauses given in the prior example:
+これで、先の例で与えたすべての節を入力できます。
 
 ```lisp
 (<- (likes Kim Robin))
@@ -661,7 +661,7 @@ Now we can enter all the clauses given in the prior example:
 (<- (likes ?x ?x))
 ```
 
-To ask whom Sandy likes, we would use:
+Sandy が誰を好むかを尋ねるには、次を使います。
 
 ```lisp
 > (?- (likes Sandy ?who))
@@ -673,16 +673,16 @@ To ask whom Sandy likes, we would use:
   (?WHO . SANDY) (?X2867 . SANDY)))
 ```
 
-Perhaps surprisingly, there are six answers.
-The first two answers are Lee and Kim, because of the facts.
-The next three stem from the clause that Sandy likes everyone who likes cats.
-First, Robin is an answer because of the fact that Robin likes cats.
-To see that Robin is the answer, we have to unravel the bindings: `?who` is bound to `?x2856`, which is in turn bound to Robin.
+意外かもしれませんが、答えは6つあります。
+最初の2つの答えは、事実のおかげで Lee と Kim です。
+次の3つは、Sandy は猫を好む者なら誰でも好む、という節から来ています。
+まず、Robin が猫を好むという事実のおかげで Robin が答えになります。
+Robin が答えだと分かるには、束縛をほどく必要があります。`?who` は `?x2856` に束縛され、それがさらに Robin に束縛されています。
 
-Now we're in for some surprises: Sandy is listed, because of the following reasoning: (1) Sandy likes anyone/thing who likes cats, (2) cats like cats because everyone likes  themselves, (3) therefore Sandy likes cats, and (4) therefore Sandy likes Sandy.
-Cats is an answer because of step (2), and finally, Sandy is an answer again, because of the clause about liking oneself.
-Notice that the result of the query is a list of solutions, where each solution corresponds to a different way of proving the query true.
-Sandy appears twice because there are two different ways of showing that Sandy likes Sandy.
+ここで少し驚かされます。Sandy が挙がるのは、次の推論のためです。(1) Sandy は猫を好む者・ものなら誰・何でも好む、(2) 猫は猫を好む（誰もが自分自身を好むから）、(3) ゆえに Sandy は猫を好む、(4) ゆえに Sandy は Sandy を好む。
+cats が答えになるのは段階(2)のためで、最後に Sandy がもう一度答えになるのは、自分自身を好むことについての節のためです。
+問い合わせの結果が解の並びであり、各解が問い合わせを真と証明する異なるやり方に対応していることに注目してください。
+Sandy が2回現れるのは、Sandy が Sandy を好むことを示すやり方が2通りあるからです。
 The order in which solutions appear is determined by the order of the search.
 Prolog searches for solutions in a top-down, left-to-right fashion.
 The clauses are searched from the top down, so the first clauses entered are the first ones tried.
