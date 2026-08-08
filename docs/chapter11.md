@@ -1089,23 +1089,23 @@ Prologがとても得意とするものの例を示します。論理パズル�
 
 8.  クールは黄色い家で吸われている。
 
-9.  Milk is drunk in the middle house.
+9.  真ん中の家では牛乳が飲まれている。
 
-10.  The Norwegian lives in the first house on the left.
+10.  ノルウェー人は左端の家に住んでいる。
 
-11.  The man who smokes Chesterfields lives next to the man with the fox.
+11.  チェスターフィールドを吸う人は、キツネを飼う人の隣に住んでいる。
 
-12.  Kools are smoked in the house next to the house with the horse.
+12.  クールは、馬のいる家の隣の家で吸われている。
 
-13.  The Lucky Strike smoker drinks orange juice.
+13.  ラッキーストライクを吸う人はオレンジジュースを飲む。
 
-14.  The Japanese smokes Parliaments.
+14.  日本人はパーラメントを吸う。
 
-15.  The Norwegian lives next to the blue house.
+15.  ノルウェー人は青い家の隣に住んでいる。
 
-The questions to be answered are: who drinks water and who owns the zebra?
-To solve this puzzle, we first define the relations `nextto` (for "next to") and `iright` (for "immediately to the right of").
-They are closely related to `member,` which is repeated here.
+答えるべき問いは、誰が水を飲み、誰がシマウマを飼っているか、です。
+このパズルを解くために、まず関係 `nextto`（「隣にある」）と `iright`（「すぐ右にある」）を定義します。
+これらは `member` と密接に関わっており、ここに再掲します。
 
 ```
 (<- (member ?item (?item . ?rest)))
@@ -1121,16 +1121,16 @@ They are closely related to `member,` which is repeated here.
 (<- (= ?x ?x))
 ```
 
-We also defined the identity relation, `=`.
-It has a single clause that says that any x is equal to itself.
-One might think that this implements `eq` or `equal`.
-Actually, since Prolog uses unification to see if the two arguments of a goal each unify with `?x`, this means that `=` is unification.
+同一性の関係 `=` も定義しました。
+これは、任意の x は自分自身に等しいと述べる、ただ1つの節を持ちます。
+これは `eq` や `equal` を実装していると思うかもしれません。
+実のところ、Prologは目標の2つの引数がそれぞれ `?x` と単一化するかを見るのに単一化を使うので、これは `=` が単一化であることを意味します。
 
-Now we are ready to define the zebra puzzle with a single (long) clause.
-The variable `?h` represents the list of five houses, and each house is represented by a term of the form (house *nationality pet cigarette drink color*).
-The variable `?w` is the water drinker, and `?z` is the zebra owner.
-Each of the 15 constraints in the puzzle is listed in the body of `zebra`, although constraints 9 and 10 have been combined into the first one.
-Consider constraint 2, "The Englishman lives in the red house." This is interpreted as "there is a house whose nationality is Englishman and whose color is red, and which is a member of the list of houses": in other words, `(member (house englishman ? ? ? red) ?h).` The other constraints are similarly straightforward.
+これで、シマウマのパズルを1つの（長い）節で定義する準備が整いました。
+変数 `?h` は5軒の家の並びを表し、各家は (house *国籍 ペット タバコ 飲み物 色*) という形の項で表されます。
+変数 `?w` は水を飲む人、`?z` はシマウマの飼い主です。
+パズルの15の制約はそれぞれ `zebra` の本体に挙げてありますが、制約9と10は最初のものにまとめてあります。
+制約2「イギリス人は赤い家に住んでいる」を考えてみましょう。これは「国籍がイギリス人で色が赤く、家の並びの member である家がある」と解釈されます。言い換えれば `(member (house englishman ? ? ? red) ?h)` です。他の制約も同様に素直です。
 
 ```lisp
 (<- (zebra ?h ?w ?z)
@@ -1160,7 +1160,7 @@ Consider constraint 2, "The Englishman lives in the red house." This is interpre
  (member (house ?z zebra ? ? ?) ?h))               ;Q2
 ```
 
-Here's the query and solution to the puzzle:
+パズルへの問い合わせと解を示します。
 
 ```lisp
 > (?- (zebra ?houses ?water-drinker ?zebra-owner))
@@ -1174,39 +1174,39 @@ Here's the query and solution to the puzzle:
 No.
 ```
 
-This took 278 seconds, and profiling (see page 288) reveals that the function `prove` was called 12,825 times.
-A call to prove has been termed a *logical inference,* so our system is performing 12825/278 = 46 logical inferences per second, or LIPS.
-Good Prolog systems perform at 10,000 to 100,000 LIPS or more, so this is barely limping along.
+これには278秒かかり、プロファイリング（288ページを参照）から関数 `prove` が12,825回呼ばれたことが分かります。
+prove の呼び出し1回は*論理推論*と呼ばれてきたので、私たちのシステムは毎秒 12825/278 = 46 回の論理推論、すなわちLIPSで動いていることになります。
+よいPrologシステムは10,000から100,000 LIPS以上で動くので、これはやっとのことで這っているようなものです。
 
-Small changes to the problem can greatly affect the search time.
-For example, the relation `nextto` holds when the first house is immediately right of the second, or when the second is immediately right of the first.
-It is arbitrary in which order these clauses are listed, and one might think it would make no difference in which order they were listed.
-In fact, if we reverse the order of these two clauses, the execution time is roughly cut in half.
+問題への小さな変更が、探索の時間に大きく影響しうるのです。
+たとえば関係 `nextto` は、最初の家が2番目のすぐ右にあるとき、あるいは2番目が最初のすぐ右にあるときに成り立ちます。
+この2つの節をどの順で並べるかは任意であり、どの順で並べても違いはないと思うかもしれません。
+実際には、この2つの節の順序を逆にすると、実行時間はおよそ半分になります。
 
-## 11.5 The Synergy of Backtracking and Unification
+## 11.5 バックトラックと単一化の相乗効果
 
-Prolog's backward chaining with backtracking is a powerful technique for generating the possible solutions to a problem.
-It makes it easy to implement a *generate-and-test* strategy, where possible solutions are considered one at a time, and when a candidate solution is rejected, the next is suggested.
-But generate-and-test is only feasible when the space of possible solutions is small.
+バックトラックを伴うPrologの後ろ向き連鎖は、問題へのありうる解を生成する強力な技法です。
+これは*生成と検査*の戦略を実装しやすくします。そこではありうる解が一度に1つずつ検討され、候補の解が退けられると次のものが示されます。
+しかし生成と検査は、ありうる解の空間が小さいときにのみ実行可能です。
 
-In the zebra puzzle, there are five attributes for each of the five houses.
-Thus there are 5!<sup>5</sup>, or over 24 billion candidate solutions, far too many to test one at a time.
-It is the concept of unification (with the corresponding notion of a logic variable) that makes generate-and-test feasible on this puzzle.
-Instead of enumerating complete candidate solutions, unification allows us to specify *partial* candidates.
-We start out knowing that there are five houses, with the Norwegian living on the far left and the milk drinker in the middle.
-Rather than generating all complete candidates that satisfy these two constraints, we leave the remaining information vague, by unifying the remaining houses and attributes with anonymous logic variables.
-The next constraint (number 2) places the Englishman in the red house.
-Because of the way `member` is written, this first tries to place the Englishman in the leftmost house.
-This is rejected, because Englishman and Norwegian fail to unify, so the next possibility is considered, and the Englishman is placed in the second house.
-But no other features of the second house are specified-we didn't have to make separate guesses for the Englishman's house being green, yellow, and so forth.
-The search continues, filling in only as much as is necessary and backing up whenever a unification fails.
+シマウマのパズルでは、5軒の家それぞれに5つの属性があります。
+ですから 5!<sup>5</sup>、すなわち240億を超える候補の解があり、一度に1つずつ調べるにはあまりにも多すぎます。
+このパズルで生成と検査を実行可能にするのは、（対応する論理変数という考えを伴う）単一化という概念です。
+完全な候補の解を列挙する代わりに、単一化は*部分的な*候補を指定させてくれます。
+5軒の家があり、ノルウェー人が左端に、牛乳を飲む人が真ん中に住んでいることを知った状態から始めます。
+この2つの制約を満たす完全な候補をすべて生成するのではなく、残りの家と属性を無名の論理変数と単一化することで、残りの情報を曖昧なままにしておきます。
+次の制約（2番）は、イギリス人を赤い家に置きます。
+`member` の書き方のせいで、これはまずイギリス人を左端の家に置こうとします。
+これは退けられます。イギリス人とノルウェー人が単一化しないからです。そこで次の可能性が検討され、イギリス人は2番目の家に置かれます。
+しかし2番目の家の他の特徴は指定されていません。イギリス人の家が緑か、黄色か、といった別々の推測をする必要はなかったのです。
+探索は続き、必要な分だけを埋め、単一化が失敗するたびに後戻りします。
 
-For this problem, unification serves the same purpose as the delay macro (page 281).
-It allows us to delay deciding the value of some attribute as long as possible, but to immediately reject a solution that tries to give two different values to the same attribute.
-That way, we save time if we end up backtracking before the computation is made, but we are still able to fill in the value later on.
+この問題では、単一化は delay マクロ（281ページ）と同じ目的を果たします。
+ある属性の値を決めるのをできるだけ遅らせつつ、同じ属性に2つの異なる値を与えようとする解は即座に退けることを可能にします。
+こうすれば、計算が行われる前にバックトラックすることになれば時間を節約でき、それでもあとで値を埋めることはできます。
 
-It is possible to extend unification so that it is doing more work, and backtracking is doing less work.
-Consider the following computation:
+単一化を拡張して、より多くの仕事をさせ、バックトラックの仕事を減らすことも可能です。
+次の計算を考えてみましょう。
 
 ```lisp
 (?- (length ?l 4)
@@ -1214,31 +1214,31 @@ Consider the following computation:
         (= ?l (a b c d)))
 ```
 
-The first two lines generate permutations of the list (`d a c b`), and the third line tests for a permutation equal to (`a b c d`).
-Most of the work is done by backtracking.
-An alternative is to extend unification to deal with lists, as well as constants and variables.
-Predicates like `length` and `member` would be primitives that would have to know about the representation of lists.
-Then the first two lines of the above program would `set ?l` to something like `#s (list :length 4 :members (d a c d))`.
-The third line would be a call to the extended unification procedure, which would further specify `?l` to be something like:
+最初の2行はリスト (`d a c b`) の順列を生成し、3行目は (`a b c d`) に等しい順列を調べます。
+仕事の大半はバックトラックが行います。
+代わりに、単一化を拡張して、定数や変数だけでなくリストも扱えるようにする手があります。
+`length` や `member` のような述語は、リストの表現について知っていなければならない基本手続きになるでしょう。
+すると上のプログラムの最初の2行は、`?l` を `#s (list :length 4 :members (d a c d))` のようなものに設定するでしょう。
+3行目は拡張された単一化の手続きの呼び出しになり、`?l` をさらに次のようなものに特定するでしょう。
 
 ```lisp
 #s(list :length 4 imembers (d a c d) :order (abc d))
 ```
 
-By making the unification procedure more complex, we eliminate the need for backtracking entirely.
+単一化の手続きをより複雑にすることで、バックトラックの必要を完全になくすのです。
 
-**Exercise  11.3 [s]** Would a unification algorithm that delayed `member` tests be a good idea or a bad idea for the zebra puzzle?
+**練習問題 11.3 [s]** `member` の検査を遅らせる単一化アルゴリズムは、シマウマのパズルにとってよい考えか、悪い考えか。
 
-## 11.6 Destructive Unification
+## 11.6 破壊的な単一化
 
-As we saw in [section 11.2](#s0015), keeping track of a binding list of variables is a little tricky.
-It is also prone to inefficiency if the binding list grows large, because the list must be searched linearly, and because space must be allocated to hold the binding list.
-An alternative implementation is to change `unify` to a destructive operation.
-In this approach, there are no binding lists.
-Instead, each variable is represented as a structure that includes a field for its binding.
-When the variable is unified with another expression, the variable's binding field is modified to point to the expression.
-Such variables will be called `vars` to distinguish them from the implementation of variables as symbols starting with a question mark.
-`vars` are defined with the following code:
+[11.2節](#s0015)で見たとおり、変数の束縛の並びを記録するのは少し厄介です。
+また、束縛の並びが大きくなると非効率になりがちです。並びを線形に探さねばならず、束縛の並びを保持する領域を割り当てねばならないからです。
+別の実装は、`unify` を破壊的な操作に変えることです。
+この方式では束縛の並びがありません。
+代わりに、各変数はその束縛のための欄を含む構造体として表されます。
+変数が別の式と単一化されると、その変数の束縛の欄が、その式を指すよう変えられます。
+そうした変数を、疑問符で始まるシンボルとしての変数の実装と区別するために `vars` と呼ぶことにします。
+`vars` は次のコードで定義します。
 
 ```lisp
 (defconstant unbound "Unbound")
@@ -1246,12 +1246,12 @@ Such variables will be called `vars` to distinguish them from the implementation
 (defun bound-p (var) (not (eq (var-binding var) unbound)))
 ```
 
-The macro `deref` gets at the binding of a variable, returning its argument when it is an unbound variable or a non-variable expression.
-It includes a loop because a variable can be bound to another variable, which in turn is bound to the ultimate value.
+マクロ `deref` は変数の束縛を取り出し、引数が未束縛の変数か変数でない式のときはその引数を返します。
+変数が別の変数に束縛され、その変数がさらに最終的な値に束縛されうるので、これはループを含みます。
 
-Normally, it would be considered bad practice to implement deref as a macro, since it could be implemented as an inline function, provided the caller was willing to write `(setf x (deref x))` instead of `(deref x)`.
-However, deref will appear in code generated by some versions of the Prolog compiler that will be presented in the next section.
-Therefore, to make the generated code look neater, I have allowed myself the luxury of the `deref` macro.
+通常なら、deref をマクロとして実装するのはよくない流儀とされるでしょう。呼び出し側が `(deref x)` の代わりに `(setf x (deref x))` と書くのをいとわなければ、インライン関数として実装できるからです。
+しかし deref は、次節で示すPrologコンパイラのいくつかの版が生成するコードに現れます。
+ですから、生成されるコードをより整って見せるために、`deref` マクロという贅沢を自分に許しました。
 
 ```lisp
 (defmacro deref (exp)
@@ -1261,8 +1261,8 @@ Therefore, to make the generated code look neater, I have allowed myself the lux
                   ,exp))
 ```
 
-The function `unify!` below is the destructive version of `unify`.
-It is a predicate that returns true for success and false for failure, and has the side effect of altering variable bindings.
+下の関数 `unify!` は `unify` の破壊的な版です。
+成功なら真、失敗なら偽を返す述語であり、変数の束縛を書き換えるという副作用を持ちます。
 
 ```lisp
 (defun unify! (x y)
@@ -1280,7 +1280,7 @@ It is a predicate that returns true for success and false for failure, and has t
  t)
 ```
 
-To make `vars` easier to read, we can install a `:print-function`:
+`vars` を読みやすくするために、`:print-function` を組み込めます。
 
 ```lisp
 (defstruct (var (:print-function print-var))
@@ -1293,16 +1293,16 @@ To make `vars` easier to read, we can install a `:print-function`:
         (write var :stream stream)))
 ```
 
-This is the first example of a carefully crafted `:print-function`.
-There are three things to notice about it.
-First, it explicitly writes to the stream passed as the argument.
-It does not write to a default stream.
-Second, it checks the variable `depth` against `*print-level*`, and prints just the variable name when the depth is exceeded.
-Third, it uses `write` to print the bindings.
-This is because write pays attention to the current values of `*print-escape*`, `*print-pretty*`, and so on.
-Other printing functions such as `prinl` or `print` do not pay attention to these variables.
+これは丹念に作った `:print-function` の最初の例です。
+注目すべき点が3つあります。
+第一に、引数として渡されたストリームに明示的に書き出します。
+既定のストリームには書き出しません。
+第二に、変数 `depth` を `*print-level*` と照らし合わせ、深さを超えたときは変数名だけを表示します。
+第三に、束縛の表示に `write` を使います。
+これは write が `*print-escape*`、`*print-pretty*` などの現在の値に注意を払うからです。
+`prin1` や `print` のような他の表示関数は、これらの変数に注意を払いません。
 
-Now, for backtracking purposes, we want to make `set-binding!` keep track of the bindings that were made, so they can be undone later:
+さて、バックトラックのために、`set-binding!` に行われた束縛を記録させ、あとで取り消せるようにしたいのです。
 
 ```lisp
 (defvar *trail* (make-array 200 :fill-pointer 0 :adjustable t))
@@ -1319,13 +1319,13 @@ Now, for backtracking purposes, we want to make `set-binding!` keep track of the
    do (setf (var-binding (vector-pop *trail*)) unbound)))
 ```
 
-Now we need a way of making new variables, where each one is distinct.
-That could be done by `gensym-ing` a new name for each variable, but a quicker solution is just to increment a counter.
-The constructor function `?` is defined to generate a new variable with a name that is a new integer.
-This is not strictly necessary; we could have just used the automatically provided constructor `make-var`.
-However, I thought that the operation of providing new anonymous variable was different enough from providing a named variable that it deserved its own function.
-Besides, `make-var` may be less efficient, because it has to process the keyword arguments.
-The function `?` has no arguments; it just assigns the default values specified in the slots of the `var` structure.
+次に、それぞれが別個である新しい変数を作る手立てが要ります。
+それは各変数に新しい名前を `gensym` することでもできますが、より手早い解決は単に計数器を増やすことです。
+構成子関数 `?` は、新しい整数を名前とする新しい変数を生成するよう定義されています。
+これは厳密には必要ありません。自動的に用意される構成子 `make-var` を使うだけでもよかったのです。
+しかし、新しい無名変数を用意する操作は、名前つきの変数を用意するのとは十分に違うので、独自の関数に値すると考えました。
+それに `make-var` は、キーワード引数を処理せねばならないので、効率が劣るかもしれません。
+関数 `?` は引数を持ちません。`var` 構造体のスロットに指定された既定値を割り当てるだけです。
 
 ```lisp
 (defvar *var-counter* 0)
@@ -1335,17 +1335,17 @@ The function `?` has no arguments; it just assigns the default values specified 
   (binding unbound))
 ```
 
-A reasonable next step would be to use destructive unification to make a more efficient interpreter.
-This is left as an exercise, however, and instead we put the interpreter aside, and in the next chapter develop a compiler.
+妥当な次の段階は、破壊的な単一化を使ってより効率的なインタプリタを作ることでしょう。
+しかしこれは練習問題としておき、代わりにインタプリタは脇に置いて、次章でコンパイラを作ります。
 
-## 11.7 Prolog in Prolog
+## 11.7 Prolog上のProlog
 
-As stated at the start of this chapter, Prolog has many of the same features that make Lisp attractive for program development.
-Just as it is easy to write a Lisp interpreter in Lisp, it is easy to write a Prolog interpreter in Prolog.
-The following Prolog metainterpreter has three main relations.
-The relation clause is used to store clauses that make up the rules and facts that are to be interpreted.
-The relation `prove` is used to prove a goal.
-It calls `prove-all`, which attempts to prove a list of goals, `prove-all` succeeds in two ways: (1) if the list is empty, or (2) if there is some clause whose head matches the first goal, and if we can prove the body of that clause, followed by the remaining goals:
+この章の初めに述べたとおり、Prologは、Lispをプログラム開発に魅力的にしているのと同じ特徴の多くを持っています。
+LispでLispインタプリタを書くのが容易なのとちょうど同じように、PrologでPrologインタプリタを書くのも容易です。
+次のPrologのメタインタプリタは、3つの主な関係を持ちます。
+関係 clause は、解釈される規則と事実をなす節を格納するのに使います。
+関係 `prove` は目標を証明するのに使います。
+これは目標の並びを証明しようとする `prove-all` を呼びます。`prove-all` は2通りで成功します。(1) 並びが空のとき、あるいは (2) 頭部が最初の目標に合致する節があり、その節の本体と、それに続く残りの目標を証明できるとき、です。
 
 ```lisp
 (<- (prove ?goal) (prove-all (?goal)))
@@ -1356,14 +1356,14 @@ It calls `prove-all`, which attempts to prove a list of goals, `prove-all` succe
     (prove-all ?new-goals))
 ```
 
-Now we add two clauses to the data base to define the member relation:
+次に、member の関係を定義するために、データベースに2つの節を加えます。
 
 ```lisp
 (<- (clause (<- (mem ?x (?x . ?y)))))
 (<- (clause (<- (mem ?x (? . ?z)) (mem ?x ?z))))
 ```
 
-Finally, we can prove a goal using our interpreter:
+最後に、私たちのインタプリタを使って目標を証明できます。
 
 ```lisp
 (?- (prove (mem ?x (1 2 3))))
@@ -1373,58 +1373,58 @@ Finally, we can prove a goal using our interpreter:
 No.
 ```
 
-## 11.8 Prolog Compared to Lisp
+## 11.8 PrologとLispの比較
 
-Many of the features that make Prolog a successful language for AI (and for program development in general) are the same as Lisp's features.
-Let's reconsider the list of features that make Lisp different from conventional languages (see page 25) and see what Prolog has to offer:
+PrologをAI（そしてプログラム開発一般）にとって成功した言語にしている特徴の多くは、Lispの特徴と同じです。
+Lispを従来の言語と違うものにしている特徴の並び（25ページを参照）を改めて考え、Prologが何を差し出すかを見てみましょう。
 
-* *Built-in Support for Lists (and other data types).*
-New data types can be created easily using lists or structures (structures are preferred).
-Support for reading, printing, and accessing components is provided automatically.
-Numbers, symbols, and characters are also supported.
-However, because logic variables cannot be altered, certain data structures and operations are not provided.
-For example, there is no way to update an element of a vector in Prolog.
+* *リスト（と他のデータ型）への組み込みの支援。*
+新しいデータ型は、リストか構造体（構造体のほうが好まれます）を使って容易に作れます。
+読み取り・表示・構成要素へのアクセスの支援が自動的に提供されます。
+数・シンボル・文字も支えられています。
+ただし論理変数は書き換えられないので、特定のデータ構造と操作は提供されません。
+たとえばPrologでは、ベクタの要素を更新する手立てがありません。
 
-* *Automatic Storage Management.*
-The programmer can allocate new objects without worrying about reclaiming them.
-Reclaiming is usually faster in Prolog than in Lisp, because most data can be stack-allocated instead of heap-allocated.
+* *記憶の自動管理。*
+プログラマは、回収を気にせずに新しいオブジェクトを割り当てられます。
+回収はたいていLispよりPrologのほうが速くなります。データの大半がヒープではなくスタックに割り当てられるからです。
 
-* *Dynamic Typing.*
-Declarations are not required.
-Indeed, there is no standard way to make type declarations, although some implementations allow for them.
-Some Prolog systems provide only fixnums, so that eliminates the need for a large class of declarations.
+* *動的な型付け。*
+宣言は要りません。
+実際、型宣言をする標準的な方法はありません。もっとも、それを許す処理系もあります。
+fixnum しか提供しないPrologシステムもあり、それは大きな種類の宣言の必要をなくします。
 
-* *First-Class Functions.*
-Prolog has no equivalent of `lambda`, but the built-in predicate `call` allows a term - a piece of data - to be called as a goal.
-Although backtracking choice points are not first-class objects, they can be used in a way very similar to continuations in Lisp.
+* *第一級の関数。*
+Prologに `lambda` に当たるものはありませんが、組み込み述語 `call` により、項 — データの一片 — を目標として呼べます。
+バックトラックの選択点は第一級のオブジェクトではありませんが、Lispの継続にとてもよく似たやり方で使えます。
 
-* *Uniform Syntax.*
-Like Lisp, Prolog has a uniform syntax for both programs and data.
-This makes it easy to write interpreters and compilers in Prolog.
-While Lisp's prefix-operator list notation is more uniform, Prolog allows infix and postfix operators, which may be more natural for some applications.
+* *一様な構文。*
+Lispと同じく、Prologはプログラムとデータの両方に一様な構文を持ちます。
+これはPrologでインタプリタやコンパイラを書くのを容易にします。
+Lispの前置演算子のリスト記法のほうがより一様ですが、Prologは中置と後置の演算子を許し、それが応用によってはより自然かもしれません。
 
-* *Interactive Environment.*
-Expressions can be immediately evaluated.
-High-quality Prolog systems offer both a compiler and interpreter, along with a host of debugging tools.
+* *対話的な環境。*
+式は即座に評価できます。
+高品質なPrologシステムは、多くのデバッグの道具とともに、コンパイラとインタプリタの両方を提供します。
 
-* *Extensibility.*
-Prolog syntax is extensible.
-Because programs and data share the same format, it is possible to write the equivalent of macros in Prolog and to define embedded languages.
-However, it can be harder to ensure that the resulting code will be compiled efficiently.
-The details of Prolog compilation are implementation-dependent.
+* *拡張性。*
+Prologの構文は拡張可能です。
+プログラムとデータが同じ形式を共有するので、Prologでマクロに相当するものを書き、組み込み言語を定義することが可能です。
+ただし、できたコードが効率的にコンパイルされることを保証するのは、より難しいことがあります。
+Prologのコンパイルの詳細は処理系に依存します。
 
-To put things in perspective, consider that Lisp is at once one of the highest-level languages available and a universal assembly language.
-It is a high-level language because it can easily capture data, functional, and control abstractions.
-It is a good assembly language because it is possible to write Lisp in a style that directly reflects the operations available on modern computers.
+物事を大局的に見るために、Lispが最も高水準な言語の1つであると同時に、万能のアセンブリ言語でもあることを考えてみてください。
+データ・関数・制御の抽象を容易に捉えられるので、高水準の言語です。
+現代の計算機で使える操作を直に反映する流儀でLispを書けるので、よいアセンブリ言語です。
 
-Prolog is generally not as efficient as an assembly language, but it can be more concise as a specification language, at least for some problems.
-The user writes specifications: lists of axioms that describe the relationships that can hold in the problem domain.
-If these specifications are in the right form, Prolog's automatic backtracking can find a solution, even though the programmer does not provide an explicit algorithm.
-For other problems, the search space will be too large or infinite, or Prolog's simple depth-first search with backup will be too inflexible.
-In this case, Prolog must be used as a programming language rather than a specification language.
-The programmer must be aware of Prolog's search strategy, using it to implement an appropriate algorithm for the problem at hand.
+Prologは一般にアセンブリ言語ほど効率的ではありませんが、仕様記述言語としては、少なくともいくつかの問題については、より簡潔でありえます。
+利用者は仕様 — 問題領域で成り立ちうる関係を記述する公理の並び — を書きます。
+これらの仕様が正しい形なら、プログラマが明示的なアルゴリズムを与えなくても、Prologの自動バックトラックが解を見つけられます。
+他の問題では、探索空間が大きすぎるか無限か、あるいは後戻りを伴うPrologの単純な深さ優先探索が融通が利かなすぎるでしょう。
+この場合、Prologは仕様記述言語ではなくプログラミング言語として使わねばなりません。
+プログラマはPrologの探索戦略を意識し、それを使って目の前の問題に適切なアルゴリズムを実装せねばなりません。
 
-Prolog, like Lisp, has suffered unfairly from some common myths.
+PrologもLispと同じく、いくつかのよくある俗説から不当な被害を受けてきました。
 It has been thought to be an inefficient language because early implementations were interpreted, and because it has been used to write interpreters.
 But modern compiled Prolog can be quite efficient (see [Warren et al.
 1977](bibliography.md#bb1335) and Van Roy 1990).
