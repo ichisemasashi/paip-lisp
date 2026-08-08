@@ -1,27 +1,27 @@
-# Chapter 12
-## Compiling Logic Programs
+# 第12章
+## 論理プログラムのコンパイル
 
-The end of [chapter 11](chapter11.md) introduced a new, more efficient representation for logic variables.
-It would be reasonable to build a new version of the Prolog interpreter incorporating this representation.
-However, [chapter 9](chapter9.md) has taught us that compilers run faster than interpreters and are not that much harder to build.
-Thus, this chapter will present a Prolog compiler that translates from Prolog to Lisp.
+[第11章](chapter11.md)の終わりで、論理変数のための新しい、より効率的な表現を紹介しました。
+この表現を取り込んだ新しい版のPrologインタプリタを組み立てるのは、妥当なことでしょう。
+しかし[第9章](chapter9.md)は、コンパイラがインタプリタより速く走り、しかも組み立てるのがさほど難しくないことを教えてくれました。
+ですからこの章では、PrologからLispへ翻訳するPrologコンパイラを示します。
 
-Each Prolog predicate will be translated into a Lisp function, and we will adopt the convention that a predicate called with a different number of arguments is a different predicate.
-If the symbol `p` can be called with either one or two arguments, we will need two Lisp functions to implement the two predicates.
-Following Prolog tradition, these will be called `p/1` and `p/2`.
+各Prologの述語はLisp関数に翻訳され、引数の数が異なる述語は別の述語とする、という流儀を採り入れます。
+シンボル `p` が1つの引数でも2つの引数でも呼べるなら、その2つの述語を実装するのに2つのLisp関数が要ります。
+Prologの慣わしに従い、これらを `p/1` と `p/2` と呼びます。
 
-The next step is to decide what the generated Lisp code should look like.
-It must unify the head of each clause against the arguments, and if the unification succeeds, it must call the predicates in the body.
-The difficult part is that the choice points have to be remembered.
-If a call to a predicate in the first clause fails, we must be able to return to the second clause and try again.
+次の段階は、生成されるLispコードがどんなものであるべきかを決めることです。
+各節の頭部を引数に単一化し、単一化が成功すれば本体の述語を呼ばねばなりません。
+難しいのは、選択点を覚えておかねばならないことです。
+最初の節の述語への呼び出しが失敗したら、2番目の節に戻って再び試せなければなりません。
 
-This can be done by passing in a *success continuation* as an extra argument to every predicate.
-This continuation represents the goals that remain unsolved, the `other-goals` argument of `prove`.
-For each clause in the predicate, if all the goals in a clause succeed, then we should call the success continuation.
-If a goal fails, we don't do anything special; we just go on to the next clause.
-There is one complication: after failing we have to undo any bindings made by `unify!`.
-Consider an example.
-The clauses
+これは、すべての述語に追加の引数として*成功継続*を渡すことで行えます。
+この継続は、まだ解かれていない目標 — `prove` の `other-goals` 引数 — を表します。
+述語の各節について、その節のすべての目標が成功すれば、成功継続を呼ぶべきです。
+目標が失敗したら、特別なことは何もせず、単に次の節へ進みます。
+1つ込み入った点があります。失敗のあとには、`unify!` が行った束縛を取り消さねばなりません。
+例を考えてみましょう。
+次の節は、
 
 ```lisp
 (<- (likes Robin cats))
@@ -29,7 +29,7 @@ The clauses
 (<- (likes Kim ?x) (likes ?x Lee) (likes ?x Kim))
 ```
 
-could be compiled into this:
+次のようにコンパイルできます。
 
 ```lisp
 (defun likes/2 (?arg1 ?arg2 cont)
@@ -47,81 +47,81 @@ could be compiled into this:
      #'(lambda () (likes/2 ?arg2 'Kim cont))))))
 ```
 
-In the first clause, we just check the two arguments and, if the unifications succeed, call the continuation directly, because the first clause has no body.
-In the second clause, `likes/2` is called recursively, to see if `?arg2` likes `cats`.
-If this succeeds, then the original goal succeeds, and the continuation `cont` is called.
-In the third clause, we have to call `likes/2` recursively again, this time requesting that it check if `?arg2` likes `Lee`.
-If this check succeeds, then the continuation will be called.
-In this case, the continuation involves another call to `likes/2`, to check if `?arg2` likes `Kim`.
-If this succeeds, then the original continuation, `cont`, will finally be called.
+最初の節では、2つの引数を調べるだけで、単一化が成功すれば継続を直に呼びます。最初の節には本体がないからです。
+2番目の節では、`?arg2` が `cats` を好むかを見るために `likes/2` が再帰的に呼ばれます。
+これが成功すれば、元の目標が成功し、継続 `cont` が呼ばれます。
+3番目の節では、再び `likes/2` を再帰的に呼ばねばならず、今度は `?arg2` が `Lee` を好むかを調べるよう求めます。
+この検査が成功すれば、継続が呼ばれます。
+この場合、継続は `likes/2` へのもう1つの呼び出しを含み、`?arg2` が `Kim` を好むかを調べます。
+これが成功すれば、元の継続 `cont` がついに呼ばれます。
 
-Recall that in the Prolog interpreter, we had to append the list of pending goals, `other-goals`, to the goals in the body of the clause.
-In the compiler, there is no need to do an `append.` Instead, the continuation cont represents the other-goals, and the body of the clause is represented by explicit calls to functions.
+Prologインタプリタでは、未処理の目標の並び `other-goals` を、節の本体の目標に append せねばならなかったことを思い出してください。
+コンパイラでは `append` を行う必要がありません。代わりに、継続 cont が other-goals を表し、節の本体は関数への明示的な呼び出しで表されます。
 
-Note that the code for `likes/2` given before has eliminated some unnecessary calls to `unify!`.
-The most obvious implementation would have one call to `unify!` for each argument.
-Thus, for the second clause, we would have the code:
+先に示した `likes/2` のコードが、`unify!` への不要な呼び出しをいくつか取り除いていることに注目してください。
+最も分かりやすい実装なら、引数ごとに `unify!` の呼び出しが1つずつあるでしょう。
+ですから2番目の節については、次のコードになるでしょう。
 
 ```lisp
 (if (and (unify! ?argl 'Sandy) (unify! ?arg2 ?x))
  (likes/2 ?x 'cats cont))
 ```
 
-where we would need a suitable let binding for the variable `?x`.
+ここで、変数 `?x` のための適切な let 束縛が要ります。
 
-## 12.1 A Prolog Compiler
+## 12.1 Prologコンパイラ
 
-This section presents the compiler summarized in [figure 12.1](#f0010).
-At the top level is the function `prolog-compile`, which takes a symbol, looks at the clauses defined for that symbol, and groups the clauses by arity.
-Each symbol/arity is compiled into a separate Lisp function by `compile-predicate`.
+この節では、[図12.1](#f0010)にまとめたコンパイラを示します。
+最上位にあるのは関数 `prolog-compile` で、シンボルをとり、そのシンボルに定義された節を見て、節を項数ごとにまとめます。
+各シンボル/項数は、`compile-predicate` によって別々のLisp関数にコンパイルされます。
 
 | Function                    | Description                                                |
 |-----------------------------|------------------------------------------------------------|
 |                             | **Top-Level Functions**                                    |
-| `?-`                        | Make a query, but compile everything first.                |
+| `?-`                        | 問い合わせを行うが、まずすべてをコンパイルする。            |
 |                             | **Special Variables**                                      |
-| `*trail*`                   | A list of all bindings made so far.                        |
+| `*trail*`                   | ここまでに行われたすべての束縛の並び。                      |
 |                             | **Major Functions**                                        |
-| `top-level-prove`           | New version compiles everything first.                     |
-| `run-prolog`                | Compile everything and call a Prolog function.             |
-| `prolog-compile-symbols`    | Compile a list of Prolog symbols.                          |
-| `prolog-compile`            | Compile a symbol; make a separate function for each arity. |
-| `compile-predicate`         | Compile all the clauses for a given symbol/arity.          |
-| `compile-clause`            | Transform away the head and compile the resulting body.    |
-| `compile-body`              | Compile the body of a clause.                              |
-| `compile-call`              | Compile a call to a Prolog predicate.                      |
-| `compile-arg`               | Generate code for an argument to a goal in the body.       |
-| `compile-unify`             | Return code that tests if var and term unify.              |
+| `top-level-prove`           | まずすべてをコンパイルする新しい版。                        |
+| `run-prolog`                | すべてをコンパイルしてProlog関数を呼ぶ。                    |
+| `prolog-compile-symbols`    | Prologのシンボルの並びをコンパイルする。                    |
+| `prolog-compile`            | シンボルをコンパイルする。項数ごとに別々の関数を作る。      |
+| `compile-predicate`         | 与えたシンボル/項数のすべての節をコンパイルする。           |
+| `compile-clause`            | 頭部を変換して消し、できた本体をコンパイルする。            |
+| `compile-body`              | 節の本体をコンパイルする。                                  |
+| `compile-call`              | Prologの述語への呼び出しをコンパイルする。                  |
+| `compile-arg`               | 本体の目標への引数のコードを生成する。                      |
+| `compile-unify`             | var と項が単一化するかを調べるコードを返す。                |
 |                             | **Auxiliary Functions**                                    |
-| `clauses-with-arity`        | Return all clauses whose head has a given arity.           |
-| `relation-arity`            | The number of arguments to a relation.                     |
-| `args`                      | The arguments of a relation.                               |
-| `make-parameters`           | Build a list of parameters.                                |
-| `make-predicate`            | Build a symbol of the form name/arity.                     |
-| `make-=`                    | Build a unification relation.                              |
-| `def-prolog-compiler-macro` | Define a compiler macro for Prolog.                        |
-| `prolog-compiler-macro`     | Fetch the compiler macro for a Prolog predicate.           |
-| `has-variable-p`            | Is there a variable anywhere in the expression `x`?        |
-| `proper-listp`              | Is `x` a proper (non-dotted) list?                         |
-| `maybe-add-undo-bindings`   | Undo any bindings that need undoing.                       |
-| `bind-unbound-vars`         | Add a `let` if needed.                                     |
-| `make-anonymous`            | Replace variables that are only used once with `?`.        |
-| `anonymous-variables-in`    | A list of anonymous variables.                             |
-| `compile-if`                | Compile an IF form.  No `else`-part allowed.               |
-| `compile-unify-variable`    | Compile the unification of a `var`.                        |
-| `bind-variables-in`         | Bind all variables in `exp` to themselves.                 |
-| `follow-binding`            | Get the ultimate binding of `var` according to bindings.   |
-| `bind-new-variables`        | Extend bindings to include any unbound variables.          |
-| `ignore`                    | Do nothing&mdash;ignore the arguments.                     |
+| `clauses-with-arity`        | 頭部が与えた項数を持つすべての節を返す。                    |
+| `relation-arity`            | 関係への引数の数。                                          |
+| `args`                      | 関係の引数。                                                |
+| `make-parameters`           | 引数の並びを組み立てる。                                    |
+| `make-predicate`            | name/arity の形のシンボルを組み立てる。                     |
+| `make-=`                    | 単一化の関係を組み立てる。                                  |
+| `def-prolog-compiler-macro` | Prologのコンパイラマクロを定義する。                        |
+| `prolog-compiler-macro`     | Prologの述語のコンパイラマクロを取ってくる。                |
+| `has-variable-p`            | 式 `x` のどこかに変数があるか。                             |
+| `proper-listp`              | `x` は真の（ドットのない）リストか。                        |
+| `maybe-add-undo-bindings`   | 取り消しが必要な束縛を取り消す。                            |
+| `bind-unbound-vars`         | 必要なら `let` を加える。                                   |
+| `make-anonymous`            | 1回しか使われない変数を `?` に置き換える。                  |
+| `anonymous-variables-in`    | 無名変数の並び。                                            |
+| `compile-if`                | IF の形をコンパイルする。`else` の部分は許さない。          |
+| `compile-unify-variable`    | `var` の単一化をコンパイルする。                            |
+| `bind-variables-in`         | `exp` のすべての変数を自分自身に束縛する。                  |
+| `follow-binding`            | bindings に従って `var` の最終的な束縛を得る。              |
+| `bind-new-variables`        | 未束縛の変数を含むよう bindings を拡張する。                |
+| `ignore`                    | 何もしない — 引数を無視する。                               |
 |                             | **Previously Defined Functions**                           |
-| `unify!`                    | Destructive unification (see section 11.6)                 |
-| `undo-bindings!`            | Use the trail to backtrack, undoing bindings.              |
-| `binding-val`               | Pick out the value part of a var/val binding.              |
-| `symbol`                    | Create or find an interned symbol.                         |
-| `new-symbol`                | Create a new uninterned symbol.                            |
-| `find-anywhere`             | Does item occur anywhere in tree?                          |
+| `unify!`                    | 破壊的な単一化（11.6節を参照）。                            |
+| `undo-bindings!`            | トレイルを使ってバックトラックし、束縛を取り消す。          |
+| `binding-val`               | var/val の束縛から値の部分を取り出す。                      |
+| `symbol`                    | インターンされたシンボルを作る、あるいは見つける。          |
+| `new-symbol`                | インターンされていない新しいシンボルを作る。                |
+| `find-anywhere`             | 要素が木のどこかに現れるか。                                |
 
-Figure 12.1: Glossary for the Prolog Compiler
+図12.1: Prologコンパイラの用語一覧
 
 ```lisp
 (defun prolog-compile (symbol &optional
@@ -137,7 +137,7 @@ Figure 12.1: Glossary for the Prolog Compiler
         symbol (clauses-with-arity clauses #'/= arity)))))
 ```
 
-Three utility functions are included here:
+3つの便利な関数をここに含めます。
 
 ```lisp
 (defun clauses-with-arity (clauses test arity)
@@ -155,8 +155,8 @@ Three utility functions are included here:
 (defun args (x) "The arguments of a relation" (rest x))
 ```
 
-The next step is to compile the clauses for a given predicate with a fixed arity into a Lisp function.
-For now, that will be done by compiling each clause independently and wrapping them in a `lambda` with the right parameter list.
+次の段階は、固定の項数を持つ与えた述語の節を、Lisp関数にコンパイルすることです。
+今のところ、それは各節を独立にコンパイルし、正しい引数リストを持つ `lambda` で包むことで行います。
 
 ```lisp
 (defun compile-predicate (symbol arity clauses)
@@ -181,9 +181,9 @@ For now, that will be done by compiling each clause independently and wrapping t
   (symbol symbol '/ arity))
 ```
 
-Now for the hard part: we must actually generate the code for a clause.
-Here again is an example of the code desired for one clause.
-We'll start by setting as a target the simple code:
+さて難しいところです。実際に節のコードを生成せねばなりません。
+1つの節について望まれるコードの例を、再び示します。
+まず、次の単純なコードを目標として掲げることから始めます。
 
 ```lisp
 (<- (likes Kim ?x) (likes ?x Lee) (likes ?x Kim))
@@ -196,7 +196,7 @@ We'll start by setting as a target the simple code:
 
  ...)
 
-but we'll also consider the possibility of upgrading to the improved code:
+しかし、次の改善されたコードへ格上げする可能性も考えます。
 
 ```lisp
 (defun likes/2 (?arg1 ?arg2 cont)
@@ -208,35 +208,35 @@ but we'll also consider the possibility of upgrading to the improved code:
 
  ...)
 
-One approach would be to write two functions, `compile-head` and `compile-body`, and then combine them into the code (if *head body*).
-This approach could easily generate the prior code.
-However, let's allow ourselves to think ahead a little.
-If we eventually want to generate the improved code, we will need some communication between the head and the body.
-We will have to know that the head decided not to compile the unification of `?arg2` and `?x`, but because of this, the body will have to substitute `?arg2` for `?x`.
-That means that the `compile-head` function conceptually returns two values: the code for the head, and an indication of substitutions to perform in the body.
-This could be handled by explicitly manipulating multiple values, but it seems complicated.
+1つの方式は、`compile-head` と `compile-body` という2つの関数を書き、それらを (if *head body*) というコードに組み合わせることでしょう。
+この方式なら、先のコードを簡単に生成できます。
+しかし、少し先を見越して考えてみましょう。
+いずれ改善されたコードを生成したいなら、頭部と本体のあいだで何らかのやりとりが要ります。
+頭部が `?arg2` と `?x` の単一化をコンパイルしないことにした、しかしそのために本体は `?x` を `?arg2` に置き換えねばならない、ということを知る必要があります。
+つまり `compile-head` 関数は、概念上2つの値を返すということです。頭部のコードと、本体で行うべき置換の指示です。
+これは多値を明示的に操作することで扱えますが、複雑に思えます。
 
-An alternate approach is to eliminate `compile-head` and just write `compile-body`.
-This is possible if we in effect do a source-code transformation on the clause.
-Instead of treating the clause as:
+別の方式は、`compile-head` をなくして `compile-body` だけを書くことです。
+これは、節に対して事実上ソースコードの変換を行えば可能です。
+節を次のように扱う代わりに、
 
 ```lisp
 (<- (likes Kim ?x)
   (likes ?x Lee) (likes ?x Kim))
 ```
 
-we transform it to the equivalent:
+それを次の等価なものに変換します。
 
 ```lisp
 (<- (likes ?arg1 ?arg2)
   (= ?arg1 Kim) (= ?arg2 ?x) (likes ?x Lee) (likes ?x Kim))
 ```
 
-Now the arguments in the head of the clause match the arguments in the function `likes/2`, so there is no need to generate any code for the head.
-This makes things simpler by eliminating `compile-head`, and it is a better decomposition for another reason: instead of adding optimizations to `compile-head`, we will add them to the code in `compile-body` that handles `=`.
-That way, we can optimize calls that the user makes to `=`, in addition to the calls introduced by the source-code transformation.
+こうすれば節の頭部の引数が関数 `likes/2` の引数と一致するので、頭部のためのコードを生成する必要がなくなります。
+これは `compile-head` をなくすことで話を単純にしますし、もう1つの理由からもよりよい分け方です。`compile-head` に最適化を加える代わりに、`=` を扱う `compile-body` のコードに加えるのです。
+そうすれば、ソースコードの変換が持ち込んだ呼び出しに加えて、利用者が `=` に対して行う呼び出しも最適化できます。
 
-To get an overview, the calling sequence of functions will turn out to be as follows:
+概観のために示すと、関数の呼び出しの連なりは次のようになります。
 
 ```lisp
 prolog-compile
@@ -249,9 +249,9 @@ prolog-compile
             compile-arg
 ```
 
-where each function calls the ones below it that are indented one level.
-We have already defined the first two functions.
-Here then is our first version of `compile-clause`:
+ここで各関数は、1段深く字下げされた下の関数を呼びます。
+最初の2つの関数はすでに定義しました。
+では `compile-clause` の最初の版を示します。
 
 ```lisp
 (defun compile-clause (parms clause cont)
@@ -265,17 +265,17 @@ Here then is our first version of `compile-clause`:
 (defun make-= (x y) `(= ,x ,y))
 ```
 
-The bulk of the work is in `compile-body`, which is a little more complicated.
-There are three cases.
-If there is no body, we just call the continuation.
-If the body starts with a call to `=`, we compile a call to `unify!`.
-Otherwise, we compile a call to a function, passing in the appropriate continuation.
+仕事の大半は `compile-body` にあり、これは少し込み入っています。
+3つの場合があります。
+本体がなければ、継続を呼ぶだけです。
+本体が `=` の呼び出しで始まるなら、`unify!` の呼び出しにコンパイルします。
+そうでなければ、適切な継続を渡して関数への呼び出しにコンパイルします。
 
-However, it is worthwhile to think ahead at this point.
-If we want to treat `=` specially now, we will probably want to treat other goals specially later.
-So instead of explicitly checking for `=`, we will do a data-driven dispatch, looking for any predicate that has a `prolog-compiler-macro` property attached to it.
-Like Lisp compiler macros, the macro can decline to handle the goal.
-We will adopt the convention that returning `:pass` means the macro decided not to handle it, and thus it should be compiled as a normal goal.
+しかしこの時点で、少し先を見越して考える値打ちがあります。
+今 `=` を特別に扱いたいなら、おそらくのちに他の目標も特別に扱いたくなるでしょう。
+ですから `=` を明示的に調べる代わりに、`prolog-compiler-macro` の属性が付いた述語を探すデータ駆動の振り分けを行います。
+Lispのコンパイラマクロと同じく、このマクロはその目標を扱うのを断れます。
+`:pass` を返すことは、マクロがそれを扱わないと決めたことを意味し、したがって通常の目標としてコンパイルされるべきだ、という流儀を採り入れます。
 
 ```lisp
 (defun compile-body (body cont)
@@ -324,8 +324,8 @@ We will adopt the convention that returning `:pass` means the macro decided not 
   `(unify! ,(compile-arg x) ,(compile-arg y)))
 ```
 
-All that remains is `compile-arg`, a function to compile the arguments to goals in the body.
-There are three cases to consider, as shown in the compilation to the argument of `q` below:
+あとは `compile-arg` — 本体の目標への引数をコンパイルする関数 — だけです。
+考えるべき場合は3つで、下の `q` の引数へのコンパイルに示すとおりです。
 
 | []()                         |                              |
 |------------------------------|------------------------------|
@@ -333,12 +333,12 @@ There are three cases to consider, as shown in the compilation to the argument o
 | `2 (<- (p ?x) (q (f a b)))`  | `(q/1 '(f a b) cont)`        |
 | `3 (<- (p ?x) (q (f ?x b)))` | `(q/1 (list 'f ?x 'b) cont)` |
 
-In case 1, the argument is a variable, and it is compiled as is.
-In case 2, the argument is a constant expression (one without any variables) that compiles into a quoted expression.
-In case 3, the argument contains a variable, so we have to generate code that builds up the expression.
-Case 3 is actually split into two in the list below: one compiles into a call to `list`, and the other a call to `cons`.
-It is important to remember that the goal `(q (f ?x b))` does *not* involve a call to the function `f`.
-Rather, it involves the term `(f ?x b)`, which is just a list of three elements.
+場合1では、引数は変数で、そのままコンパイルされます。
+場合2では、引数は定数の式（変数を含まないもの）で、引用された式にコンパイルされます。
+場合3では、引数が変数を含むので、その式を組み立てるコードを生成せねばなりません。
+場合3は下の並びでは実際には2つに分かれています。1つは `list` の呼び出しに、もう1つは `cons` の呼び出しにコンパイルされます。
+目標 `(q (f ?x b))` が関数 `f` への呼び出しを伴わ*ない*ことを覚えておくのが大切です。
+むしろ、3要素の並びにすぎない項 `(f ?x b)` を伴うのです。
 
 ```lisp
 (defun compile-arg (arg)
@@ -360,8 +360,8 @@ Rather, it involves the term `(f ?x b)`, which is just a list of three elements.
       (and (consp x) (proper-listp (rest x)))))
 ```
 
-Let's see how it works.
-We will consider the following clauses:
+どう働くか見てみましょう。
+次の節を考えます。
 
 ```lisp
 (<- (likes Robin cats))
@@ -371,7 +371,7 @@ We will consider the following clauses:
 (<- (member ?item (?x . ?rest)) (member ?item ?rest))
 ```
 
-Here's what `prolog-compile` gives us:
+`prolog-compile` が返すものを示します。
 
 ```lisp
 (DEFUN LIKES/2 (?ARG1 ?ARG2 CONT)
@@ -394,23 +394,23 @@ Here's what `prolog-compile` gives us:
    (MEMBER/2 ?ITEM ?REST CONT))))
 ```
 
-## 12.2 Fixing the Errors in the Compiler
+## 12.2 コンパイラの誤りを直す
 
-There are some problems in this version of the compiler:
+この版のコンパイラにはいくつか問題があります。
 
-*   We forgot to undo the bindings after each call to `unify!`.
+*   `unify!` の呼び出しのあとに束縛を取り消すのを忘れていた。
 
-*   The definition of `undo-bindings!` defined previously requires as an argument an index into the `*trail*` array.
-So we will have to save the current top of the trail when we enter each function.
+*   先に定義した `undo-bindings!` は、引数として `*trail*` 配列への添字を要する。
+ですから、各関数に入るときにトレイルの現在の一番上を保存せねばなりません。
 
-*   Local variables, such as `?x`, were used without being introduced.
-They should be bound to new variables.
+*   `?x` のような局所変数が、導入されずに使われていた。
+これらは新しい変数に束縛されるべきです。
 
-Undoing the bindings is simple: we add a single line to `compile-predicate,` a call to the function `maybe-add-undo-bindings`.
-This function inserts a call to `undo-bindings!` after every failure.
-If there is only one clause, no undoing is necessary, because the predicate higher up in the calling sequence will do it when it fails.
-If there are multiple clauses, the function wraps the whole function body in a let that captures the initial value of the trail's fill pointer, so that the bindings can be undone to the right point.
-Similarly, we can handle the unbound-variable problem by wrapping a call to `bind-unbound-vars` around each compiled clause:
+束縛の取り消しは単純です。`compile-predicate` に1行 — 関数 `maybe-add-undo-bindings` の呼び出し — を加えます。
+この関数は、失敗のたびに `undo-bindings!` の呼び出しを差し込みます。
+節が1つだけなら取り消しは不要です。呼び出しの連なりの上位の述語が、失敗したときにそれを行うからです。
+節が複数あれば、この関数は関数の本体全体を、トレイルのフィルポインタの初期値を捕まえる let で包み、束縛を正しい点まで取り消せるようにします。
+同様に、未束縛の変数の問題は、コンパイルした各節を `bind-unbound-vars` の呼び出しで包むことで扱えます。
 
 ```lisp
 (defun compile-predicate (symbol arity clauses)
@@ -459,7 +459,7 @@ Similarly, we can handle the unbound-variable problem by wrapping a call to `bin
         exp)))
 ```
 
-With these improvements, here's the code we get for `likes` and `member`:
+これらの改善を加えると、`likes` と `member` について得られるコードは次のとおりです。
 
 ```lisp
 (DEFUN LIKES/2 (?ARG1 ?ARG2 CONT)
@@ -494,13 +494,13 @@ With these improvements, here's the code we get for `likes` and `member`:
             (MEMBER/2 ?ITEM ?REST CONT))))))
 ```
 
-## 12.3 Improving the Compiler
+## 12.3 コンパイラを改良する
 
-This is fairly good, although there is still room for improvement.
-One minor improvement is to eliminate unneeded variables.
-For example, `?rest` in the first clause of `member` and `?x` in the second clause are bound to new variables-the result of the `(?)` call-and then only used once.
-The generated code could be made a little tighter by just putting `(?)` inline, rather than binding it to a variable and then referencing that variable.
-There are two parts to this change: updating `compile-arg` to compile an anonymous variable inline, and changing the `<-` macro so that it converts all variables that only appear once in a clause into anonymous variables:
+これはかなりよいものですが、まだ改善の余地があります。
+1つの小さな改善は、不要な変数をなくすことです。
+たとえば `member` の最初の節の `?rest` や2番目の節の `?x` は、新しい変数 — `(?)` の呼び出しの結果 — に束縛され、そのあと1回しか使われません。
+生成されるコードは、`(?)` を変数に束縛してその変数を参照するのではなく、`(?)` をそのままインラインに置くだけで、少し引き締められます。
+この変更には2つの部分があります。無名変数をインラインでコンパイルするよう `compile-arg` を更新することと、節に1回しか現れないすべての変数を無名変数に変えるよう `<-` マクロを変えることです。
 
 ```lisp
 (defmacro <- (&rest clause)
@@ -527,10 +527,10 @@ There are two parts to this change: updating `compile-arg` to compile an anonymo
         (t exp)))
 ```
 
-Finding anonymous variables is tricky.
-The following function keeps two lists: the variables that have been seen once, and the variables that have been seen twice or more.
-The local function `walk` is then used to walk over the tree, recursively considering the components of each cons cell and updating the two lists as each variable is encountered.
-This use of local functions should be remembered, as well as an alternative discussed in [exercise 12.23](#p4625) on [page 428](#p428).
+無名変数を見つけるのは厄介です。
+次の関数は2つの並びを保ちます。1回見た変数と、2回以上見た変数です。
+そして局所関数 `walk` が木を歩き、各コンスセルの構成要素を再帰的に考え、各変数に出くわすたびに2つの並びを更新します。
+この局所関数の使い方は、[428ページ](#p428)の[練習問題12.23](#p4625)で論じる代案とともに、覚えておくべきです。
 
 ```lisp
 (defun anonymous-variables-in (tree)
@@ -552,7 +552,7 @@ This use of local functions should be remembered, as well as an alternative disc
       seen-once)))
 ```
 
-Now `member` compiles into this:
+これで `member` は次のようにコンパイルされます。
 
 ```lisp
 (DEFUN MEMBER/2 (?ARG1 ?ARG2 CONT)
@@ -569,16 +569,16 @@ Now `member` compiles into this:
       (MEMBER/2 ?ITEM ?REST CONT))))))
 ```
 
-## 12.4 Improving the Compilation of Unification
+## 12.4 単一化のコンパイルを改良する
 
-Now we turn to the improvement of `compile-unify`.
-Recall that we want to eliminate certain calls to `unify!` so that, for example, the first clause of `member`:
+次に `compile-unify` の改良に取りかかります。
+たとえば `member` の最初の節が、
 
 ```lisp
 (<- (member ?item (?item . ?rest)))
 ```
 
-compiles into:
+次のようにコンパイルされるのではなく、
 
 ```lisp
 (LET ((?ITEM (?)))
@@ -587,46 +587,46 @@ compiles into:
     (FUNCALL CONT))))
 ```
 
-when it could compile to the more efficient:
+次のより効率的なものにコンパイルできるよう、`unify!` への特定の呼び出しをなくしたいのを思い出してください。
 
 ```lisp
 (IF (UNIFY! ?ARG2 (CONS ?ARG1 (?)))
   (FUNCALL CONT))
 ```
 
-Eliminating the unification in one goal has repercussions in other goals later on, so we will need to keep track of expressions that have been unified together.
-We have a design choice.
-Either `compile-unify` can modify a global state variable, or it can return multiple values.
-On the grounds that global variables are messy, we make the second choice: `compile-unify` will take a binding list as an extra argument and will return two values, the actual code and an updated binding list.
-We will expect that other related functions will have to be modified to deal with these multiple values.
+ある目標で単一化をなくすと、あとの他の目標に影響が及ぶので、たがいに単一化された式を記録する必要があります。
+設計の選択があります。
+`compile-unify` が大域的な状態変数を書き換えるか、多値を返すかのいずれかです。
+大域変数は後始末が面倒だという理由から、2番目の選択を採ります。`compile-unify` は追加の引数として束縛の並びをとり、2つの値 — 実際のコードと、更新された束縛の並び — を返します。
+関連する他の関数も、この多値を扱うよう変えねばならないと見込まれます。
 
-When `compile-unify` is first called in our example clause, it is asked to unify `?arg1` and `?item`.
-We want it to return no code (or more precisely, the trivially true test, `t`).
-For the second value, it should return a new binding list, with `?item` bound to `?arg1`.
-That binding will be used to replace `?item` with `?arg1` in subsequent code.
+私たちの例の節で `compile-unify` が最初に呼ばれるとき、`?arg1` と `?item` を単一化するよう求められます。
+これにはコードを返さない（より正確には、自明に真の判定 `t`）ようにしてほしいのです。
+2番目の値としては、`?item` が `?arg1` に束縛された新しい束縛の並びを返すべきです。
+その束縛は、以降のコードで `?item` を `?arg1` に置き換えるのに使われます。
 
-How do we know to bind `?item` to `?arg1` rather than the other way around?
-Because `?arg1` is already bound to something-the value passed in to `member.` We don't know what this value is, but we can't ignore it.
-Thus, the initial binding list will have to indicate that the parameters are bound to something.
-A simple convention is to bind the parameters to themselves.
-Thus, the initial binding list will be:
+逆ではなく、`?item` を `?arg1` に束縛すべきだと、どうして分かるのでしょうか。
+`?arg1` がすでに何か — `member` に渡された値 — に束縛されているからです。この値が何かは分かりませんが、無視はできません。
+ですから、最初の束縛の並びは、引数が何かに束縛されていることを示さねばなりません。
+単純な流儀は、引数を自分自身に束縛することです。
+ですから最初の束縛の並びは次のようになります。
 
 ```lisp
 ((?arg1 .?arg1) (?arg2 . ?arg2))
 ```
 
-We saw in the previous chapter ([page 354](chapter11.md#p354)) that binding a variable to itself can lead to problems; we will have to be careful.
+前章（[354ページ](chapter11.md#p354)）で、変数を自分自身に束縛すると問題を招きうることを見ました。気をつけねばなりません。
 
-Besides eliminating unifications of new variables against parameters, there are quite a few other improvements that can be made.
-For example, unifications involving only constants can be done at compile time.
-The call `(= (f a) (f a ))` always succeeds, while `(=  3 4)` always fails.
-In addition, unification of two cons cells can be broken into components at compile time: `(= (f ?x) (f a))` reduces to `(= ?x a)` and `(= f f)`, where the latter trivially succeeds.
-We can even do some occurs checking at compile time: `(= ?x (f ?x))` should fail.
+新しい変数を引数に単一化するのをなくすことのほかにも、加えられる改善はかなりあります。
+たとえば、定数だけを含む単一化はコンパイル時に行えます。
+`(= (f a) (f a ))` の呼び出しは常に成功し、`(=  3 4)` は常に失敗します。
+加えて、2つのコンスセルの単一化はコンパイル時に構成要素に分けられます。`(= (f ?x) (f a))` は `(= ?x a)` と `(= f f)` に帰着し、後者は自明に成功します。
+コンパイル時にいくらか出現検査を行うことさえできます。`(= ?x (f ?x))` は失敗すべきです。
 
-The following table lists these improvements, along with a breakdown for the cases of unifying a bound `(?arg1)` or unbound `(?x)` variable agains another expression.
-The first column is the unification call, the second is the generated code, and the third is the bindings that will be added as a result of the call:
+次の表は、これらの改善を、束縛された変数 `(?arg1)` あるいは未束縛の変数 `(?x)` を別の式と単一化する場合の内訳とともに挙げたものです。
+1列目は単一化の呼び出し、2列目は生成されるコード、3列目はその呼び出しの結果として加えられる束縛です。
 
-|      | Unification         | Code                    | Bindings            |
+|      | 単一化              | コード                  | 束縛                |
 |------|---------------------|-------------------------|---------------------|
 | 1    | `(= 3 3)`           | `t`                     | `-`                 |
 | 2    | `(= 3 4)`           | `nil`                   | `-`                 |
@@ -641,9 +641,9 @@ The first column is the unification call, the second is the generated code, and 
 | 11   | `(= ?x (f ? x))`    | `nil`                   | `-`                 |
 | 12   | `(= ?x ?)`          | `t`                     | `-`                 |
 
-From this table we can craft our new version of `compile-unify`.
-The first part is fairly easy.
-It takes care of the first three cases in this table and makes sure that `compile-unify-variable` is called with a variable as the first argument for the other cases.
+この表から、`compile-unify` の新しい版を作れます。
+最初の部分はかなり簡単です。
+この表の最初の3つの場合を扱い、それ以外の場合には `compile-unify-variable` が変数を第1引数として呼ばれるようにします。
 
 ```lisp
 (defun compile-unify (x y bindings)
@@ -671,12 +671,12 @@ It takes care of the first three cases in this table and makes sure that `compil
     (otherwise `(if ,pred ,then-part))))
 ```
 
-The function `compile-unify-variable` following is one of the most complex we have seen.
-For each argument, we see if it has a binding (the local variables `xb` and `yb`), and then use the bindings to get the value of each argument (`x1` and `y1`).
-Note that for either an unbound variable or one bound to itself, `x` will equal `x1` (and the same for `y` and `y1`).
-If either of the pairs of values is not equal, we should use the new ones (`x1` or `y1`), and the clause commented deref does that.
-After that point, we just go through the cases, one at a time.
-It turns out that it was easier to change the order slightly from the preceding table, but each clause is commented with the corresponding number:
+次の関数 `compile-unify-variable` は、私たちが見てきた中で最も複雑なものの1つです。
+各引数について、束縛があるか（局所変数 `xb` と `yb`）を見て、その束縛を使って各引数の値（`x1` と `y1`）を得ます。
+未束縛の変数でも自分自身に束縛された変数でも、`x` は `x1` に等しくなることに注意してください（`y` と `y1` も同様です）。
+どちらかの値の対が等しくなければ、新しいもの（`x1` か `y1`）を使うべきで、deref とコメントした節がそれを行います。
+その時点のあとは、場合を1つずつたどるだけです。
+先の表から順序を少し変えるほうが楽だと分かりましたが、各節には対応する番号をコメントしてあります。
 
 ```lisp
 (defun compile-unify-variable (x y bindings)
@@ -704,8 +704,8 @@ It turns out that it was easier to change the order slightly from the preceding 
       (t (values 't (extend-bindings x1 y1 bindings)))))) ; 8,9
 ```
 
-Take some time to understand just how this function works.
-Then go on to the following auxiliary functions:
+この関数がどう働くかを、時間をかけて理解してください。
+それから次の補助関数へ進んでください。
 
 ```lisp
 (defun bind-variables-in (exp bindings)
@@ -725,9 +725,9 @@ Then go on to the following auxiliary functions:
             b))))
 ```
 
-Now we need to integrate the new `compile-unify` into the rest of the compiler.
-The problem is that the new version takes an extra argument and returns an extra value, so all the functions that call it need to be changed.
-Let's look again at the calling sequence:
+次に、新しい `compile-unify` をコンパイラの残りに統合する必要があります。
+問題は、新しい版が追加の引数をとり追加の値を返すので、それを呼ぶすべての関数を変える必要があることです。
+呼び出しの連なりをもう一度見てみましょう。
 
 ```lisp
 prolog-compile
@@ -740,8 +740,8 @@ prolog-compile
             compile-arg
 ```
 
-First, going downward, we see that `compile-arg` needs to take a binding list as an argument, so that it can look up and substitute in the appropriate values.
-But it will not alter the binding list, so it still returns one value:
+まず下へ進むと、`compile-arg` が、適切な値を引いて差し込めるよう、束縛の並びを引数にとる必要があるのが分かります。
+しかしこれは束縛の並びを書き換えないので、なお1つの値を返します。
 
 ```lisp
 (defun compile-arg (arg bindings)
@@ -761,7 +761,7 @@ But it will not alter the binding list, so it still returns one value:
                   ,(compile-arg (rest arg) bindings)))))
 ```
 
-Now, going upward, `compile-body` needs to take a binding list and pass it on to various functions:
+次に上へ進むと、`compile-body` が束縛の並びをとり、さまざまな関数に渡す必要があります。
 
 ```lisp
 (defun compile-body (body cont bindings)
@@ -792,8 +792,8 @@ Now, going upward, `compile-body` needs to take a binding list and pass it on to
                            (bind-new-variables bindings goal))))))))))
 ```
 
-The function `bind-new-variables` takes any variables mentioned in the goal that have not been bound yet and binds these variables to themselves.
-This is because the goal, whatever it is, may bind its arguments.
+関数 `bind-new-variables` は、目標に現れるがまだ束縛されていない変数をとり、それらの変数を自分自身に束縛します。
+これは、その目標が何であれ、自分の引数を束縛するかもしれないからです。
 
 ```lisp
 (defun bind-new-variables (bindings goal)
@@ -805,7 +805,7 @@ This is because the goal, whatever it is, may bind its arguments.
 (defun self-cons (x) (cons x x))
 ```
 
-One of the functions that needs to be changed to accept a binding list is the compiler macro for `=`:
+束縛の並びを受け付けるよう変える必要のある関数の1つが、`=` のコンパイラマクロです。
 
 ```lisp
 (def-prolog-compiler-macro = (goal body cont bindings)
@@ -820,7 +820,7 @@ One of the functions that needs to be changed to accept a binding list is the co
             (compile-body body cont bindings1))))))
 ```
 
-The last step upward is to change `compile-clause` so that it starts everything off by passing in to `compile-body` a binding list with all the parameters bound to themselves:
+上へ進む最後の段階は、`compile-clause` を変えて、すべての引数を自分自身に束縛した束縛の並びを `compile-body` に渡すことで、すべてを始動させることです。
 
 ```lisp
 (defun compile-clause (parms clause cont)
@@ -835,7 +835,7 @@ The last step upward is to change `compile-clause` so that it starts everything 
       (mapcar #'self-cons parms))))                    ;***
 ```
 
-Finally, we can see the fruits of our efforts:
+ついに、私たちの努力の成果を見られます。
 
 ```lisp
 (DEFUN MEMBER/2 (?ARG1 ?ARG2 CONT)
@@ -860,25 +860,25 @@ Finally, we can see the fruits of our efforts:
             (LIKES/2 ?ARG2 'KIM CONT))))))
 ```
 
-## 12.5 Further Improvements to Unification
+## 12.5 単一化のさらなる改良
 
-Could `compile-unify` be improved yet again?
-If we insist that it call `unify!`, it seems that it can't be made much better.
-However, we could improve it by in effect compiling `unify!`.
-This is a key idea in the Warren Abstract Machine, or WAM, which is the most commonly used model for Prolog compilers.
+`compile-unify` はさらにもう一度改良できるでしょうか。
+それが `unify!` を呼ぶことにこだわるなら、たいして改善できないように見えます。
+しかし、事実上 `unify!` をコンパイルすることで改善できます。
+これはWarren抽象機械、すなわちWAMの中心的な考えです。WAMはPrologコンパイラで最もよく使われるモデルです。
 
-We call `unify!` in four cases (5, 6, 7, and 10), and in each case the first argument is a variable, and we know something about the second argument.
-But the first thing `unify!` does is redundantly test if the first argument is a variable.
-We could eliminate unnecessary tests by calling more specialized functions rather than the general-purpose function `unify!`.
-Consider this call:
+`unify!` を呼ぶのは4つの場合（5、6、7、10）で、いずれの場合も第1引数は変数であり、第2引数について何か分かっています。
+しかし `unify!` が最初にすることは、第1引数が変数かどうかを冗長に調べることです。
+汎用の関数 `unify!` ではなく、より特殊化された関数を呼ぶことで、不要な判定をなくせます。
+この呼び出しを考えてみましょう。
 
 ```lisp
 (unify! ?arg2 (cons ?arg1 (?)))
 ```
 
-If `?arg2` is an unbound variable, this code is appropriate.
-But if `?arg2` is a constant atom, we should fail immediately, without allowing `cons` and `?` to generate garbage.
-We could change the test to:
+`?arg2` が未束縛の変数なら、このコードは適切です。
+しかし `?arg2` が定数のアトムなら、`cons` と `?` にごみを生成させることなく、即座に失敗すべきです。
+判定を次のように変えられます。
 
 ```lisp
 (and (consp-or-variable-p ?arg2)
@@ -886,11 +886,11 @@ We could change the test to:
   (unify-rest! ?arg2 (?)))
 ```
 
-with suitable definitions for the functions referenced here.
-This change should speed execution time and limit the amount of garbage generated.
-Of course, it makes the generated code longer, so that could slow things down if the program ends up spending too much time bringing the code to the processor.
+ここで参照される関数の適切な定義とともに。
+この変更は実行時間を速め、生成されるごみの量を抑えるはずです。
+もちろん、これは生成されるコードを長くするので、プログラムがコードをプロセッサへ運ぶのに時間をかけすぎることになれば、かえって遅くなりえます。
 
-**Exercise  12.1 [h]** Write definitions for `consp-or-variable-p, unify-first!,` and `unify-rest!`, and change the compiler to generate code like that outlined previously.
+**練習問題 12.1 [h]** `consp-or-variable-p`、`unify-first!`、`unify-rest!` の定義を書き、先に概説したようなコードを生成するようコンパイラを変えよ。
 You might want to look at the function `compile-rule` in [section 9.6](chapter9.md#s0035), starting on [page 300](chapter9.md#p300).
 This function compiled a call to `pat-match` into individual tests; now we want to do the same thing to `unify!`.
 Run some benchmarks to compare the altered compiler to the original version.
