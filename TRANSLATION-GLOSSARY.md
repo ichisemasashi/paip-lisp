@@ -356,6 +356,27 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | goal-directed computing | 目標指向の計算 | |
 | step-relation | 継の関係 | step-parent など（練習問題11.10） |
 
+### 第12章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| success continuation | 成功継続 | 本章のコンパイラが渡すもの |
+| failure continuation | 失敗継続 | 本物のPrologが使う方式 |
+| trail | トレイル | 束縛の記録。取り消しに使う |
+| cut | カット | `!`。バックトラックを断ち切る |
+| compiler macro | コンパイラマクロ | `def-prolog-compiler-macro` |
+| arity | 項数 | `name/arity` の形で述語を識別 |
+| instantiate | 具体化する | 変数に値が定まること |
+| dereference | 参照解決 | 第11章の deref に対応 |
+| structure sharing | 構造共有 | 骨格（skeleton）とヘッダで項を表す方式 |
+| skeleton / header | 骨格／ヘッダ | 構造共有の2要素 |
+| Warren Abstract Machine (WAM) | Warren抽象機械（WAM） | 略号は原文のまま併記 |
+| byte-code interpretation | バイトコードの解釈 | |
+| native machine instructions | その計算機本来の機械語命令 | |
+| theorem prover | 定理証明器 | |
+| freeze | 「凍結」 | 練習問題12.22。述語名 `freeze` は原文のまま |
+| tracing event | トレース事象 | `call` `exit` `redo` `fail` は記号として原文のまま |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -387,6 +408,19 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | Acknowledgments | 謝辞 |
 | Appendix | 付録 |
 | Exercises / Answers | 練習問題／解答 |
+| History and References | 歴史と参考文献 |
+
+各章の図にある関数一覧表の見出しと区分ラベルも訳語を揃える。
+
+| 原文 | 訳語 |
+|---|---|
+| Function / Description | 関数／説明 |
+| Top-Level Functions / Macros | トップレベルの関数／マクロ |
+| Special Variables | 特殊変数 |
+| Data Types | データ型 |
+| Major Functions | 主要な関数 |
+| Auxiliary Functions | 補助的な関数 |
+| Previously Defined Functions / Constants | すでに定義した関数／定数 |
 
 ### 練習問題の等級
 
@@ -424,8 +458,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter11.md` | 完了 |
-| `chapter12.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter12.md` | 完了 |
+| `chapter13.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証

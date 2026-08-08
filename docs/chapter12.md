@@ -75,13 +75,13 @@ Prologインタプリタでは、未処理の目標の並び `other-goals` を�
 最上位にあるのは関数 `prolog-compile` で、シンボルをとり、そのシンボルに定義された節を見て、節を項数ごとにまとめます。
 各シンボル/項数は、`compile-predicate` によって別々のLisp関数にコンパイルされます。
 
-| Function                    | Description                                                |
+| 関数                        | 説明                                                       |
 |-----------------------------|------------------------------------------------------------|
-|                             | **Top-Level Functions**                                    |
+|                             | **トップレベルの関数**                                     |
 | `?-`                        | 問い合わせを行うが、まずすべてをコンパイルする。            |
-|                             | **Special Variables**                                      |
+|                             | **特殊変数**                                               |
 | `*trail*`                   | ここまでに行われたすべての束縛の並び。                      |
-|                             | **Major Functions**                                        |
+|                             | **主要な関数**                                             |
 | `top-level-prove`           | まずすべてをコンパイルする新しい版。                        |
 | `run-prolog`                | すべてをコンパイルしてProlog関数を呼ぶ。                    |
 | `prolog-compile-symbols`    | Prologのシンボルの並びをコンパイルする。                    |
@@ -92,7 +92,7 @@ Prologインタプリタでは、未処理の目標の並び `other-goals` を�
 | `compile-call`              | Prologの述語への呼び出しをコンパイルする。                  |
 | `compile-arg`               | 本体の目標への引数のコードを生成する。                      |
 | `compile-unify`             | var と項が単一化するかを調べるコードを返す。                |
-|                             | **Auxiliary Functions**                                    |
+|                             | **補助的な関数**                                           |
 | `clauses-with-arity`        | 頭部が与えた項数を持つすべての節を返す。                    |
 | `relation-arity`            | 関係への引数の数。                                          |
 | `args`                      | 関係の引数。                                                |
@@ -113,7 +113,7 @@ Prologインタプリタでは、未処理の目標の並び `other-goals` を�
 | `follow-binding`            | bindings に従って `var` の最終的な束縛を得る。              |
 | `bind-new-variables`        | 未束縛の変数を含むよう bindings を拡張する。                |
 | `ignore`                    | 何もしない — 引数を無視する。                               |
-|                             | **Previously Defined Functions**                           |
+|                             | **すでに定義した関数**                                     |
 | `unify!`                    | 破壊的な単一化（11.6節を参照）。                            |
 | `undo-bindings!`            | トレイルを使ってバックトラックし、束縛を取り消す。          |
 | `binding-val`               | var/val の束縛から値の部分を取り出す。                      |
@@ -1645,7 +1645,7 @@ Lispの構文を使う他のProlog実装には、micro-Prolog、Symbolics Prolog
 とはいえ、たいていの処理系はここにまとめた記法に従っています。
 これらは、David H.
 D.
-Warrenと彼の同僚がDEC-10向けにエジンバラ大学で開発したPrologに由来します。
+Warrenとその同僚がDEC-10向けにエジンバラ大学で開発したPrologに由来します。
 前節の基本手続きの名前も、エジンバラPrologから取ったものです。
 
 |           | Prolog          | Lisp上のProlog        |
@@ -1668,100 +1668,100 @@ Warrenと彼の同僚がDEC-10向けにエジンバラ大学で開発したProlo
 本物のPrologではコンスセルが提供されますが、項はふつうリストではなく*構造体*から組み立てられます。
 Prologの項 `p(a,b)` は、リスト `(p a b)` ではなくLispのベクタ `#(p/2 a b)` に対応します。
 少数のProlog実装は*構造共有*を使います。この方式では、アトムでないすべての項が、変数のためのプレースホルダを含む骨格と、その骨格を指し、プレースホルダを埋める変数も含むヘッダとで表されます。
-With structure sharing, making a copy is easy: just copy the header, regardless of the size of the skeleton.
-However, manipulating terms is complicated by the need to keep track of both skeleton and header.
-See [Boyer and Moore 1972](bibliography.md#bb0110) for more on structure sharing.
+構造共有では、複製を作るのは簡単です。骨格の大きさによらず、ヘッダを複製するだけで済みます。
+しかし項を操作するほうは、骨格とヘッダの両方を追いかけなければならないぶん厄介になります。
+構造共有については[Boyer and Moore 1972](bibliography.md#bb0110)を参照してください。
 
-Another major difference is that real Prolog uses the equivalent of failure continuations, not success continuations.
-No actual continuation, in the sense of a closure, is built.
-Instead, when a choice is made, the address of the code for the next choice is pushed on a stack.
-Upon failure, the next choice is popped off the stack.
-This is reminiscent of the backtracking approach using Scheme's `call/cc` facility outlined on [page 772](chapter22.md#p772).
+もう一つの大きな違いは、本物のPrologが成功継続ではなく、失敗継続にあたるものを使うことです。
+クロージャという意味での継続が実際に組み立てられるわけではありません。
+そうではなく、選択が行われたときに、次の選択肢のコードのアドレスがスタックに積まれます。
+失敗すると、次の選択肢がスタックから取り出されます。
+これは、[772ページ](chapter22.md#p772)で概略を述べる、Schemeの `call/cc` 機能を使ったバックトラックのやり方を思わせます。
 
-**Exercise  12.15 [m]** Assuming an approach using a stack of failure continuations instead of success continuations, show what the code for `p` and `member` would look like.
-Note that you need not pass failure continuations around; you can just push them onto a stack that `top-level-prove` will invoke.
-How would the cut be implemented?
-Did we make the right choice in implementing our compiler with success continuations, or would failure continuations have been better?
+**練習問題 12.15 [m]** 成功継続ではなく失敗継続のスタックを使う方式を想定して、`p` と `member` のコードがどうなるかを示せ。
+失敗継続を引き回す必要はないことに注意せよ。`top-level-prove` が呼び出すスタックに積むだけでよい。
+カットはどう実装することになるか。
+コンパイラを成功継続で実装したのは正しい選択だったか。それとも失敗継続のほうがよかったか。
 
-## 12.11 History and References
+## 12.11 歴史と参考文献
 
-As described in [chapter 11](chapter11.md), the idea of logic programming was fairly well understood by the mid-1970s.
-But because the implementations of that time were slow, logic programming did not catch on.
-It was the Prolog compiler for the DEC-10 that made logic programming a serious alternative to Lisp and other general-purpose languages.
-The compiler was developed in 1977 by David H.
+[第11章](chapter11.md)で述べたとおり、論理プログラミングの考え方は1970年代半ばにはかなりよく理解されていました。
+しかし当時の実装が遅かったために、論理プログラミングは広まりませんでした。
+論理プログラミングを、Lispをはじめとする汎用言語に対する本気の選択肢にしたのは、DEC-10向けのPrologコンパイラでした。
+このコンパイラは1977年に、David H.
 D.
-Warren with Fernando Pereira and Luis Pereira.
-See the paper by [Warren (1979)](bibliography.md#bb1325) and by all three (1977).
+WarrenがFernando Pereira、Luis Pereiraとともに開発しました。
+[Warren（1979）](bibliography.md#bb1325)の論文と、3人による論文（1977）を参照してください。
 
-Unfortunately, David H.
+残念ながら、Prologのコンパイルに関するDavid H.
 D.
-Warren's pioneering work on compiling Prolog has never been published in a widely accessible form.
-His main contribution was the description of the Warren Abstract Machine (WAM), an instruction set for compiled Prolog.
-Most existing compilers use this instruction set, or a slight modification of it.
-This can be done either through byte-code interpretation or through macroexpansion to native machine instructions.
-[A&iuml;t-Kaci 1991](bibliography.md#bb0020) provides a good tutorial on the WAM, much less terse than the original ([Warren 1983](bibliography.md#bb1330)).
-The compiler presented in this chapter does not use the WAM.
-Instead, it is modeled after Mark [Stickel's (1988)](bibliography.md#bb1200) theorem prover.
-A similar compiler is briefly sketched by Jacques [Cohen 1985](bibliography.md#bb0225).
+Warrenの先駆的な仕事は、広く手に取れる形で公刊されたことがありません。
+その最大の貢献は、コンパイルされたPrologのための命令セットであるWarren抽象機械（WAM）を記述したことでした。
+現存するコンパイラのほとんどは、この命令セットか、それを少し変えたものを使っています。
+これはバイトコードの解釈によって行うことも、その計算機本来の機械語命令へのマクロ展開によって行うこともできます。
+[A&iuml;t-Kaci 1991](bibliography.md#bb0020)はWAMのよい入門になっており、原典（[Warren 1983](bibliography.md#bb1330)）よりずっと丁寧です。
+本章で示したコンパイラはWAMを使っていません。
+そうではなく、Mark [Stickelの（1988）](bibliography.md#bb1200)定理証明器を手本にしています。
+よく似たコンパイラが、Jacques [Cohen 1985](bibliography.md#bb0225)で簡単に素描されています。
 
-## 12.12 Exercises
+## 12.12 練習問題
 
-**Exercise  12.16 [m]** Change the Prolog compiler to allow implicit `calls`.
-That is, if a goal is not a cons cell headed by a predicate, compile it as if it were a `call`.
-The clause:
+**練習問題 12.16 [m]** 暗黙の `calls` を許すよう、Prologコンパイラを変えよ。
+すなわち、目標が述語を先頭に持つコンスセルでない場合は、それが `call` であるかのようにコンパイルする。
+次の節は、
 
 ```lisp
 (<- (p ?x ?y) (?x c) ?y)
 ```
 
-should be compiled as if it were:
+次のものであるかのようにコンパイルされるべきである。
 
 ```lisp
 (<- (p ?x ?y) (call (?x c)) (call ?y))
 ```
 
-**Exercise  12.17 [h]** Here are some standard Prolog primitives:
+**練習問題 12.17 [h]** 標準的なPrologの基本手続きをいくつか挙げる。
 
-*   `get/1` Read a single character and unify it with the argument.
+*   `get/1` 文字を1つ読み込み、引数と単一化する。
 
-*   `put/1` Print a single character.
+*   `put/1` 文字を1つ表示する。
 
-*   `nonvar/1, /=, /==` The opposites of `var, = and = =` , respectively.
+*   `nonvar/1, /=, /==` それぞれ `var, = and = =` の逆。
 
-*   `integer/1` True if the argument is an integer.
+*   `integer/1` 引数が整数なら真。
 
-*   `atom/1` True if the argument is a symbol (like Lisp's `symbol p`).
+*   `atom/1` 引数がシンボルなら真（Lispの `symbol p` にあたる）。
 
-*   `atomic/1` True if the argument is a number or symbol (like Lisp's `atom`).
+*   `atomic/1` 引数が数かシンボルなら真（Lispの `atom` にあたる）。
 
-*   `<`, `>`, `=<`, `>=` Arithmetic comparison; succeeds when the arguments are both instantiated to numbers and the comparison is true.
+*   `<`, `>`, `=<`, `>=` 算術比較。引数がどちらも数に具体化されていて、比較が真のときに成功する。
 
-*   `listing/0` Print out the clauses for all defined predicates.
+*   `listing/0` 定義済みのすべての述語について、その節を書き出す。
 
-*   `listing/1` Print out the clauses for the argument predicate.
+*   `listing/1` 引数で与えた述語について、その節を書き出す。
 
-Implement these predicates.
-In each case, decide if the predicate should be implemented as a primitive or a list of clauses, and if it should have a compiler macro.
+これらの述語を実装せよ。
+それぞれについて、基本手続きとして実装すべきか節の並びとして実装すべきか、またコンパイラマクロを持たせるべきかを判断せよ。
 
-There are some naming conflicts that need to be resolved.
-Terms like `atom` have one meaning in Prolog and another in Lisp.
-Also, in Prolog the normal notation is `\=` and `\==`, not `/=` and `/==`.
-For Prolog-In-Lisp, you need to decide which notations to use: Prolog's or Lisp's.
+解決しなければならない名前の衝突がいくつかある。
+`atom` のような用語は、Prologでの意味とLispでの意味が違う。
+また、Prologでふつうに使う記法は `/=` と `/==` ではなく `\=` と `\==` である。
+Prolog-In-Lispでは、Prologの記法とLispの記法のどちらを使うかを決める必要がある。
 
-**Exercise  12.18 [s]** In Lisp, we are used to writing n-ary calls like `(< 1 n 10 )` or `(= x y z)`.
-Write compiler macros that expand n-ary calls into a series of binary calls.
-For example, `(< 1 n 10)` should expand into `(and (< 1 n) (< n 10))`.
+**練習問題 12.18 [s]** Lispでは、`(< 1 n 10 )` や `(= x y z)` のようなn引数の呼び出しを書き慣れている。
+n引数の呼び出しを2引数の呼び出しの連なりに展開するコンパイラマクロを書け。
+たとえば `(< 1 n 10)` は `(and (< 1 n) (< n 10))` に展開されるべきである。
 
-**Exercise  12.19 [m]** One feature of Lisp that is absent in Prolog is the `quote` mechanism.
-Is there a use for `quote?` If so, implement it; if not, explain why it is not needed.
+**練習問題 12.19 [m]** LispにあってPrologにない機能の一つが `quote` の仕組みである。
+`quote?` に使い道はあるか。あるなら実装し、ないならなぜ必要ないのかを説明せよ。
 
-**Exercise  12.20 [h]** Write a tracing mechanism for Prolog.
-Add procedures `p-trace` and `p-untrace` to trace and untrace Prolog predicates.
-Add code to the compiler to generate calls to a printing procedure for goals that are traced.
-In Lisp, we have to trace procedures when they are called and when they return.
-In Prolog, there are four cases to consider: the call, successful completion, backtrack into subsequent clauses, and failure with no more clauses.
-We will call these four cases `call`, `exit`, `redo`, and `fail`, respectively.
-If we traced `member,` we would expect tracing output to look something like this:
+**練習問題 12.20 [h]** Prolog用のトレースの仕組みを書け。
+Prologの述語のトレースを始める／やめるための手続き `p-trace` と `p-untrace` を加えよ。
+トレース対象の目標について、表示用の手続きへの呼び出しを生成するコードをコンパイラに加えよ。
+Lispでは、手続きが呼ばれたときと戻ったときにトレースすればよい。
+Prologでは考えるべき場合が4つある。呼び出し、成功しての完了、後続の節へのバックトラック、そしてもう節がなくなっての失敗である。
+この4つの場合を、それぞれ `call`、`exit`、`redo`、`fail` と呼ぶことにする。
+`member` をトレースしたなら、トレースの出力は次のようなものになるはずである。
 
 ```lisp
 > (?- (member ?x (a b c d)) (fail))
@@ -1787,23 +1787,23 @@ If we traced `member,` we would expect tracing output to look something like thi
 No.
 ```
 
-**Exercise  12.21 [m]** Some Lisp systems are very slow at compiling functions.
-`KCL` is an example; it compiles by translating to `C` and then calling the `C` compiler and assembler.
-In `KCL` it is best to compile only code that is completely debugged, and run interpreted while developing a program.
+**練習問題 12.21 [m]** Lispシステムのなかには、関数のコンパイルがひどく遅いものがある。
+`KCL` がその例である。`C` に変換してから `C` のコンパイラとアセンブラを呼ぶことでコンパイルする。
+`KCL` では、完全にデバッグの済んだコードだけをコンパイルし、プログラムの開発中はインタプリタで走らせるのが一番よい。
 
-Alter the Prolog compiler so that calling the Lisp compiler is optional.
-In all cases, Prolog functions are translated into Lisp, but they are only compiled to machine language when a variable is set.
+Lispのコンパイラを呼ぶかどうかを選べるよう、Prologコンパイラを変えよ。
+どの場合もPrologの関数はLispに変換されるが、機械語にコンパイルされるのは、ある変数がセットされているときだけとする。
 
-**Exercise  12.22 [d]** Some Prolog systems provide the predicate `freeze` to "freeze" a goal until its variables are instantiated.
-For example, the goal `(freeze x (> x 0))` is interpreted as follows: if `x` is instantiated, then just evaluate the goal `(> x 0)`, and succeed or fail depending on the result.
-However, if `x` is unbound, then succeed and continue the computation, but remember the goal `(> x 0)` and evaluate it as soon as `x` becomes instantiated.
-Implement `freeze`.
+**練習問題 12.22 [d]** Prologシステムのなかには、目標をその変数が具体化されるまで「凍結」しておくための述語 `freeze` を備えたものがある。
+たとえば目標 `(freeze x (> x 0))` は次のように解釈される。`x` が具体化されていれば、目標 `(> x 0)` をそのまま評価し、その結果に応じて成功または失敗する。
+一方、`x` が未束縛なら、成功して計算を続けるが、目標 `(> x 0)` を覚えておき、`x` が具体化された時点でそれを評価する。
+`freeze` を実装せよ。
 
-**Exercise  12.23 [m]** Write a recursive version of `anonymous-variables-in` that does not use a local function.
+**練習問題 12.23 [m]** 局所関数を使わない、再帰版の `anonymous-variables-in` を書け。
 
-## 12.13 Answers
+## 12.13 解答
 
-**Answer 12.6** Here's a version that works for Texas Instruments and Lucid implementations:
+**解答 12.6** Texas InstrumentsとLucidの実装で動く版を示す。
 
 ```lisp
 (defmacro with-compilation-unit (options &body body)
@@ -1823,15 +1823,15 @@ Implement `freeze`.
   (setf *uncompiled* (set-difference *uncompiled* symbols))))
 ```
 
-**Answer 12.9** Macros for `and` and `or` are very important, since these are commonly used.
-The macro for `and` is trivial:
+**解答 12.9** `and` と `or` のマクロは、これらがよく使われるだけにとても重要である。
+`and` のマクロは自明である。
 
 ```lisp
 (def-prolog-compiler-macro and (goal body cont bindings)
   (compile-body (append (args goal) body) cont bindings))
 ```
 
-The macro for `or` is trickier:
+`or` のマクロはもう少し込み入っている。
 
 ```lisp
 (def-prolog-compiler-macro or (goal body cont bindings)
@@ -1847,8 +1847,8 @@ The macro for `or` is trickier:
                 bindings)))))))))
 ```
 
-**Answer 12.11** `true/0` is `funcall`: when a goal succeeds, we call the continuation, `fail/0` is `ignore`: when a goal fails, we ignore the continuation.
-We could also define compiler macros for these primitives:
+**解答 12.11** `true/0` は `funcall` である。目標が成功したら継続を呼ぶ。`fail/0` は `ignore` である。目標が失敗したら継続を無視する。
+これらの基本手続きにコンパイラマクロを定義することもできる。
 
 ```lisp
 (def-prolog-compiler-macro true (goal body cont bindings)
@@ -1859,7 +1859,7 @@ We could also define compiler macros for these primitives:
   nil)
 ```
 
-**Answer 12.13**
+**解答 12.13**
 
 ```lisp
 (defun deref-copy (exp)
@@ -1884,12 +1884,12 @@ We could also define compiler macros for these primitives:
     (walk exp))))
 ```
 
-**Answer 12.14** In the first clause of `test-cut`, all four calls to `p` will succeed via the first clause of `p`.
-Then backtracking will occur over the calls to `(p c)` and `(p d)`.
-All four combinations of `1` and `2` succeed.
-After that, backtracking would normally go back to the call to `(p b)`.
-But the cut prevents this, and the whole `(test-cut)` goal fails, without ever considering the second clause.
-Here's the actual output:
+**解答 12.14** `test-cut` の最初の節では、`p` への4つの呼び出しがすべて `p` の最初の節によって成功する。
+その後、`(p c)` と `(p d)` の呼び出しについてバックトラックが起こる。
+`1` と `2` の4通りの組み合わせがすべて成功する。
+そのあと、ふつうならバックトラックは `(p b)` の呼び出しまで戻るはずである。
+しかしカットがそれを妨げ、`(test-cut)` の目標全体が、2番目の節を検討することもないまま失敗する。
+実際の出力は次のとおり。
 
 ```lisp
 (?- (test-cut))
@@ -1904,7 +1904,7 @@ Yes;
 No.
 ```
 
-**Answer 12.17** For example:
+**解答 12.17** たとえば次のようになる。
 
 ```lisp
 (defun >/2 (x y cont)
@@ -1915,12 +1915,12 @@ No.
     (funcall cont)))
 ```
 
-**Answer 12.19** Lisp uses `quote` in two ways: to distinguish a symbol from the value of the variable represented by that symbol, and to distinguish a literal list from the value that would be returned by evaluating a function call.
-The first distinction Prolog makes by a lexical convention: variables begin with a question mark in our Prolog, and they are capitalized in real Prolog.
-The second distinction is not necessary because Prolog is relational rather than functional.
-An expression is a goal if it is a member of the body of a clause, and is a literal if it is an argument to a goal.
+**解答 12.19** Lispは `quote` を2通りに使う。一つはシンボルを、そのシンボルが表す変数の値と区別するため、もう一つはリテラルのリストを、関数呼び出しを評価したときに返る値と区別するためである。
+一つ目の区別を、Prologは字面の約束事でつける。私たちのPrologでは変数は疑問符で始まり、本物のPrologでは大文字で始まる。
+二つ目の区別は、Prologが関数的ではなく関係的であるために必要ない。
+式は、節の本体の要素であれば目標であり、目標への引数であればリテラルである。
 
-**Answer 12.20** Hint: Here's how `member` could be augmented with calls to a procedure, `prolog-trace`, which will print information about the four kinds of tracing events:
+**解答 12.20** ヒント。4種類のトレース事象についての情報を表示する手続き `prolog-trace` への呼び出しで `member` を補強すると、次のようになる。
 
 ```lisp
 (defun member/2 (?arg1 ?arg2 cont)
@@ -1939,7 +1939,7 @@ An expression is a goal if it is a member of the body of a clause, and is a lite
   (prolog-trace 'fail 'member ?arg1 ?arg2)))
 ```
 
-The definition of `prolog-trace` is:
+`prolog-trace` の定義は次のとおり。
 
 ```lisp
 (defvar *prolog-trace-indent* 0)
@@ -1952,7 +1952,7 @@ The definition of `prolog-trace` is:
   (decf *prolog-trace-indent* 3)))
 ```
 
-**Answer 12.23**
+**解答 12.23**
 
 ```lisp
 (defun anonymous-variables-in (tree)
