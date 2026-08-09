@@ -501,6 +501,32 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | culture | 培養 | 検体を培養したもの |
 | organism | 微生物 | 本章では感染性の細菌 |
 
+### 第17章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| line-diagram labeling | 線画のラベル付け | 章題 |
+| constraint satisfaction | 制約充足 | |
+| constraint propagation | 制約伝播 | Waltzが導入 |
+| labeling | ラベル付け | 過程も、ラベルの並び1つ分も同じ語。原文の用法に合わせた |
+| robotics | ロボット工学 | |
+| computer vision | 計算機視覚 | 本書の「計算機」の訳し方に揃えた |
+| low-level / high-level vision | 低水準／高水準の視覚 | |
+| polyhedron | 多面体 | |
+| trihedral / quad-hedral vertex | 三面頂点／四面の頂点 | 3つ（4つ）の面が交わる頂点 |
+| vertex / face / edge | 頂点／面／辺 | |
+| convex / concave line | 凸線／凹線 | `+` と `-` |
+| boundary line | 境界線 | 矢印。多面体と背景の境目 |
+| occluding line | 遮蔽する線 | |
+| accidental vertex | 偶然の頂点 | 視点のせいでたまたま重なって見える交わり |
+| fork / arrow | フォーク／アロー | Y頂点・W頂点の別名 |
+| grounded line | 接地線 | 地面との継ぎ目。`ground` 関数 |
+| ambiguous / unambiguous | あいまい／あいまいでない | 頂点のラベル付けが複数か1つか |
+| poiuyt | ポイユット | ありえない図形の通称。音写した |
+| Waltz filtering | ウォルツのフィルタリング | |
+| texture | 肌理 | 低水準の視覚が検出するもの |
+| pixel | 画素 | |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -582,8 +608,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter16.md` | 完了 |
-| `chapter17.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter17.md` | 完了 |
+| `chapter18.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
