@@ -470,6 +470,37 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | normalize | 正規化する | `normalize-poly`。標準形（canonical）とは別語 |
 | cdr-coding | cdr符号化 | 脚注。リストの記憶を詰める古い技法 |
 
+### 第16章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| expert system | エキスパートシステム | |
+| knowledge-based system | 知識ベースシステム | |
+| expert-system shell | エキスパートシステムのシェル | |
+| certainty factor (cf) | 確信度 | -1（偽）から+1（真）までの数 |
+| cache | ためる | 節見出しに合わせた。名詞形が要る箇所は文で言い換える |
+| context | 文脈 | EMYCINでは実質データ型。文脈の木をなす |
+| instance / parameter | インスタンス／パラメータ | 対象とその属性 |
+| premise / conclusion | 前提／結論 | 規則の2部分 |
+| rule base | 規則ベース | |
+| knowledge engineer | 知識エンジニア | 専門家とシェルのあいだに立つ人 |
+| client | 依頼者 | できあがったシステムを使う最終利用者 |
+| finding | 所見 | `report-findings` |
+| prompt | 問いかけ | 動詞は「問いかける」 |
+| unity path | ユニティパス | 確信度1に至る経路。原語のまま音写 |
+| antecedent rule | 先行規則 | 質問より先に走る規則 |
+| default rule | 既定の規則 | 他の規則が値を定められなかったときに埋める |
+| Dempster-Shafer theory | デンプスター＝シェイファーの理論 | 確率の下限と上限の区間で表す |
+| fuzzy set theory | ファジィ集合論 | Zadeh |
+| Bayes's law / Bayesian | ベイズの法則／ベイズ主義者 | |
+| conditional probability | 条件付き確率 | |
+| compromised host | 易感染宿主 | 医学の定訳 |
+| gram-negative / gram-positive | グラム陰性／グラム陽性 | |
+| rod / coccus | 桿菌／球菌 | |
+| aerobic / anaerobic | 好気性／嫌気性 | |
+| culture | 培養 | 検体を培養したもの |
+| organism | 微生物 | 本章では感染性の細菌 |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -551,8 +582,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter15.md` | 完了 |
-| `chapter16.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter16.md` | 完了 |
+| `chapter17.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
