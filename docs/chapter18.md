@@ -1,119 +1,119 @@
-# Chapter 18
-## Search and the Game of Othello
+# 第18章
+## 探索とオセロ
 
-> In the beginner's mind there are endless possibilities; in the expert's there are few.
+> 初心者の心には限りない可能性がある。熟練者の心にはわずかしかない。
 
-> -Suzuki Roshi, Zen Master
+> —鈴木老師（禅僧）
 
-Game playing has been the target of much early work in AI for three reasons.
-First, the rules of most games are formalized, and they can be implemented in a computer program rather easily.
-Second, in many games the interface requirements are trivial.
-The computer need only print out its moves and read in the opponent's moves.
-This is true for games like chess and checkers, but not for ping-pong and basketball, where vision and motor skills are crucial.
-Third, playing a good game of chess is considered by many an intellectual achievement.
-Newell, Shaw, and Simon say, "Chess is the intellectual game *par excellence*," and Donald Michie called chess the "*Drosophila melanogaster* of machine intelligence," meaning that chess is a relatively simple yet interesting domain that can lead to advances in AI, just as study of the fruit fly served to advance biology.
+ゲームをすることは、3つの理由から初期のAIの仕事の多くで目標とされてきました。
+第一に、たいていのゲームの規則は形式化されていて、計算機のプログラムとしてかなり容易に実装できます。
+第二に、多くのゲームでは入出力に求められるものがごくわずかです。
+計算機は自分の手を書き出し、相手の手を読み込むだけで済みます。
+これはチェスやチェッカーのようなゲームには当てはまりますが、視覚と運動の技能が決定的に効く卓球やバスケットボールには当てはまりません。
+第三に、チェスをうまく指すことは、多くの人に知的な達成と見なされています。
+Newell、Shaw、Simonは「チェスは*卓越した*知的ゲームである」と述べ、Donald Michieはチェスを「機械知能の*キイロショウジョウバエ*」と呼びました。ショウジョウバエの研究が生物学を進めたのと同じく、チェスは比較的単純でありながら興味深い領域で、AIの前進につながりうる、という意味です。
 
-Today there is less emphasis on game playing in AI.
-It has been realized that techniques that work well in the limited domain of a board game do not necessarily lead to intelligent behavior in other domains.
-Also, as it turns out, the techniques that allow computers to play well are not the same as the techniques that good human players use.
-Humans are capable of recognizing abstract patterns learned from previous games, and formulating plans of attack and defense.
-While some computer programs try to emulate this approach, the more successful programs work by rapidly searching thousands of possible sequences of moves, making fairly superficial evaluations of the worth of each sequence.
+今日、AIにおいてゲームをすることの比重は下がっています。
+盤上のゲームという限られた領域でうまく働く技法が、他の領域での知的な振る舞いに必ずしもつながらないと気づかれたからです。
+また、計算機にうまく指させる技法は、人間の上級者が使う技法とは違うこともわかりました。
+人間は、過去の対局から学んだ抽象的なパターンを見て取り、攻めと守りの計画を立てられます。
+この方式をまねようとする計算機プログラムもありますが、より成功しているプログラムは、ありうる手順を何千通りも高速に探索し、各手順の値打ちをかなり表面的に評価することで働いています。
 
-While much previous work on game playing has concentrated on chess and checkers, this chapter demonstrates a program to play the game of Othello.<a id="tfn18-1"></a><sup>[1](#fn18-1)</sup>
-Othello is a variation on the nineteenth-century game Reversi.
-It is an easy game to program because the rules are simpler than chess.
-Othello is also a rewarding game to program, because a simple search technique can yield an excellent player.
-There are two reasons for this.
-First, the number of legal moves per turn is low, so the search is not too explosive.
-Second, a single Othello move can flip a dozen or more opponent pieces.
-This makes it difficult for human players to visualize the long-range consequences of a move.
-Search-based programs are not confused, and thus do well relative to humans.
+ゲームについてのこれまでの仕事の多くはチェスとチェッカーに集中してきましたが、本章ではオセロを指すプログラムを示します。<a id="tfn18-1"></a><sup>[1](#fn18-1)</sup>
+オセロは19世紀のゲーム、リバーシの変種です。
+規則がチェスより単純なので、プログラムにしやすいゲームです。
+また、単純な探索の技法で優れた打ち手が得られるので、プログラムする甲斐のあるゲームでもあります。
+これには2つの理由があります。
+第一に、1手番あたりの合法手の数が少ないので、探索がそれほど爆発しません。
+第二に、オセロでは1手で相手の石を10個以上裏返せることがあります。
+そのため人間の打ち手には、ある手の先々の帰結を思い描くのが難しくなります。
+探索にもとづくプログラムは混乱しないので、人間に対して良い成績を上げます。
 
-The very name "Othello" derives from the fact that the game is so unpredictable, like the Moor of Venice.
-The name may also be an allusion to the line, "Your daughter and the Moor are now making the beast with two backs,"<a id="tfn18-2"></a><sup>[2](#fn18-2)</sup>
- since the game pieces do indeed have two backs, one white and one black.
-In any case, the association between the game and the play carries over to the name of several programs: Cassio, Iago, and Bill.
-The last two will be discussed in this chapter.
-They are equal to or better than even champion human players.
-We will be able to develop a simplified version that is not quite a champion but is much better than beginning players.
+「オセロ」という名前そのものが、このゲームがヴェニスのムーア人のように読みがたいことに由来しています。
+この名前は、劇中の「あなたの娘とムーア人が、いま背中を2つ持つ獣になっている」という台詞をほのめかしてもいるのかもしれません。<a id="tfn18-2"></a><sup>[2](#fn18-2)</sup>
+ ゲームの石は実際、白と黒という2つの背中を持っているのですから。
+いずれにせよ、ゲームと戯曲の結びつきは、いくつかのプログラムの名前にも受け継がれています。Cassio、Iago、Billです。
+後ろの2つは本章で取り上げます。
+これらは人間の優勝者に匹敵するか、それ以上の強さです。
+本章では、優勝者には届かないものの初心者よりはるかに強い、簡略版を作れるでしょう。
 
-## 18.1 The Rules of the Game
+## 18.1 ゲームの規則
 
-Othello is played on a 8-by-8 board, which is initially set up with four pieces in the center, as shown in [figure 18.1](#f0010).
-The two players, black and white, alternate turns, with black playing first.
-On each turn, a player places a single piece of his own color on the board.
-No piece can be moved once it is placed, but subsequent moves may flip a piece from one color to another.
-Each piece must be placed so that it *brackets* one or more opponent pieces.
-That is, when black plays a piece there must be a line (horizontal, vertical, or diagonal) that goes through the piece just played, then through one or more white pieces, and then to another black piece.
-The intervening white pieces are flipped over to black.
-If there are bracketed white pieces in more than one direction, they are all flipped.
-[Figure 18.2 (a)](#f0015) indicates the legal moves for black with small dots.
-[Figure 18.2 (b)](#f0015) shows the position after black moves to square b4.
-Players alternate turns, except that a player who has no legal moves must pass.
-When neither player has any moves, the game is over, and the player with the most pieces on the board wins.
-This usually happens because there are no empty squares left, but it occasionally happens earlier in the game.
+オセロは8×8の盤で指します。[図18.1](#f0010)に示すとおり、最初は中央に4つの石が置かれています。
+黒と白の2人の打ち手が交互に手番を取り、黒が先手です。
+各手番で、打ち手は自分の色の石を1つ盤に置きます。
+いったん置かれた石は動かせませんが、その後の手で色が裏返ることはあります。
+石は、相手の石を1つ以上*挟む*ように置かねばなりません。
+つまり黒が石を打つとき、いま打った石を通り、白の石を1つ以上通り、そして別の黒の石に至る線（縦・横・斜め）がなければなりません。
+あいだにある白の石は黒に裏返されます。
+複数の方向で白の石が挟まれていれば、そのすべてが裏返ります。
+[図18.2 (a)](#f0015)は、黒の合法手を小さな点で示しています。
+[図18.2 (b)](#f0015)は、黒がb4のマスに打ったあとの局面です。
+打ち手は交互に手番を取りますが、合法手がない打ち手はパスしなければなりません。
+どちらの打ち手にも手がなくなればゲームは終わり、盤上の石が多いほうが勝ちです。
+これはたいてい空きマスがなくなるからですが、ときにはもっと早く起こることもあります。
 
 | <a id="fig-18-01"></a>[]() |
 |---|
 | <img src="images/chapter18/fig-18-01.svg" onerror="this.src='images/chapter18/fig-18-01.png'; this.onerror=null;" alt="Figure 18.1" /> |
-| **Figure 18.1: The Othello Board** |
+| **図18.1: オセロの盤** |
 
 | <a id="fig-18-02"></a>[]() |
 |---|
 | <img src="images/chapter18/fig-18-02.svg" onerror="this.src='images/chapter18/fig-18-02.png'; this.onerror=null;" alt="Figure 18.2" /> |
-| **Figure 18.2: Legal Othello Moves** |
+| **図18.2: オセロの合法手** |
 
-## 18.2 Representation Choices
+## 18.2 表現の選択
 
-In developing an Othello program, we will want to test out various strategies, playing those strategies against each other and against human players.
-We may also want our program to allow two humans to play a game.
-Therefore, our main function, `othello`, will be a monitoring function that takes as arguments two strategies.
-It uses these strategies to get each player's moves, and then applies these moves to a representation of the game board, perhaps printing out the board as it goes.
+オセロのプログラムを作るにあたっては、さまざまな戦略を試し、それらを互いに、また人間の打ち手と対戦させたくなるでしょう。
+人間どうしで対局できるようにもしたいかもしれません。
+ですから主関数 `othello` は、2つの戦略を引数に取る進行役の関数にします。
+この戦略を使って各打ち手の手を得て、その手を盤の表現に適用し、進行にあわせて盤を表示することもあります。
 
-The first choice to make is how to represent the board and the pieces on it.
-The board is an 8-by-8 square, and each square can be filled by a black or white piece or can be empty.
-Thus, an obvious representation choice is to make the board an 8-by-8 array, where each element of the array is the symbol `black, white,` or `nil`.
+最初に決めるべきは、盤とその上の石をどう表現するかです。
+盤は8×8の正方形で、各マスは黒か白の石で埋まっているか、空いているかのいずれかです。
+ですから、すぐ思いつく表現は、盤を8×8の配列にし、各要素をシンボル `black, white`、`nil` のいずれかにすることです。
 
-Notice what is happening here: we are following the usual Lisp convention of implementing an *enumerated type* (the type of pieces that can fill a square) as a set of symbols.
-This is an appropriate representation because it supports the primary operation on elements of an enumerated type: test for equality using eq.
-It also supports input and output quite handily.
+ここで何が起きているかに注目してください。*列挙型*（マスを埋めうる石の型）をシンボルの集まりとして実装するという、Lispのいつもの約束に従っているのです。
+これが適切な表現なのは、列挙型の要素に対する主要な操作、すなわち eq による等価性の検査を支えるからです。
+入出力も具合よく扱えます。
 
-In many other languages (such as C or Pascal), enumerated types are implemented as integers.
-In Pascal one could declare:
+他の多くの言語（CやPascalなど）では、列挙型は整数として実装されます。
+Pascalなら次のように宣言できます。
 
 ```lisp
 type piece = (black, white, empty);
 ```
 
-to define `piece` as a set of three elements that is treated as a subtype of the integers.
-The language does not allow for direct input and output of such types, but equality can be checked.
-An advantage of this approach is that an element can be packed into a small space.
-In the Othello domain, we anticipate that efficiency will be important, because one way to pick a good move is to look at a large number of possible sequences of moves, and choose a sequence that leads toward a favorable result.
-Thus, we are willing to look hard at alternative representations to find an efficient one.
-It takes only two bits to represent one of the three possible types, while it takes many more (perhaps 32) to represent a symbol.
-Thus, we may save space by representing pieces as small integers rather than symbols.
+これは `piece` を、整数の下位型として扱われる3要素の集合として定義するものです。
+この言語ではそうした型を直に入出力できませんが、等価性は調べられます。
+この方式の利点は、要素を小さな場所に詰め込めることです。
+オセロの領域では効率が重要になると見込まれます。良い手を選ぶ1つのやり方が、ありうる手順を大量に見て、好ましい結果に向かう手順を選ぶことだからです。
+ですから、効率のよいものを見つけるために別の表現をじっくり検討する値打ちがあります。
+3つの型のいずれかを表すのに必要なのは2ビットだけですが、シンボルを表すにはずっと多く（おそらく32ビット）かかります。
+ですから、石をシンボルではなく小さな整数として表せば場所を節約できます。
 
-Next, we consider the board.
-The two-dimensional array seems like such an obvious choice that it is hard to imagine a better representation.
-We could consider an 8-element list of 8-element lists, but this would just waste space (for the cons cells) and time (in accessing the later elements of the lists).
-However, we will have to implement two other abstract data types that we have not yet considered: the square and the direction.
-We will need, for example, to represent the square that a player chooses to move into.
-This will be a pair of integers, such as 4,5.
-We could represent this as a two-element list, or more compactly as a cons cell, but this still means that we may have to generate garbage (create a cons cell) every time we want to refer to a new square.
-Similarly, we need to be able to scan in a given direction from a square, looking for pieces to flip.
-Directions will be represented as a pair of integers, such as +1,-1.
-One clever possibility is to use complex numbers for both squares and directions, with the real component mapped to the horizontal axis and the imaginary component mapped to the vertical axis.
-Then moving in a given direction from a square is accomplished by simply adding the direction to the square.
-But in most implementations, creating new complex numbers will also generate garbage.
+次に盤を考えます。
+二次元配列があまりに当然の選択に思えるので、それより良い表現は思いつきにくいところです。
+8要素のリストを8つ並べたリストも考えられますが、これは（コンスセルの分の）場所と、（リストの後ろの要素にアクセスする）時間を無駄にするだけです。
+しかし、まだ考えていない抽象データ型を2つ実装せねばなりません。マスと方向です。
+たとえば、打ち手が打とうと選んだマスを表す必要があります。
+これは4,5のような整数の対になるでしょう。
+2要素のリストとして、あるいはもっと詰めてコンスセルとして表せますが、それでも新しいマスに触れるたびにごみを出す（コンスセルを作る）ことになりかねません。
+同じく、あるマスから指定した方向へ走査して、裏返す石を探せる必要もあります。
+方向は +1,-1 のような整数の対として表されます。
+気の利いた手の1つは、マスにも方向にも複素数を使い、実部を横軸に、虚部を縦軸に対応させることです。
+そうすれば、あるマスから指定の方向へ進むのは、マスに方向を足すだけで済みます。
+しかしたいていの実装では、新しい複素数を作るのもごみを出すことになります。
 
-Another possibility is to represent squares (and directions) as two distinct integers, and have the routines that manipulate them accept two arguments instead of one.
-This would be efficient, but it is losing an important abstraction: that squares (and directions) are conceptually single objects.
+もう1つの手は、マス（と方向）を2つの別々の整数として表し、それを扱うルーチンが引数を1つではなく2つ取るようにすることです。
+これは効率がよいのですが、重要な抽象、すなわちマス（と方向）が概念のうえでは1つの対象だということを失っています。
 
-A way out of this dilemma is to represent the board as a one-dimensional vector.
-Squares are represented as integers in the range 0 to 63.
-In most implementations, small integers (fixnums) are represented as immediate data that can be manipulated without generating garbage.
-Directions can also be implemented as integers, representing the numerical difference between adjacent squares along that direction.
-To get a feel for this, take a look at the board:
+この板挟みからの出口は、盤を一次元のベクタとして表すことです。
+マスは0から63までの整数で表されます。
+たいていの実装では、小さな整数（fixnum）は即値のデータとして表され、ごみを出さずに扱えます。
+方向も整数として実装でき、その方向に沿って隣り合うマスの数値の差を表します。
+感じをつかむために、盤を見てみましょう。
 
 ```lisp
  0  1  2  3  4  5  6  7
@@ -126,18 +126,18 @@ To get a feel for this, take a look at the board:
 56 57 58 59 60 61 62 63
 ```
 
-You can see that the direction +1 corresponds to movement to the right, +7 corresponds to diagonal movement downward and to the left, +8 is downward, and +9 is diagonally downward and to the right.
-The negations of these numbers (-1, -7, -8, -9) represent the opposite directions.
+方向 +1 が右への移動に、+7 が左下への斜めの移動に、+8 が下へ、+9 が右下への斜めの移動に対応することがわかります。
+これらの数の符号を反転したもの（-1、-7、-8、-9）が逆の方向を表します。
 
-There is one complication with this scheme: we need to know when we hit the edge of the board.
-Starting at square 0, we can move in direction +1 seven times to arrive at the right edge of the board, but we aren't allowed to move in that direction yet again to arrive at square 8.
-It is possible to check for the edge of the board by considering quotients and remainders modulo 8, but it is somewhat complicated and expensive to do so.
+この仕掛けには1つ厄介な点があります。盤の端に達したことを知る必要があるのです。
+マス0から始めて方向 +1 に7回進めば盤の右端に着きますが、そこからさらに同じ方向へ進んでマス8に至ることは許されません。
+8で割った商と余りを考えれば盤の端を調べられますが、それはいささか込み入っていて高くつきます。
 
-A simpler solution is to represent the edge of the board explicitly, by using a 100-element vector instead of a 64-element vector.
-The outlying elements are filled with a marker indicating that they are outside the board proper.
-This representation wastes some space but makes edge detection much simpler.
-It also has the minor advantage that legal squares are represented by numbers in the range 11-88, which makes them easier to understand while debugging.
-Here's the new 100-element board:
+もっと簡単な解は、64要素ではなく100要素のベクタを使って、盤の端を明示的に表すことです。
+外側の要素には、盤の本体の外であることを示す印を埋めます。
+この表現は場所を少し無駄にしますが、端の検出はずっと簡単になります。
+また、合法なマスが11から88の範囲の数で表されるので、デバッグ中に読み取りやすいという小さな利点もあります。
+新しい100要素の盤を示します。
 
 ```lisp
  0  1  2  3  4  5  6  7  8  9
@@ -152,21 +152,21 @@ Here's the new 100-element board:
 90 91 92 93 94 95 96 97 98 99
 ```
 
-The horizontal direction is now &plusmn;1, vertical is &plusmn;10, and the diagonals are &plusmn;9 and &plusmn;11.
-We'll tentatively adopt this latest representation, but leave open the possibility of changing to another format.
-With this much decided, we are ready to begin.
-[Figure 18.3](#f0020) is the glossary for the complete program.
-A glossary for a second version of the program is on [page 623](#p623).
+これで横の方向は &plusmn;1、縦は &plusmn;10、斜めは &plusmn;9 と &plusmn;11 になります。
+ひとまずこの最後の表現を採り、別の形式に変える可能性は残しておきます。
+ここまで決まれば、始める用意ができました。
+[図18.3](#f0020)は、プログラム全体の用語一覧です。
+プログラムの第2版の用語一覧は[623ページ](#p623)にあります。
 
 | []()                                          |
 |-----------------------------------------------|
 | ![f18-03](images/chapter18/f18-03.jpg)        |
-| Figure 18.3: Glossary for the Othello Program |
+| 図18.3: オセロのプログラムの用語一覧          |
 
-*(ed: this should be a markdown table)*
+*（編注: ここはMarkdownの表にすべき）*
 
-What follows is the code for directions and pieces.
-We explicitly define the type `piece` to be a number from `empty` to `outer` (0 to 3), and define the function `name-of` to map from a piece number to a character: a dot for empty, `@` for black, `0` for white, and a question mark (which should never be printed) for `outer`.
+続くのは方向と石のコードです。
+型 `piece` を `empty` から `outer` までの数（0から3）として明示的に定義し、石の番号から文字への対応を与える関数 `name-of` を定義します。emptyには点、黒には `@`、白には `0`、`outer` には疑問符（これは決して表示されないはずです）を割り当てます。
 
 ```lisp
 (defconstant all-directions '(-11 -10 -9 -1 1 9 10 11))
@@ -183,10 +183,10 @@ We explicitly define the type `piece` to be a number from `empty` to `outer` (0 
 (defun opponent (player) (if (eql player black) white black))
 ```
 
-And here is the code for the board.
-Note that we introduce the function `bref`, for "board reference" rather than using the built-in function `aref`.
-This facilitates possible changes to the representation of boards.
-Also, even though there is no contiguous range of numbers that represents the legal squares, we can define the constant `all-squares` to be a list of the 64 legal squares, computed as those numbers from 11 to 88 whose value mod 10 is between 1 and 8.
+そして盤のコードです。
+組み込みの関数 `aref` を使わず、「board reference（盤の参照）」を意味する関数 `bref` を導入していることに注意してください。
+これによって、盤の表現を後で変えやすくなります。
+また、合法なマスを表す数の連続した範囲はありませんが、定数 `all-squares` を64個の合法なマスの並びとして定義できます。11から88までの数のうち、10で割った余りが1から8のものとして計算します。
 
 ```lisp
 (deftype board () '(simple-array piece (100)))
@@ -239,7 +239,7 @@ Also, even though there is no contiguous range of numbers that represents the le
      (count (opponent player) board)))
 ```
 
-Now let's take a look at the initial board, as it is printed by `print-board`, and by a raw `write` (I added the line breaks to make it easier to read):
+では初期の盤を、`print-board` で表示したものと、素の `write` で表示したもので見てみましょう（読みやすいよう改行を足してあります）。
 
 ```lisp
 > (write (initial-board)
@@ -270,17 +270,17 @@ Now let's take a look at the initial board, as it is printed by `print-board`, a
 NIL
 ```
 
-Notice that `print-board` provides some additional information: the number of pieces that each player controls, and the difference between these two counts.
+`print-board` が追加の情報、すなわち各打ち手が持つ石の数と、その2つの差を出していることに注目してください。
 
-The next step is to handle moves properly: given a board and a square to move to, update the board to reflect the effects of the player moving to that square.
-This means flipping some of the opponent's pieces.
-One design decision is whether the procedure that makes moves, `make-move`, will be responsible for checking for error conditions.
-My choice is that `make-move` assumes it will be passed a legal move.
-That way, a strategy can use the function to explore sequences of moves that are known to be valid without slowing `make-move` down.
-Of course, separate procedures will have to insure that a move is legal.
-Here we introduce two terms: a *valid* move is one that is syntactically correct: an integer from 11 to 88 that is not off the board.
-A *legal* move is a valid move into an empty square that will flip at least one opponent.
-Here's the code:
+次の段は手を正しく扱うことです。盤と打つマスが与えられたとき、打ち手がそのマスに打った結果を映すよう盤を更新します。
+これは相手の石をいくつか裏返すということです。
+設計上の決めごとの1つは、手を打つ手続き `make-move` が誤りの条件を調べる役目を負うかどうかです。
+私は、`make-move` には合法な手が渡されるものと仮定することにしました。
+そうすれば戦略は、正しいとわかっている手順を調べるのにこの関数を使えて、しかも `make-move` を遅くせずに済みます。
+もちろん、手が合法であることは別の手続きが保証せねばなりません。
+ここで2つの用語を導入します。*正しい*手とは、書式のうえで正しい手、すなわち盤から外れていない11から88の整数です。
+*合法な*手とは、空きマスへの正しい手で、少なくとも1つの相手の石を裏返すものです。
+コードを示します。
 
 ```lisp
 (defun valid-p (move)
@@ -303,10 +303,10 @@ Here's the code:
   board)
 ```
 
-Now all we need is to `make-flips`.
-To do that, we search in all directions for a *bracketing* piece: a piece belonging to the player who is making the move, which sandwiches a string of opponent pieces.
-If there are no opponent pieces in that direction, or if an empty or outer piece is hit before the player's piece, then no flips are made.
-Note that `would-flip?` is a semipredicate that returns false if no flips would be made in the given direction, and returns the square of the bracketing piece if there is one.
+あとは `make-flips` だけです。
+そのために、あらゆる方向へ*挟む*石を探します。挟む石とは、いま打っている打ち手の石で、相手の石の連なりを挟むもののことです。
+その方向に相手の石がないか、打ち手の石より先に空きマスや盤外に当たれば、裏返しは起こりません。
+`would-flip?` が半述語であることに注意してください。指定の方向で裏返しが起こらなければ偽を返し、挟む石があればそのマスを返します。
 
 ```lisp
 (defun make-flips (move player board dir)
@@ -334,12 +334,12 @@ Note that `would-flip?` is a semipredicate that returns false if no flips would 
         (t nil)))
 ```
 
-Finally we can write the function that actually monitors a game.
-But first we are faced with one more important choice: how will we represent a player?
-We have already distinguished between black and white's pieces, but we have not decided how to ask black or white for their moves.
-I choose to represent player's strategies as functions.
-Each function takes two arguments: the color to move (black or white) and the current board.
-The function should return a legal move number.
+これでようやく、実際に対局の進行役をつとめる関数を書けます。
+しかしその前に、重要な選択がもう1つあります。打ち手をどう表現するかです。
+黒と白の石の区別はすでにつけましたが、黒や白に手を尋ねる方法はまだ決めていません。
+私は打ち手の戦略を関数として表すことにしました。
+各関数は2つの引数、すなわち打つ側の色（黒か白）と現在の盤を取ります。
+関数は合法な手の番号を返すべきです。
 
 ```lisp
 (defun othello (bl-strategy wh-strategy
@@ -365,12 +365,12 @@ The function should return a legal move number.
       (count-difference black board))))
 ```
 
-We need to be able to determine who plays next at any point.
-The rules say that players alternate turns, but if one player has no legal moves, the other can move again.
-When neither has a legal move, the game is over.
-This usually happens because there are no empty squares left, but it sometimes happens earlier in the game.
-The player with more pieces at the end of the game wins.
-If neither player has more, the game is a draw.
+どの時点でも、次に打つのが誰かを見定められる必要があります。
+規則では打ち手は交互に手番を取りますが、一方に合法手がなければ、もう一方がもう一度打てます。
+どちらにも合法手がなければゲームは終わりです。
+これはたいてい空きマスがなくなるからですが、ときにはもっと早く起こることもあります。
+ゲームの終わりに石が多いほうの打ち手が勝ちます。
+どちらも多くなければ引き分けです。
 
 ```lisp
 (defun next-to-play (board previous-player print)
@@ -390,13 +390,13 @@ If neither player has more, the game is a draw.
         all-squares))
 ```
 
-Note that the argument `print` (of `othello`, `next-to-play`, and below, `get-move`) determines if information about the progress of the game will be printed.
-For an interactive game, `print` should be true, but it is also possible to play a "batch" game with `print` set to false.
+引数 `print`（`othello`、`next-to-play`、そして下の `get-move` の引数）が、対局の進行についての情報を表示するかどうかを決めることに注意してください。
+対話的な対局では `print` は真であるべきですが、`print` を偽にして「一括」の対局を行うこともできます。
 
-In `get-move` below, the player's strategy function is called to determine his move.
-Illegal moves are detected, and proper moves are reported when `print` is true.
-The strategy function is passed a number representing the player to move (black or white) and a copy of the board.
-If we passed the *real* game board, the function could cheat by changing the pieces on the board!
+下の `get-move` では、打ち手の戦略の関数を呼んでその手を決めます。
+非合法な手は検出され、`print` が真なら正しい手が報告されます。
+戦略の関数には、打つ側の打ち手（黒か白）を表す数と、盤の複製が渡されます。
+*本物の*対局の盤を渡したら、その関数は盤の石を変えて不正を働けてしまいます。
 
 ```lisp
 (defun get-move (strategy player board print)
@@ -413,7 +413,7 @@ If we passed the *real* game board, the function could cheat by changing the pie
          (get-move strategy player board print)))))
 ```
 
-Here we define two simple strategies:
+ここで単純な戦略を2つ定義します。
 
 ```lisp
 (defun human (player board)
@@ -432,21 +432,21 @@ Here we define two simple strategies:
      when (legal-p move player board) collect move))
 ```
 
-We are now in a position to play the game.
-The expression
+これでゲームを指せるようになりました。
+次の式で
 
-`(othello #'human #'human)` will let two people play against each other.
-Alternately, `(othello #'random-strategy #'human)` will allow us to match our wits against a particularly poor strategy.
-The rest of this chapter shows how to develop a better strategy.
+`(othello #'human #'human)` とすれば、2人で対戦できます。
+あるいは `(othello #'random-strategy #'human)` とすれば、とりわけ下手な戦略と知恵比べができます。
+本章の残りでは、もっと良い戦略の作り方を示します。
 
-## 18.3 Evaluating Positions
+## 18.3 局面を評価する
 
-The random-move strategy is, of course, a poor one.
-We would like to make a good move rather than a random move, but so far we don't know what makes a good move.
-The only positions we are able to evaluate for sure are final positions: when the game is over, we know that the player with the most pieces wins.
-This suggests a strategy: choose the move that maximizes `count-difference`, the piece differential.
-The function `maximize-difference` does just that.
-It calls `maximizer`, a higher-order function that chooses the best move according to an arbitrary evaluation function.
+でたらめに打つ戦略は、もちろん下手なものです。
+でたらめな手ではなく良い手を打ちたいところですが、いまのところ何が良い手なのかがわかりません。
+確かに評価できる局面は最終局面だけです。ゲームが終われば、石の多いほうが勝つとわかります。
+ここから1つの戦略が浮かびます。石の差である `count-difference` を最大にする手を選ぶのです。
+関数 `maximize-difference` がまさにそれを行います。
+これは `maximizer` を呼びます。`maximizer` は、任意の評価関数に従って最善手を選ぶ高階関数です。
 
 ```lisp
 (defun maximize-difference (player board)
@@ -471,26 +471,26 @@ It calls `maximizer`, a higher-order function that chooses the best move accordi
         (elt moves (position best scores)))))
 ```
 
-**Exercise  18.1** Play some games with `maximize-difference` against `random-strategy` and `human`.
-How good is `maximize-difference`?
+**練習問題 18.1** `maximize-difference` を `random-strategy` や `human` と何局か対戦させよ。
+`maximize-difference` はどれくらい強いか。
 
-Those who complete the exercise will quickly see that the `maximize-difference` player does better than random, and may even beat human players in their first game or two.
-But most humans are able to improve, learning to take advantage of the overly greedy play of `maximize-difference`.
-Humans learn that the edge squares, for example, are valuable because the player dominating the edges can surround the opponent, while it is difficult to recapture an edge.
-This is especially true of corner squares, which can never be recaptured.
+この練習問題をやってみれば、`maximize-difference` の打ち手がでたらめより強く、人間の打ち手にも最初の1、2局は勝つことさえあるとすぐわかるでしょう。
+しかしたいていの人間は上達し、`maximize-difference` の欲張りすぎる打ち方につけ込むことを覚えます。
+たとえば人間は、辺のマスが値打ちを持つことを学びます。辺を制した打ち手は相手を囲めますし、辺を取り返すのは難しいからです。
+これは、決して取り返せない隅のマスにはとりわけよく当てはまります。
 
-Using this knowledge, a clever player can temporarily sacrifice pieces to obtain edge and corner squares in the short run, and win back pieces in the long run.
-We can approximate some of this reasoning with the `weighted-squares` evaluation function.
-Like `count-difference`, it adds up all the player's pieces and subtracts the opponents, but each piece is weighted according to the square it occupies.
-Edge squares are weighted highly, corner squares higher still, and squares adjacent to the corners and edges have negative weights, because occupying these squares often gives the opponent a means of capturing the desirable square.
-[Figure 18.4](#f0025) shows the standard nomenclature for edge squares: X, A, B, and C.
-In general, X and C squares are to be avoided, because taking them gives the opponent a chance to take the corner.
-The `weighted-squares` evaluation function reflects this.
+この知識を使えば、賢い打ち手は目先で石を犠牲にして辺や隅のマスを取り、長い目では石を取り戻せます。
+この考え方のいくらかは、`weighted-squares` という評価関数で近似できます。
+`count-difference` と同じく打ち手の石を足して相手の石を引きますが、各石はそれが占めるマスに応じて重み付けされます。
+辺のマスは高く、隅のマスはさらに高く重み付けされ、隅や辺に隣接するマスは負の重みを持ちます。そうしたマスを占めると、望ましいマスを相手に取られる手立てを与えてしまうことが多いからです。
+[図18.4](#f0025)は、辺のマスの標準的な呼び名、すなわちX、A、B、Cを示しています。
+一般にXとCのマスは避けるべきです。そこを取ると、相手に隅を取る機会を与えてしまうからです。
+評価関数 `weighted-squares` はこれを映しています。
 
 | <a id="fig-18-04"></a>[]() |
 |---|
 | <img src="images/chapter18/fig-18-04.svg" onerror="this.src='images/chapter18/fig-18-04.png'; this.onerror=null;" alt="Figure 18.4" /> |
-| **Figure 18.4: Names for Edge Squares** |
+| **図18.4: 辺のマスの呼び名** |
 
 ```lisp
 (defparameter *weights*
@@ -515,9 +515,9 @@ The `weighted-squares` evaluation function reflects this.
           sum (- (aref *weights* i)))))
 ```
 
-**Exercise  18.2** Compare strategies by evaluating the two forms below.
-What happens?
-Is this a good test to determine which strategy is better?
+**練習問題 18.2** 下の2つの形式を評価して戦略を比べよ。
+何が起こるか。
+これはどちらの戦略が優れているかを見定めるのに良い試験だろうか。
 
 ```lisp
 (othello (maximizer #'weighted-squares)
@@ -526,83 +526,83 @@ Is this a good test to determine which strategy is better?
                   (maximizer #'weighted-squares) nil)
 ```
 
-## 18.4 Searching Ahead: Minimax
+## 18.4 先読み: ミニマックス
 
-Even the weighted-squares strategy is no match for an experienced player.
-There are two ways we could improve the strategy.
-First, we could modify the evaluation function to take more information into account.
-But even without changing the evaluation function, we can improve the strategy by searching ahead.
-Instead of choosing the move that leads immediately to the highest score, we can also consider the opponent's possible replies, our replies to those replies, and so on.
-By searching through several levels of moves, we can steer away from potential disaster and find good moves that were not immediately apparent.
+重み付きマスの戦略でさえ、経験を積んだ打ち手には歯が立ちません。
+戦略を改良する道は2つあります。
+第一に、より多くの情報を考えに入れるよう評価関数を変えることです。
+しかし評価関数を変えなくても、先を読むことで戦略を良くできます。
+すぐに最高の点をもたらす手を選ぶのではなく、相手のありうる応手、それへのこちらの応手、というふうに考えていくのです。
+何段かの手を探索すれば、破滅になりかねない道を避け、すぐには見えない良い手を見つけられます。
 
-Another way to look at the `maximizer` function is as a search function that searches only one level, or *ply*, deep:
+関数 `maximizer` は、1段、すなわち1*プライ*だけ深く探索する探索関数と見ることもできます。
 
 <a id="diagram-18-01"></a>
 <img src="images/chapter18/diagram-18-01.svg"
   onerror="this.src='images/chapter18/diagram-18-01.png'; this.onerror=null;"
   alt="Diagram 18.1" />
 
-The top of the tree is the current board position, and the squares below that indicate possible moves.
-The `maximizer` function evaluates each of these and picks the best move, which is underlined in the diagram.
+木の頂点が現在の盤面で、その下の四角がありうる手を示しています。
+関数 `maximizer` はそれぞれを評価して最善手を選びます。図では下線を引いてあります。
 
-Now let's see how a 3-ply search might go.
-The first step is to apply `maximizer` to the positions just above the bottom of the tree.
-Suppose we get the following values:
+では3プライの探索がどう進むかを見てみましょう。
+最初の段は、木の最下段のすぐ上の局面に `maximizer` を適用することです。
+次の値が得られたとします。
 
 <a id="diagram-18-02"></a>
 <img src="images/chapter18/diagram-18-02.svg"
   onerror="this.src='images/chapter18/diagram-18-02.png'; this.onerror=null;"
   alt="Diagram 18.2" />
 
-Each position is shown as having two possible legal moves, which is unrealistic but makes the diagram fit on the page.
-In a real game, five to ten legal moves per position is typical.
-The values at the leaves of the tree were computed by applying the evaluation function, while the values one level up were computed by `maximizer`.
-The result is that we know what our best move is for any of the four positions just above the bottom of the tree.
+各局面に合法手が2つあるように描いていますが、これは現実的ではなく、図をページに収めるためです。
+実際の対局では、1局面あたり5手から10手が典型です。
+木の葉の値は評価関数を適用して計算し、その1段上の値は `maximizer` で計算しました。
+その結果、最下段のすぐ上にある4つの局面のいずれについても、こちらの最善手がわかります。
 
-Going up a level, it is the opponent's turn to move.
-We can assume the opponent will choose the move that results in the minimal value to us, which would be the maximal value to the opponent.
-Thus, the opponent's choices would be the 10- and 9-valued positions, avoiding the 20- and 23-valued positions.
+1段上がると、今度は相手の手番です。
+相手は、こちらにとって最小の値になる手、すなわち相手にとって最大の値になる手を選ぶと仮定できます。
+ですから相手は、値20と23の局面を避けて、値10と9の局面を選ぶことになります。
 
 <a id="diagram-18-03"></a>
 <img src="images/chapter18/diagram-18-03.svg"
   onerror="this.src='images/chapter18/diagram-18-03.png'; this.onerror=null;"
   alt="Diagram 18.3" />
 
-Now it is our turn to move again, so we apply `maximizer` once again to get the final value of the top-level position:
+ふたたびこちらの手番なので、もう一度 `maximizer` を適用して最上段の局面の最終的な値を得ます。
 
 <a id="diagram-18-04"></a>
 <img src="images/chapter18/diagram-18-04.svg"
   onerror="this.src='images/chapter18/diagram-18-04.png'; this.onerror=null;"
   alt="Diagram 18.4" />
 
-If the opponent plays as expected, we will always follow the left branch of the tree and end up at the position with value 10.
-If the opponent plays otherwise, we will end up at a position with a better value.
+相手が予想どおりに打てば、こちらは常に木の左の枝をたどり、値10の局面に行き着きます。
+相手がそれ以外に打てば、もっと良い値の局面に行き着きます。
 
-This kind of search is traditionally called a *minimax* search, because of the alternate application of the `maximizer` and a hypothetical `minimizer` function.
-Notice that only the leaf positions in the tree are looked at by the evaluation function.
-The value of all other positions is determined by minimizing and maximizing.
+この種の探索は伝統的に*ミニマックス*探索と呼ばれます。`maximizer` と、仮想の `minimizer` 関数を交互に適用するからです。
+評価関数が見るのは木の葉の局面だけであることに注目してください。
+他のすべての局面の値は、最小化と最大化によって定まります。
 
-We are almost ready to code the minimax algorithm, but first we have to make a few design decisions.
-First, we could write two functions, `minimax` and `maximin`, which correspond to the two players' analyses.
-However, it is easier to write a single function that maximizes the value of a position for a particular player.
-In other words, by adding the player as a parameter, we avoid having to write two otherwise identical functions.
+ミニマックスのアルゴリズムを書く準備はほぼ整いましたが、その前に設計上の決めごとがいくつかあります。
+第一に、2人の打ち手の分析に対応する `minimax` と `maximin` という2つの関数を書くこともできます。
+しかし、特定の打ち手にとっての局面の値を最大化する関数を1つ書くほうが楽です。
+言い換えれば、打ち手を引数に加えることで、それ以外は同じ2つの関数を書かずに済みます。
 
-Second, we have to decide if we are going to write a general minimax searcher or an Othello-specific searcher.
-I decided on the latter for efficiency reasons, and because there are some Othello-specific complications that need to be accounted for.
-First, it is possible that a player will not have any legal moves.
-In that case, we want to continue the search with the opponent to move.
-If the opponent has no moves either, then the game is over, and the value of the position can be determined with finality by counting the pieces.
+第二に、汎用のミニマックス探索器を書くか、オセロ専用の探索器を書くかを決めねばなりません。
+効率のため、またオセロ特有の面倒な事情を織り込む必要があるため、私は後者にしました。
+まず、打ち手に合法手がまったくないことがありえます。
+その場合は、相手の手番として探索を続けたいところです。
+相手にも手がなければゲームは終わりで、局面の値は石を数えることで最終的に定まります。
 
-Third, we need to decide the interaction between the normal evaluation function and this final evaluation that occurs when the game is over.
-We could insist that each evaluation function determine when the game is over and do the proper computation.
-But that overburdens the evaluation functions and may lead to wasteful checking for the end of game.
-Instead, I implemented a separate `final-value` evaluation function, which returns 0 for a draw, a large positive number for a win, and a large negative number for a loss.
-Because fixnum arithmetic is most efficient, the constants `most-positive-fixnum` and `most-negative-fixnum` are used.
-The evaluation functions must be careful to return numbers that are within this range.
-All the evaluation functions in this chapter will be within range if fixnums are 20 bits or more.
+第三に、ふつうの評価関数と、ゲームが終わったときのこの最終評価とのやりとりを決める必要があります。
+各評価関数に、ゲームが終わったかを判断して適切な計算をさせることもできます。
+しかしそれは評価関数の負担が重すぎますし、終局の判定を無駄に繰り返すことにもなりかねません。
+そこで別に `final-value` という評価関数を実装しました。引き分けなら0、勝ちなら大きな正の数、負けなら大きな負の数を返します。
+fixnumの算術がもっとも効率がよいので、定数 `most-positive-fixnum` と `most-negative-fixnum` を使います。
+評価関数は、この範囲に収まる数を返すよう気をつけねばなりません。
+本章の評価関数はすべて、fixnumが20ビット以上あれば範囲に収まります。
 
-In a tournament, it is not only important who wins and loses, but also by how much.
-If we were trying to maximize the margin of victory, then `final-value` would be changed to include a small factor for the final difference.
+大会では、誰が勝ち誰が負けたかだけでなく、どれだけの差がついたかも重要です。
+勝ちの差を最大にしようとするなら、`final-value` を変えて最終的な差の小さな項を含めることになるでしょう。
 
 ```lisp
 (defconstant winning-value most-positive-fixnum)
@@ -616,13 +616,13 @@ If we were trying to maximize the margin of victory, then `final-value` would be
     (+1 winning-value)))
 ```
 
-Fourth, and finally, we need to decide on the parameters for the minimax function.
-Like the other evaluation functions, it needs the player to move and the current board as parameters.
-It also needs an indication of how many ply to search, and the static evaluation function to apply to the leaf positions.
-Thus, minimax will be a function of four arguments.
-What will it return?
-It needs to return the best move, but it also needs to return the value of that move, according to the static evaluation function.
-We use multiple values for this.
+第四に、そして最後に、ミニマックスの関数の引数を決める必要があります。
+他の評価関数と同じく、打つ側の打ち手と現在の盤を引数として必要とします。
+さらに、何プライ探索するかの指定と、葉の局面に適用する静的な評価関数も必要です。
+ですからminimaxは4引数の関数になります。
+では何を返すのでしょうか。
+最善手を返す必要がありますが、静的な評価関数に照らしたその手の値も返す必要があります。
+これには多値を使います。
 
 ```lisp
 (defun minimax (player board ply eval-fn)
@@ -651,10 +651,10 @@ We use multiple values for this.
               (values best-val best-move))))))
 ```
 
-The `minimax` function cannot be used as a strategy function as is, because it takes too many arguments and returns too many values.
-The functional `minimax-searcher` returns an appropriate strategy.
-Remember that a strategy is a function of two arguments: the player and the board.
-`get-move` is responsible for passing the right arguments to the function, so the strategy need not worry about where the arguments come from.
+関数 `minimax` はそのままでは戦略の関数として使えません。引数が多すぎ、返す値も多すぎるからです。
+高階関数 `minimax-searcher` が適切な戦略を返します。
+戦略とは、打ち手と盤という2つの引数の関数だったことを思い出してください。
+正しい引数をその関数へ渡すのは `get-move` の役目なので、戦略は引数がどこから来るかを気にせずに済みます。
 
 ```lisp
 (defun minimax-searcher (ply eval-fn)
@@ -666,8 +666,8 @@ Remember that a strategy is a function of two arguments: the player and the boar
         move)))
 ```
 
-We can test the minimax strategy, and see that searching ahead 3 ply is indeed better than looking at only 1 ply.
-I show only the final result, which demonstrates that it is indeed an advantage to be able to look ahead:
+ミニマックスの戦略を試すと、3プライ先読みするほうが1プライだけ見るより実際に良いことがわかります。
+最終結果だけを示します。先を読めることが確かに有利だとわかります。
 
 ```lisp
 > (othello (minimax-searcher 3 #'count-difference)
@@ -685,46 +685,46 @@ The game is over. Final result:
 80 . . . . @ @ . .
 ```
 
-## 18.5 Smarter Searching: Alpha-Beta Search
+## 18.5 賢い探索: アルファベータ探索
 
-The problem with a full minimax search is that it considers too many positions.
-It looks at every line of play, including many improbable ones.
-Fortunately, there is a way to find the optimal line of play without looking at every possible position.
-Let's go back to our familiar search tree:
+完全なミニマックス探索の難点は、考える局面が多すぎることです。
+ありそうにない手順も含め、あらゆる手順を見てしまいます。
+さいわい、ありうる局面すべてを見なくても最適な手順を見つける方法があります。
+おなじみの探索木に戻りましょう。
 
 <a id="diagram-18-05"></a>
 <img src="images/chapter18/diagram-18-05.svg"
   onerror="this.src='images/chapter18/diagram-18-05.png'; this.onerror=null;"
   alt="Diagram 18.5" />
 
-Here we have marked certain positions with question marks.
-The idea is that the whole search tree evaluates to 10 regardless of the value of the positions labeled ?<sub>*i*</sub>.
-Consider the position labeled ?<sub>1</sub>.
-It does not matter what this position evaluates to, because the opponent will always choose to play toward the 10-position, to avoid the possibility of the 15.
-Thus, we can cut off the search at this point and not consider the ?-position.
-This kind of cutoff has historically been called a *beta* cutoff.
+ここでは、いくつかの局面に疑問符を付けてあります。
+要点は、?<sub>*i*</sub> と印を付けた局面の値がどうであれ、探索木全体は10と評価されるということです。
+?<sub>1</sub> と印を付けた局面を考えてみましょう。
+この局面がどう評価されようと関係ありません。相手は15になる可能性を避けるため、常に10の局面へ向かう手を選ぶからです。
+ですからこの時点で探索を打ち切り、?の局面を考えずに済ませられます。
+この種の打ち切りは、歴史的に*ベータ*打ち切りと呼ばれてきました。
 
-Now consider the position labeled ?<sub>4</sub>.
-It does not matter what this position evaluates to, because we will always prefer to choose the 10 position at the left branch, rather than giving the opponent a chance to play to the 9-position.
-This is an *alpha* cutoff.
-Notice that it cuts off a whole subtree of positions below it (labeled ?<sub>2</sub> and ?<sub>3</sub>).
+次に ?<sub>4</sub> と印を付けた局面を考えます。
+この局面がどう評価されようと関係ありません。相手に9の局面へ打つ機会を与えるより、左の枝の10の局面を選ぶほうを常に好むからです。
+これが*アルファ*打ち切りです。
+その下にある局面の部分木まるごと（?<sub>2</sub> と ?<sub>3</sub> と印を付けたもの）が切り落とされることに注目してください。
 
-In general, we keep track of two parameters that bound the true value of the current position.
-The lower bound is a value we know we can achieve by choosing a certain line of play.
-The idea is that we need not even consider moves that will lead to a value lower than this.
-The lower bound has traditionally been called *alpha,* but we will name it `achievable`.
-The upper bound represents a value the opponent can achieve by choosing a certain line of play.
-It has been called *beta*, but we will call it `cutoff`.
-Again, the idea is that we need not consider moves with a higher value than this (because then the opponent would avoid the move that is so good for us).
-The alpha-beta algorithm is just minimax, but with some needless evaluations pruned by these two parameters.
+一般に、現在の局面の真の値を挟む2つの引数を記録しておきます。
+下限は、ある手順を選べば達成できるとわかっている値です。
+これより低い値につながる手は、考えることすら要らないという考えです。
+下限は伝統的に*アルファ*と呼ばれてきましたが、ここでは `achievable` と名づけます。
+上限は、相手がある手順を選べば達成できる値を表します。
+これは*ベータ*と呼ばれてきましたが、ここでは `cutoff` と呼びます。
+ここでも、これより高い値の手は考えなくてよいという考えです（そうなれば相手は、こちらに好都合すぎるその手を避けるからです）。
+アルファベータのアルゴリズムはミニマックスそのものですが、この2つの引数によって不要な評価が刈り取られます。
 
-In deeper trees with higher branching factors, many more evaluations can be pruned.
-In general, a tree of depth *d* and branching factor *b* requires *b<sup>d</sup>* evaluations for full minimax, and as few as *b*<sup>*d*/2</sup> evaluations with alpha-beta minimax.
+分岐数の多い深い木では、はるかに多くの評価を刈り取れます。
+一般に、深さ *d*、分岐数 *b* の木は、完全なミニマックスでは *b<sup>d</sup>* 回の評価を要しますが、アルファベータのミニマックスなら少なくて *b*<sup>*d*/2</sup> 回で済みます。
 
-To implement alpha-beta search, we add two more parameters to the function `minimax` and rename it `alpha-beta`.
-`achievable` is the best score the player can achieve; it is what we want to maximize.
-The `cutoff` is a value that, when exceeded, will make the opponent choose another branch of the tree, thus making the rest of the current level of the tree irrelevant.
-The test `until (>= achievable cutoff)` in the penultimate line of `minimax` does the cutoff; all the other changes just involve passing the parameters around properly.
+アルファベータ探索を実装するため、関数 `minimax` に引数を2つ加えて `alpha-beta` と改名します。
+`achievable` は打ち手が達成できる最良の点で、これを最大化したいわけです。
+`cutoff` は、それを超えると相手が木の別の枝を選ぶことになり、その結果いまの段の残りが無関係になる値です。
+`minimax` の最後から2行目にある検査 `until (>= achievable cutoff)` が打ち切りを行います。他の変更は引数を正しく引き回すだけのものです。
 
 ```lisp
 (defun alpha-beta (player board achievable cutoff ply eval-fn)
@@ -764,28 +764,28 @@ The test `until (>= achievable cutoff)` in the penultimate line of `minimax` doe
         move)))
 ```
 
-It must be stressed that `alpha-beta` computes the exact same result as the full-search version of `minimax`.
-The only advantage of the cutoffs is making the search go faster by considering fewer positions.
+`alpha-beta` が、全探索版の `minimax` とまったく同じ結果を計算することは強調しておかねばなりません。
+打ち切りの利点は、考える局面を減らして探索を速くすることだけです。
 
-## 18.6 An Analysis of Some Games
+## 18.6 いくつかの対局の分析
 
-Now is a good time to stop and analyze where we have gone.
-We've demonstrated a program that can play a *legal* game of Othello, and some strategies that may or may not play a *good* game.
-First, we'll look at some individual games to see the mistakes made by some strategies, and then we'll generate some statistics for series of games.
+ここでいったん立ち止まり、どこまで来たかを分析するのに良い頃合いです。
+オセロの*合法な*対局を指せるプログラムと、*良い*対局を指せるかもしれない戦略をいくつか示してきました。
+まず個々の対局を見ていくつかの戦略が犯す誤りを確かめ、それから連戦の統計を取ります。
 
-Is the weighted-squares measure a good one?
-We can compare it to a strategy of maximizing the number of pieces.
-Such a strategy would of course be perfect if it could look ahead to the end of the game, but the speed of our computers limits us to searching only a few ply, even with cutoffs.
-Consider the following game, where black is maximizing the difference in the number of pieces, and white is maximizing the weighted sum of squares.
-Both search to a depth of 4 ply:
+重み付きマスの尺度は良いものでしょうか。
+石の数を最大にする戦略と比べられます。
+その戦略は、終局まで先を読めればもちろん完璧ですが、計算機の速さの制約から、打ち切りを入れても数プライしか探索できません。
+次の対局を考えてみましょう。黒は石数の差を最大にし、白はマスの重み付きの和を最大にします。
+どちらも4プライの深さまで探索します。
 
 ```lisp
 > (othello (alpha-beta-searcher 4 #'count-difference)
                       (alpha-beta-searcher 4 #'weighted-squares))
 ```
 
-Black is able to increase the piece difference dramatically as the game progresses.
-After 17 moves, white is down to only one piece:
+対局が進むにつれ、黒は石数の差を劇的に広げていきます。
+17手目のあと、白の石は1つだけになっています。
 
 ```lisp
      1 2 3 4 5 6 7 8  [@=20 0=1 (+19)]
@@ -799,8 +799,8 @@ After 17 moves, white is down to only one piece:
   80 . . . . . . . .
 ```
 
-Although behind by 19 points, white is actually in a good position, because the piece in the corner is safe and threatens many of black's pieces.
-White is able to maintain good position while being numerically far behind black, as shown in these positions later in the game:
+19点差で負けてはいますが、白は実のところ良い形です。隅の石は安全で、黒の多くの石を脅かしているからです。
+白は、数のうえでは黒に大きく離されながらも良い形を保ちます。対局の後半の次の局面がそれを示しています。
 
 ```lisp
      1 2 3 4 5 6 7 8  [@=32 0=15 (+17)]
@@ -826,7 +826,7 @@ White is able to maintain good position while being numerically far behind black
   80 0 @ 0 . . . . .
 ```
 
-After some give-and-take, white gains the advantage for good by capturing eight pieces on a move to square 85 on the third-to-last move of the game:
+取ったり取られたりのあと、白は対局の3手前に85のマスへ打って8つの石を取り、決定的に優位に立ちます。
 
 ```lisp
      1 2 3 4 5 6 7 8  [@=31 0=30 (+1)]
@@ -885,19 +885,19 @@ The game is over. Final result:
 -16
 ```
 
-White ends up winning by 16 pieces.
-Black's strategy was too greedy: black was willing to give up position (all four corners and all but four of the edge squares) for temporary gains in material.
+白は最終的に16石差で勝ちます。
+黒の戦略は欲張りすぎました。目先の石数のために、形（4つの隅すべてと、辺のマスのうち4つを除くすべて）を手放してしまったのです。
 
-Increasing the depth of search does not compensate for a faulty evaluation function.
-In the following game, black's search depth is increased to 6 ply, while white's is kept at 4.
-The same things happen, although black's doom takes a bit longer to unfold.
+探索の深さを増しても、欠陥のある評価関数の埋め合わせにはなりません。
+次の対局では、黒の探索の深さを6プライに増やし、白は4のままにしています。
+同じことが起こりますが、黒の破滅が姿を現すまでに少し長くかかります。
 
 ```lisp
 > (othello (alpha-beta-searcher 6 #'count-difference)
            (alpha-beta-searcher 4 #'weighted-squares))
 ```
 
-Black slowly builds up an advantage:
+黒はじわじわと優位を築いていきます。
 
 ```lisp
      1 2 3 4 5 6 7 8  [@=21 0=8 (+13)]
@@ -911,8 +911,8 @@ Black slowly builds up an advantage:
   80 . . . . . . . .
 ```
 
-But at this point white has clear access to the upper left corner, and through that corner threatens to take the whole top edge.
-Still, black maintains a material edge as the game goes on:
+しかしこの時点で白は左上の隅へ明確に手が届いており、その隅を通じて上辺全体を取ると脅しています。
+それでも対局が進むあいだ、黒は石数の優位を保ちます。
 
 ```lisp
      1 2 3 4 5 6 7 8  [@=34 0=11 (+23)]
@@ -926,7 +926,7 @@ Still, black maintains a material edge as the game goes on:
   80 . . . . . . . .
 ```
 
-But eventually white's weighted-squares strategy takes the lead:
+しかしやがて、白の重み付きマスの戦略が主導権を握ります。
 
 ```lisp
      1 2 3 4 5 6 7 8  [@=23 0=27 (-4)]
@@ -940,7 +940,7 @@ But eventually white's weighted-squares strategy takes the lead:
   80 0 . . . . . . .
 ```
 
-and is able to hold on to win:
+そしてそのまま押し切って勝ちます。
 
 ```lisp
      1 2 3 4 5 6 7 8  [@=24 0=40 (-16)]
@@ -955,10 +955,10 @@ and is able to hold on to win:
 -16
 ```
 
-This shows that brute-force searching is not a panacea.
-While it is helpful to be able to search deeper, greater gains can be made by making the evaluation function more accurate.
-There are many problems with the weighted-squares evaluation function.
-Consider again this position from the first game above:
+これは、力ずくの探索が万能薬ではないことを示しています。
+より深く探索できるのは助けになりますが、評価関数を正確にするほうが大きな得になります。
+重み付きマスの評価関数には多くの問題があります。
+上の最初の対局の、この局面をもう一度考えてみましょう。
 
 ```lisp
      1 2 3 4 5 6 7 8  [@=20 0=1 (+19)]
@@ -972,13 +972,13 @@ Consider again this position from the first game above:
   80 . . . . . . . .
 ```
 
-Here white, playing the weighted-squares strategy, chose to play 66.
-This is probably a mistake, as 13 would extend white's dominance of the top edge, and allow white to play again (since black would have no legal moves).
-Unfortunately, white rejects this move, primarily because square 12 is weighted as -20.
-Thus, there is a disincentive to taking this square.
-But 12 is weighted -20 because it is a bad idea to take such a square when the corner is empty-the opponent will then have a chance to capture the corner, regaining the 12 square as well.
-Thus, we want squares like 12 to have a negative score when the corner is empty, but not when it is already occupied.
-The `modified-weighted-squares` evaluation function does just that.
+ここで重み付きマスの戦略を採る白は、66に打つことを選びました。
+これはおそらく誤りです。13なら白の上辺の支配を広げ、しかも（黒に合法手がなくなるので）白がもう一度打てるからです。
+あいにく白はこの手を退けます。おもな理由は、マス12の重みが -20 だからです。
+つまり、このマスを取ることに対する抑止が働くわけです。
+しかし12の重みが -20 なのは、隅が空いているときにそうしたマスを取るのはまずい考えだからです。そのとき相手には隅を取る機会が生まれ、ついでに12のマスも取り返せます。
+ですから12のようなマスは、隅が空いているときには負の点にしたいが、すでに埋まっているときにはそうしたくないのです。
+評価関数 `modified-weighted-squares` がまさにそれを行います。
 
 ```lisp
 (defun modified-weighted-squares (player board)
@@ -1007,13 +1007,13 @@ The `modified-weighted-squares` evaluation function does just that.
     (aref neighbor-table square)))
 ```
 
-## 18.7 The Tournament Version of Othello
+## 18.7 大会仕様のオセロ
 
-While the `othello` function serves as a perfectly good moderator for casual play, there are two points that need to be fixed for tournament-level play.
-First, tournament games are played under a strict time limit: a player who takes over 30 minutes total to make all the moves forfeits the game.
-Second, the standard notation for Othello games uses square names in the range al to h8, rather than in the 11 to 88 range that we have used so far.
-a1 is the upper left corner, a8 is the lower left corner, and h8 is the lower right corner.
-We can write routines to translate between this notation and the one we were using by creating a table of square names.
+関数 `othello` は気楽な対局の進行役としては申し分ありませんが、大会水準の対局のためには直すべき点が2つあります。
+第一に、大会の対局は厳しい持ち時間の制限のもとで行われます。全部の手を打つのに合計30分を超えた打ち手は、その対局を失格になります。
+第二に、オセロの標準的な記法では、これまで使ってきた11から88ではなく、a1からh8の範囲のマス名を使います。
+a1が左上の隅、a8が左下の隅、h8が右下の隅です。
+マス名の表を作れば、この記法とこれまでの記法を相互に変換するルーチンが書けます。
 
 ```lisp
 (let ((square-names
@@ -1040,12 +1040,12 @@ We can write routines to translate between this notation and the one we were usi
            ylist))
 ```
 
-Note that these routines return their input unchanged when it is not one of the expected values.
-This is to allow commands other than moving to a particular square.
-For example, we will add a feature that recognizes `resign` as a move.
+これらのルーチンは、入力が想定した値のどれでもないとき、その入力をそのまま返すことに注意してください。
+これは、特定のマスに打つ以外の命令を許すためです。
+たとえば、`resign`（投了）を手として認める機能を加えます。
 
-The `human` player needs to be changed slightly to read moves in this format.
-While we're at it, we'll also print the list of possible moves:
+`human` の打ち手は、この形式で手を読むよう少し変える必要があります。
+ついでに、打てる手の一覧も表示することにします。
 
 ```lisp
 (defun human (player board)
@@ -1058,20 +1058,20 @@ While we're at it, we'll also print the list of possible moves:
 | []()                                                        |
 |-------------------------------------------------------------|
 | ![f18-05](images/chapter18/f18-05.jpg)                      |
-| Figure 18.5: Glossary for the Tournament Version of Othello |
+| 図18.5: 大会仕様のオセロの用語一覧                          |
 
-*(ed: should be a markdown table)*
+*（編注: ここはMarkdownの表にすべき）*
 
-The `othello` function needn't worry about notation, but it does need to monitor the time.
-We make up a new data structure, the clock, which is an array of integers saying how much time (in internal units) each player has left.
-For example, (`aref clock black`) is the amount of time black has left to make all his moves.
-In Pascal, we would declare the clock array as `array[black..white]`, but in Common Lisp all arrays are zero-based, so we need an array of three elements to allow the subscript `black`, which is 2.
+関数 `othello` は記法を気にする必要はありませんが、時間は見張らねばなりません。
+新しいデータ構造として時計をこしらえます。これは、各打ち手の残り時間を（内部の単位で）表す整数の配列です。
+たとえば (`aref clock black`) は、黒が残りの手をすべて打つのに使える時間です。
+Pascalなら時計の配列を `array[black..white]` と宣言するところですが、Common Lispでは配列はすべて0始まりなので、添字 `black`（これは2です）を使えるように3要素の配列が必要です。
 
-The clock is passed to `get-move` and `print-board` but is otherwise unused.
-I could have complicated the main game loop by adding tests for forfeits because of expired time and, as we shall see later, resignation by either player.
-However, I felt that would add a great deal of complexity for rarely used options.
-Instead, I wrap the whole game loop, along with the computation of the final score, in a `catch` special form.
-Then, if `get-move` encounters a forfeit or resignation, it can `throw` an appropriate final score: 64 or -64, depending on which player forfeits.
+時計は `get-move` と `print-board` へ渡されますが、それ以外では使いません。
+時間切れによる失格や、あとで見るようにどちらかの打ち手の投了を調べる検査を加えて、対局の主ループを込み入らせることもできました。
+しかしそれは、めったに使わない選択肢のために大きな複雑さを持ち込むと感じました。
+そこで代わりに、対局のループ全体を、最終得点の計算とともに `catch` の特殊形式で包みます。
+そうすれば `get-move` が失格や投了に出くわしたとき、どちらの打ち手が失格かに応じて64か-64という適切な最終得点を `throw` できます。
 
 ```lisp
 (defvar *move-number* 1 "The number of the move to be played")
@@ -1099,16 +1099,16 @@ Then, if `get-move` encounters a forfeit or resignation, it can `throw` an appro
       (count-difference black board))))
 ```
 
-Strategies now have to comply with the time-limit rule, so they may want to look at the time remaining.
-Rather than passing the clock in as an argument to the strategy, I decided to store the clock in the special variable `*clock*`.
-The new version of `othello` also keeps track of the `*move-number*`.
-This also could have been passed to the strategy functions as a parameter.
-But adding these extra arguments would require changes to all the strategies we have developed so far.
-By storing the information in special variables, strategies that want to can look at the clock or the move number, but other strategies don't have to know about them.
+戦略は持ち時間の規則に従わねばならなくなったので、残り時間を見たくなるかもしれません。
+時計を戦略の引数として渡すのではなく、特殊変数 `*clock*` に格納することにしました。
+新しい版の `othello` は `*move-number*` も記録します。
+これも戦略の関数に引数として渡せたでしょう。
+しかしこの余分な引数を加えると、これまでに作ったすべての戦略を変えねばならなくなります。
+特殊変数に情報を格納しておけば、見たい戦略は時計や手数を見られ、他の戦略はそれらを知らずに済みます。
 
-We still have the security problem-we don't want a strategy to be able to set the opponent's remaining time to zero and thereby win the game.
-Thus, we use `*clock*` only as a copy of the "real" game clock.
-The function `replace` copies the real clock into `*clock*`, and also copies the real board into `*board*`.
+それでも安全上の問題は残ります。戦略が相手の残り時間を0にして勝ってしまえるのは困ります。
+ですから `*clock*` は「本物の」対局時計の複製としてのみ使います。
+関数 `replace` が本物の時計を `*clock*` に、本物の盤を `*board*` に写します。
 
 ```lisp
 (defvar *clock* (make-array 3) "A copy of the game clock")
@@ -1141,9 +1141,9 @@ The function `replace` copies the real clock into `*clock*`, and also copies the
          (get-move strategy player board print clock)))))
 ```
 
-Finally, the function `print-board` needs to print the time remaining for each player; this requires an auxiliary function to get the number of minutes and seconds from an internal-format time interval.
-Note that we make the arguments optional, so that in debugging one can say just (`print-board`) to see the current situation.
-Also note the esoteric format option: `"~2, '0d"` prints a decimal number using at least two places, padding on the left with zeros.
+最後に、関数 `print-board` は各打ち手の残り時間を表示する必要があります。これには、内部形式の時間間隔から分と秒を得る補助関数が要ります。
+引数を省略可能にしてあるので、デバッグ中は (`print-board`) と書くだけで現在の状況を見られることに注意してください。
+また、風変わりなformatの指定にも注目してください。`"~2, '0d"` は10進数を少なくとも2桁で表示し、左を0で埋めます。
 
 ```lisp
 (defun print-board (&optional (board *board*) clock)
@@ -1172,10 +1172,10 @@ Also note the esoteric format option: `"~2, '0d"` prints a decimal number using 
     (format nil "~2d:~2,'0d" min sec)))
 ```
 
-## 18.8 Playing a Series of Games
+## 18.8 連戦する
 
-A single game is not enough to establish that one strategy is better than another.
-The following function allows two strategies to compete in a series of games:
+1局だけでは、ある戦略が別の戦略より優れていることを確かめるには足りません。
+次の関数は、2つの戦略を連戦させるものです。
 
 ```lisp
 (defun othello-series (strategy1 strategy2 n-pairs)
@@ -1195,7 +1195,7 @@ The following function allows two strategies to compete in a series of games:
             scores)))
 ```
 
-Let's see what happens when we use it to pit the two weighted-squares functions against each other in a series of ten games:
+これを使って2つの重み付きマスの関数を10局戦わせると何が起こるかを見てみましょう。
 
 ```lisp
 >(othello-series
@@ -1206,18 +1206,18 @@ Let's see what happens when we use it to pit the two weighted-squares functions 
 (-28 40 -28 40 -28 40 -28 40 -28 40)
 ```
 
-Something is suspicious here-the same scores are being repeated.
-A little thought reveals why: neither strategy has a random component, so the exact same game was played five times with one strategy going first, and another game was played five times when the other strategy goes first!
-A more accurate appraisal of the two strategies' relative worth would be gained by starting each game from some random position and playing from there.
+どうも怪しい。同じ得点が繰り返されています。
+少し考えれば理由がわかります。どちらの戦略にも乱数の要素がないので、一方が先手の対局がまったく同じ形で5回、もう一方が先手の対局がまた5回指されただけなのです。
+2つの戦略の相対的な値打ちをより正確に測るには、各対局をでたらめな局面から始めて、そこから指すのがよいでしょう。
 
-Think for a minute how you would design to run a series of games starting from a random position.
-One possibility would be to change the function `othello` to accept an optional argument indicating the initial state of the board.
-Then `othello-series` could be changed to somehow generate a random board and pass it to `othello`.
-While this approach is feasible, it means changing two existing working functions, as well as writing another function, `generate-random-board`.
-But we couldn't generate just any random board: it would have to be a legal board, so it would have to call `othello` and somehow get it to stop before the game was over.
+でたらめな局面から始める連戦をどう設計するか、少し考えてみてください。
+1つの手は、盤の初期状態を示す省略可能な引数を受け取るよう関数 `othello` を変えることでしょう。
+そうすれば `othello-series` を変えて、どうにかしてでたらめな盤を作り `othello` に渡せます。
+この方式は実行可能ですが、動いている既存の関数を2つ変えたうえに、`generate-random-board` という関数をもう1つ書くことになります。
+しかも、どんなでたらめな盤でもよいわけではありません。合法な盤でなければならないので、`othello` を呼び、対局が終わる前にどうにか止める必要があります。
 
-An alternative is to leave both `othello` and `othello-series` alone and build another function on top of it, one that works by passing in two new strategies: strategies that make a random move for the first few moves and then revert to the normal specified behavior.
-This is a better solution because it uses existing functions rather than modifying them, and because it requires no new functions besides `switch-strategies`, which could prove useful for other purposes, and `random-othello-series`, which does nothing more than call `othello-series` with the proper arguments.
+別の道は、`othello` も `othello-series` もそのままにして、その上に別の関数を築くことです。新しい戦略を2つ渡して働かせる関数で、その戦略は最初の数手はでたらめに打ち、そのあと指定どおりのふるまいに戻ります。
+こちらが良い解なのは、既存の関数を変えるのではなく使うからであり、必要な新しい関数が、他の用途にも役立ちうる `switch-strategies` と、適切な引数で `othello-series` を呼ぶだけの `random-othello-series` しかないからです。
 
 ```lisp
 (defun random-othello-series (strategy1 strategy2
@@ -1236,10 +1236,10 @@ This is a better solution because it uses existing functions rather than modifyi
                player board)))
 ```
 
-There is a problem with this kind of series: it may be that one of the strategies just happens to get better random positions.
-A fairer test would be to play two games from each random position, one with the each strategy playing first.
-One way to do that is to alter `othello-series` so that it saves the random state before playing the first game of a pair, and then restores the saved random state before playing the second game.
-That way the same random position will be duplicated.
+この種の連戦には問題があります。一方の戦略がたまたま良いでたらめの局面に当たるかもしれないのです。
+より公平な試験は、でたらめな局面ごとに2局指し、それぞれの戦略が先手を持つようにすることでしょう。
+その1つのやり方は、`othello-series` を変えて、対の1局目を指す前に乱数の状態を保存し、2局目を指す前にその状態を戻すことです。
+そうすれば同じでたらめな局面が再現されます。
 
 ```lisp
 (defun othello-series (strategy1 strategy2 n-pairs)
@@ -1259,8 +1259,8 @@ That way the same random position will be duplicated.
             scores)))
 ```
 
-Now we are in a position to do a more meaningful test.
-In the following, the weighted-squares strategy wins 4 out of 10 games against the modified strategy, losing by a total of 76 pieces, with the actual scores indicated.
+これでもっと意味のある試験ができるようになりました。
+次では、重み付きマスの戦略が改良版の戦略に対して10局中4勝、合計76石差で負けており、実際の得点も示されています。
 
 ```lisp
 > (random-othello-series
@@ -1272,8 +1272,8 @@ In the following, the weighted-squares strategy wins 4 out of 10 games against t
 (-8 -40 22 -30 10 -10 12 -18 4 -18)
 ```
 
-The `random-othello-series` function is useful for comparing two strategies.
-When there are more than two strategies to be compared at the same time, the following function can be useful:
+関数 `random-othello-series` は、2つの戦略を比べるのに役立ちます。
+同時に3つ以上の戦略を比べたいときは、次の関数が使えます。
 
 ```lisp
 (defun round-robin (strategies n-pairs &optional
@@ -1306,7 +1306,7 @@ When there are more than two strategies to be compared at the same time, the fol
                              (aref scores i j)))))))
 ```
 
-Here is a comparison of five strategies that search only 1 ply:
+1プライだけ探索する5つの戦略の比較を示します。
 
 ```lisp
 (defun mobility (player board)
@@ -1328,10 +1328,10 @@ MODIFIED-WEIGHTED  31.5: 10.0 5.0 7.0 --- 9.5
 RANDOM              7.5:  3.0 3.0 1.0 0.5 ---
 ```
 
-The parameter `n-pairs` is 5, meaning that each strategy plays five games as black and five as white against each of the other four strategies, for a total of 40 games for each strategy and 100 games overall.
-The first line of output says that the count-difference strategy won 12.5 of its 40 games, including 3 against the mobility strategy, 2.5 against the weighted strategy, none against the modified weighted, and 7 against the random strategy.
-The fact that the random strategy manages to win 7.5 out of 40 games indicates that the other strategies are not amazingly strong.
-Now we see what happens when the search depth is increased to 4 ply (this will take a while to run):
+引数 `n-pairs` は5で、各戦略が他の4つの戦略それぞれに対して黒で5局、白で5局を指し、1戦略あたり40局、全体で100局になります。
+出力の1行目は、count-differenceの戦略が40局中12.5勝したことを示しています。内訳はmobilityに3勝、weightedに2.5勝、modified weightedには0勝、randomに7勝です。
+でたらめな戦略が40局中7.5勝もしているという事実は、他の戦略が驚くほど強くはないことを示しています。
+では探索の深さを4プライに増やすと何が起こるかを見てみましょう（走らせるのに少し時間がかかります）。
 
 ```lisp
 > (round-robin
@@ -1347,26 +1347,26 @@ MODIFIED-WEIGHTED  24.5: 10.0 4.5 --- 10.0
 RANDOM              0.0:  0.0 0.0 0.0  ---
 ```
 
-Here the random strategy does not win any games-an indication that the other strategies are doing something right.
-Notice that the modified weighted-squares has only a slight advantage over the weighted-squares, and in fact it lost their head-to-head series, four games to five, with one draw.
-So it is not clear which strategy is better.
+ここではでたらめな戦略が1局も勝てません。他の戦略が何か正しいことをしている証です。
+改良版の重み付きマスが、元の重み付きマスにわずかしか勝っていないこと、しかも直接対決では4勝5敗1分けで負け越していることに注目してください。
+ですから、どちらの戦略が優れているかははっきりしません。
 
-The output does not break down wins by black or white, nor does it report the numerical scores.
-I felt that that would clutter up the output too much, but you're welcome to add this information.
-It turns out that white wins 23 (and draws 1) of the 40 games played between 4-ply searching strategies.
-Usually, Othello is a fairly balanced game, because black has the advantage of moving first but white usually gets to play last.
-It is clear that these strategies do not play well in the opening game, but for the last four ply they play perfectly.
-This may explain white's slight edge, or it may be a statistical aberration.
+この出力は、黒番と白番の勝ちを分けて示していませんし、得点も報告していません。
+出力がごちゃごちゃしすぎると感じたからですが、この情報を加えてもらってかまいません。
+実のところ、4プライ探索の戦略どうしで指した40局のうち、白が23勝（1分け）しています。
+ふつうオセロはかなり均衡のとれたゲームです。黒には先手の利がありますが、たいてい白が最後に打てるからです。
+これらの戦略が序盤をうまく指せないのは明らかですが、最後の4プライは完璧に指します。
+これが白のわずかな優位を説明するのかもしれませんし、統計上のぶれにすぎないのかもしれません。
 
-## 18.9 More Efficient Searching
+## 18.9 もっと効率のよい探索
 
-The alpha-beta cutoffs work when we have established a good move and another move proves to be not as good.
-Thus, we will be able to make cutoffs earlier if we ensure that good moves are considered first.
-Our current algorithm loops through the list of `legal-moves`, but `legal-moves` makes no attempt to order the moves in any way.
-We will call this the *random-ordering* strategy (even though the ordering is not random at all-square 11 is always considered first, then 12, etc.).
+アルファベータの打ち切りが効くのは、良い手をすでに確保していて、別の手がそれほど良くないと判明したときです。
+ですから、良い手が先に検討されるようにすれば、より早く打ち切れます。
+いまのアルゴリズムは `legal-moves` の並びを回りますが、`legal-moves` は手を何らかの順に並べようとはしていません。
+これを*でたらめ順*の戦略と呼ぶことにします（順序はまったくでたらめではなく、常にマス11が最初、次が12、という具合ですが）。
 
-One way to try to generate good moves first is to search highly weighted squares first.
-Since `legal-moves` considers squares in the order defined by `all-squares`, all we have to do is redefine the list `all-squares`<a id="tfn18-3"></a><sup>[3](#fn18-3)</sup>
+良い手を先に生成する1つのやり方は、重みの大きいマスを先に探索することです。
+`legal-moves` は `all-squares` が定める順にマスを見ていくので、並び `all-squares` を定義しなおすだけで済みます。<a id="tfn18-3"></a><sup>[3](#fn18-3)</sup>
 :
 
 ```lisp
@@ -1376,15 +1376,15 @@ Since `legal-moves` considers squares in the order defined by `all-squares`, all
             #'> :key #'(lambda (sq) (elt *weights* sq))))
 ```
 
-Now the corner squares will automatically be considered first, followed by the other highly weighted squares.
-We call this the s*tatic-ordering* strategy, because the ordering is not random, but it does not change depending on the situation.
+これで隅のマスが自動的に最初に検討され、続いて重みの大きい他のマスが検討されます。
+これを*静的順序*の戦略と呼びます。順序はでたらめではないものの、状況によって変わらないからです。
 
-A more informed way to try to generate good moves first is to sort the moves according to the evaluation function.
-This means making more evaluations.
-Previously, only the boards at the leaves of the search tree were evaluated.
-Now we need to evaluate every board.
-In order to avoid evaluating a board more than once, we make up a structure called a `node`, which holds a board, the square that was taken to result in that board, and the evaluation value of that board.
-The search is the same except that nodes are passed around instead of boards, and the nodes are sorted by their value.
+良い手を先に生成する、より賢いやり方は、評価関数に従って手を並べ替えることです。
+これは評価の回数が増えることを意味します。
+これまでは、探索木の葉にある盤面だけを評価していました。
+いまはすべての盤面を評価する必要があります。
+同じ盤面を2度評価しないよう、`node` という構造体をこしらえます。これは盤面と、その盤面に至るのに打ったマスと、その盤面の評価値を保ちます。
+探索は、盤面の代わりに節点を引き回し、節点をその値で並べ替える点を除けば同じです。
 
 ```lisp
 (defstruct (node) square board value)
@@ -1448,16 +1448,16 @@ The search is the same except that nodes are passed around instead of boards, an
           #'> :key #'node-value)))
 ```
 
-(Note the use of the function `map-into`.
-This is part of ANSI Common Lisp, but if it is not a part of your implementation, a definition is provided on [page 857](chapter24.md#p857).)
+（関数 `map-into` を使っていることに注意してください。
+これはANSI Common Lispの一部ですが、お使いの実装にない場合は[857ページ](chapter24.md#p857)に定義があります。）
 
-The following table compares the performance of the random-ordering strategy, the sorted-ordering strategy and the static-ordering strategy in the course of a single game.
-All strategies search 6 ply deep.
-The table measures the number of boards investigated, the number of those boards that were evaluated (in all cases the evaluation function was `modified-weighted-squares`) and the time in seconds to compute a move.
+次の表は、1局のあいだの、でたらめ順・並べ替え順・静的順序の各戦略の性能を比べたものです。
+どの戦略も6プライの深さまで探索します。
+表は、調べた盤面の数、そのうち評価した盤面の数（いずれの場合も評価関数は `modified-weighted-squares` です）、そして1手を計算するのにかかった秒数を示しています。
 
-| random order |         |        | sorted order |         |        | static order |         |        |
+| でたらめ順   |         |        | 並べ替え順   |         |        | 静的順序     |         |        |
 |--------------|---------|--------|--------------|---------|--------|--------------|---------|--------|
-| *boards*     | *evals* | *secs* | *boards*     | *evals* | *secs* | *boards*     | *evals* | *secs* |
+| *盤面*       | *評価*  | *秒*   | *盤面*       | *評価*  | *秒*   | *盤面*       | *評価*  | *秒*   |
 | 13912        | 10269   | 69     | 5556         | 5557    | 22     | 2365         | 1599    | 19     |
 | 9015         | 6751    | 56     | 6571         | 6572    | 25     | 3081         | 2188    | 18     |
 | 9820         | 7191    | 46     | 11556        | 11557   | 45     | 5797         | 3990    | 31     |
@@ -1476,68 +1476,68 @@ The table measures the number of boards investigated, the number of those boards
 | 24743        | 18777   | 105    | 20003        | 20004   | 65     | 15627        | 11737   | 66     |
 | 1.0          | 1.0     | 1.0    | .81          | 1.07    | .62    | .63          | .63     | .63    |
 
-The last two lines of the table give the averages and the averages normalized to the random-ordering strategy's performance.
-The sorted-ordering strategy takes only 62% of the time of the random-ordering strategy, and the static-ordering takes 63%.
-These times are not to be trusted too much, because a large-scale garbage collection was taking place during the latter part of the game, and it may have thrown off the times.
-The board and evaluation count may be better indicators, and they both show the static-ordering strategy doing the best.
+表の最後の2行は、平均と、でたらめ順の戦略の性能を1としたときの平均を示しています。
+並べ替え順の戦略はでたらめ順の62%の時間しかかからず、静的順序は63%です。
+この時間はあまり当てにしないでください。対局の後半に大規模なごみ集めが起きており、時間が狂った可能性があります。
+盤面の数と評価の回数のほうが良い指標かもしれず、どちらも静的順序の戦略がもっとも良いことを示しています。
 
-We have to be careful how we evaluate these results.
-Earlier I said that alpha-beta search makes more cutoffs when it is presented first with better moves.
-The actual truth is that it makes more cutoffs when presented first with moves that *the evaluation function thinks* are better.
-In this case the evaluation function and the static-ordering strategy are in strong agreement on what are the best moves, so it is not surprising that static ordering does so well.
-As we develop evaluation functions that vary from the weighted-squares approach, we will have to run experiments again to see if the static-ordering is still the best.
+この結果の受け取り方には気をつけねばなりません。
+先ほど、アルファベータ探索は良い手を先に与えられるほど多く打ち切ると述べました。
+実のところは、*評価関数が*良いと*考える*手を先に与えられるほど多く打ち切る、というのが正しいのです。
+この場合、評価関数と静的順序の戦略は何が最善手かについて強く一致しているので、静的順序がこれほどうまくいくのは驚くにあたりません。
+重み付きマスの方式から離れた評価関数を作っていくときには、静的順序がなお最良かを確かめるために実験をやり直さねばならないでしょう。
 
-## 18.10 It Pays to Precycle
+## 18.10 先に使い回すと得をする
 
-The progressive city of Berkeley, California, has a strong recycling program to reclaim glass, paper, and aluminum that would otherwise be discarded as garbage.
-In 1989, Berkeley instituted a novel program of *precycling:* consumers are encouraged to avoid buying products that come in environmentally wasteful packages.
+進取の気性に富むカリフォルニア州バークレー市には、そのままならごみとして捨てられるガラス・紙・アルミを回収する熱心な再生利用の制度があります。
+1989年、バークレーは*プリサイクル*という新しい制度を設けました。消費者は、環境に無駄な包装の商品を買わないよう勧められるのです。
 
-Your Lisp system also has a recycling program: the Lisp garbage collector automatically recycles any unused storage.
-However, there is a cost to this program, and you the consumer can get better performance by precycling your data.
-Don't buy wasteful data structures when simpler ones can be used or reused.
-You, the Lisp programmer, may not be able to save the rain forests or the ozone layer, but you can save valuable processor time.
+あなたのLispシステムにも再生利用の制度があります。Lispのごみ集めが、使われなくなった記憶を自動で再生利用してくれます。
+しかしこの制度には費用がかかり、消費者であるあなたはデータをプリサイクルすることで性能を上げられます。
+より単純なもので済むとき、あるいは使い回せるときに、無駄なデータ構造を買わないことです。
+Lispプログラマであるあなたに熱帯雨林やオゾン層は救えないかもしれませんが、貴重な処理装置の時間なら救えます。
 
-We saw before that the search routines look at tens of thousands of boards per move.
-Currently, each board position is created anew by `copy-board` and discarded soon thereaf ter.
-We could avoid generating all this garbage by reusing the same board at each ply.
-We'd still need to keep the board from the previous ply for use when the search backs up.
-Thus, a vector of boards is needed.
-In the following we assume that we will never search deeper than 40 ply.
-This is a safe assumption, as even the fastest Othello programs can only search about 15 ply before running out of time.
+先に見たとおり、探索のルーチンは1手あたり何万もの盤面を見ます。
+いまは各盤面が `copy-board` によって新しく作られ、すぐあとに捨てられています。
+各プライで同じ盤面を使い回せば、このごみをすべて出さずに済みます。
+探索が戻るときのために、1つ前のプライの盤面は保っておく必要があります。
+ですから盤面のベクタが要ります。
+以下では、40プライより深く探索することはないと仮定します。
+これは安全な仮定です。もっとも速いオセロのプログラムでさえ、時間切れになるまでに15プライほどしか探索できないのですから。
 
 ```lisp
 (defvar *ply-boards*
   (apply #'vector (loop repeat 40 collect (initial-board))))
 ```
 
-Now that we have sharply limited the number of boards needed, we may want to reevaluate the implementation of boards.
-Instead of having the board as a vector of pieces (to save space), we may want to implement boards as vectors of bytes or full words.
-In some implementations, accessing elements of such vectors is faster.
-(In other implementations, there is no difference.)
+必要な盤面の数をぐっと絞ったので、盤面の実装を見直したくなるかもしれません。
+（場所を節約するために）盤面を石のベクタにするのではなく、バイトや語のベクタとして実装したくなるかもしれません。
+実装によっては、そうしたベクタの要素にアクセスするほうが速いのです。
+（違いのない実装もあります。）
 
-An implementation using the vector of boards will be done in the next section.
-Note that there is another alternative: use only one board, and update it by making and retracting moves.
-This is a good alternative in a game like chess, where a move only alters two squares.
-In Othello, many squares can be altered by a move, so copying the whole board over and making the move is not so bad.
+盤面のベクタを使う実装は次節で行います。
+もう1つの道もあることに注意してください。盤面を1つだけ使い、手を打ったり戻したりして更新するやり方です。
+1手で2つのマスしか変わらないチェスのようなゲームでは、これは良い選択肢です。
+オセロでは1手で多くのマスが変わりうるので、盤面全体を写してから打つのも悪くありません。
 
-It should be mentioned that it is worth looking into the problem of copying a position from one board to another.
-The function `replace` copies one sequence (or part of it) into another, but it is a generic function that may be slow.
-In particular, if each element of a board is only 2 bits, then it may be much faster to use displaced arrays to copy 32 bits at a time.
-The advisability of this approach depends on the implementation, and so it is not explored further here.
+ある盤面から別の盤面へ局面を写す問題も、調べてみる値打ちがあると述べておくべきでしょう。
+関数 `replace` は並びの（一部の）内容を別の並びへ写しますが、これは総称的な関数なので遅いかもしれません。
+とりわけ、盤面の各要素がわずか2ビットなら、ずらし配列を使って一度に32ビットずつ写すほうがずっと速いかもしれません。
+この方式が良いかどうかは実装によるので、ここではこれ以上立ち入りません。
 
-## 18.11 Killer Moves
+## 18.11 キラー手
 
-In [section 18.9](#s0050), we considered the possibility of searching moves in a different order, in an attempt to search the better moves first, thereby getting more alpha-beta pruning.
-In this section, we consider the *killer heuristic,* which states that a move that has proven to be a good one in one line of play is also likely to be a good one in another line of play.
-To use chess as perhaps a more familiar example, suppose I consider one move, and it leads to the opponent replying by capturing my queen.
-This is a killer move, one that I would like to avoid.
-Therefore, when I consider other possible moves, I want to immediately consider the possibility of the opponent making that queen-capturing move.
+[18.9節](#s0050)では、より良い手を先に探索してアルファベータの枝刈りを増やすために、手を別の順序で探索する可能性を考えました。
+本節では*キラーのヒューリスティック*を考えます。これは、ある手順で良いとわかった手は、別の手順でも良い手でありそうだ、というものです。
+より身近かもしれないチェスを例に取りましょう。ある手を考えたら、相手がこちらのクイーンを取る応手につながったとします。
+これがキラー手、こちらとしては避けたい手です。
+ですから他の手を考えるときにも、相手がそのクイーンを取る手を打つ可能性をすぐに考えたいわけです。
 
-The function `alpha-beta3` adds the parameter `killer`, which is the best move found so far at the current level.
-After we determine the `legal-moves`, we use `put-first` to put the killer move first, if it is in fact a legal move.
-When it comes time to search the next level, we keep track of the best move in `killer2`.
-This requires keeping track of the value of the best move in `killer2-val`.
-Everything else is unchanged, except that we get a new board by recycling the `*ply-boards*` vector rather than by allocating fresh ones.
+関数 `alpha-beta3` は引数 `killer` を加えます。これは現在の段でここまでに見つかった最善手です。
+`legal-moves` を求めたあと、キラー手が実際に合法手であれば `put-first` でそれを先頭に置きます。
+次の段を探索する段になったら、最善手を `killer2` に記録します。
+そのためには、最善手の値を `killer2-val` に記録する必要があります。
+他はすべて変わりませんが、新しい盤面を新たに割り当てるのではなく、ベクタ `*ply-boards*` を使い回して得る点だけが違います。
 
 ```lisp
 (defun alpha-beta3 (player board achievable cutoff ply eval-fn
@@ -1591,46 +1591,46 @@ Everything else is unchanged, except that we get a new board by recycling the `*
       moves))
 ```
 
-Another experiment on a single game reveals that adding the killer heuristic to static-ordering search (again at 6-ply) cuts the number of boards and evaluations, and the total time, all by about 20%.
-To summarize, alpha-beta search at 6 ply with random ordering takes 105 seconds per move (in our experiment), adding static-ordering cuts it to 66 seconds, and adding killer moves to that cuts it again to 52 seconds.
-This doesn't include the savings that alpha-beta cutoffs give over full minimax search.
-At 6 ply with a branching factor of 7, full minimax would take about nine times longer than static ordering with killers.
-The savings increase with increased depth.
-At 7 ply and a branching factor of 10, a small experiment shows that static-ordering with killers looks at only 28,000 boards in about 150 seconds.
-Full minimax would evaluate 10 million boards and take 350 times longer.
-The times for full minimax are estimates based on the number of boards per second, not on an actual experiment.
+1局についてのもう1つの実験から、静的順序の探索（やはり6プライ）にキラーのヒューリスティックを加えると、盤面の数も評価の回数も合計時間も、いずれも20%ほど減ることがわかります。
+まとめると、6プライのアルファベータ探索はでたらめ順で1手105秒（この実験では）かかり、静的順序を加えると66秒に、さらにキラー手を加えると52秒に減ります。
+これには、完全なミニマックス探索に対してアルファベータの打ち切りがもたらす節約は含まれていません。
+分岐数7で6プライなら、完全なミニマックスはキラー手つきの静的順序の9倍ほどかかるでしょう。
+深さが増すほど節約は大きくなります。
+分岐数10で7プライなら、小さな実験によると、キラー手つきの静的順序は約150秒で28,000の盤面しか見ません。
+完全なミニマックスなら1000万の盤面を評価し、350倍の時間がかかるでしょう。
+完全なミニマックスの時間は、実際の実験ではなく毎秒あたりの盤面数からの見積もりです。
 
-The algorithm in this section just keeps track of one killer move.
-It is of course possible to keep track of more than one.
-The Othello program Bill ([Lee and Mahajan 1990b](bibliography.md#bb0715)) merges the idea of killer moves with legal move generation: it keeps a list of possible moves at each level, sorted by their value.
-The legal move generator then goes down this list in sorted order.
+本節のアルゴリズムはキラー手を1つしか記録しません。
+もちろん複数を記録することもできます。
+オセロのプログラムBill（[Lee and Mahajan 1990b](bibliography.md#bb0715)）は、キラー手の考えを合法手の生成と融合させています。各段で、打てる手の並びを値で並べ替えて保つのです。
+合法手の生成器は、その並びを順にたどります。
 
-It should be stressed once again that all this work on alpha-beta cutoffs, ordering, and killer moves has not made any change at all in the moves that are selected.
-We still end up choosing the same move that would be made by a full minimax search to the given depth, we are just doing it faster, without looking at possibilities that we can prove are not as good.
+アルファベータの打ち切り、順序づけ、キラー手にまつわるこれらの工夫が、選ばれる手をまったく変えていないことは、あらためて強調しておくべきです。
+最後に選ぶのは、与えた深さまでの完全なミニマックス探索が選ぶのと同じ手です。ただそれを、劣ると証明できる可能性を見ずに、より速く行っているだけなのです。
 
-## 18.12 Championship Programs: Iago and Bill
+## 18.12 優勝プログラム: IagoとBill
 
-As mentioned in the introduction, the unpredictability of Othello makes it a difficult game for humans to master, and thus programs that search deeply can do comparatively well.
-In fact, in 1981 the reigning champion, Jonathan Cerf, proclaimed "In my opinion the top programs ... are now equal (if not superior) to the best human players." In discussing Rosenbloom's Iago program (1982), Cerf went on to say "I understand Paul Rosenbloom is interested in arranging a match against me.
-Unfortunately my schedule is very full, and I'm going to see that it remains that way for the foreseeable future."
+冒頭で述べたとおり、オセロは読みがたいために人間には習熟の難しいゲームであり、そのぶん深く探索するプログラムが比較的よい成績を上げられます。
+実際1981年、当時の王者Jonathan Cerfは「私の見るところ、上位のプログラムは……いまや人間の最強の打ち手と同等（でなければそれ以上）だ」と述べました。RosenbloomのIagoプログラム（1982）について論じるなかで、Cerfはこう続けます。「Paul Rosenbloomが私との対戦を望んでいると聞いている。
+あいにく私の予定は詰まっており、当分のあいだそのままにしておくつもりだ」。
 
-In 1989, another program, Bill ([Lee and Mahajan 1990](bibliography.md#bb0715)) beat the highest rated American Othello player, Brian Rose, by a score of 56-8.
-Bill's evaluation function is fast enough to search 6-8 ply under tournament conditions, yet it is so accurate that it beats its creator, Kai-Fu Lee, searching only 1 ply.
-(However, Lee is only a novice Othello player; his real interest is in speech recognition; see [Waibel and Lee 1991](bibliography.md#bb1285).)
-There are other programs that also play at a high level, but they have not been written up in the AI literature as Iago and Bill have.
+1989年、別のプログラムBill（[Lee and Mahajan 1990](bibliography.md#bb0715)）が、アメリカで最高の格付けを持つオセロ打ちBrian Roseを56対8で破りました。
+Billの評価関数は大会の条件下で6〜8プライを探索できるほど速く、しかも1プライしか探索しなくても作者のKai-Fu Leeを破るほど正確です。
+（もっともLeeはオセロについては初心者で、本当の関心は音声認識にあります。[Waibel and Lee 1991](bibliography.md#bb1285)を参照。）
+高い水準で指す他のプログラムもありますが、IagoやBillのようにAIの文献で書かれてはいません。
 
-In this section we present an evaluation function based on Iago's, although it also contains elements of Bill, and of an evaluation function written by Eric Wefald in 1989.
-The evaluation function makes use of two main features: *mobility and edge stability*.
+本節ではIagoのものにもとづく評価関数を示します。ただしBillの要素や、1989年にEric Wefaldが書いた評価関数の要素も含んでいます。
+この評価関数は、*着手可能性と辺の安定性*という2つのおもな特徴を使います。
 
-### Mobility
+### 着手可能性
 
-Both Iago and Bill make heavy use of the concept of *mobility*.
-Mobility is a measure of the ability to make moves; basically, the more moves one can make, the better.
-This is not quite true, because there is no advantage in being able to make bad moves, but it is a useful heuristic.
-We define *current mobility* as the number of legal moves available to a player, and *potential mobility* as the number of blank squares that are adjacent to opponent's pieces.
-These include the legal moves.
-A better measure of mobility would try to count only good moves.
-The following function computes both current and potential mobility for a player:
+IagoもBillも*着手可能性*という考えを重く用いています。
+着手可能性は手を打てる能力の尺度で、基本的には打てる手が多いほどよいというものです。
+悪い手を打てても得はないので、これは厳密には正しくありませんが、役に立つヒューリスティックです。
+*現在の着手可能性*を打ち手が打てる合法手の数、*潜在的な着手可能性*を相手の石に隣接する空きマスの数と定義します。
+後者には合法手も含まれます。
+より良い着手可能性の尺度なら、良い手だけを数えようとするでしょう。
+次の関数は、打ち手について現在と潜在の両方の着手可能性を計算します。
 
 ```lisp
 (defun mobility (player board)
@@ -1651,38 +1651,38 @@ The following function computes both current and potential mobility for a player
     (values current (+ current potential))))
 ```
 
-### Edge Stability
+### 辺の安定性
 
-Success at Othello often hinges around edge play, and both Iago and Bill evaluate the edges carefully.
-Edge analysis is made easier by the fact that the edges are fairly independent of the interior of the board: once a piece is placed on the edge, no interior moves can flip it.
-This independence allows a simplifying assumption: to evaluate a position's edge strength, evaluate each of the four edges independently, without consideration of the interior of the board.
-The evaluation can be made more accurate by considering the X-squares to be part of the edge.
+オセロの勝敗はしばしば辺の打ち方にかかっており、IagoもBillも辺を注意深く評価します。
+辺の分析は、辺が盤の内側からかなり独立しているおかげで楽になります。いったん石が辺に置かれれば、内側のどんな手もそれを裏返せません。
+この独立性のおかげで、話を簡単にする仮定が置けます。ある局面の辺の強さを評価するには、盤の内側を考えずに4つの辺をそれぞれ独立に評価すればよいのです。
+Xのマスを辺の一部と見なせば、評価をより正確にできます。
 
-Even evaluating a single edge is a time-consuming task, so Bill and Iago compile away the evaluation by building a table of all possible edge positions.
-An "edge" according to Bill is ten squares: the eight actual edge squares and the two X-squares.
-Since each square can be black, white, or empty, there are 3<sup>10</sup> or 59,049 possible edge positions-a large but manageable number.
+1つの辺を評価するだけでも時間のかかる仕事なので、BillとIagoは、ありうる辺の配置すべての表を作ることで評価をコンパイルしてしまいます。
+Billの言う「辺」は10マス、すなわち実際の辺の8マスと2つのXのマスです。
+各マスは黒・白・空のいずれかなので、辺の配置は 3<sup>10</sup> すなわち59,049通りあります。大きな数ですが手に負えないほどではありません。
 
-The value of each edge position is determined by a process of successive approximation.
-Just as in a minimax search, we will need a static edge evaluation function to determine the value of a edge position without search.
-This static edge evaluation function is applied to every possible edge position, and the results are stored in a 59,049 element vector.
-The static evaluation is just a weighted sum of the occupied squares, with different weights given depending on if the piece is stable or unstable.
+各辺の配置の値は、逐次近似の過程によって定まります。
+ミニマックス探索と同じく、探索なしに辺の配置の値を定める静的な辺の評価関数が要ります。
+この静的な辺の評価関数をありうるすべての辺の配置に適用し、結果を59,049要素のベクタに格納します。
+静的な評価は、埋まったマスの重み付きの和にすぎませんが、石が安定か不安定かによって違う重みが与えられます。
 
-Each edge position's evaluation can be improved by a process of search.
-Iago uses a single ply search: given a position, consider all moves that could be made (including no move at all).
-Some moves will be clearly legal, because they flip pieces on the edge, but other moves will only be legal if there are pieces in the interior of the board to flip.
-Since we are only considering the edge, we don't know for sure if these moves are legal.
-They will be assigned probabilities of legality.
-The updated evaluation of a position is determined by the values and probabilities of each move.
-This is done by sorting the moves by value and then summing the product of the value times the probability that the move can be made.
-This process of iterative approximation is repeated five times for each position.
-At that point, Rosenbloom reports, the values have nearly converged.
+各辺の配置の評価は、探索の過程によって良くできます。
+Iagoは1プライの探索を使います。ある配置が与えられたら、打ちうるすべての手（まったく打たない場合も含む）を考えるのです。
+辺の石を裏返すので明らかに合法な手もあれば、盤の内側に裏返す石があって初めて合法になる手もあります。
+辺しか見ていないので、そうした手が合法かどうかは確かにはわかりません。
+それらには合法である確率を割り当てます。
+配置の更新後の評価は、各手の値と確率によって定まります。
+これは、手を値で並べ替えてから、値とその手を打てる確率との積を足し合わせることで行います。
+この反復近似の過程を、各配置について5回繰り返します。
+その時点で値はほぼ収束していると、Rosenbloomは報告しています。
 
-In effect, this extends the depth of the normal alpha-beta search by including an edge-only search in the evaluation function.
-Since each edge position with *n* pieces is evaluated as a function of the positions with *n* + 1 pieces, the search is complete-it is an implicit 10-ply search.
+実質的にこれは、評価関数のなかに辺だけの探索を含めることで、通常のアルファベータ探索の深さを伸ばしています。
+石が *n* 個の辺の配置はどれも、石が *n* + 1 個の配置の関数として評価されるので、この探索は完全です。暗黙の10プライ探索なのです。
 
-Calculating edge stability is a bit more complicated than the other features.
-The first step is to define a variable, `*edge-table*`, which will hold the evaluation of each edge position, and a constant, `edge-and-x-lists`, which is a list of the squares on each of the four edges.
-Each edge has ten squares because the X-squares are included.
+辺の安定性の計算は、他の特徴より少し込み入っています。
+最初の段は、各辺の配置の評価を保つ変数 `*edge-table*` と、4つの辺それぞれのマスの並びである定数 `edge-and-x-lists` を定義することです。
+Xのマスを含むので、各辺は10マスです。
 
 ```lisp
 (defvar *edge-table* (make-array (expt 3 10))
@@ -1696,8 +1696,8 @@ Each edge has ten squares because the X-squares are included.
   "The four edges (with their X-squares).")
 ```
 
-Now for each edge we can compute an index into the edge table by building a 10-digit base-3 number, where each digit is 1 if the corresponding edge square is occupied by the player, 2 if by the opponent, and 0 if empty.
-The function `edge-index` computes this, and `edge-stability` sums the values of the four edge indexes.
+これで各辺について、10桁の3進数を組み立てて辺の表への索引を計算できます。各桁は、対応する辺のマスを打ち手が占めていれば1、相手が占めていれば2、空いていれば0とします。
+関数 `edge-index` がこれを計算し、`edge-stability` が4つの辺の索引の値を足し合わせます。
 
 ```lisp
 (defun edge-index (player board squares)
@@ -1718,14 +1718,14 @@ The function `edge-index` computes this, and `edge-stability` sums the values of
                   (edge-index player board edge-list))))
 ```
 
-The function `edge-stability` is all we will need in Iago's evaluation function, but we still need to generate the edge table.
-Since this needs to be done only once, we don't have to worry about efficiency.
-In particular, rather than invent a new data structure to represent edges, we will continue to use complete boards, even though they will be mostly empty.
-The computations for the edge table will be made on the top edge, from the point of view of black, with black to play.
-But the same table can be used for white, or for one of the other edges, because of the way the edge index is computed.
+Iagoの評価関数に必要なのは関数 `edge-stability` だけですが、辺の表はまだ生成せねばなりません。
+これは一度きりでよいので、効率を気にする必要はありません。
+とりわけ、辺を表す新しいデータ構造をこしらえるのではなく、ほとんど空であっても完全な盤面を使い続けます。
+辺の表の計算は、黒の視点で、黒の手番として、上辺について行います。
+しかし辺の索引の計算のしかたのおかげで、同じ表を白にも、他の辺にも使えます。
 
-Each position in the table is first initialized to a static value computed by a kind of weighted-squares metric, but with different weights depending on if a piece is in danger of being captured.
-After that, each position is updated by considering the possible moves that can be made from the position, and the values of each of these moves.
+表の各配置は、まず一種の重み付きマスの尺度で計算した静的な値に初期化されます。ただし石が取られる危険にあるかどうかで重みが変わります。
+そのあと各配置は、そこから打ちうる手と、その各手の値を考えることで更新されます。
 
 ```lisp
 (defconstant top-edge (first edge-and-x-lists))
@@ -1751,13 +1751,13 @@ After that, each position is updated by considering the possible moves that can 
             black (initial-board) n-pieces top-edge 0))))
 ```
 
-The function `map-edge-n-pieces` iterates through all edge positions with a total of `n` pieces (of either color), applying a function to each such position.
-It also keeps a running count of the edge index as it goes.
-The function should accept two arguments: the board and the index.
-Note that a single board can be used for all the positions because squares are reset after they are used.
-The function has three cases: if the number of squares remaining is less than `n`, then it will be impossible to place `n` pieces on those squares, so we give up.
-If there are no more squares then `n` must also be zero, so this is a valid position, and the function `fn` is called.
-Otherwise we first try leaving the current square blank, then try filling it with player's piece, and then with the opponent's piece, in each case calling `map-edge-n-pieces` recursively.
+関数 `map-edge-n-pieces` は、（どちらの色でも）合計 `n` 個の石を持つ辺の配置をすべてたどり、各配置に関数を適用します。
+進みながら辺の索引も数え続けます。
+その関数は、盤面と索引という2つの引数を取るべきです。
+マスは使ったあとに戻されるので、すべての配置に1つの盤面を使い回せることに注意してください。
+この関数には3つの場合があります。残りのマス数が `n` より少なければ、そこに `n` 個の石を置くのは不可能なのであきらめます。
+マスが残っていなければ `n` も0のはずなので、これは正しい配置であり、関数 `fn` が呼ばれます。
+それ以外では、まず現在のマスを空のままにしてみて、次に打ち手の石で埋め、次に相手の石で埋め、いずれの場合も `map-edge-n-pieces` を再帰的に呼びます。
 
 ```lisp
 (defun map-edge-n-pieces (fn player board n squares index)
@@ -1779,9 +1779,9 @@ Otherwise we first try leaving the current square blank, then try filling it wit
            (setf (bref board sq) empty))))))
 ```
 
-The function `possible-edge-moves-value` searches through all possible moves to determine an edge value that is more accurate than a static evaluation.
-It loops through every empty square on the edge, calling `possible-edge-move` to return a (*probability value*) pair.
-Since it is also possible for a player not to make any move at all on an edge, the pair (`1.0` *current-value*) is also included.
+関数 `possible-edge-moves-value` は、打ちうるすべての手を探索して、静的な評価より正確な辺の値を求めます。
+辺の空きマスをすべて回り、`possible-edge-move` を呼んで（*確率 値*）の対を返させます。
+打ち手が辺にまったく打たないこともありうるので、対（`1.0` *現在の値*）も含めます。
 
 ```lisp
 (defun possible-edge-moves-value (player board index)
@@ -1796,7 +1796,7 @@ Since it is also possible for a player not to make any move at all on an edge, t
     player))
 ```
 
-The value of each position is determined by making the move on the board, then looking up in the table the value of the resulting position for the opponent, and negating it (since we are interested in the value to us, not to our opponent).
+各配置の値は、盤面にその手を打ってから、できた配置の相手にとっての値を表から引き、その符号を反転して求めます（こちらにとっての値が知りたいのであって、相手にとっての値ではないからです）。
 
 ```lisp
 (defun possible-edge-move (player board sq)
@@ -1809,10 +1809,10 @@ The value of each position is determined by making the move on the board, then l
                                new-board top-edge))))))
 ```
 
-The possible moves are combined with `combine-edge-moves`, which sorts the moves best-first.
-(Since `init-edge-table` started from black's perspective, black tries to maximize and white tries to minimize scores.) We then go down the moves, increasing the total value by the value of each move times the probability of the move, and decreasing the remaining probability by the probability of the move.
-Since there will always be a least one move (pass) with probability 1.0, this is guaranteed to converge.
-In the end we round off the total value, so that we can do the run-time calculations with fixnums.
+打ちうる手は `combine-edge-moves` でまとめられ、この関数は手を良いものから順に並べ替えます。
+（`init-edge-table` は黒の視点から始めているので、黒は得点を最大に、白は最小にしようとします。）そのうえで手を順にたどり、各手の値とその確率の積だけ合計の値を増やし、その確率のぶんだけ残りの確率を減らしていきます。
+確率1.0の手（パス）が常に少なくとも1つあるので、収束が保証されます。
+最後に合計の値を丸め、実行時の計算をfixnumで行えるようにします。
 
 ```lisp
 (defun combine-edge-moves (possibilities player)
@@ -1827,9 +1827,9 @@ In the end we round off the total value, so that we can do the run-time calculat
     (round val)))
 ```
 
-We still need to compute the probability that each possible edge move is legal.
-These probabilities should reflect things such as the fact that it is easy to capture a corner if the opponent is in the adjacent X-square, and very difficult otherwise.
-First we define some functions to recognize corner and X-squares and relate them to their neighbors:
+辺で打ちうる各手が合法である確率も計算せねばなりません。
+この確率には、相手が隣のXのマスにいれば隅を取りやすく、そうでなければ非常に難しい、といった事情が映されるべきです。
+まず、隅とXのマスを見分け、それらを隣と関係づける関数をいくつか定義します。
 
 ```lisp
 (let ((corner/xsqs '((11 . 22) (18 . 27) (81. 72) (88 . 77))))
@@ -1839,13 +1839,13 @@ First we define some functions to recognize corner and X-squares and relate them
   (defun corner-for (xsq) (car (rassoc xsq corner/xsqs))))
 ```
 
-Now we consider the probabilities.
-There are four cases.
-First, since we don't know anything about the interior of the board, we assume each player has a 50% chance of being able to play in an X-square.
-Second, if we can show that a move is legal (because it flips opponent pieces on the edge) then it has 100% probability.
-Third, for the corner squares, we assign a 90% chance if the opponent occupies the X-square, 10% if it is empty, and only .1% if we occupy it.
-Otherwise, the probability is determined by the two neighboring squares: if a square is next to one or more opponents it is more likely we can move there; if it is next to our pieces it is less likely.
-If it is legal for the opponent to move into the square, then the chances are cut in half (although we may still be able to move there, since we move first).
+では確率を考えます。
+場合は4つあります。
+第一に、盤の内側について何も知らないので、各打ち手がXのマスに打てる見込みは50%と仮定します。
+第二に、（辺の相手の石を裏返すので）ある手が合法だと示せるなら、確率は100%です。
+第三に、隅のマスについては、相手がXのマスを占めていれば90%、空いていれば10%、こちらが占めていればわずか.1%とします。
+それ以外では、確率は両隣のマスによって定まります。マスが1つ以上の相手の石に隣接していればそこに打てる見込みは高まり、こちらの石に隣接していれば低くなります。
+相手がそのマスに打つのが合法なら、見込みは半減します（こちらが先に打つので、なお打てるかもしれませんが）。
 
 ```lisp
 (defun edge-move-probability (player board square)
@@ -1874,11 +1874,11 @@ If it is legal for the opponent to move into the square, then the chances are cu
             '(+1 -1)))
 ```
 
-Now we return to the problem of determining the static value of an edge position.
-This is computed by a weighted-squares metric, but the weights depend on the *stability* of each piece.
-A piece is called stable if it cannot be captured, unstable if it is in immediate danger of being captured, and semistable otherwise.
-A table of weights follows for each edge square and stability.
-Note that corner squares are always stable, and X-squares we will call semistable if the adjacent corner is taken, and unstable otherwise.
+では辺の配置の静的な値を求める問題に戻ります。
+これは重み付きマスの尺度で計算しますが、重みは各石の*安定性*によります。
+取られえない石を安定、いますぐ取られる危険にある石を不安定、それ以外を半安定と呼びます。
+辺の各マスと安定性ごとの重みの表を次に示します。
+隅のマスは常に安定であること、Xのマスは隣の隅が取られていれば半安定、そうでなければ不安定と呼ぶことに注意してください。
 
 ```lisp
 (defparameter *static-edge-table*
@@ -1896,7 +1896,7 @@ Note that corner squares are always stable, and X-squares we will call semistabl
        ))
 ```
 
-The static evaluation then just sums each piece's value according to this table:
+静的な評価は、この表に従って各石の値を足し合わせるだけです。
 
 ```lisp
 (defun static-edge-stability (player board)
@@ -1912,11 +1912,11 @@ The static evaluation then just sums each piece's value according to this table:
                           (piece-stability board sq)))))))
 ```
 
-The computation of stability is fairly complex.
-It centers around finding the two "pieces," `p1` and `p2`, which lay on either side of the piece in question and which are not of the same color as the piece.
-These "pieces" may be empty, or they may be off the board.
-A piece is unstable if one of the two is empty and the other is the opponent; it is semistable if there are opponents on both sides and at least one empty square to play on, or if it is surrounded by empty pieces.
-Finally, if either `p1` or `p2` is nil then the piece is stable, since it must be connected by a solid wall of pieces to the corner.
+安定性の計算はかなり込み入っています。
+中心となるのは、問題の石の両側にあって、その石と同じ色ではない2つの「石」`p1` と `p2` を見つけることです。
+この「石」は空マスであることも、盤の外であることもあります。
+2つのうち一方が空で他方が相手なら、その石は不安定です。両側が相手で、打てる空きマスが少なくとも1つあるか、空マスに囲まれていれば半安定です。
+最後に、`p1` か `p2` のいずれかがnilなら、その石は安定です。石の切れ目のない壁で隅までつながっているはずだからです。
 
 ```lisp
 (let ((stable 0) (semi-stable 1) (unstable 2))
@@ -1950,28 +1950,28 @@ Finally, if either `p1` or `p2` is nil then the piece is stable, since it must b
              (t stable)))))))
 ```
 
-The edge table can now be built by a call to `init-edge-table`.
-After the table is built once, it is a good idea to save it so that we won't need to repeat the initialization.
-We could write simple routines to dump the table into a file and read it back in, but it is faster and easier to use existing tools that already do this job quite well: `compile-file` and `load`.
-All we have to do is create and compile a file containing the single line:
+これで `init-edge-table` を呼べば辺の表を組み立てられます。
+表をいったん組み立てたら、初期化を繰り返さずに済むよう保存しておくのが良い考えです。
+表をファイルに書き出して読み戻す簡単なルーチンを書くこともできますが、この仕事をすでに十分うまくこなす既存の道具、すなわち `compile-file` と `load` を使うほうが速く楽です。
+必要なのは、次の1行だけを含むファイルを作ってコンパイルすることだけです。
 
 ```lisp
 (setf *edge-table* '#.*edge-table*)
 ```
 
-The `#.` read macro evaluates the following expression at read time.
-Thus, the compiler will see and compile the current edge table.
-It will be able to store this more compactly and `load` it back in more quickly than if we printed the contents of the vector in decimal (or any other base).
+`#.` の読み取りマクロは、続く式を読み取り時に評価します。
+ですからコンパイラは現在の辺の表を見て、それをコンパイルします。
+ベクタの中身を10進（や他の基数）で書き出す場合より、これをより詰めて格納し、より速く `load` で読み戻せます。
 
-### Combining the Factors
+### 要素を組み合わせる
 
-Now we have a measure of the three factors: current mobility, potential mobility, and edge stability.
-All that remains is to find a good way to combine them into a single evaluation metric.
-The combination function used by [Rosenbloom (1982)](bibliography.md#bb1000) is a linear combination of the three factors, but each factor's coefficient is dependent on the move number.
-Rosenbloom's features are normalized to the range [-1000, 1000]; we normalize to the range [-1, 1] by doing a division after multiplying by the coefficient.
-That allows us to use fixnums for the coefficients.
-Since our three factors are not calculated in quite the same way as Rosenbloom's, it is not surprising that his coefficients are not the best for our program.
-The edge coefficient was doubled and the potential coefficient cut by a factor of five.
+これで3つの要素、すなわち現在の着手可能性・潜在的な着手可能性・辺の安定性の尺度が揃いました。
+あとは、これらを1つの評価の尺度にまとめる良い方法を見つけるだけです。
+[Rosenbloom（1982）](bibliography.md#bb1000)が使う組み合わせの関数は3要素の線形結合ですが、各要素の係数は手数によって変わります。
+Rosenbloomの特徴は [-1000, 1000] の範囲に正規化されています。ここでは係数を掛けたあとに割ることで [-1, 1] の範囲に正規化します。
+そうすれば係数にfixnumを使えます。
+私たちの3つの要素はRosenbloomのものとまったく同じには計算していないので、彼の係数が私たちのプログラムにとって最良でないのは驚くにあたりません。
+辺の係数は2倍にし、潜在の係数は5分の1に減らしました。
 
 ```lisp
 (defun Iago-eval (player board)
@@ -1994,13 +1994,13 @@ The edge coefficient was doubled and the potential coefficient cut by a factor o
            (round (* c-pot  (- p-pot o-pot)) (+ p-pot o-pot 2)))))))
 ```
 
-Finally, we are ready to code the `Iago` function.
-Given a search depth, `Iago` returns a strategy that will do alpha-beta search to that depth using the `Iago-eval` evaluation function.
-This version of Iago was able to defeat the modified weighted-squares strategy in 8 of 10 games at 3 ply, and 9 of 10 at 4 ply.
-On an Explorer II, 4-ply search takes about 20 seconds per move.
-At 5 ply, many moves take over a minute, so the program runs the risk of forfeiting.
-At 3 ply, the program takes only a few seconds per move, but it still was able to defeat the author in five straight games, by scores of 50-14, 64-0, 51-13, 49-15 and 36-28.
-Despite these successes, it is likely that the evaluation function could be improved greatly with a little tuning of the parameters.
+これでようやく関数 `Iago` を書く用意ができました。
+探索の深さを与えると、`Iago` は評価関数 `Iago-eval` を使ってその深さまでアルファベータ探索を行う戦略を返します。
+この版のIagoは、3プライで改良版の重み付きマスの戦略に10局中8勝、4プライで10局中9勝しました。
+Explorer IIでは、4プライの探索に1手あたり約20秒かかります。
+5プライでは多くの手が1分を超えるので、失格の危険があります。
+3プライなら1手あたり数秒しかかかりませんが、それでも著者を5連勝で下しました。得点は50対14、64対0、51対13、49対15、36対28です。
+こうした成功にもかかわらず、引数を少し調整すれば評価関数を大きく改良できそうです。
 
 ```lisp
 (defun Iago (depth)
@@ -2008,234 +2008,234 @@ Despite these successes, it is likely that the evaluation function could be impr
   (alpha-beta-searcher3 depth #'iago-eval))
 ```
 
-## 18.13 Other Techniques
+## 18.13 その他の技法
 
-There are many other variations that can be tried to speed up the search and improve play.
-Unfortunately, choosing among the techniques is a bit of a black art.
-You will have to experiment to find the combination that is best for each domain and each evaluation function.
-Most of the following techniques were incorporated, or at least considered and rejected, in Bill.
+探索を速くし打ち方を良くするために試せる工夫は、ほかにも数多くあります。
+あいにく、そのなかから選ぶのは少々職人芸めいた話です。
+領域ごと、評価関数ごとに最良の組み合わせを見つけるには、実験するほかありません。
+以下の技法のほとんどは、Billに採り入れられたか、少なくとも検討されて退けられたものです。
 
-### Iterative Deepening
+### 反復深化
 
-We have seen that the average branching factor for Othello is about 10.
-This means that searching to depth *n* + 1 takes roughly 10 times longer than search to depth *n*.
-Thus, we should be willing to go to a lot of overhead before we search one level deeper, to assure two things: that search will be done efficiently, and that we won't forfeit due to running out of time.
-A by-now familiar technique, iterative deepening (see [chapters 6](chapter6.md) and [14](chapter14.md)), serves both these goals.
+オセロの平均の分岐数は約10だと見てきました。
+つまり深さ *n* + 1 まで探索するのは、深さ *n* までの探索のおよそ10倍かかるということです。
+ですから1段深く探索する前には、2つのこと、すなわち探索が効率よく行われることと、時間切れで失格しないことを確かにするために、相当な手間をかける値打ちがあります。
+もうおなじみの技法である反復深化（[第6章](chapter6.md)と[第14章](chapter14.md)を参照）が、この2つの目的に応えます。
 
-Iterative deepening is used as follows.
-The strategy determines how much of the remaining time to allocate to each move.
-A simple strategy could allocate a constant amount of time for each move, and a more sophisticated strategy could allocate more time for moves at crucial points in the game.
-Once the time allocation is determined for a move, the strategy starts an iterative deepening alpha-beta search.
-There are two complications: First, the search at *n* ply keeps track of the best moves, so that the search at *n* + 1 ply will have better ordering information.
-In many cases it will be faster to do both the *n* and *n* + 1 ply searches with the ordering information than to do only the *n* + 1 ply search without it.
-Second, we can monitor how much time has been taken searching each ply, and cut off the search when searching one more ply would exceed the allocated time limit.
-Thus, iterative-deepening search degrades gracefully as time limits are imposed.
-It will give a reasonable answer even with a short time allotment, and it will rarely exceed the allotted time.
+反復深化は次のように使います。
+戦略は、残り時間のうちどれだけを各手に割り当てるかを決めます。
+単純な戦略なら各手に一定の時間を割り当て、より洗練された戦略なら対局の要所の手に多くの時間を割り当てるでしょう。
+ある手への時間の割り当てが決まれば、戦略は反復深化のアルファベータ探索を始めます。
+込み入った点が2つあります。第一に、*n* プライの探索は最善手を記録するので、*n* + 1 プライの探索はより良い順序の情報を持てます。
+多くの場合、順序の情報なしで *n* + 1 プライだけを探索するより、順序の情報つきで *n* と *n* + 1 の両方を探索するほうが速くなります。
+第二に、各プライの探索にどれだけ時間がかかったかを見張り、もう1プライ探索すると割り当てた制限を超えるときに探索を打ち切れます。
+ですから反復深化の探索は、時間の制限が課されても穏やかに性能を落としていきます。
+割り当てが短くてもそれなりの答えを出しますし、割り当てた時間を超えることもめったにありません。
 
-### Forward Pruning
+### 前向き枝刈り
 
-One way to cut the number of positions searched is to replace the legal move generator with a *plausible* move generator: in other words, only consider good moves, and never even look at moves that seem clearly bad.
-This technique is called *forward pruning*.
-It has fallen on disfavor because of the difficulty in determining which moves are plausible.
-For most games, the factors that would go into a plausible move generator would be duplicated in the static evaluation function anyway, so forward pruning would require more effort without much gain.
-Worse, forward pruning could rule out a brilliant sacrifice-a move that looks bad initially but eventually leads to a gain.
+探索する局面の数を減らす1つのやり方は、合法手の生成器を*もっともらしい*手の生成器で置き換えることです。つまり良い手だけを考え、明らかに悪そうな手は見もしないのです。
+この技法を*前向き枝刈り*と呼びます。
+どの手がもっともらしいかを見定めるのが難しいため、これは好まれなくなりました。
+たいていのゲームでは、もっともらしい手の生成器に入る要素はどのみち静的な評価関数にも重複するので、前向き枝刈りは大した得もなく手間ばかり増やすことになります。
+さらに悪いことに、前向き枝刈りは見事な捨て石、すなわち最初は悪く見えてもやがて得につながる手を締め出しかねません。
 
-For some games, forward pruning is a necessity.
-The game of Go, for example, is played on a 19 by 19 board, so the first player has 361 legal moves, and a 6-ply search would involve over 2 quadrillion positions.
-However, many good Go programs can be viewed as not doing forward pruning but doing abstraction.
-There might be 30 empty squares in one portion of the board, and the program would treat a move to any of these squares equivalently.
+ゲームによっては、前向き枝刈りが必要です。
+たとえば囲碁は19×19の盤で打つので、先手には361の合法手があり、6プライの探索は2000兆を超える局面に及びます。
+しかし優れた囲碁プログラムの多くは、前向き枝刈りではなく抽象化をしていると見られます。
+盤のある部分に空点が30あるとして、プログラムはそのどの点への着手も同等に扱うのです。
 
-Bill uses forward pruning in a limited way to rule out certain moves adjacent to the corners.
-It does this not to save time but because the evaluation function might lead to such a move being selected, even though it is in fact a poor move.
-In other words, forward pruning is used to correct a bug in the evaluation function cheaply.
+Billは、隅に隣接する特定の手を締め出すために、限られた形で前向き枝刈りを使っています。
+これは時間の節約のためではなく、評価関数のせいでそうした手が、実際には悪手であるのに選ばれかねないからです。
+言い換えれば、前向き枝刈りは評価関数の不具合を安上がりに正すのに使われています。
 
-### Nonspeculative Forward Pruning
+### 当て推量によらない前向き枝刈り
 
-This technique makes use of the observation that there are limits in the amount the evaluation function can change from one position to the next.
-For example, if we are using the count difference as the evaluation function, then the most a move can change the evaluation is +37 (one for placing a piece in the corner, and six captures in each of the three directions).
-The smallest change is 0 (if the player is forced to pass).
-Thus, if there are 2 ply left in the search, and the backed-up value of position *A* has been established as 38 points better than the static value of position *B*, then it is useless to expand position *B*.
-This assumes that we are evaluating every position, perhaps to do sorted ordering or iterative deepening.
-It also assumes that no position in the search tree is a final position, because then the evaluation could change by more than 37 points.
-In conclusion, it seems that nonspeculative forward pruning is not very useful for Othello, although it may play a role in other games.
+この技法は、評価関数がある局面から次の局面へ変わりうる幅には限りがある、という観察を使います。
+たとえば石数の差を評価関数に使っているなら、1手が評価を変えられる最大は +37 です（隅に石を1つ置き、3方向それぞれで6つ取る場合）。
+最小の変化は0です（打ち手がパスを強いられる場合）。
+ですから探索が残り2プライで、局面 *A* の遡らせた値が局面 *B* の静的な値より38点良いと確定していれば、局面 *B* を展開しても無駄です。
+これは、並べ替え順や反復深化のために、すべての局面を評価していることを前提にしています。
+また、探索木のどの局面も最終局面でないことも前提にしています。最終局面なら評価が37点より大きく変わりうるからです。
+結論として、当て推量によらない前向き枝刈りはオセロにはあまり役立たないようですが、他のゲームでは働くかもしれません。
 
-### Aspiration Search
+### アスピレーション探索
 
-Alpha-beta search is initated with the `achievable` and `cutoff` boundaries set to `losing-value` and `winning-value`, respectively.
-In other words, the search assumes nothing: the final position may be anything from a loss to a win.
-But suppose we are in a situation somewhere in the mid-game where we are winning by a small margin (say the static evaluation for the current position is 50).
-In most cases, a single move will not change the evaluation by very much.
-Therefore, if we invoked the alpha-beta search with a window defined by boundaries of, say, 0 and 100, two things can happen: if the actual backed-up evaluation for this position is in fact in the range 0 to 100, then the search will find it, and it will be found quickly, because the reduced window will cause more pruning.
-If the actual value is not in the range, then the value returned will reflect that, and we can search again using a larger window.
-This is called aspiration search, because we aspire to find a value within a given window.
-If the window is chosen well, then often we will succeed and will have saved some search time.
+アルファベータ探索は、境界 `achievable` と `cutoff` をそれぞれ `losing-value` と `winning-value` に設定して始まります。
+言い換えれば、この探索は何も仮定しません。最終局面は負けから勝ちまで何でもありうるのです。
+しかし中盤のどこかで、こちらがわずかに勝っている状況だとしましょう（現在の局面の静的評価が50だとします）。
+たいていの場合、1手で評価が大きく変わることはありません。
+ですから、たとえば0と100を境界とする窓でアルファベータ探索を呼び出すと、2つのことが起こりえます。この局面の実際の遡らせた評価が本当に0から100の範囲にあれば、探索はそれを見つけますし、窓が狭いぶん枝刈りが増えるので速く見つかります。
+実際の値がその範囲になければ、返る値がそれを示すので、より広い窓で探索しなおせます。
+これをアスピレーション探索と呼びます。与えた窓のなかに値を見つけたいと願う（aspire）からです。
+窓の選び方がよければ、たいてい成功して探索の時間を節約できます。
 
-[Pearl (1984)](bibliography.md#bb0930) suggests an alternative called zero-window search.
-At each level, the first possible move, which we'll call *m*, is searched using a reasonably wide window to determine its exact value, which we'll call *v*.
-Then the remaining possible moves are searched using *v* as both the lower and upper bounds of the window.
-Thus, the result of the search will tell if each subsequent move is better or worse than *m*, but won't tell how much better or worse.
-There are three outcomes for zero-window search.
-If no move turns out to be better than *m*, then stick with *m*.
-If a single move is better, then use it.
-If several moves are better than *m*, then they have to be searched again using a wider window to determine which is best.
+[Pearl（1984）](bibliography.md#bb0930)は、ゼロ窓探索という別の手を挙げています。
+各段で、最初の手を *m* とし、それなりに広い窓で探索して正確な値 *v* を求めます。
+次に残りの手を、*v* を窓の下限にも上限にも使って探索します。
+ですから探索の結果は、後続の各手が *m* より良いか悪いかは教えてくれますが、どれだけ良いか悪いかは教えてくれません。
+ゼロ窓探索の結末は3つあります。
+*m* より良い手が1つもなければ、*m* のままにします。
+良い手が1つだけあれば、それを使います。
+*m* より良い手が複数あれば、どれが最良かを見定めるために、より広い窓でもう一度探索せねばなりません。
 
-There is always a trade-off between time spent searching and information gained.
-Zero-window search makes an attractive trade-off: we gain some search time by losing information about the value of the best move.
-We are still guaranteed of finding the best move, we just don't know its exact value.
+探索に費やす時間と得られる情報のあいだには、常に折り合いがあります。
+ゼロ窓探索は魅力的な折り合いをつけます。最善手の値についての情報を失う代わりに、探索の時間を得るのです。
+最善手が見つかることはなお保証されており、ただその正確な値がわからないだけです。
 
-Bill's zero-window search takes only 63% of the time taken by full alpha-beta search.
-It is effective because Bill's move-ordering techniques ensure that the first move is often best.
-With random move ordering, zero-window search would not be effective.
+Billのゼロ窓探索は、完全なアルファベータ探索の63%の時間しかかかりません。
+これが効くのは、Billの手の順序づけの技法によって、最初の手がしばしば最良になるからです。
+手の順序がでたらめなら、ゼロ窓探索は効かないでしょう。
 
-### Think-Ahead
+### 先読み思考
 
-A program that makes its move and then waits for the opponent's reply is wasting half the time available to it.
-A better use of time is to compute, or *think-ahead* while the opponent is moving.
-Think-ahead is one factor that helps Bill defeat Iago.
-While many programs have done think-ahead by choosing the most likely move by the opponent and then starting an iterative-deepening search assuming that move, Bill's algorithm is somewhat more complex.
-It can consider more than one move by the opponent, depending on how much time is available.
+手を打ってから相手の応手を待つプログラムは、使える時間の半分を無駄にしています。
+時間のより良い使い方は、相手が考えているあいだに計算する、すなわち*先読み思考*をすることです。
+先読み思考は、BillがIagoを破る一因になっています。
+多くのプログラムは、相手のもっともありそうな手を選び、その手を仮定して反復深化の探索を始めることで先読み思考をしてきましたが、Billのアルゴリズムはもう少し込み入っています。
+使える時間に応じて、相手の手を2つ以上考えられるのです。
 
-### Hashing and Opening Book Moves
+### ハッシュと定石
 
-We have been treating the search space as a tree, but in general it is a directed acyclic graph (dag): there may be more than one way to reach a particular position, but there won't be any loops, because every move adds a new piece.
-This raises the question we explored briefly in [section 6.4](chapter6.md#s0025): should we treat the search space as a tree or a graph?
-By treating it as a graph we eliminate duplicate evaluations, but we have the overhead of storing all the previous positions, and of checking to see if a new position has been seen before.
-The decision must be based on the proportion of duplicate positions that are actually encountered in play.
-One compromise solution is to store in a hash table a partial encoding of each position, encoded as, say, a single fixnum (one word) instead of the seven or so words needed to represent a full board.
-Along with the encoding of each position, store the move to try first.
-Then, for each new position, look in the hash table, and if there is a hit, try the corresponding move first.
-The move may not even be legal, if there is an accidental hash collision, but there is a good chance that the move will be the right one, and the overhead is low.
+ここまで探索空間を木として扱ってきましたが、一般にはこれは有向非巡回グラフ（dag）です。ある局面に至る道は複数あるかもしれませんが、どの手も石を1つ増やすのでループはできません。
+ここで、[6.4節](chapter6.md#s0025)で少し探った問いが浮かびます。探索空間を木として扱うべきか、グラフとして扱うべきか。
+グラフとして扱えば重複した評価をなくせますが、これまでの局面をすべて格納し、新しい局面が既出かを調べる手間がかかります。
+この判断は、実際の対局で出くわす重複した局面の割合にもとづかねばなりません。
+折衷案の1つは、各局面の部分的な符号化をハッシュ表に格納することです。盤面全体を表すのに必要な7語ほどではなく、たとえばfixnum1つ（1語）に符号化するのです。
+各局面の符号とともに、最初に試すべき手を格納します。
+そして新しい局面ごとにハッシュ表を引き、当たりがあればその手を最初に試します。
+たまたまハッシュが衝突すれば、その手は合法ですらないかもしれませんが、正しい手である見込みは高く、しかも手間は小さいのです。
 
-One place where it is clearly worthwhile to store information about previous positions is in the opening game.
-Since there are fewer choices in the opening, it is a good idea to compile an opening "book" of moves and to play by it as long as possible, until the opponent makes a move that departs from the book.
-Book moves can be gleaned from the literature, although not very much has been written about Othello (as compared to openings in chess).
-However, there is a danger in following expert advice: the positions that an expert thinks are advantageous may not be the same as the positions from which our program can play well.
-It may be better to compile the book by playing the program against itself and determining which positions work out best.
+これまでの局面の情報を格納する値打ちが明らかにあるのが、序盤です。
+序盤は選択肢が少ないので、手の「定石書」をまとめ、相手が定石を外れる手を打つまで、できるかぎりそれに従って打つのが良い考えです。
+定石は文献から拾えますが、（チェスの序盤に比べると）オセロについて書かれたものはさほど多くありません。
+ただし専門家の助言に従うことには危うさもあります。専門家が有利と考える局面は、私たちのプログラムがうまく打てる局面とは限らないのです。
+プログラムを自分自身と対戦させ、どの局面がもっともうまくいくかを見定めて定石書をまとめるほうが良いかもしれません。
 
-### The End Game
+### 終盤
 
-It is also a good idea to try to save up time in the midgame and then make an all-out effort to search the complete game tree to completion as soon as feasible.
-Bill can search to completion from about 14 ply out.
-Once the search is done, of course, the most promising lines of play should be saved so that it won't be necessary to solve the game tree again.
+中盤で時間を貯めておき、可能になり次第、ゲーム木を最後まで完全に探索することに全力を注ぐのも良い考えです。
+Billは残り14プライほどから最後まで探索できます。
+もちろん探索が済んだら、ゲーム木をもう一度解かずに済むよう、もっとも有望な手順を保存しておくべきです。
 
-### Metareasoning
+### メタ推論
 
-If it weren't for the clock, Othello would be a trivial game: just search the complete game tree all the way to the end, and then choose the best move.
-The clock imposes a complication: we have to make all our moves before we run out of time.
-The algorithms we have seen so far manage the clock by allocating a certain amount of time to each move, such that the total time is guaranteed (or at least very likely) to be less than the allotted time.
-This is a very crude policy.
-A finer-grained way of managing time is to consider computation itself as a possible move.
-That is, at every tick of the clock, we need to decide if it is better to stop and play the best move we have computed so far or to continue and try to compute a better move.
-It will be better to compute more only in the case where we eventually choose a better move; it will be better to stop and play only in the case where we would otherwise forfeit due to time constraints, or be forced to make poor choices later in the game.
-An algorithm that includes computation as a possible move is called a metareasoning system, because it reasons about how much to reason.
+時計がなければ、オセロは他愛のないゲームでしょう。ゲーム木を最後まで完全に探索し、最善手を選べばよいのですから。
+時計が厄介を持ち込みます。時間が尽きる前にすべての手を打たねばならないのです。
+ここまで見てきたアルゴリズムは、合計時間が持ち時間より少なくなることが保証される（少なくともその見込みが高い）ように、各手に一定の時間を割り当てて時計を管理しています。
+これはたいそう粗い方針です。
+時間をより細かく管理するやり方は、計算そのものを打ちうる手の1つと見なすことです。
+つまり時計が刻むたびに、そこで止めてここまでに計算した最善手を打つほうがよいのか、続けてより良い手を計算しようとするほうがよいのかを決める必要があるのです。
+計算を続けるほうがよいのは、結局より良い手を選ぶ場合だけです。止めて打つほうがよいのは、そうしないと時間の制約で失格するか、対局の後半で悪い選択を強いられる場合だけです。
+計算を打ちうる手として含むアルゴリズムをメタ推論のシステムと呼びます。どれだけ推論するかについて推論するからです。
 
-[Russell and Wefald (1989)](bibliography.md#bb1025) present an approach based on this view.
-In addition to an evaluation function, they assume a variance function, which gives an estimate of how much a given position's true value is likely to vary from its static value.
-At each step, their algorithm compares the value and variance of the best move computed so far and the second best move.
-If the best move is clearly better than the second best (taking variance into account), then there is no point computing any more.
-Also, if the top two moves have similar values but both have very low variance, then computing will not help much; we can just choose one of the two at random.
+[Russell and Wefald（1989）](bibliography.md#bb1025)は、この見方にもとづく方式を示しています。
+評価関数に加えて分散の関数を仮定します。これは、ある局面の真の値が静的な値からどれだけ離れそうかの見積もりを与えます。
+各段で、このアルゴリズムはここまでに計算した最善手と次善手の値と分散を比べます。
+（分散を考えに入れて）最善手が次善手より明らかに良ければ、これ以上計算する意味はありません。
+また、上位2手の値が近くても、どちらも分散が非常に小さければ、計算してもたいして助けになりません。2つのうちどちらかをでたらめに選べばよいのです。
 
-For example, if the board is in a symmetric position, then there may be two symmetric moves that will have identical value.
-By searching each move's subtree more carefully, we soon arrive at a low variance for both moves, and then we can choose either one, without searching further.
-Of course, we could also add special-case code to check for symmetry, but the metareasoning approach will work for nonsymmetric cases as well as symmetric ones.
-If there is a situation where two moves both lead to a clear win, it won't waste time choosing between them.
+たとえば盤が対称な局面にあれば、値の等しい対称な2手があるかもしれません。
+各手の部分木をより注意深く探索すれば、どちらの手も分散が小さいことにすぐ行き着き、それ以上探索せずにどちらかを選べます。
+もちろん対称性を調べる特別扱いのコードを加えることもできますが、メタ推論の方式は対称な場合にも非対称な場合にも働きます。
+2つの手がどちらも明らかな勝ちにつながる状況なら、そのあいだで選ぶのに時間を無駄にしません。
 
-The only situation where it makes sense to continue computing is when there are two moves with high variance, so that it is uncertain if the true value of one exceeds the other.
-The metareasoning algorithm is predicated on devoting time to just this case.
+計算を続けるのが理にかなう唯一の状況は、分散の大きい手が2つあって、一方の真の値が他方を上回るかどうかが不確かなときです。
+メタ推論のアルゴリズムは、まさにこの場合に時間を注ぐことを土台にしています。
 
-### Learning
+### 学習
 
-From the earliest days of computer game playing, it was realized that a championship program would need to learn to improve itself.
-[Samuel (1959)](bibliography.md#bb1040) describes a program that plays checkers and learns to improve its evaluation function.
-The evaluation function is a linear combination of features, such as the number of pieces for each player, the number of kings, the number of possible forks, and so on.
-Learning is done by a hill-climbing search procedure: change one of the coefficients for one of the features at random, and then see if the changed evaluation function is better than the original one.
+計算機がゲームを指し始めたごく初期から、優勝級のプログラムは自分を改良することを学ぶ必要があると気づかれていました。
+[Samuel（1959）](bibliography.md#bb1040)は、チェッカーを指し、自分の評価関数を良くすることを学ぶプログラムについて述べています。
+評価関数は特徴の線形結合で、各打ち手の駒数、キングの数、可能なフォークの数などから成ります。
+学習は山登り探索の手続きで行います。どれか1つの特徴の係数をでたらめに変え、変えた評価関数が元のものより良いかを見るのです。
 
-Without some guidance, this hill-climbing search would be very slow.
-First, the space is very large-Samuel used 38 different features, and although he restricted the coefficients to be a power of two between 0 and 20, that still leaves 21<sup>38</sup> possible evaluation functions.
-Second, the obvious way of determining the relative worth of two evaluation functions-playing a series of games between them and seeing which wins more often-is quite time-consuming.
+何らかの導きがなければ、この山登り探索はたいそう遅くなります。
+第一に、空間が非常に大きいのです。Samuelは38の異なる特徴を使い、係数を0から20のあいだの2の冪に制限しましたが、それでも 21<sup>38</sup> 通りの評価関数が残ります。
+第二に、2つの評価関数の相対的な値打ちを決めるすぐ思いつくやり方、すなわち両者を連戦させてどちらが多く勝つかを見るやり方は、かなり時間がかかります。
 
-Fortunately, there is a faster way of evaluating an evaluation function.
-We can apply the evaluation function to a position and compare this static value with the backed-up value determined by an alpha-beta search.
-If the evaluation function is accurate, the static value should correlate well with the backed-up value.
-If it does not correlate well, the evaluation function should be changed in such a way that it does.
-This approach still requires the trial-and-error of hill-climbing, but it will converge much faster if we can gain information from every position, rather than just from every game.
+さいわい、評価関数を評価するもっと速い方法があります。
+評価関数をある局面に適用し、その静的な値を、アルファベータ探索で定めた遡らせた値と比べられるのです。
+評価関数が正確なら、静的な値は遡らせた値とよく相関するはずです。
+相関がよくなければ、相関するように評価関数を変えるべきです。
+この方式でも山登りの試行錯誤は要りますが、1局ごとではなく1局面ごとに情報を得られるので、収束はずっと速くなります。
 
-In the past few years there has been increased interest in learning by a process of guided search.
-*Neural nets* are one example of this.
-They have been discussed elsewhere.
-Another example is *genetic learning* algorithms.
-These algorithms start with several candidate solutions.
-In our case, each candidate would consist of a set of coefficients for an evaluation function.
-On each generation, the genetic algorithm sees how well each candidate does.
-The worst candidates are eliminated, and the best ones "mate" and "reproduce"-two candidates are combined in some way to yield a new one.
-If the new offspring has inherited both its parents' good points, then it will prosper; if it has inherited both its parents' bad points, then it will quickly die out.
-Either way, the idea is that natural selection will eventually yield a high-quality solution.
-To increase the chances of this, it is a good idea to allow for mutations: random changes in the genetic makeup of one of the candidates.
+ここ数年、導かれた探索の過程による学習への関心が高まっています。
+*ニューラルネット*がその一例です。
+これらは他所で論じられています。
+もう1つの例が*遺伝的学習*のアルゴリズムです。
+これらのアルゴリズムは、いくつかの解の候補から始まります。
+私たちの場合、各候補は評価関数の係数の組から成ります。
+世代ごとに、遺伝的アルゴリズムは各候補の出来を見ます。
+最悪の候補は除かれ、最良のものが「交配」して「繁殖」します。つまり2つの候補が何らかの形で組み合わさり、新しい候補を生みます。
+新しい子が両親の良い点を受け継げば栄えますし、両親の悪い点を受け継げばすぐに絶えます。
+いずれにせよ、自然選択がやがて質の高い解を生む、というのがその考えです。
+その見込みを高めるには、突然変異、すなわち候補の遺伝的な構成にでたらめな変化を許すのが良い考えです。
 
-## 18.14 History and References
+## 18.14 歴史と参考文献
 
-[Lee and Mahajan (1986,](bibliography.md#bb0710)[1990)](bibliography.md#bb0715) present the current top Othello program, Bill.
-Their description outlines all the techniques used but does not go into enough detail to allow the reader to reconstruct the program.
-Bill is based in large part on Rosenbloom's Iago program.
-Rosenbloom's article (1982) is more thorough.
-The presentation in this chapter is based largely on this article, although it also contains some ideas from Bill and from other sources.
+[Lee and Mahajan（1986、](bibliography.md#bb0710)[1990）](bibliography.md#bb0715)は、現在最上位のオセロプログラムBillを紹介しています。
+その記述は使われている技法を一通り述べていますが、読者がプログラムを再現できるほど詳しくはありません。
+Billの多くの部分は、RosenbloomのIagoプログラムにもとづいています。
+Rosenbloomの論文（1982）のほうが詳しいものです。
+本章の記述は主にこの論文にもとづいていますが、Billや他の出典からの考えも含んでいます。
 
-The journal *Othello Quarterly* is the definitive source for reports on both human and computer Othello games and strategies.
+雑誌 *Othello Quarterly* は、人間と計算機の双方のオセロの対局と戦略についての決定的な情報源です。
 
-The most popular game for computer implementation is chess.
-[Shannon (1950a,](bibliography.md#bb1070)[b)](bibliography.md#bb1075) speculated that a computer might play chess.
-In a way, this was one of the boldest steps in the history of AI.
-Today, writing a chess program is a challenging but feasible project for an undergraduate.
-But in 1950, even suggesting that such a program might be possible was a revolutionary step that changed the way people viewed these arithmetic calculating devices.
-Shannon introduced the ideas of a game tree search, minimaxing, and evaluation functions-ideas that remain intact to this day.
-[Marsland (1990)](bibliography.md#bb0770) provides a good short introduction to computer chess, and David Levy has two books on the subject (1976, 1988).
-It was Levy, an international chess master, who in 1968 accepted a bet from John McCarthy, Donald Michie, and others that a computer chess program would not beat him in the next ten years.
-Levy won the bet.
-Levy's *Heuristic Programming* (1990) and *Computer Games* (1988) cover a variety of computer game playing programs.
-The studies by [DeGroot (1965,](bibliography.md#bb0305)[1966)](bibliography.md#bb0310) give a fascinating insight into the psychology of chess masters.
+計算機に実装するゲームとしてもっとも人気があるのはチェスです。
+[Shannon（1950a、](bibliography.md#bb1070)[b）](bibliography.md#bb1075)は、計算機がチェスを指せるかもしれないと論じました。
+ある意味でこれは、AIの歴史のなかでもっとも大胆な一歩の1つでした。
+今日、チェスのプログラムを書くのは、学部生にとって手応えはあるものの実行可能な課題です。
+しかし1950年には、そんなプログラムがありうると示唆することさえ、人々がこの計算装置を見る目を変える革命的な一歩でした。
+Shannonはゲーム木の探索、ミニマックス、評価関数という考えを持ち込みました。これらは今日まで損なわれずに残っています。
+[Marsland（1990）](bibliography.md#bb0770)は計算機チェスへの良い短い入門で、David Levyはこの主題について2冊の本（1976、1988）を書いています。
+1968年、計算機のチェスプログラムが今後10年で自分を負かすことはないという賭けを、John McCarthyやDonald Michieらから受けたのは、国際チェスマスターであるこのLevyでした。
+Levyは賭けに勝ちました。
+Levyの *Heuristic Programming*（1990）と *Computer Games*（1988）は、さまざまな計算機のゲームプログラムを扱っています。
+[DeGroot（1965、](bibliography.md#bb0305)[1966）](bibliography.md#bb0310)の研究は、チェスの名人の心理について興味深い洞察を与えてくれます。
 
-[Knuth and Moore (1975)](bibliography.md#bb0630) analyze the alpha-beta algorithm, and Pearl's book *Heuristics* (1984) covers all kinds of heuristic search, games included.
+[Knuth and Moore（1975）](bibliography.md#bb0630)はアルファベータのアルゴリズムを分析しており、Pearlの本 *Heuristics*（1984）はゲームを含むあらゆる種類のヒューリスティック探索を扱っています。
 
-[Samuel (1959)](bibliography.md#bb1040) is the classic work on learning evaluation function parameters.
-It is based on the game of checkers.
-[Lee and Mahajan (1990)](bibliography.md#bb0715) present an alternative learning mechanism, using Bayesian classification to learn an evaluation function that optimally distinguishes winning positions from losing positions.
-Genetic algorithms are discussed by L.
-[Davis (1987,](bibliography.md#bb0280) [1991)](bibliography.md#bb0285) and [Goldberg (1989)](bibliography.md#bb0480).
+[Samuel（1959）](bibliography.md#bb1040)は、評価関数の引数を学習することについての古典的な仕事です。
+チェッカーにもとづいています。
+[Lee and Mahajan（1990）](bibliography.md#bb0715)は別の学習の仕組みを示し、ベイズ分類を使って、勝ち局面と負け局面を最適に区別する評価関数を学習します。
+遺伝的アルゴリズムはL.
+[Davis（1987、](bibliography.md#bb0280)[1991）](bibliography.md#bb0285)と[Goldberg（1989）](bibliography.md#bb0480)が論じています。
 
-## 18.15 Exercises
+## 18.15 練習問題
 
-**Exercise  18.3 [s]** How many different Othello positions are there?
-Would it be feasible to store the complete game tree and thus have a perfect player?
+**練習問題 18.3 [s]** オセロの局面は何通りあるか。
+完全なゲーム木を格納して完璧な打ち手を得るのは現実的か。
 
-**Exercise  18.4 [m]** At the beginning of this chapter, we implemented pieces as an enumerated type.
-There is no built-in facility in Common Lisp for doing this, so we had to introduce a series of `defconstant` forms.
-Define a macro for defining enumerated types.
-What else should be provided besides the constants?
+**練習問題 18.4 [m]** 本章の冒頭で、石を列挙型として実装した。
+Common Lispにはそのための組み込みの仕組みがないので、`defconstant` の形式を並べる必要があった。
+列挙型を定義するマクロを定義せよ。
+定数のほかに何を用意すべきか。
 
-**Exercise  18.5 [h]** Add fixnum and speed declarations to the Iago evaluation function and the alpha-beta code.
-How much does this speed up Iago?
-What other efficiency measures can you take?
+**練習問題 18.5 [h]** Iagoの評価関数とアルファベータのコードに、fixnumと速度の宣言を加えよ。
+これでIagoはどれだけ速くなるか。
+ほかにどんな効率化の手立てが取れるか。
 
-**Exercise  18.6 [h]** Implement an iterative deepening search that allocates time for each move and checks between each iteration if the time is exceeded.
+**練習問題 18.6 [h]** 各手に時間を割り当て、繰り返しのあいだに時間を超えたかを調べる反復深化の探索を実装せよ。
 
-**Exercise  18.7 [h]** Implement zero-window search, as described in [section 18.13](#s0085).
+**練習問題 18.7 [h]** [18.13節](#s0085)で述べたゼロ窓探索を実装せよ。
 
-**Exercise  18.8 [d]** Read the references on Bill ([Lee and Mahajan 1990](bibliography.md#bb0715), and [1986](bibliography.md#bb0710) if you can get it), and reimplement Bill's evaluation function as best you can, using the table-based approach.
-It will also be helpful to read [Rosenbloom 1982](bibliography.md#bb1000).
+**練習問題 18.8 [d]** Billについての文献（[Lee and Mahajan 1990](bibliography.md#bb0715)、手に入るなら[1986](bibliography.md#bb0710)も）を読み、表にもとづく方式でBillの評価関数をできるかぎり再現して実装せよ。
+[Rosenbloom 1982](bibliography.md#bb1000)を読むのも助けになる。
 
-**Exercise  18.9 [d]** Improve the evaluation function by tuning the parameters, using one of the techniques described in [section 18.13](#s0085).
+**練習問題 18.9 [d]** [18.13節](#s0085)で述べた技法のいずれかを使い、引数を調整して評価関数を改良せよ。
 
-**Exercise  18.10 [h]** Write move-generation and evaluation functions for another game, such as chess or checkers.
+**練習問題 18.10 [h]** チェスやチェッカーなど、別のゲームの手の生成と評価の関数を書け。
 
-## 18.16 Answers
+## 18.16 解答
 
-**Answer 18.2** The `weighted-squares` strategy wins the first game by 20 pieces, but when `count-difference` plays first, it captures all the pieces on its fifth move.
-These two games alone are not enough to determine the best strategy; the function `othello-series` on [page 626](#p626) shows a better comparison.
+**解答 18.2** `weighted-squares` の戦略は1局目を20石差で勝つが、`count-difference` が先手だと、その5手目で全部の石を取ってしまう。
+この2局だけでは最良の戦略を決めるには足りない。[626ページ](#p626)の関数 `othello-series` がより良い比較を示している。
 
-**Answer 18.3** 3<sup>64</sup> = 3,433,683,820,292,512,484,657,849,089,281.
-No.
+**解答 18.3** 3<sup>64</sup> = 3,433,683,820,292,512,484,657,849,089,281。
+現実的ではない。
 
-**Answer 18.4** Besides the constants, we provide a `deftype` for the type itself, and conversion routines between integers and symbols:
+**解答 18.4** 定数のほかに、型そのものの `deftype` と、整数とシンボルを相互に変換するルーチンを用意する。
 
 ```lisp
 (defmacro define-enumerated-type (type &rest elements)
@@ -2251,7 +2251,7 @@ No.
                 collect '(defconstant ,element ,i))))
 ```
 
-Here's how the macro would be used to define the piece data type, and the code produced:
+このマクロで石のデータ型を定義するとどうなるか、そして生成されるコードを示す。
 
 ```lisp
 > (macroexpand
@@ -2269,20 +2269,20 @@ Here's how the macro would be used to define the piece data type, and the code p
     (DEFCONSTANT OUTER 3))
 ```
 
-A more general facility would, like `defstruct`, provide for several options.
-For example, it might allow for a documentation string for the type and each constant, and for a `:conc-name`, so the constants could have names like `piece-empty` instead of `empty`.
-This would avoid conflicts with other types that wanted to use the same names.
-The user might also want the ability to start the values at some number other than zero, or to assign specific values to some of the symbols.
+より一般的な仕組みなら、`defstruct` のようにいくつかの選択肢を用意するだろう。
+たとえば型と各定数への説明文字列や、`:conc-name` を許して、定数が `empty` ではなく `piece-empty` のような名前を持てるようにするなどである。
+そうすれば、同じ名前を使いたい他の型との衝突を避けられる。
+利用者は、値を0以外の数から始めたり、一部のシンボルに特定の値を割り当てたりしたくなるかもしれない。
 
 ----------------------
 
 <a id="fn18-1"></a><sup>[1](#tfn18-1)</sup>
-Othello is a registered trademark of CBS Inc.
-Gameboard design @ 1974 CBS Inc.
+オセロはCBS Inc.の登録商標です。
+盤面の意匠 @ 1974 CBS Inc.
 
 <a id="fn18-2"></a><sup>[2](#tfn18-2)</sup>
-*Othello,* [I. i. 117] William Shakespeare.
+*オセロー*、[第1幕第1場 117行] William Shakespeare。
 
 <a id="fn18-3"></a><sup>[3](#tfn18-3)</sup>
-Remember, when a constant is redefined, it may be necessary to recompile any functions that use the constant.
+定数を定義しなおしたときは、その定数を使う関数を再コンパイルする必要があるかもしれないことを忘れないでください。
 
