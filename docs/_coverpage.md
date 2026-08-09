@@ -1,10 +1,10 @@
 ![logo](_media/paip-cover.gif)
 
-# Paradigms of Artificial Intelligence Programming
+# 人工知能プログラミングのパラダイム
 
-> Case Studies in Common Lisp
+> Common Lispによる事例研究
 
 * Peter Norvig
 
 [GitHub](https://github.com/norvig/paip-lisp)
-[Get Started](#paradigms-of-artificial-intelligence-programming)
+[読みはじめる](#人工知能プログラミングのパラダイム)

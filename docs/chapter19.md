@@ -1,48 +1,48 @@
-# Chapter 19
-## Introduction to Natural Language
+# 第19章
+## 自然言語入門
 
-> Language is everywhere.
-It permeates our thoughts, mediates our relations with others, and even creeps into our dreams.
-The overwhelming bulk of human knowledge is stored and transmitted in language.
-Language is so ubiquitous that we take it for granted but without it, society as we know it would be impossible.
+> 言語はいたるところにある。
+それは我々の思考に染みわたり、他者との関わりを取り持ち、夢のなかにまで入り込んでくる。
+人間の知識の圧倒的な大半は、言語によって蓄えられ、伝えられている。
+言語はあまりに遍在しているので我々はそれを当たり前と思っているが、それなしには、我々の知る社会はありえないだろう。
 >
-> -Ronand Langacker
+> —Ronand Langacker
 >
-> Language and its Structure (1967)
+> Language and its Structure（1967）
 
-A natural language is a language spoken by people, such as English, German, or Tagalog.
-This is in opposition to artificial languages like Lisp, FORTRAN, or Morse code.
-Natural language processing is an important part of AI because language is intimately connected to thought.
-One measure of this is the number of important books that mention language and thought in the title: in AI, Schank and Colby's *Computer Models of Thought and Language;* in linguistics, Whorf's *Language, Thought, and Reality* (and Chomsky's *Language and Mind;)* in philosophy, Fodor's *The Language of Thought;* and in psychology, Vygotsky's *Thought and Language* and John Anderson's *Language, Memory, and Thought.* Indeed, language is the trait many think of as being the most characteristic of humans.
-Much controversy has been generated over the question of whether animals, especially primates and dolphins, can use and "understand" language.
-Similar controversy surrounds the same question asked of computers.
+自然言語とは、英語・ドイツ語・タガログ語のように人が話す言語のことです。
+これはLisp、FORTRAN、モールス符号のような人工言語と対をなすものです。
+自然言語処理はAIの重要な一部です。言語が思考と密接に結びついているからです。
+その一つの目安が、表題に言語と思考を掲げる重要な本の多さです。AIではSchankとColbyの *Computer Models of Thought and Language*、言語学ではWhorfの *Language, Thought, and Reality*（そしてChomskyの *Language and Mind*）、哲学ではFodorの *The Language of Thought*、心理学ではVygotskyの *Thought and Language* とJohn Andersonの *Language, Memory, and Thought* です。実際、言語は人間をもっとも特徴づける性質だと多くの人が考えています。
+動物、とりわけ霊長類やイルカが言語を使い「理解」できるかという問いをめぐっては、多くの論争が生まれてきました。
+計算機についての同じ問いにも、同じような論争がつきまといます。
 
-The study of language has been traditionally separated into two broad classes: syntax, or grammar, and semantics, or meaning.
-Historically, syntax has achieved the most attention, largely because on the surface it is more amenable to formal and semiformal methods.
-Although there is evidence that the boundary between the two is at best fuzzy, we still maintain the distinction for the purposes of these notes.
-We will cover the "easier" part, syntax, first, and then move on to semantics.
+言語の研究は伝統的に、大きく2つに分けられてきました。統語論すなわち文法と、意味論すなわち意味です。
+歴史的には統語論がもっとも注目を集めてきました。おもに、表面上は形式的・半形式的な方法になじみやすいからです。
+両者の境目はよくてもぼんやりしたものだという証拠もありますが、ここでは話の都合上その区別を保つことにします。
+「易しい」ほうである統語論を先に扱い、そのあと意味論に移ります。
 
-A good artificial language, like Lisp or C, is unambiguous.
-There is only one interpretation for a valid Lisp expression.
-Of course, the interpretation may depend on the state of the current state of the Lisp world, such as the value of global variables.
-But these dependencies can be explicitly enumerated, and once they are spelled out, then there can only be one meaning for the expression.<a id="tfn19-1"></a><sup>[1](#fn19-1)</sup>
+LispやCのような良い人工言語は曖昧ではありません。
+正しいLispの式には解釈が1つしかありません。
+もちろんその解釈は、大域変数の値のような、いまのLispの世界の状態に依存するかもしれません。
+しかしその依存は明示的に数え上げられますし、いったん書き出してしまえば、式の意味は1つしかありえません。<a id="tfn19-1"></a><sup>[1](#fn19-1)</sup>
 
-Natural language does not work like this.
-Natural expressions are inherently ambiguous, depending on any number of factors that can never be quite spelled out completely.
-It is perfectly reasonable for two people to disagree on what some other person meant by a natural language expression.
-(Lawyers and judges make their living largely by interpreting natural language expressions-laws-that are meant to be unambiguous but are not.)
+自然言語はこのようには働きません。
+自然な表現は本質的に曖昧で、決して完全には書き出しきれない数々の要因に左右されます。
+ある人が自然言語の表現で何を意味したのかについて、2人の意見が食い違うのはまったく当然のことです。
+（弁護士や裁判官は、曖昧でないはずなのに曖昧な自然言語の表現、すなわち法律を解釈することで、その暮らしの大半を立てています。）
 
-This chapter is a brief introduction to natural language processing.
-The next chapter gives a more thorough treatment from the point of view of logic grammars, and the chapter after that puts it all together into a full-fledged system.
+本章は自然言語処理への短い入門です。
+次章では論理文法の視点からより徹底した扱いをし、その次の章ではそれらをまとめて本格的なシステムに仕立てます。
 
-## 19.1 Parsing with a Phrase-Structure Grammar
+## 19.1 句構造文法による構文解析
 
-To parse a sentence means to recover the constituent structure of the sentence-to discover what sequence of generation rules could have been applied to come up with the sentence.
-In general, there may be several possible derivations, in which case we say the sentence is grammatically ambiguous.
-In certain circles, the term "parse" means to arrive at an understanding of a sentence's meaning, not just its grammatical form.
-We will attack that more difficult question later.
+文を構文解析するとは、その文の構成素の構造を取り戻すこと、すなわちその文を作り出すのにどんな生成規則の並びが適用されえたかを見つけ出すことです。
+一般に、ありうる導出は複数あるかもしれず、その場合その文は文法的に曖昧だと言います。
+界隈によっては、「構文解析」という語は、文の文法的な形だけでなくその意味の理解に至ることを指します。
+その難しいほうの問題には、のちほど取りかかります。
 
-We start with the grammar defined on [page 39](chapter2.md#p39) for the `generate` program:
+[39ページ](chapter2.md#p39)で `generate` プログラムのために定義した文法から始めます。
 
 ```lisp
 (defvar *grammar* nil "The grammar used by GENERATE.")
@@ -56,18 +56,18 @@ We start with the grammar defined on [page 39](chapter2.md#p39) for the `generat
           (Verb -> hit took saw liked)))
 ```
 
-Our parser takes as input a list of words and returns a structure containing the parse tree and the unparsed words, if any.
-That way, we can parse the remaining words under the next category to get compound rules.
-For example, in parsing "the man saw the table," we would first parse "the man," returning a structure representing the noun phrase, with the remaining words "saw the table." This remainder would then be parsed as a verb phrase, returning no remainder, and the two phrases could then be joined to form a parse that is a complete sentence with no remainder.
+私たちの構文解析器は語の並びを入力に取り、構文木と、あれば未解析の語を含む構造体を返します。
+そうすれば、残りの語を次の範疇のもとで解析して、複合の規則を得られます。
+たとえば「the man saw the table」を解析するときは、まず「the man」を解析して名詞句を表す構造体を返し、残りの語は「saw the table」となります。この残りを動詞句として解析すれば残りはなくなり、2つの句を結んで、残りのない完全な文としての解析ができあがります。
 
-Before proceeding, I want to make a change in the representation of grammar rules.
-Currently, rules have a left-hand side and a list of alternative right-hand sides.
-But each of these alternatives is really a separate rule, so it would be more modular to write them separately.
-For the `generate` program it was fine to have them all together, because that made processing choices easier, but now I want a more flexible representation.
-Later on we will want to add more information to each rule, like the semantics of the assembled left-hand side, and constraints between constituents on the right-hand side, so the rules would become quite large indeed if we didn't split up the alternatives.
-I also take this opportunity to clear up the confusion between words and category symbols.
-The convention is that a right-hand side can be either an atom, in which case it is a word, or a list of symbols, which are then all interpreted as categories.
-To emphasize this, I include "noun" and "verb" as nouns in the grammar `*grammar3*`, which is otherwise equivalent to the previous `*grammar1*`.
+先へ進む前に、文法規則の表現を変えておきたいと思います。
+いまのところ規則は、左辺と、代替となる右辺の並びを持っています。
+しかしその代替のそれぞれは実は別々の規則なので、分けて書くほうが部品として扱いやすくなります。
+`generate` プログラムではまとめておくので構いませんでした。選択肢の処理が楽になるからです。しかしいまは、もっと柔軟な表現がほしいのです。
+のちには各規則に、組み上がった左辺の意味や、右辺の構成素どうしの制約といった情報を加えたくなります。代替を分けておかないと、規則はかなり大きくなってしまうでしょう。
+この機会に、語と範疇のシンボルの混同も片づけておきます。
+約束は、右辺はアトムであってもよく、その場合は語であり、シンボルの並びであってもよく、その場合はすべて範疇と解釈される、というものです。
+これを際立たせるため、文法 `*grammar3*` には名詞として「noun」と「verb」を入れてあります。それ以外は先の `*grammar1*` と同じです。
 
 ```lisp
 (defparameter *grammar3*
@@ -82,9 +82,9 @@ To emphasize this, I include "noun" and "verb" as nouns in the grammar `*grammar
 (setf *grammar* *grammar3*)
 ```
 
-I also define the data types `rule`, `parse`, and `tree`, and some functions for getting at the rules.
-Rules are defined as structures of type list with three slots: the left-hand side, the arrow (which should always be represented as the literal `->`) and the right-hand side.
-Compare this to the treatment on [page 40](chapter2.md#p40).
+データ型 `rule`、`parse`、`tree` と、規則に手を伸ばす関数もいくつか定義します。
+規則は、左辺、矢印（常にリテラルの `->` で表されるべきもの）、右辺という3つのスロットを持つ、list型の構造体として定義します。
+[40ページ](chapter2.md#p40)での扱いと比べてみてください。
 
 ```lisp
 (defstruct (rule (:type list)) lhs -> rhs sem)
@@ -113,10 +113,10 @@ Compare this to the treatment on [page 40](chapter2.md#p40).
   (if (consp x) (first x) nil))
 ```
 
-Now we're ready to define the parser.
-The main function `parser` takes a list of words to parse.
-It calls `parse`, which returns a list of all parses that parse some subsequence of the words, starting at the beginning.
-`parser` keeps only the parses with no remainder - that is, the parses that span all the words.
+これで構文解析器を定義する用意ができました。
+主関数 `parser` は、解析する語の並びを取ります。
+これは `parse` を呼び、`parse` は語の先頭から始まる部分列を解析した結果をすべて並べて返します。
+`parser` は残りのない解析だけを残します。つまり、すべての語にまたがる解析です。
 
 ```lisp
 (defun parser (words)
@@ -128,19 +128,19 @@ It calls `parse`, which returns a list of all parses that parse some subsequence
   (find-all-if #'null parses :key #'parse-rem))
 ```
 
-The function `parse` looks at the first word and considers each category it could be.
-It makes a parse of the first word under each category, and calls `extend-parse` to try to continue to a complete parse.
-`parse` uses `mapcan` to append together all the resulting parses.
-As an example, suppose we are trying to parse "the man took the ball."
-`parse` would find the single lexical rule for "the" and call `extend-parse` with a parse with tree `(Art the)` and remainder "man took the ball," with no more categories needed.
+関数 `parse` は最初の語を見て、それがなりうる範疇をそれぞれ考えます。
+各範疇のもとで最初の語の解析を作り、`extend-parse` を呼んで完全な解析へ進もうとします。
+`parse` は `mapcan` を使って、できた解析をすべてつなぎ合わせます。
+例として「the man took the ball」を解析しようとしているとしましょう。
+`parse` は「the」に対する唯一の語彙規則を見つけ、木が `(Art the)` で残りが「man took the ball」、そしてもう必要な範疇のない解析とともに `extend-parse` を呼びます。
 
-`extend-parse` has two cases.
-If the partial parse needs no more categories to be complete, then it returns the parse itself, along with any parses that can be formed by extending parses starting with the partial parse.
-In our example, there is one rule starting with `Art`, namely `(NP -> (Art Noun))`, so the function would try to extend the parse tree (`NP (Art the))` with remainder "man took the ball," with the category `Noun` needed.
-That call to `extend-parse` represents the second case.
-We first parse "man took the ball," and for every parse that is of category `Noun` (there will be only one), we combine with the partial parse.
-In this case we get `(NP (Art the) (Noun man))`.
-This gets extended as a sentence with a VP needed, and eventually we get a parse of the complete list of words.
+`extend-parse` には2つの場合があります。
+部分的な解析が完成にもう範疇を必要としないなら、その解析自身と、その部分解析から始まる解析を伸ばして作れる解析とを返します。
+この例では `Art` で始まる規則が1つ、すなわち `(NP -> (Art Noun))` があるので、この関数は構文木 (`NP (Art the))`、残り「man took the ball」、必要な範疇 `Noun` として伸ばそうとします。
+その `extend-parse` の呼び出しが2つ目の場合にあたります。
+まず「man took the ball」を解析し、範疇が `Noun` である解析（1つしかありません）のそれぞれについて、部分解析と組み合わせます。
+この場合は `(NP (Art the) (Noun man))` が得られます。
+これはVPを必要とする文として伸ばされ、やがて語の並び全体の解析が得られます。
 
 ```lisp
 (defun parse (words)
@@ -172,7 +172,7 @@ This gets extended as a sentence with a VP needed, and eventually we get a parse
         (parse rem))))
 ```
 
-This makes use of the auxiliary function `append1`:
+これは補助関数 `append1` を使っています。
 
 ```lisp
 (defun append1 (items item)
@@ -180,7 +180,7 @@ This makes use of the auxiliary function `append1`:
   (append items (list item)))
 ```
 
-Some examples of the parser in action are shown here:
+構文解析器が動くようすの例をいくつか示します。
 
 ```lisp
 > (parser '(the table))
@@ -195,28 +195,28 @@ Some examples of the parser in action are shown here:
                (NP (ART THE) (NOUN VERB)))))
 ```
 
-## 19.2 Extending the Grammar and Recognizing Ambiguity
+## 19.2 文法を広げ、曖昧さを見つける
 
-Overall, the parser seems to work fine, but the range of sentences we can parse is quite limited with the current grammar.
-The following grammar includes a wider variety of linguistic phenomena: adjectives, prepositional phrases, pronouns, and proper names.
-It also uses the usual linguistic conventions for category names, summarized in the table below:
+全体として構文解析器はうまく働くようですが、いまの文法では解析できる文の幅がかなり限られています。
+次の文法は、より幅広い言語現象を含んでいます。形容詞、前置詞句、代名詞、固有名です。
+また範疇の名前には言語学の慣例を使っており、下の表にまとめてあります。
 
-|      | Category                         | Examples                   |
+|      | 範疇                             | 例                         |
 |------|----------------------------------|----------------------------|
-| S    | Sentence                         | *John likes Mary*          |
-| NP   | Noun Phrase                      | *John; a blue table*       |
-| VP   | Verb Phrase                      | *likes Mary; hit the ball* |
-| PP   | Prepositional Phrase             | *to Mary; with the man*    |
-| A    | Adjective                        | *little; blue*             |
-| A  + | A list of one or more adjectives | *little blue*              |
-| D    | Determiner                       | *the; a*                   |
-| N    | Noun                             | *ball; table*              |
-| Name | Proper Name                      | *John; Mary*               |
-| P    | Preposition                      | *to; with*                 |
-| Pro  | Pronoun                          | *you; me*                  |
-| V    | Verb                             | *liked; hit*               |
+| S    | 文                               | *John likes Mary*          |
+| NP   | 名詞句                           | *John; a blue table*       |
+| VP   | 動詞句                           | *likes Mary; hit the ball* |
+| PP   | 前置詞句                         | *to Mary; with the man*    |
+| A    | 形容詞                           | *little; blue*             |
+| A  + | 1つ以上の形容詞の並び            | *little blue*              |
+| D    | 限定詞                           | *the; a*                   |
+| N    | 名詞                             | *ball; table*              |
+| Name | 固有名                           | *John; Mary*               |
+| P    | 前置詞                           | *to; with*                 |
+| Pro  | 代名詞                           | *you; me*                  |
+| V    | 動詞                             | *liked; hit*               |
 
-Here is the grammar:
+文法は次のとおりです。
 
 ```lisp
 (defparameter *grammar4*
@@ -246,9 +246,9 @@ Here is the grammar:
 (setf *grammar* *grammar4*)
 ```
 
-Now we can parse more interesting sentences, and we can see a phenomenon that was not present in the previous examples: ambiguous sentences.
-The sentence "The man hit the table with the ball" has two parses, one where the ball is the thing that hits the table, and the other where the ball is on or near the table.
-`parser` finds both of these parses (although of course it assigns no meaning to either parse):
+これでもっと面白い文を解析でき、これまでの例にはなかった現象、すなわち曖昧な文が見えてきます。
+「The man hit the table with the ball」という文には2通りの解析があります。1つはボールが机を打つ道具である場合、もう1つはボールが机の上か近くにある場合です。
+`parser` はこの両方を見つけます（もちろん、どちらの解析にも意味は与えませんが）。
 
 ```lisp
 > (parser '(The man hit the table with the ball))
@@ -261,8 +261,8 @@ The sentence "The man hit the table with the ball" has two parses, one where the
                         (PP (P WITH) (NP (DTHE) (N BALL)))))))
 ```
 
-Sentences are not the only category that can be ambiguous, and not all ambiguities have to be between parses in the same category.
-Here we see a phrase that is ambiguous between a sentence and a noun phrase:
+曖昧になりうる範疇は文だけではありませんし、曖昧さが同じ範疇の解析どうしのあいだにあるとも限りません。
+次に、文と名詞句のあいだで曖昧な句を見てみましょう。
 
 ```lisp
 > (parser '(the orange saw))
@@ -270,13 +270,13 @@ Here we see a phrase that is ambiguous between a sentence and a noun phrase:
   (NP (D THE) (A  + (A ORANGE)) (N SAW)))
 ```
 
-## 19.3 More Efficient Parsing
+## 19.3 もっと効率のよい構文解析
 
-With more complex grammars and longer sentences, the parser starts to slow down.
-The main problem is that it keeps repeating work.
-For example, in parsing "The man hit the table with the ball," it has to reparse "with the ball" for both of the resulting parses, even though in both cases it receives the same analysis, a PP.
-We have seen this problem before and have already produced an answer: memoization (see [section 9.6](#s0035)).
-To see how much memoization will help, we need a benchmark:
+文法が複雑になり文が長くなると、構文解析器は遅くなり始めます。
+おもな問題は、同じ仕事を繰り返し続けることです。
+たとえば「The man hit the table with the ball」を解析するとき、できあがる2つの解析のどちらについても「with the ball」を解析しなおさねばなりません。どちらの場合も同じPPという分析になるというのにです。
+この問題は以前にも見ましたし、答えもすでに出しています。メモ化です（[9.6節](#s0035)を参照）。
+メモ化がどれだけ助けになるかを見るには、測るための題材が要ります。
 
 ```lisp
 > (setf s (generate 's))
@@ -287,11 +287,11 @@ Evaluation of (LENGTH (PARSER S)) took 33.11 Seconds of elapsed time.
 10
 ```
 
-The sentence S has 10 parses, since there are two ways to parse the subject NP and five ways to parse the VP.
-It took 33 seconds to discover these 10 parses with the parse function as it was written.
+文Sには10通りの解析があります。主語のNPの解析が2通り、VPの解析が5通りだからです。
+書いたままのparse関数では、この10通りを見つけるのに33秒かかりました。
 
-We can improve this dramatically by memoizing `parse` (along with the table-lookup functions).
-Besides memoizing, the only change is to clear the memoization table within parser.
+`parse` を（表を引く関数とともに）メモ化すれば、これを劇的に改善できます。
+メモ化のほかに変えたのは、parserのなかでメモ化の表を空にすることだけです。
 
 ```lisp
 (memoize 'lexical-rules)
@@ -304,12 +304,12 @@ Besides memoizing, the only change is to clear the memoization table within pars
   (mapcar #'parse-tree (complete-parses (parse words))))
 ```
 
-In normal human language use, memoization would not work very well, since the interpretation of a phrase depends on the context in which the phrase was uttered.
-But with context-free grammars we have a guarantee that the context cannot affect the interpretation.
-The call `(parse words)` must return all possible parses for the words.
-We are free to choose between the possibilities based on contextual information, but context can never supply a new interpretation that is not in the context-free list of parses.
+ふつうの人間の言語の使い方では、メモ化はあまりうまく働かないでしょう。句の解釈は、その句が発せられた文脈に左右されるからです。
+しかし文脈自由文法なら、文脈が解釈に影響しえないことが保証されています。
+呼び出し `(parse words)` は、その語についてありうる解析をすべて返さねばなりません。
+その可能性のあいだから文脈の情報にもとづいて選ぶのは自由ですが、文脈自由な解析の並びにない新しい解釈を文脈が持ち込むことは決してありません。
 
-The function `use` is introduced to tell the table-lookup functions that they are out of date whenever the grammar changes:
+関数 `use` は、文法が変わるたびに、表を引く関数へその内容が古くなったと伝えるために導入します。
 
 ```lisp
 (defun use (grammar)
@@ -319,7 +319,7 @@ The function `use` is introduced to tell the table-lookup functions that they ar
   (length (setf *grammar* grammar)))
 ```
 
-Now we run the benchmark again with the memoized version of `parse`:
+では、メモ化した `parse` でもう一度測ってみます。
 
 ```lisp
 > (time (length (parser s)))
@@ -327,15 +327,15 @@ Evaluation of (LENGTH (PARSER S 's)) took .13 Seconds of elapsed time.
 10
 ```
 
-By memoizing `parse` we reduce the parse time from 33 to .13 seconds, a 250-fold speed-up.
-We can get a more systematic comparison by looking at a range of examples.
-For example, consider sentences of the form "The man hit the table [with the ball]\*" for zero or more repetitions of the PP "with the ball."
-In the following table we record N, the number of repetitions of the PP, along with the number of resulting parses,<a id="tfn19-2"></a><sup>[2](#fn19-2)</sup> and for both memoized and unmemoized versions of parse, the number of seconds to produce the parse, the number of parses per second (PPS), and the number of recursive calls to `parse`.
-The performance of the memoized version is quite acceptable; for N=5, a 20-word sentence is parsed into 132 possibilities in .68 seconds, as opposed to the 20 seconds it takes in the unmemoized version.
+`parse` をメモ化することで解析の時間は33秒から.13秒に減り、250倍の速度向上になりました。
+いくつもの例を見れば、もっと体系的な比較ができます。
+たとえば「The man hit the table [with the ball]\*」の形の文、すなわちPP「with the ball」を0回以上繰り返した文を考えます。
+次の表には、PPの繰り返し回数N、できあがる解析の数<a id="tfn19-2"></a><sup>[2](#fn19-2)</sup>、そしてメモ化した版と していない版それぞれについて、解析にかかった秒数、毎秒あたりの解析数（PPS）、`parse` への再帰呼び出しの回数を記録しています。
+メモ化した版の性能はかなり満足のいくものです。N=5では、20語の文が.68秒で132通りに解析されます。メモ化していない版では20秒かかるところをです。
 
-|     |          | Memoized |       |         | Unmemoized |       |         |
+|     |          | メモ化あり |     |         | メモ化なし |       |         |
 |-----|----------|----------|-------|---------|------------|-------|---------|
-| *N* | *Parses* | *Secs*   | *PPS* | *Calls* | *Secs*     | *PPS* | *Calls* |
+| *N* | *解析数* | *秒*     | *PPS* | *呼出*  | *秒*       | *PPS* | *呼出*  |
 | 0   | 1        | 0.02     | 60    | 4       | 0.02       | 60    | 17      |
 | 1   | 2        | 0.02     | 120   | 11      | 0.07       | 30    | 96      |
 | 2   | 5        | 0.05     | 100   | 21      | 0.23       | 21    | 381     |
@@ -346,16 +346,16 @@ The performance of the memoized version is quite acceptable; for N=5, a 20-word 
 | 7   | 1430     | 5.80     | 247   | 116     | -          |       |         |
 | 8   | 4862     | 20.47    | 238   | 144     | -          |       |         |
 
-**Exercise  19.1 [h]** It seems that we could be more efficient still by memoizing with a table consisting of a vector whose length is the number of words in the input (plus one).
-Implement this approach and see if it entails less overhead than the more general hash table approach.
+**練習問題 19.1 [h]** 入力の語数（プラス1）を長さとするベクタから成る表でメモ化すれば、さらに効率を上げられそうである。
+この方式を実装し、より一般的なハッシュ表の方式より手間が少なくて済むかを確かめよ。
 
-## 19.4 The Unknown-Word Problem
+## 19.4 未知語の問題
 
-As it stands, the parser cannot deal with unknown words.
-Any sentence containing a word that is not in the grammar will be rejected, even if the program can parse all the rest of the words perfectly.
-One way of treating unknown words is to allow them to be any of the "open-class" categories-nouns, verbs, adjectives, and names, in our grammar.
-An unknown word will not be considered as one of the "closed-class" categories-prepositions, determiners, or pronouns.
-This can be programmed very simply by having `lexical-rules` return a list of these open-class rules for every word that is not already known.
+いまのままでは、構文解析器は未知の語を扱えません。
+文法にない語を含む文は、残りの語をすべて完璧に解析できたとしても退けられます。
+未知語を扱う1つのやり方は、それが「開いた類」の範疇、この文法では名詞・動詞・形容詞・固有名のいずれかでありうるとすることです。
+未知語は「閉じた類」の範疇、すなわち前置詞・限定詞・代名詞とは見なされません。
+これは、すでに知られていない語すべてについて `lexical-rules` がこの開いた類の規則の並びを返すようにすれば、ごく簡単に書けます。
 
 ```lisp
 (defparameter *open-categories* '(N V A Name)
@@ -367,8 +367,8 @@ This can be programmed very simply by having `lexical-rules` return a list of th
       (mapcar #'(lambda (cat) `(,cat -> ,word)) *open-categories*)))
 ```
 
-With memoization of `lexical-rules`, this means that the lexicon is expanded every time an unknown word is encountered.
-Let's try this out:
+`lexical-rules` をメモ化してあるので、これは未知語に出くわすたびに辞書が広がることを意味します。
+試してみましょう。
 
 ```lisp
 > (parser '(John liked Mary))
@@ -382,9 +382,9 @@ Let's try this out:
             (VP (V ZAGGLED) (NP (D THE) (A  + (A WOOGLY)) (N QUAX)))))
 ```
 
-We see the parser works as well with words it knows (John and Mary) as with new words (Dana and Dale), which it can recognize as names because of their position in the sentence.
-In the last sentence in the example, it recognizes each unknown word unambiguously.
-Things are not always so straightforward, unfortunately, as the following examples show:
+構文解析器が、知っている語（JohnとMary）と同じように新しい語（DanaとDale）も扱えていることがわかります。文中の位置から固有名だと見分けられるのです。
+例の最後の文では、未知語のそれぞれを曖昧さなく見分けています。
+あいにく、次の例が示すように、いつもそう素直にいくわけではありません。
 
 ```lisp
 > (parser '(the slithy toves gymbled))
@@ -404,26 +404,26 @@ Things are not always so straightforward, unfortunately, as the following exampl
         (PP (P ON) (NP (D THE) (N WABE)))))
 ```
 
-If the program knew morphology-that a *y* at the end of a word often signals an adjective, an *s* a plural noun, and an *ed* a past-tense verb-then it could do much better.
+このプログラムが形態論、すなわち語末の *y* はしばしば形容詞を、*s* は複数形の名詞を、*ed* は過去形の動詞を示すことを知っていれば、もっとうまくやれるでしょう。
 
-## 19.5 Parsing into a Semantic Representation
+## 19.5 意味表現への構文解析
 
-Syntactic parse trees of a sentence may be interesting, but by themselves they're not very useful.
-We use sentences to communicate ideas, not to display grammatical structures.
-To explore the idea of the semantics, or meaning, of a phrase, we need a domain to talk about.
-Imagine the scenario of a compact disc player capable of playing back selected songs based on their track number.
-Imagine further that this machine has buttons on the front panel indicating numbers, as well as words such as "play," "to," "and," and "without." If you then punch in the sequence of buttons "play 1 to 5 without 3," you could reasonably expect the machine to respond by playing tracks 1, 2, 4, and 5.
-After a few such successful interactions, you might say that the machine "understands" a limited language.
-The important point is that the utility of this machine would not be enhanced much if it happened to display a parse tree of the input.
-On the other hand, you would be justifiably annoyed if it responded to "play 1 to 5 without 3" by playing 3 or skipping 4.
+文の統語的な構文木は面白いかもしれませんが、それだけではあまり役に立ちません。
+私たちが文を使うのは考えを伝えるためであって、文法の構造を並べて見せるためではありません。
+句の意味論、すなわち意味という考えを探るには、話題にする領域が要ります。
+曲の番号にもとづいて選んだ曲を再生できるコンパクトディスクの再生機を思い浮かべてください。
+さらにこの機械の前面に、数字のボタンと、「play」「to」「and」「without」といった語のボタンが並んでいるとします。ここで「play 1 to 5 without 3」とボタンを押せば、機械が1、2、4、5番の曲を再生してくれると期待するのは当然でしょう。
+そうしたやりとりが何度かうまくいけば、この機械は限られた言語を「理解する」と言いたくなるかもしれません。
+大事なのは、この機械が入力の構文木を表示したところで、その使い勝手はたいして上がらないという点です。
+一方、「play 1 to 5 without 3」に対して3を再生したり4を飛ばしたりされたら、腹を立てるのももっともです。
 
-Now let's stretch the imagination one more time by assuming that this CD player comes equipped with a full Common Lisp compiler, and that we are now in charge of writing the parser for its input language.
-Let's first consider the relevant data structures.
-We need to add a component for the semantics to both the rule and tree structures.
-Once we've done that, it is clear that trees are nothing more than instances of rules, so their definitions should reflect that.
-Thus, I use an `:include` defstruct to define trees, and I specify no copier function, because `copy-tree` is already a Common Lisp function, and I don't want to redefine it.
-To maintain consistency with the old new-tree function (and to avoid having to put in all those keywords) I define the constructor `new-tree`.
-This option to `defstruct` makes `(new-tree a b c)` equivalent to `(make-tree :lhs a :sem b :rhs c)`.
+では想像をもう一段広げて、このCD再生機に完全なCommon Lispのコンパイラが載っており、その入力言語の構文解析器を書くのが私たちの仕事だとしましょう。
+まず関わりのあるデータ構造を考えましょう。
+規則と木の両方の構造体に、意味のための欄を加える必要があります。
+そうしてみれば、木は規則の実例にほかならないことがはっきりするので、定義もそれを映すべきです。
+そこで木の定義には `:include` つきのdefstructを使い、複製の関数は指定しません。`copy-tree` はすでにCommon Lispの関数であり、定義しなおしたくないからです。
+古い new-tree 関数との一貫性を保つため（そしてキーワードを並べずに済ませるため）、構築関数 `new-tree` を定義します。
+この `defstruct` の指定によって、`(new-tree a b c)` は `(make-tree :lhs a :sem b :rhs c)` と同じことになります。
 
 ```lisp
 (defstruct (rule (:type list)) lhs -> rhs sem)
@@ -432,21 +432,21 @@ This option to `defstruct` makes `(new-tree a b c)` equivalent to `(make-tree :l
                  (:constructor new-tree (lhs sem rhs))))
 ```
 
-We will adopt the convention that the semantics of a word can be any Lisp object.
-For example, the semantics of the word "1" could be the object 1, and the semantics of "without" could be the function `set-difference`.
-The semantics of a tree is formed by taking the semantics of the rule that generated the tree and applying it (as a function) to the semantics of the constituents of the tree.
-Thus, the grammar writer must insure that the semantic component of rules are functions that expect the right number of arguments.
-For example, given the rule
+語の意味はどんなLispの対象でもよい、という約束を採ります。
+たとえば語「1」の意味は対象1、「without」の意味は関数 `set-difference` でありえます。
+木の意味は、その木を生んだ規則の意味を取り、それを（関数として）木の構成素の意味に適用することで作られます。
+ですから文法を書く人は、規則の意味の欄が正しい引数の数を取る関数であることを保証せねばなりません。
+たとえば次の規則があるとき、
 
 ```lisp
 (NP -> (NP CONJ NP) infix-funcall)
 ```
 
-then the semantics of the phrase "1 to 5 without 3" could be determined by first determining the semantics of "1 to 5" to be `(1 2 3 4 5)`, of "without" to be `set-difference`, and of "3" to be (3).
-After these sub-constituents are determined, the rule is applied by calling the function `infix-funcall` with the three arguments `(1 2 3 4 5)`, `set-difference`, and `(3)`.
-Assuming that `infix-funcall` is defined to apply its second argument to the other two arguments, the result will be `(1 2 4 5)`.
+句「1 to 5 without 3」の意味は、まず「1 to 5」の意味を `(1 2 3 4 5)`、「without」の意味を `set-difference`、「3」の意味を (3) と定めることで求められます。
+下位の構成素が定まったら、`(1 2 3 4 5)`、`set-difference`、`(3)` という3つの引数で関数 `infix-funcall` を呼ぶことで規則が適用されます。
+`infix-funcall` が第2引数を残る2つの引数に適用するよう定義されているとすれば、結果は `(1 2 4 5)` になります。
 
-This may make more sense if we look at a complete grammar for the CD player problem:
+CD再生機の問題についての完全な文法を見れば、もっと腑に落ちるでしょう。
 
 ```lisp
 (use
@@ -470,21 +470,21 @@ This may make more sense if we look at a complete grammar for the CD player prob
   (funcall function arg1 arg2))
 ```
 
-Consider the first three grammar rules, which are the only nonlexical rules.
-The first says that when two NPs are joined by a conjunction, we assume the translation of the conjunction will be a function, and the translation of the phrase as a whole is derived by calling that function with the translations of the two NPs as arguments.
-The second rule says that a single noun (whose translation should be a number) translates into the singleton list consisting of that number.
-The third rule is similar to the first, but concerns joining Ns rather than NPs.
-The overall intent is that the translation of an NP will always be a list of integers, representing the songs to play.
+最初の3つの文法規則を見てください。語彙規則でないのはこれだけです。
+1つ目は、2つのNPが接続詞で結ばれるとき、その接続詞の訳は関数だと仮定し、句全体の訳は2つのNPの訳を引数としてその関数を呼ぶことで導かれる、と述べています。
+2つ目の規則は、名詞1つ（その訳は数であるはず）は、その数だけからなる1要素の並びに訳される、と述べています。
+3つ目の規則は1つ目に似ていますが、NPではなくNを結ぶ場合のものです。
+全体の意図は、NPの訳が常に整数の並びであり、再生する曲を表すということです。
 
-As for the lexical rules, the conjunction "and" translates to the `union` function, "without" translates to the function that subtracts one set from another, and "to" translates to the function that generates a list of integers between two end points.
-The numbers "0" to "9" translate to themselves.
-Note that both lexical rules like "`CONJ -> and`" and nonlexical rules like "`NP -> (N P N)`" can have functions as their semantic translations; in the first case, the function will just be returned as the semantic translation, whereas in the second case the function will be applied to the list of constituents.
+語彙規則については、接続詞「and」は関数 `union` に、「without」はある集合から別の集合を引く関数に、「to」は2つの端点のあいだの整数の並びを生む関数に訳されます。
+数「0」から「9」はそれ自身に訳されます。
+「`CONJ -> and`」のような語彙規則も「`NP -> (N P N)`」のような非語彙規則も、意味の訳として関数を持てることに注意してください。前者では関数がそのまま意味の訳として返され、後者では関数が構成素の並びに適用されます。
 
-Only minor changes are needed to `parse` to support this kind of semantic processing.
-As we see in the following, we add a `sem` argument to `extend-parse` and arrange to pass the semantic components around properly.
-When we have gathered all the right-hand-side components, we actually do the function application.
-All changes are marked with `***`.
-We adopt the convention that the semantic value `nil` indicates failure, and we discard all such parses.
+この種の意味処理を支えるために `parse` に必要な変更はわずかです。
+次に見るとおり、`extend-parse` に `sem` の引数を加え、意味の部分を正しく引き回すようにします。
+右辺の構成素をすべて集めたところで、実際に関数の適用を行います。
+変更した箇所はすべて `***` で印を付けてあります。
+意味の値が `nil` なら失敗を示す、という約束を採り、そうした解析はすべて捨てます。
 
 ```lisp
 (defun parse (words)
@@ -520,7 +520,7 @@ We adopt the convention that the semantic value `nil` indicates failure, and we 
         (parse rem))))
 ```
 
-We need to add some new functions to support this:
+これを支えるために、新しい関数をいくつか加える必要があります。
 
 ```lisp
 (defun apply-semantics (tree)
@@ -542,7 +542,7 @@ We need to add some new functions to support this:
   (remove-duplicates (mapcar #'tree-sem (parser words)) :test #'equal))
 ```
 
-Here are some examples of the meanings that the parser can extract:
+構文解析器が取り出せる意味の例をいくつか示します。
 
 ```
 > (meanings '(1 to 5 without 3))
@@ -556,19 +556,19 @@ Here are some examples of the meanings that the parser can extract:
  (1 2 5 6))
 ```
 
-The example "(1 to 6 without 3 and 4)" is ambiguous.
-The first reading corresponds to "((1 to 6) without 3) and 4," while the second corresponds to "(1 to 6) without (3 and 4)." The syntactic ambiguity leads to a semantic ambiguity-the two meanings have different lists of numbers in them.
-However, it seems that the second reading is somehow better, in that it doesn't make a lot of sense to talk of adding 4 to a set that already includes it, which is what the first translation does.
+例「(1 to 6 without 3 and 4)」は曖昧です。
+1つ目の読みは「((1 to 6) without 3) and 4」に、2つ目は「(1 to 6) without (3 and 4)」に対応します。統語的な曖昧さが意味的な曖昧さにつながっており、2つの意味は含む数の並びが違います。
+しかし2つ目の読みのほうがどこか良さそうです。すでに4を含む集合に4を加えると言うのはあまり意味をなしませんが、1つ目の訳はまさにそれをしているからです。
 
-We can upgrade the lexicon to account for this.
-The following lexicon insists that "and" conjoins disjoint sets and that "without" removes only elements that were already in the first argument.
-If these conditions do not hold, then the translation will return nil, and the parse will fail.
-Note that this also means that an empty list, such as "3 to 2," will also fail.
+これを織り込むよう辞書を改められます。
+次の辞書は、「and」がたがいに交わらない集合を結ぶこと、「without」が第1引数にすでにあった要素だけを取り除くことを求めます。
+この条件が満たされなければ訳はnilを返し、解析は失敗します。
+これは「3 to 2」のような空の並びも失敗することを意味する点に注意してください。
 
-The previous grammar only allowed for the numbers 0 to 9.
-We can allow larger numbers by stringing together digits.
-So now we have two rules for numbers: a number is either a single digit, in which case the value is the digit itself (the `identity` function), or it is a number followed by another digit, in which case the value is 10 times the number plus the digit.
-We could alternately have specified a number to be a digit followed by a number, or even a number followed by a number, but either of those formulations would require a more complex semantic interpretation.
+先の文法は0から9までの数しか許していませんでした。
+数字をつなげれば、より大きな数を許せます。
+そこで数の規則が2つになります。数は1つの数字であるか、その場合の値は数字そのもの（関数 `identity`）です。あるいは数のあとに数字が続くもので、その場合の値は数を10倍して数字を足したものです。
+数を、数字のあとに数が続くもの、あるいは数のあとに数が続くものと定めることもできましたが、どちらの言い方でももっと込み入った意味の解釈が要ります。
 
 ```lisp
 (use
@@ -590,7 +590,7 @@ We could alternately have specified a number to be a digit followed by a number,
 (defun 10*N+D (N D) (+ (* 10 N) D))
 ```
 
-With this new grammar, we can get single interpretations out of most reasonable inputs:
+この新しい文法なら、たいていの筋の通る入力から解釈を1つに絞れます。
 
 ```lisp
 > (meanings '(1 to 6 without 3 and 4))
@@ -609,19 +609,19 @@ With this new grammar, we can get single interpretations out of most reasonable 
 (123 (123))
 ```
 
-The example "1 2 3" shows an ambiguity between the number 123 and the list (123), but all the others are unambiguous.
+例「1 2 3」は数の123と並び (123) のあいだの曖昧さを示していますが、他はすべて曖昧さがありません。
 
-## 19.6 Parsing with Preferences
+## 19.6 選好を用いた構文解析
 
-One reason we have unambiguous interpretations is that we have a very limited domain of interpretation: we are dealing with sets of numbers, not lists.
-This is perhaps typical of the requests faced by a CD player, but it does not account for all desired input.
-For example, if you had a favorite song, you couldn't hear it three times with the request "1 and 1 and 1" under this grammar.
-We need some compromise between the permissive grammar, which generated all possible parses, and the restrictive grammar, which eliminates too many parses.
-To get the "best" interpretation out of an arbitrary input, we will not only need a new grammar, we will also need to modify the program to compare the relative worth of candidate interpretations.
-In other words, we will assign each interpretation a numeric score, and then pick the interpretation with the highest score.
+曖昧でない解釈が得られている理由の1つは、解釈の領域がひどく限られていることです。扱っているのは並びではなく数の集合なのです。
+これはCD再生機が受ける求めとしては典型的かもしれませんが、望まれる入力のすべてを覆ってはいません。
+たとえばお気に入りの曲があっても、この文法では「1 and 1 and 1」と求めて3回聴くことはできません。
+ありうる解析をすべて生む緩い文法と、解析を削りすぎる厳しい文法とのあいだで、何らかの折り合いが要ります。
+任意の入力から「最良の」解釈を得るには、新しい文法だけでなく、候補となる解釈の相対的な値打ちを比べるようプログラムを変える必要もあります。
+言い換えれば、各解釈に数値の点を与え、点のもっとも高い解釈を選ぶのです。
 
-We start by once again modifying the rule and tree data types to include a score component.
-As with the `sem` component, this will be used to hold first a function to compute a score and then eventually the score itself.
+まずはまた、点の欄を含むよう規則と木のデータ型を変えることから始めます。
+`sem` の欄と同じく、これははじめ点を計算する関数を保ち、やがて点そのものを保つことになります。
 
 ```lisp
 (defstruct (rule (:type list)
@@ -632,9 +632,9 @@ As with the `sem` component, this will be used to hold first a function to compu
                  (:constructor new-tree (lhs sem score rhs))))
 ```
 
-Note that we have added the constructor function `rule`.
-The intent is that the `sem` and `score` component of grammar rules should be optional.
-The user does not have to supply them, but the function `use` will make sure that the function `rule` is called to fill in the missing `sem` and `score` values with nil.
+構築関数 `rule` を加えたことに注意してください。
+意図は、文法規則の `sem` と `score` の欄を省略可能にすることです。
+利用者はそれらを与えなくてもよく、関数 `use` が関数 `rule` を呼んで、欠けている `sem` と `score` の値をnilで埋めます。
 
 ```lisp
 (defun use (grammar)
@@ -646,9 +646,9 @@ The user does not have to supply them, but the function `use` will make sure tha
                         grammar))))
 ```
 
-Now we modify the parser to keep track of the score.
-The changes are again minor, and mirror the changes needed to add semantics.
-There are two places where we put the score into trees as we create them, and one place where we apply the scoring function to its arguments.
+次に、点を記録するよう構文解析器を変えます。
+変更はまたわずかで、意味を加えるのに必要だった変更と同じ形です。
+木を作るときに点を入れる箇所が2つ、採点の関数をその引数に適用する箇所が1つあります。
 
 ```lisp
 (defun parse (words)
@@ -689,17 +689,17 @@ There are two places where we put the score into trees as we create them, and on
         (parse rem))))
 ```
 
-Again we need some new functions to support this.
-Most important is `apply-scorer`, which computes the score for a tree.
-If the tree is a terminal (a word), then the function just looks up the score associated with that word.
-In this grammar all words have a score of 0, but in a grammar with ambiguous words it would be a good idea to give lower scores for infrequently used senses of ambiguous words.
-If the tree is a nonterminal, then the score is computed in two steps.
-First, all the scores of the constituents of the tree are added up.
-Then, this is added to a measure for the tree as a whole.
-The rule associated with each tree will have either a number attached to it, which is added to the sum, or a function.
-In the latter case, the function is applied to the tree, and the result is added to obtain the final score.
-As a final special case, if the function returns nil, then we assume it meant to return zero.
-This will simplify the definition of some of the scoring functions.
+ここでもまた、これを支える新しい関数がいくつか要ります。
+もっとも重要なのは `apply-scorer` で、これが木の点を計算します。
+木が終端（語）なら、この関数はその語に結びついた点を引くだけです。
+この文法ではすべての語の点が0ですが、曖昧な語のある文法なら、曖昧な語のあまり使われない語義に低い点を与えるのが良い考えでしょう。
+木が非終端なら、点は2段階で計算されます。
+まず、木の構成素の点をすべて足し合わせます。
+次に、それに木全体としての尺度を加えます。
+各木に結びついた規則は、和に足される数を持つか、関数を持つかのどちらかです。
+後者の場合、その関数を木に適用し、結果を足して最終的な点を得ます。
+最後の特別扱いとして、関数がnilを返したら、0を返すつもりだったと見なします。
+これによって、採点の関数のいくつかは定義が簡単になります。
 
 ```lisp
 (defun apply-scorer (tree)
@@ -716,18 +716,18 @@ This will simplify the definition of some of the scoring functions.
                      (or (apply score (tree-rhs tree)) 0)))))))
 ```
 
-Here is an accessor function to pick out the score from a tree:
+木から点を取り出すアクセサ関数を示します。
 
 ```lisp
 (defun tree-score-or-0 (tree)
     (if (numberp (tree-score tree)) (tree-score tree) 0))
 ```
 
-Here is the updated grammar.
-First, I couldn't resist the chance to add more features to the grammar.
-I added the postnominal adjectives "shuffled," which randomly permutes the list of songs, and "reversed," which reverses the order of play.
-I also added the operator "repeat," as in "1 to 3 repeat 5," which repeats a list a certain number of times.
-I also added brackets to allow input that says explicitly how it should be parsed.
+更新した文法を示します。
+まず、文法に機能を増やす機会をどうしても見過ごせませんでした。
+名詞のあとに置く形容詞として、曲の並びをでたらめに並べ替える「shuffled」と、再生の順を逆にする「reversed」を加えました。
+また「1 to 3 repeat 5」のように使う演算子「repeat」も加えました。これは並びを決まった回数だけ繰り返します。
+さらに、どう解析すべきかを明示的に述べる入力を許すために括弧も加えました。
 
 ```lisp
 (use
@@ -751,14 +751,14 @@ I also added brackets to allow input that says explicitly how it should be parse
     (D -> 6 6) (D -> 7 7) (D -> 8 8) (D -> 9 9) (D -> 0 0)))
 ```
 
-The following scoring functions take trees as inputs and compute bonuses or penalties for those trees.
-The scoring function `prefer<`, used for the word "to," gives a one-point penalty for reversed ranges: "5 to 1" gets a score of -1, while "1 to 5" gets a score of 0.
-The scorer for "and," `prefer-disjoint`, gives a one-point penalty for intersecting lists: "1 to 3 and 7 to 9" gets a score of 0, while "1 to 4 and 2 to 5" gets -1.
-The "x without y" scorer, `prefer-subset`, gives a three-point penalty when the y list has elements that aren't in the x list.
-It also awards points in inverse proportion to the length (in words) of the x phrase.
-The idea is that we should prefer to bind "without" tightly to some small expression on the left.
-If the final scores come out as positive or as nonintegers, then this scoring component is responsible, since all the other components are negative intgers.
-The "x shuffled" scorer, `prefer-not-singleton`, is similar, except that there the penalty is for shuffling a list of less than two songs.
+次の採点の関数は木を入力に取り、その木への加点や減点を計算します。
+語「to」に使う採点関数 `prefer<` は、範囲が逆向きのときに1点の減点をします。「5 to 1」は-1点、「1 to 5」は0点です。
+「and」の採点関数 `prefer-disjoint` は、並びが交わるときに1点の減点をします。「1 to 3 and 7 to 9」は0点、「1 to 4 and 2 to 5」は-1点です。
+「x without y」の採点関数 `prefer-subset` は、yの並びにxの並びにない要素があるとき3点の減点をします。
+また、xの句の長さ（語数）に反比例して点を与えます。
+「without」は左側の小さな式にきつく結びつけるほうを好むべきだ、という考えです。
+最終的な点が正になったり整数でなくなったりしたら、それはこの採点の要素のせいです。他の要素はすべて負の整数だからです。
+「x shuffled」の採点関数 `prefer-not-singleton` も似ていますが、こちらは2曲に満たない並びを混ぜることへの減点です。
 
 ```lisp
 (defun prefer< (x y) (if (>= (sem x) (sem y)) -1))
@@ -772,7 +772,7 @@ The "x shuffled" scorer, `prefer-not-singleton`, is similar, except that there t
   (+ (inv-span x) (if (< (length (sem x)) 2) -4 0)))
 ```
 
-The `infix-scorer` and `rev-scorer` functions don't add anything new, they just assure that the previously mentioned scoring functions will get applied in the right place.
+関数 `infix-scorer` と `rev-scorer` は新しいことは何もせず、先に述べた採点の関数が正しい場所で適用されるようにするだけです。
 
 ```lisp
 (defun infix-scorer (arg1 scorer arg2)
@@ -781,7 +781,7 @@ The `infix-scorer` and `rev-scorer` functions don't add anything new, they just 
 (defun rev-scorer (arg scorer) (funcall (tree-score scorer) arg))
 ```
 
-Here are the functions mentioned in the grammar, along with some useful utilities:
+文法で触れた関数と、いくつかの便利な補助関数を示します。
 
 ```lisp
 (defun arg2 (a1 a2 &rest a-n) (declare (ignore a1 a-n)) a2)
@@ -824,7 +824,7 @@ Here are the functions mentioned in the grammar, along with some useful utilitie
         (cons e (permute (remove e bag :count 1 :test #'eq))))))
 ```
 
-We will need a way to show off the preference rankings:
+選好の順位を見せる手立てが要ります。
 
 ```lisp
 (defun all-parses (words)
@@ -843,7 +843,7 @@ We will need a way to show off the preference rankings:
         (t (mapcar #'bracketing (tree-rhs tree)))))
 ```
 
-Now we can try some examples:
+では例をいくつか試してみましょう。
 
 ```lisp
 > (all-parses '(1 to 6 without 3 and 4))
@@ -893,12 +893,12 @@ Score   Semantics         (1 AND 3 TO 7 AND 9 WITHOUT 5 AND 2)
 -2.9    (1 3 4 6 7 9)     ((1 AND ((3 TO 7) AND 9)) WITHOUT (5 AND 2))
 ```
 
-In each case, the preference rules are able to assign higher scores to more reasonable interpretations.
-It turns out that, in each case, all the interpretations with positive scores represent the same set of numbers, while interpretations with negative scores seem worse.
-Seeing all the scores in gory detail may be of academic interest, but what we really want is something to pick out the best interpretation.
-The following code is appropriate for many situations.
-It picks the top scorer, if there is a unique one, or queries the user if several interpretations tie for the best score, and it complains if there are no valid parses at all.
-The `query-user` function may be useful in many applications, but note that `meaning` uses it only as a default; a program that had some automatic way of deciding could supply another `tie-breaker` function to `meaning`.
+いずれの場合も、選好の規則はより筋の通る解釈に高い点を与えられています。
+いずれの場合も、正の点を持つ解釈はすべて同じ数の集合を表しており、負の点の解釈は見劣りすることがわかります。
+点を細かく残らず眺めるのは学術的な興味としては面白いかもしれませんが、本当にほしいのは最良の解釈を選び出すものです。
+次のコードは多くの場面に合うものです。
+最高点のものが1つに定まればそれを選び、最高点で複数の解釈が並べば利用者に尋ね、正しい解析が1つもなければ文句を言います。
+関数 `query-user` は多くの応用で役に立つでしょうが、`meaning` はこれを既定として使っているだけである点に注意してください。自動で決める手立てを持つプログラムなら、別の `tie-breaker` 関数を `meaning` に渡せます。
 
 ```lisp
 (defun meaning (words &optional (tie-breaker #'query-user))
@@ -925,7 +925,7 @@ The `query-user` function may be useful in many applications, but note that `mea
   (nth (- (read) 1) choices))
 ```
 
-Here we see some final examples:
+最後に例をいくつか見てみましょう。
 
 ```lisp
 > (meaning '(1 to 5 without 3 and 4))
@@ -958,58 +958,58 @@ Score  Semantics              (1 TO 5 WITHOUT 3 AND 7 REPEAT 2)
 -2.7   (1 2 4 5)              ((1 TO 5) WITHOUT (3 AND (7 REPEAT 2)))
 ```
 
-This last example points out a potential problem: I wasn't sure what was a good scoring function for "repeat", so I left it blank, it defaulted to 0, and we end up with two parses with the same score.
-This example suggests that "repeat" should probably involve `inv-span` like the other modifiers, but perhaps other factors should be involved as well.
-There can be a complicated interplay between phrases, and it is not always clear where to assign the score.
-For example, it doesn't make much sense to repeat a "without" phrase; that is, the bracketing `(x without (y repeat n))` is probably a bad one.
-But the scorer for "without" nearly handles that already.
-It assigns a penalty if its right argument is not a subset of its left.
-Unfortunately, repeated elements are not counted in sets, so for example, the list `(1 2 3 1 2 3)` is a subset of `(1 2 3 4)`.
-However, we could change the scorer for "without" to test for `sub-bag-p` (not a built-in Common Lisp function) instead, and then "repeat" would not have to be concerned with that case.
+この最後の例は、起こりうる問題を示しています。「repeat」に良い採点関数が何かわからなかったので空のままにしたところ、既定の0になり、同じ点の解析が2つできてしまったのです。
+この例からすると、「repeat」も他の修飾語と同じく `inv-span` を使うべきなのでしょうが、ほかの要素も絡めるべきかもしれません。
+句どうしのあいだには込み入った絡み合いがありえて、どこで点を与えるべきかが常にはっきりしているわけではありません。
+たとえば「without」の句を繰り返すのはあまり意味をなしません。つまり `(x without (y repeat n))` という括り方は、おそらくまずいものです。
+しかし「without」の採点関数は、すでにそれをほぼ扱えています。
+右の引数が左の部分集合でなければ減点するからです。
+あいにく、集合では繰り返しの要素が数えられないので、たとえば並び `(1 2 3 1 2 3)` は `(1 2 3 4)` の部分集合になってしまいます。
+とはいえ「without」の採点関数を、代わりに `sub-bag-p`（Common Lispの組み込み関数ではありません）で調べるように変えれば、「repeat」がその場合を気にせずに済みます。
 
-## 19.7 The Problem with Context-Free Phrase-Structure Rules
+## 19.7 文脈自由な句構造規則の問題
 
-The fragment of English grammar we specified in [section 19.2](#s0015) admits a variety of ungrammatical phrases.
-For example, it is equally happy with both "I liked her" and "me liked she." Only the first of these should be accepted; the second should be ruled out.
-Similarly, our grammar does not state that verbs have to agree with their subjects in person and number.
-And, since the grammar has no notion of meaning, it will accept sentences that are semantically anomalous (or at least unusual), such as "the table liked the man."
+[19.2節](#s0015)で定めた英文法の断片は、さまざまな非文法的な句を通してしまいます。
+たとえば「I liked her」も「me liked she」も同じように受け入れます。受け入れるべきは前者だけで、後者は退けられるべきです。
+同じく、この文法は動詞が主語と人称・数で一致せねばならないとは述べていません。
+さらに、この文法には意味という考えがないので、「the table liked the man」のような意味的におかしな（少なくとも変わった）文も受け入れます。
 
-There are also some technical problems with context-free grammars.
-For example, it can be shown that no context-free grammar can be written to account for the language consisting of just the strings ABC, AABBCC, AAABBBCCC, and so forth, where each string has an equal number of As, Bs, and Cs.
-Yet sentences roughly of that form show up (admittedly rarely) in natural languages.
-An example is "Robin and Sandy loved and hated Pat and Kim, respectively." While there is still disagreement over whether it is possible to generate natural languages with a context-free grammar, clearly it is much easier to use a more powerful grammatical formalism.
-For example, consider solving the subject-predicate agreement problem.
-It is possible to do this with a context-free language including categories like singular-NP, plural-NP, singular-VP, and plural-VP, but it is far easier to augment the grammatical formalism to allow passing features between constituents.
+文脈自由文法には技術的な問題もいくつかあります。
+たとえば、ABC、AABBCC、AAABBBCCC……という、AとBとCが同数ずつ並ぶ文字列だけからなる言語を扱う文脈自由文法は書けないことが示せます。
+それでいて、おおよそその形の文が自然言語には（確かにまれではありますが）現れます。
+「Robin and Sandy loved and hated Pat and Kim, respectively」がその例です。自然言語を文脈自由文法で生成できるかについては今なお意見が分かれていますが、より強力な文法の形式を使うほうがずっと楽なのは明らかです。
+たとえば主語と述語の一致の問題を解くことを考えてみましょう。
+単数NP、複数NP、単数VP、複数VPといった範疇を含む文脈自由言語でもできますが、構成素のあいだで素性を受け渡せるよう文法の形式を拡張するほうがはるかに楽です。
 
-It should be noted that context-free phrase-structure rules turned out to be very useful for describing programming languages.
-Starting with Algol 60, the formalism has been used under the name *Backus-Naur Form* (BNF) by computer scientists.
-In this book we are more interested in natural languages, so in the next chapter we will see a more powerful formalism known as *unification grammar* that can handle the problem of agreement, as well as other difficulties.
-Furthermore, *unification grammars* allow a natural way of attaching semantics to a parse.
+文脈自由な句構造規則が、プログラミング言語を記述するのに非常に役立つと判明したことは述べておくべきでしょう。
+Algol 60を皮切りに、この形式は*バッカス・ナウア記法*（BNF）という名前で計算機科学者に使われてきました。
+本書では自然言語のほうに関心があるので、次章では*単一化文法*として知られるより強力な形式を見ます。これは一致の問題も、他の難しさも扱えます。
+さらに*単一化文法*は、解析に意味を結びつける自然な手立ても与えてくれます。
 
-## 19.8 History and References
+## 19.8 歴史と参考文献
 
-There is a class of parsing algorithms known as *chart parsers* that explicitly cache partial parses and reuse them in constructing larger parses.
-Earley's algorithm (1970) is the first example, and Martin [Kay (1980)](bibliography.md#bb0605) gives a good overview of the field and introduces a data structure, the *chart*, for storing substrings of a parse.
-[Winograd (1983)](bibliography.md#bb1395) gives a complex (five-page) specification of a chart parser.
-None of these authors have noticed that one can achieve the same results by augmenting a simple (one-page) parser with memoization.
-In fact, it is possible to write a top-down parser that is even more succinct.
-(See [exercise 19.3](#p2455) below.)
+*チャート構文解析器*として知られる一群のアルゴリズムがあります。これは部分的な解析を明示的にためておき、より大きな解析を組み立てるのに再利用します。
+Earleyのアルゴリズム（1970）が最初の例で、Martin [Kay（1980）](bibliography.md#bb0605)はこの分野のよい概観を与え、解析の部分文字列を格納するデータ構造*チャート*を導入しています。
+[Winograd（1983）](bibliography.md#bb1395)は、チャート構文解析器の込み入った（5ページの）仕様を示しています。
+これらの著者は誰も、単純な（1ページの）構文解析器にメモ化を加えれば同じ結果が得られることに気づいていません。
+実のところ、もっと簡潔な下向きの構文解析器を書くこともできます。
+（下の[練習問題19.3](#p2455)を参照。）
 
-For a general overview of natural language processing, my preferences (in order) are [Allen 1987](bibliography.md#bb0030), [Winograd 1983](bibliography.md#bb1395) or [Gazdar and Mellish 1989](bibliography.md#bb0445).
+自然言語処理の全般的な概観としては、私の好みは（順に）[Allen 1987](bibliography.md#bb0030)、[Winograd 1983](bibliography.md#bb1395)、[Gazdar and Mellish 1989](bibliography.md#bb0445)です。
 
-## 19.9 Exercises
+## 19.9 練習問題
 
-**Exercise  19.2 [m-h]** Experiment with the grammar and the parser.
-Find sentences it cannot parse correctly, and try to add new syntactic rules to account for them.
+**練習問題 19.2 [m-h]** 文法と構文解析器を使って実験せよ。
+正しく解析できない文を見つけ、それを扱う新しい統語規則を加えてみよ。
 
-**Exercise  19.3 [m-h]** The parser works in a bottom-up fashion.
-Write a top-down parser, and compare it to the bottom-up version.
-Can both parsers work with the same grammar?
-If not, what constraints on the grammar does each parsing strategy impose?
+**練習問題 19.3 [m-h]** この構文解析器は上向きに働く。
+下向きの構文解析器を書き、上向きの版と比べよ。
+両方の構文解析器は同じ文法で働けるか。
+働けないなら、それぞれの解析の方策は文法にどんな制約を課すか。
 
-**Exercise  19.4 [h]** Imagine an interface to a dual cassette deck.
-Whereas the CD player had one assumed verb, "play," this unit has three explicit verb forms: "record," "play," and "erase." There should also be modifiers "from" and "to," where the object of a "to" is either 1 or 2, indicating which cassette to use, and the object of a "from" is either 1 or 2, or one of the symbols PHONO, CD, or AUX.
-It's up to you to design the grammar, but you should allow input something like the following, where I have chosen to generate actual Lisp code as the meaning:
+**練習問題 19.4 [h]** 2連のカセットデッキへの操作面を考えよ。
+CD再生機では「play」という動詞が1つ暗に想定されていたが、この装置には「record」「play」「erase」という3つの動詞が明示的にある。修飾語「from」と「to」もあるべきで、「to」の目的語は1か2でどちらのカセットを使うかを示し、「from」の目的語は1か2、あるいはPHONO、CD、AUXのいずれかのシンボルである。
+文法の設計は任せるが、次のような入力を許すべきである。ここでは意味として実際のLispのコードを生成することにしている。
 
 ```lisp
 > (meaning '(play 1 to 5 from CD shuffled and
@@ -1019,10 +1019,10 @@ It's up to you to design the grammar, but you should allow input something like 
        (RECORD '(1 3 7) :FROM '1))
 ```
 
-This assumes that the functions `play` and `record` take keyword arguments (with defaults) for `:from` and `:to`.
-You could also extend the grammar to accommodate an automatic timer, with phrases like "at 3:00."
+これは関数 `play` と `record` が `:from` と `:to` のキーワード引数を（既定値つきで）取ることを前提にしている。
+「at 3:00」のような句を扱う自動タイマーに対応するよう、文法を広げてもよい。
 
-**Exercise  19.5 [m]** In the definition of `permute`, repeated here, why is the `:test #'eq` needed?
+**練習問題 19.5 [m]** ここに再掲する `permute` の定義で、なぜ `:test #'eq` が必要なのか。
 
 ```lisp
 (defun permute (bag)
@@ -1033,12 +1033,12 @@ You could also extend the grammar to accommodate an automatic timer, with phrase
                   (cons e (permute (remove e bag :count 1 :test #'eq))))))
 ```
 
-**Exercise 19.6 [m]** The definition of `permute` takes *O*(*n*<sup>2</sup>).
-Replace it by an *O*(*n*) algorithm.
+**練習問題 19.6 [m]** `permute` の定義は *O*(*n*<sup>2</sup>) かかる。
+*O*(*n*) のアルゴリズムで置き換えよ。
 
-## 19.10 Answers
+## 19.10 解答
 
-**Answer 19.1**
+**解答 19.1**
 
 ```lisp
 (defun parser (words)
@@ -1084,16 +1084,16 @@ Replace it by an *O*(*n*) algorithm.
           (parse rem num-words table))))
 ```
 
-It turns out that, for the Lisp system used in the timings above, this version is no faster than normal memoization.
+上の測定に使ったLispシステムでは、この版はふつうのメモ化より速くないことがわかった。
 
-**Answer 19.3** Actually, the top-down parser is a little easier (shorter) than the bottom-up version.
-The problem is that the most straightforward way of implementing a top-down parser does not handle so-called *left recursive* rules-rules of the form `(X -> (X ...))`.
-This includes rules we've used, like `(NP -> (NP and NP))`.
-The problem is that the parser will postulate an `NP`, and then postulate that it is of the form `(NP and NP)`, and that the first `NP` of that expression is of the form `(NP and NP)`, and so on.
-An infinite structure of `NP`s is explored before even the first word is considered.
+**解答 19.3** 実のところ、下向きの構文解析器は上向きの版より少し易しく（短く）なる。
+厄介なのは、下向きの構文解析器をもっとも素直に実装すると、いわゆる*左再帰*の規則、すなわち `(X -> (X ...))` の形の規則を扱えないことである。
+これには `(NP -> (NP and NP))` のような、私たちが使ってきた規則も含まれる。
+構文解析器は `NP` を仮定し、次にそれが `(NP and NP)` の形だと仮定し、その式の最初の `NP` がまた `(NP and NP)` の形だと仮定し……と続いてしまうのである。
+最初の語を見るより前に、`NP` の無限の構造を探ってしまう。
 
-Bottom-up parsers are stymied by rules with null right-hand sides: `(X -> O)`.
-Note that I was careful to exclude such rules in my grammars earlier.
+上向きの構文解析器は、右辺が空の規則 `(X -> O)` に行き詰まる。
+先の文法では、そうした規則を注意して除いていたことに注目してほしい。
 
 ```lisp
 (defun parser (words &optional (cat 's))
@@ -1123,19 +1123,19 @@ Note that I was careful to exclude such rules in my grammars earlier.
   (find-all cat *grammar* :key #'rule-lhs))
 ```
 
-**Answer 19.5** If it were omitted, then `:test` would default to `#'eql`, and it would be possible to remove the "wrong" element from the list.
-Consider the list `(1.0 1.0)` in an implementation where floating-point numbers are `eql` but not `eq`.
-If `random-elt` chooses the first 1.0 first, then everything is satisfactory-the result list is the same as the input list.
-However, if `random-elt` chooses the second 1.0, then the second 1.0 will be the first element of the answer, but `remove` will remove the wrong 1.0!
-It will remove the first 1.0, and the final answer will be a list with two pointers to the second 1.0 and none to the first.
-In other words, we could have:
+**解答 19.5** これを省くと `:test` は既定の `#'eql` になり、並びから「誤った」要素を取り除いてしまうことがありうる。
+浮動小数点数が `eql` ではあるが `eq` ではない実装で、並び `(1.0 1.0)` を考えてみよ。
+`random-elt` が最初の1.0を先に選べば万事問題ない。結果の並びは入力の並びと同じになる。
+しかし `random-elt` が2つ目の1.0を選ぶと、2つ目の1.0が答えの最初の要素になるのに、`remove` は誤ったほうの1.0を取り除いてしまう。
+最初の1.0を取り除くので、最終的な答えは2つ目の1.0への参照を2つ持ち、最初のものへの参照を持たない並びになる。
+つまり次のようになりうる。
 
 ```lisp
   > (member (first x) (permute x) :test #'eq)
   NIL
 ```
 
-**Answer 19.6**
+**解答 19.6**
 
 ```lisp
 (defun permute (bag)
@@ -1154,8 +1154,8 @@ In other words, we could have:
   vector)
 ```
 
-The answer uses `rotatef`, a relative of `setf` that swaps 2 or more values.
-That is, `(rotatef a b)` is like:
+解答では `rotatef` を使っている。これは `setf` の仲間で、2つ以上の値を入れ替えるものである。
+つまり `(rotatef a b)` は次のようなものである。
 
 ```lisp
 (let ((temp a))
@@ -1164,7 +1164,7 @@ That is, `(rotatef a b)` is like:
   nil)
 ```
 
-Rarely, `rotatef` is used with more than two arguments, `(rotatef a b c)` is like:
+まれに `rotatef` は3つ以上の引数で使われる。`(rotatef a b c)` は次のようなものである。
 
 ```lisp
 (let ((temp a))
@@ -1177,10 +1177,10 @@ Rarely, `rotatef` is used with more than two arguments, `(rotatef a b c)` is lik
 ----------------------
 
 <a id="fn19-1"></a><sup>[1](#tfn19-1)</sup>
-Some erroneous expressions are underspecified and may return different results in different implementations, but we will ignore that problem.
+誤った式のなかには仕様が定まっておらず、実装によって違う結果を返すものもありますが、その問題はここでは措きます。
 
 <a id="fn19-2"></a><sup>[2](#tfn19-2)</sup>
-The number of parses of sentences of this kind is the same as the number of bracketings of a arithmetic expression, or the number of binary trees with a given number of leaves.
-The resulting sequence (1, 2, 5, 14, 42, ...) is known as the Catalan Numbers.
-This kind of ambiguity is discussed by [Church and Patil (1982)](bibliography.md#bb0200) in their article *Coping with Syntactic Ambiguity, or How to Put the Block in the Box on the Table.*
+この種の文の解析の数は、算術式の括り方の数、すなわち葉の数を与えたときの二分木の数と同じです。
+できあがる列（1, 2, 5, 14, 42, ...）はカタラン数として知られています。
+この種の曖昧さは、[Church and Patil（1982）](bibliography.md#bb0200)の論文 *Coping with Syntactic Ambiguity, or How to Put the Block in the Box on the Table* で論じられています。
 

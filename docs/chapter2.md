@@ -1,57 +1,57 @@
-# Chapter 2
-## A Simple Lisp Program
+# 第2章
+## 単純なLispプログラム
 
 > *Certum quod factum.* \
-> (One is certain of only what one builds.)
+> （人は自ら作ったものだけを確実に知る。）
 
 > -Giovanni Battista Vico (1668-1744) \
-> Italian royal historiographer
+> イタリア王室の歴史編纂官
 
-You will never become proficient in a foreign language by studying vocabulary lists.
-Rather, you must hear and speak (or read and write) the language to gain proficiency.
-The same is true for learning computer languages.
+単語帳を眺めているだけでは、外国語が達者になることはありません。
+上達するには、その言語を聞き、話す（あるいは読み、書く）必要があります。
+プログラミング言語を学ぶときも同じです。
 
-This chapter shows how to combine the basic functions and special forms of Lisp into a complete program.
-If you can learn how to do that, then acquiring the remaining vocabulary of Lisp (as outlined in [chapter 3](chapter3.md)) will be easy.
+この章では、Lispの基本的な関数と特殊形式を組み合わせて、1つの完結したプログラムに仕立てる方法を示します。
+それができるようになれば、Lispの残りの語彙（[第3章](chapter3.md)で概観します）を身につけるのは容易です。
 
-## 2.1 A Grammar for a Subset of English
+## 2.1 英語の部分集合の文法
 
-The program we will develop in this chapter generates random English sentences.
-Here is a simple grammar for a tiny portion of English:
+この章で作るプログラムは、英語の文を無作為に生成します。
+英語のごく一部を扱う、単純な文法を示します。
 
-> *Sentence* => *Noun-Phrase + Verb-Phrase* \
-> *Noun-Phrase* => *Article + Noun* \
-> *Verb-Phrase* => *Verb + Noun-Phrase* \
-> *Article* => *the, a,...* \
-> *Noun* => *man, ball, woman, table...* \
-> *Verb* => *hit, took, saw, liked...*
+> *文* => *名詞句 + 動詞句* \
+> *名詞句* => *冠詞 + 名詞* \
+> *動詞句* => *動詞 + 名詞句* \
+> *冠詞* => *the, a,...* \
+> *名詞* => *man, ball, woman, table...* \
+> *動詞* => *hit, took, saw, liked...*
 
-To be technical, this description is called a *context-free phrase-structure grammar*, and the underlying paradigm is called *generative syntax*.
-The idea is that anywhere we want a sentence, we can generate a noun phrase followed by a verb phrase.
-Anywhere a noun phrase has been specified, we generate instead an article followed by a noun.
-Anywhere an article has been specified, we generate either "the," "a," or some other article.
-The formalism is "context-free" because the rules apply anywhere regardless of the surrounding words, and the approach is "generative" because the rules as a whole define the complete set of sentences in a language (and by contrast the set of nonsentences as well).
-In the following we show the derivation of a single sentence using the rules:
+専門的に言えば、この記述は*文脈自由句構造文法*と呼ばれ、その背後にあるパラダイムは*生成統語論*と呼ばれます。
+考え方はこうです。文が欲しいところではどこでも、名詞句とそれに続く動詞句を生成してよい。
+名詞句が指定されたところではどこでも、代わりに冠詞とそれに続く名詞を生成する。
+冠詞が指定されたところではどこでも、「the」か「a」か、その他の冠詞を生成する。
+この枠組みが「文脈自由」なのは、規則が周囲の語に関係なくどこででも適用できるからです。この方式が「生成的」なのは、規則全体がその言語の文の集合を余さず定めるからです（そして対比として、文でないものの集合も定まります）。
+以下に、これらの規則を使って1つの文を導出する様子を示します。
 
 
-* To get a *Sentence,* append a *Noun-Phrase* and a *Verb-Phrase*
-  * To get a *Noun-Phrase*, append an *Article* and a *Noun*
-    * Choose *"the"* for the *Article*
-    * Choose *"man"* for the *Noun*
-  * The resulting *Noun-Phrase* is *"the man"*
-  * To get a *Verb-Phrase,* append a *Verb* and a *Noun-Phrase*
-    * Choose *"hit"* for the *Verb*
-    * To get a *Noun-Phrase*, append an *Article* and a *Noun*
-      * Choose *"the"* for the *Article*
-      * Choose *"ball"* for the *Noun*
-    * The resulting *Noun-Phrase* is *"the ball"*
-  * The resulting *Verb-Phrase* is *"hit the ball"*
-* The resulting *Sentence* is *"The man hit the ball"*
+* *文*を得るには、*名詞句*と*動詞句*をつなげる
+  * *名詞句*を得るには、*冠詞*と*名詞*をつなげる
+    * *冠詞*として *"the"* を選ぶ
+    * *名詞*として *"man"* を選ぶ
+  * できた*名詞句*は *"the man"*
+  * *動詞句*を得るには、*動詞*と*名詞句*をつなげる
+    * *動詞*として *"hit"* を選ぶ
+    * *名詞句*を得るには、*冠詞*と*名詞*をつなげる
+      * *冠詞*として *"the"* を選ぶ
+      * *名詞*として *"ball"* を選ぶ
+    * できた*名詞句*は *"the ball"*
+  * できた*動詞句*は *"hit the ball"*
+* できた*文*は *"The man hit the ball"*
 
-## 2.2 A Straightforward Solution
+## 2.2 素直な解法
 
-We will develop a program that generates random sentences from a phrase-structure grammar.
-The most straightforward approach is to represent each grammar rule by a separate Lisp function:
+句構造文法から文を無作為に生成するプログラムを作ります。
+最も素直な方式は、文法の各規則を別々のLisp関数で表すことです。
 
 ```lisp
 (defun sentence ()    (append (noun-phrase) (verb-phrase)))
@@ -62,16 +62,16 @@ The most straightforward approach is to represent each grammar rule by a separat
 (defun Verb ()        (one-of '(hit took saw liked)))
 ```
 
-Each of these function definitions has an empty parameter list, `()`.
-That means the functions take no arguments.
-This is unusual because, strictly speaking, a function with no arguments would always return the same thing, so we would use a constant instead.
-However, these functions make use of the `random` function (as we will see shortly), and thus can return different results even with no arguments.
-Thus, they are not functions in the mathematical sense, but they are still called functions in Lisp, because they return a value.
+これらの関数定義はどれも、空の引数リスト `()` を持っています。
+つまり引数をとらないということです。
+これは変わったことです。厳密に言えば、引数をとらない関数は常に同じものを返すはずで、それなら定数を使えばよいからです。
+しかしこれらの関数は（じきに見るように）`random` 関数を使うので、引数がなくても違う結果を返せます。
+ですから数学的な意味での関数ではありませんが、値を返すのでLispではやはり関数と呼びます。
 
-All that remains now is to define the function `one-of`.
-It takes a list of possible choices as an argument, chooses one of these at random, and returns a one-element list of the element chosen.
-This last part is so that all functions in the grammar will return a list of words.
-That way, we can freely apply `append` to any category.
+あとは `one-of` という関数を定義するだけです。
+選択肢のリストを引数にとり、その中から無作為に1つ選び、選んだ要素だけからなる1要素のリストを返します。
+最後の点は、文法中のすべての関数が語のリストを返すようにするためです。
+そうしておけば、どのカテゴリにも自由に `append` を適用できます。
 
 ```lisp
 (defun one-of (set)
@@ -83,14 +83,14 @@ That way, we can freely apply `append` to any category.
   (elt choices (random (length choices))))
 ```
 
-There are two new functions here, `elt` and `random`.
-`elt` picks an element out of a list.
-The first argument is the list, and the second is the position in the list.
-The confusing part is that the positions start at 0, so `(elt choices 0)` is the first element of the list, and `(elt choices 1)` is the second.
-Think of the position numbers as telling you how far away you are from the front.
-The expression `(random n)` returns an integer from 0 to n-1, so that `(random 4)` would return either 0, 1, 2, or 3.
+ここでは `elt` と `random` という2つの新しい関数が出てきます。
+`elt` はリストから要素を1つ取り出します。
+第1引数がリスト、第2引数がリスト内の位置です。
+紛らわしいのは位置が0から始まることです。`(elt choices 0)` がリストの最初の要素で、`(elt choices 1)` が2番目になります。
+位置の番号は、先頭からどれだけ離れているかを表していると考えてください。
+式 `(random n)` は0からn-1までの整数を返すので、`(random 4)` は0、1、2、3のいずれかを返します。
 
-Now we can test the program by generating a few random sentences, along with a noun phrase and a verb phrase:
+これでプログラムを試せます。無作為な文をいくつかと、名詞句・動詞句を生成してみましょう。
 
 ```lisp
 > (sentence) => (THE WOMAN HIT THE BALL)
@@ -130,26 +130,26 @@ Now we can test the program by generating a few random sentences, along with a n
 (THE MAN HIT THE BALL)
 ```
 
-The program works fine, and the trace looks just like the sample derivation above, but the Lisp definitions are a bit harder to read than the original grammar rules.
-This problem will be compounded as we consider more complex rules.
-Suppose we wanted to allow noun phrases to be modified by an indefinite number of adjectives and an indefinite number of prepositional phrases.
-In grammatical notation, we might have the following rules:
+プログラムはうまく動き、追跡の様子も上の導出例そっくりですが、Lispの定義は元の文法規則よりいくらか読みにくくなっています。
+より複雑な規則を考えると、この問題はさらに深刻になります。
+名詞句が、任意個の形容詞と任意個の前置詞句によって修飾されるのを許したいとしましょう。
+文法の記法では、次のような規則になるでしょう。
 
-> *Noun-Phrase => Article + Adj\* + Noun + PP\* \
+> *名詞句 => 冠詞 + Adj\* + 名詞 + PP\* \
 > Adj\* => &#x2205;, Adj + Adj\* \
 > PP\* => &#x2205;, PP + PP\* \
-> PP => Prep + Noun-Phrase \
+> PP => 前置詞 + 名詞句 \
 > Adj => big, little, blue, green, ... \
-> Prep => to, in, by, with, ...*
+> 前置詞 => to, in, by, with, ...*
 
-In this notation, &#x2205; indicates a choice of nothing at all, a comma indicates a choice of several alternatives, and the asterisk is nothing special-as in Lisp, it's just part of the name of a symbol.
-However, the convention used here is that names ending in an asterisk denote zero or more repetitions of the underlying name.
-That is, *PP\** denotes zero or more repetitions of *PP*.
+この記法で &#x2205; は「何も選ばない」を表し、カンマは複数の選択肢を表します。アスタリスクは特別なものではなく、Lispと同じくシンボル名の一部にすぎません。
+ただしここでの約束事として、アスタリスクで終わる名前は、元の名前の0回以上の繰り返しを表します。
+つまり *PP\** は *PP* の0回以上の繰り返しを表します。
 <a id="tfn02-1"></a>
-This is known as "Kleene star" notation (pronounced "clean-E") after the mathematician Stephen Cole Kleene.<sup>[1](#fn02-1)</sup>
+これは数学者Stephen Cole Kleeneにちなんで「クリーネスター」記法と呼ばれます（「クリーニー」と発音します）。<sup>[1](#fn02-1)</sup>
 
-The problem is that the rules for *Adj\** and *PP\** contain choices that we would have to represent as some kind of conditional in Lisp.
-For example:
+問題は、*Adj\** と *PP\** の規則が選択を含んでおり、それをLispでは何らかの条件分岐として表さねばならないことです。
+たとえば次のようになります。
 
 ```lisp
 (defun Adj* ()
@@ -168,8 +168,8 @@ For example:
 (defun Prep () (one-of '(to in by with on)))
 ```
 
-I've chosen two different implementations for `Adj*` and `PP*`; either approach would work in either function.
-We have to be careful, though; here are two approaches that would not work:
+`Adj*` と `PP*` には別々の実装を選びましたが、どちらの方式もどちらの関数で使えます。
+ただし注意が要ります。うまくいかない方式を2つ挙げましょう。
 
 ```lisp
 (defun Adj* ()
@@ -180,28 +180,28 @@ We have to be careful, though; here are two approaches that would not work:
   (one-of (list nil (append (Adj) (Adj*)))))
 ```
 
-The first definition is wrong because it could return the literal expression `((append (Adj) (Adj*)))` rather than a list of words as expected.
-The second definition would cause infinite recursion, because computing the value of `(Adj*)` always involves a recursive call to `(Adj*)`.
-The point is that what started out as simple functions are now becoming quite complex.
-To understand them, we need to know many Lisp conventions-`defun, (), case, if`, `quote`, and the rules for order of evaluation-when ideally the implementation of a grammar rule should use only *linguistic* conventions.
-If we wanted to develop a larger grammar, the problem could get worse, because the rule-writer might have to depend more and more on Lisp.
+最初の定義が誤っているのは、期待される語のリストではなく、`((append (Adj) (Adj*)))` という式そのものを返しうるからです。
+2番目の定義は無限再帰を招きます。`(Adj*)` の値を計算すると必ず `(Adj*)` への再帰呼び出しが起きるからです。
+要点は、単純な関数として始まったものが、今やかなり複雑になってきたということです。
+これらを理解するにはLispの約束事を数多く知る必要があります — `defun`、`()`、`case`、`if`、`quote`、そして評価順序の規則。しかし理想を言えば、文法規則の実装は*言語学的な*約束事だけで済むべきです。
+より大きな文法を作ろうとすれば、問題はもっと悪くなりえます。規則を書く人がますますLispに頼らねばならなくなるからです。
 
-## 2.3 A Rule-Based Solution
+## 2.3 規則に基づく解法
 
-An alternative implementation of this program would concentrate on making it easy to write grammar rules and would worry later about how they will be processed.
-Let's look again at the original grammar rules:
+このプログラムの別の実装としては、文法規則を書きやすくすることに専念し、それをどう処理するかは後回しにする、というやり方があります。
+元の文法規則をもう一度見てみましょう。
 
-> *Sentence => Noun-Phrase + Verb-Phrase \
-> Noun-Phrase => Article + Noun \
-> Verb-Phrase => Verb + Noun-Phrase \
-> Article => the, a, ... \
-> Noun => man, ball, woman, table... \
-> Verb => hit, took, saw, liked...*
+> *文 => 名詞句 + 動詞句 \
+> 名詞句 => 冠詞 + 名詞 \
+> 動詞句 => 動詞 + 名詞句 \
+> 冠詞 => the, a, ... \
+> 名詞 => man, ball, woman, table... \
+> 動詞 => hit, took, saw, liked...*
 
-Each rule consists of an arrow with a symbol on the left-hand side and something on the right-hand side.
-The complication is that there can be two kinds of right-hand sides: a concatenated list of symbols, as in "*Noun-Phrase => Article+Noun*," or a list of alternate words, as in "*Noun => man, ball, ...*"
-We can account for these possibilities by deciding that every rule will have a list of possibilities on the right-hand side, and that a concatenated list, *for example "Article+Noun,"* will be represented as a Lisp list, *for example* "(`Article Noun`)".
-The list of rules can then be represented as follows:
+どの規則も矢印からなり、左辺にシンボルが、右辺に何かが置かれています。
+厄介なのは、右辺に2種類ありうることです。「*名詞句 => 冠詞+名詞*」のようにシンボルを連結した並びか、「*名詞 => man, ball, ...*」のように選択肢となる語の並びかです。
+この両方に対応するには、どの規則も右辺に選択肢の並びを持つものとし、連結した並び（*たとえば「冠詞+名詞」*）はLispのリスト（*たとえば* 「(`Article Noun`)」）で表す、と決めればよいのです。
+そうすると、規則の並びは次のように表せます。
 
 ```lisp
 (defparameter *simple-grammar*
@@ -218,25 +218,25 @@ The list of rules can then be represented as follows:
   *simple-grammar*, but we can switch to other grammars.")
 ```
 
-Note that the Lisp version of the rules closely mimics the original version.
-In particular, I include the symbol "->", even though it serves no real purpose; it is purely decorative.
+Lisp版の規則が元の版によく似ていることに注目してください。
+とくに、実際には何の役目もない「->」というシンボルをあえて入れています。純粋に飾りです。
 
-The special forms `defvar` and `defparameter` both introduce special variables and assign a value to them; the difference is that a *variable*, like `*grammar*,` is routinely changed during the course of running the program.
-A *parameter*, like `*simple-grammar*`, on the other hand, will normally stay constant.
-A change to a parameter is considered a change *to* the program, not a change *by* the program.
+特殊形式 `defvar` と `defparameter` はどちらもスペシャル変数を導入して値を割り当てます。違いは、`*grammar*` のような*変数*はプログラムの実行中に日常的に変わる、という点です。
+一方 `*simple-grammar*` のような*パラメータ*は、ふつう一定のままです。
+パラメータの変更は、プログラム*による*変更ではなく、プログラム*への*変更とみなされます。
 
-Once the list of rules has been defined, it can be used to find the possible rewrites of a given category symbol.
-The function `assoc` is designed for just this sort of task.
-It takes two arguments, a "key" and a list of lists, and returns the first element of the list of lists that starts with the key.
-If there is none, it returns `nil`.
-Here is an example:
+規則の並びを定義しておけば、あるカテゴリのシンボルについて可能な書き換えを探すのに使えます。
+`assoc` という関数は、まさにこの種の仕事のためのものです。
+「キー」とリストのリストの2つを引数にとり、そのキーで始まる最初のリストを返します。
+見つからなければ `nil` を返します。
+例を挙げます。
 
 ```lisp
 > (assoc 'noun *grammar*) => (NOUN -> MAN BALL WOMAN TABLE)
 ```
 
-Although rules are quite simply implemented as lists, it is a good idea to impose a layer of abstraction by defining functions to operate on the rules.
-We will need three functions: one to get the right-hand side of a rule, one for the left-hand side, and one to look up all the possible rewrites (right-hand sides) for a category.
+規則はごく単純にリストとして実装されていますが、規則を操作する関数を定義して抽象の層を設けておくのはよい考えです。
+必要な関数は3つです。規則の右辺を得るもの、左辺を得るもの、そしてあるカテゴリについて可能な書き換え（右辺）をすべて引くものです。
 
 ```lisp
 (defun rule-lhs (rule)
@@ -252,19 +252,19 @@ We will need three functions: one to get the right-hand side of a rule, one for 
   (rule-rhs (assoc category *grammar*)))
 ```
 
-Defining these functions will make it easier to read the programs that use them, and it also makes changing the representation of rules easier, should we ever decide to do so.
+これらの関数を定義しておけば、それを使うプログラムが読みやすくなりますし、規則の表現を変えることにしたときにも変更が楽になります。
 
-We are now ready to address the main problem: defining a function that will generate sentences (or noun phrases, or any other category).
-We will call this function `generate`.
-It will have to contend with three cases:
-(1) In the simplest case, `generate` is passed a symbol that has a set of rewrite rules associated with it.
-We choose one of those at random, and then generate from that.
-(2) If the symbol has no possible rewrite rules, it must be a terminal symbol-a word, rather than a grammatical category-and we want to leave it alone.
-Actually, we return the list of the input word, because, as in the previous program, we want all results to be lists of words.
-(3) In some cases, when the symbol has rewrites, we will pick one that is a list of symbols, and try to generate from that.
-Thus, `generate` must also accept a list as input, in which case it should generate each element of the list, and then append them all together.
-In the following, the first clause in `generate` handles this case, while the second clause handles (1) and the third handles (2).
-Note that we used the `mappend` function from section 1.7 (page 18).
+これで本題に取りかかる準備ができました。文（あるいは名詞句、その他どのカテゴリでも）を生成する関数を定義することです。
+この関数を `generate` と呼ぶことにします。
+3つの場合に対処せねばなりません。
+(1) 最も単純な場合、`generate` には書き換え規則の組が結び付いたシンボルが渡されます。
+その中から無作為に1つ選び、それをもとに生成します。
+(2) シンボルに書き換え規則がなければ、それは終端記号 — 文法上のカテゴリではなく語 — のはずなので、そのままにしておきます。
+実際には入力された語のリストを返します。前のプログラムと同じく、結果はすべて語のリストにしたいからです。
+(3) シンボルに書き換えがある場合、シンボルの並びであるものを選び、それをもとに生成しようとすることがあります。
+ですから `generate` は入力としてリストも受け付けねばなりません。その場合はリストの各要素を生成し、それらをすべてつなげます。
+以下では、`generate` の最初の節がこの場合を、2番目の節が(1)を、3番目の節が(2)を扱います。
+1.7節（18ページ）の `mappend` 関数を使っていることに注意してください。
 
 ```lisp
 (defun generate (phrase)
@@ -276,12 +276,12 @@ Note that we used the `mappend` function from section 1.7 (page 18).
         (t (list phrase))))
 ```
 
-Like many of the programs in this book, this function is short, but dense with information: the craft of programming includes knowing what *not* to write, as well as what to write.
+本書の多くのプログラムと同じく、この関数は短いながら情報が詰まっています。プログラミングという技には、何を書くかだけでなく、何を書か*ない*かを知ることも含まれるのです。
 
-This style of programming is called *data-driven* programming, because the data (the list of rewrites associated with a category) drives what the program does next.
-It is a natural and easy-to-use style in Lisp, leading to concise and extensible programs, because it is always possible to add a new piece of data with a new association without having to modify the original program.
+この流儀は*データ駆動*のプログラミングと呼ばれます。データ（カテゴリに結び付いた書き換えの並び）が、プログラムの次の動きを決めるからです。
+これはLispでは自然で使いやすい流儀であり、簡潔で拡張しやすいプログラムにつながります。元のプログラムに手を入れずとも、新しい対応づけを持つデータをいつでも追加できるからです。
 
-Here are some examples of `generate` in use:
+`generate` を使った例をいくつか挙げます。
 
 ```lisp
 > (generate 'sentence) => (THE TABLE SAW THE BALL)
@@ -293,8 +293,8 @@ Here are some examples of `generate` in use:
 > (generate 'verb-phrase) => (TOOK A TABLE)
 ```
 
-There are many possible ways to write `generate`.
-The following version uses `if` instead of `cond`:
+`generate` の書き方はいろいろありえます。
+次の版は `cond` の代わりに `if` を使います。
 
 ```lisp
 (defun generate (phrase)
@@ -307,51 +307,51 @@ The following version uses `if` instead of `cond`:
             (generate (random-elt choices))))))
 ```
 
-This version uses the special form `let`, which introduces a new variable (in this case, `choices`) and also binds the variable to a value.
-In this case, introducing the variable saves us from calling the function `rewrites` twice, as was done in the `cond` version of `generate`.
-The general form of a `let` form is:
+この版は特殊形式 `let` を使っています。`let` は新しい変数（ここでは `choices`）を導入し、その変数を値に束縛します。
+この場合、変数を導入することで、`cond` を使った `generate` のように `rewrites` を2度呼ぶ手間が省けます。
+`let` の一般形は次のとおりです。
 
 ```lisp
     `(let` ((*var value*)...)
         *body-containing-vars*)
 ```
 
-`let` is the most common way of introducing variables that are not parameters of functions.
-One must resist the temptation to use a variable without introducing it:
+`let` は、関数の引数ではない変数を導入する最も一般的な方法です。
+変数を導入せずに使いたくなる誘惑には抗わねばなりません。
 
 ```lisp
 (defun generate (phrase)
   (setf choices ...)         ;; wrong!
   ... choices ...)
 ```
-This is wrong because the symbol `choices` now refers to a special or global variable, one that may be shared or changed by other functions.
-Thus, the function `generate` is not reliable, because there is no guarantee that `choices` will retain the same value from the time it is set to the time it is referenced again.
-With `let` we introduce a brand new variable that nobody else can access; therefore it is guaranteed to maintain the proper value.
+これが誤りなのは、シンボル `choices` がスペシャル変数ないし大域変数を指すことになり、他の関数と共有されたり書き換えられたりしうるからです。
+そうなると `generate` は当てになりません。`choices` に値を設定してから再び参照するまで、同じ値が保たれる保証がないからです。
+`let` なら、誰もアクセスできないまったく新しい変数を導入するので、正しい値が保たれることが保証されます。
 
-&#9635; **Exercise  2.1 [m]** Write a version of `generate` that uses `cond` but avoids calling `rewrites` twice.
+&#9635; **練習問題 2.1 [m]** `cond` を使いつつ `rewrites` を2度呼ばずに済む `generate` を書け。
 
-&#9635; **Exercise  2.2 [m]** Write a version of `generate` that explicitly differentiates between terminal symbols (those with no rewrite rules) and nonterminal symbols.
+&#9635; **練習問題 2.2 [m]** 終端記号（書き換え規則を持たないもの）と非終端記号を明示的に区別する `generate` を書け。
 
-## 2.4 Two Paths to Follow
+## 2.4 進むべき2つの道
 
-The two versions of the preceding program represent two alternate approaches that come up time and time again in developing programs: (1) Use the most straightforward mapping of the problem description directly into Lisp code.
-(2) Use the most natural notation available to solve the problem, and then worry about writing an interpreter for that notation.
+先のプログラムの2つの版は、プログラム開発で何度も現れる2つの方式を表しています。(1) 問題の記述を最も素直にLispのコードへ写す。
+(2) 問題を解くのに使える最も自然な記法を用い、その記法のインタプリタを書くことはあとで考える。
 
-Approach (2) involves an extra step, and thus is more work for small problems.
-However, programs that use this approach are often easier to modify and expand.
-This is especially true in a domain where there is a lot of data to account for.
-The grammar of natural language is one such domain-in fact, most AI problems fit this description.
-The idea behind approach (2) is to work with the problem as much as possible in its own terms, and to minimize the part of the solution that is written directly in Lisp.
+方式(2)は一手間多いので、小さな問題では手間が増えます。
+しかしこの方式のプログラムは、変更も拡張もしやすいことが多いのです。
+扱うべきデータが多い領域では、とくにそう言えます。
+自然言語の文法はそうした領域の1つです。実際、AIの問題の大半がこれに当てはまります。
+方式(2)の考えは、問題をできるだけその問題自身の言葉で扱い、Lispで直に書く部分を最小限にとどめることです。
 
-Fortunately, it is very easy in Lisp to design new notations-in effect, new programming languages.
-Thus, Lisp encourages the construction of more robust programs.
-Throughout this book, we will be aware of the two approaches.
-The reader may notice that in most cases, we choose the second.
+幸い、Lispでは新しい記法 — 事実上の新しいプログラミング言語 — を設計するのがとても簡単です。
+ですからLispは、より頑健なプログラムの構築を後押しします。
+本書を通じて、この2つの方式を意識していきます。
+たいていの場合に2番目を選んでいることに、読者は気づくでしょう。
 
-## 2.5 Changing the Grammar without Changing the Program
+## 2.5 プログラムを変えずに文法を変える
 
-We show the utility of approach (2) by defining a new grammar that includes adjectives, prepositional phrases, proper names, and pronouns.
-We can then apply the `generate` function without modification to this new grammar.
+形容詞・前置詞句・固有名詞・代名詞を含む新しい文法を定義して、方式(2)の有用さを示します。
+そして `generate` 関数を一切変えずに、この新しい文法に適用できます。
 
 ```lisp
 (defparameter *bigger-grammar*
@@ -384,14 +384,14 @@ We can then apply the `generate` function without modification to this new gramm
 (THE GREEN TABLE HIT IT WITH HE)
 ```
 
-Notice the problem with case agreement for pronouns: the program generated "with he," although "with him" is the proper grammatical form.
-Also, it is clear that the program does not distinguish sensible from silly output.
+代名詞の格の一致に問題があることに注目してください。文法的に正しいのは「with him」なのに、プログラムは「with he」を生成しました。
+また、このプログラムが意味の通る出力と馬鹿げた出力を区別していないのも明らかです。
 
-## 2.6 Using the Same Data for Several Programs
+## 2.6 同じデータを複数のプログラムで使う
 
-Another advantage of representing information in a declarative form-as rules or facts rather than as Lisp functions-is that it can be easier to use the information for multiple purposes.
-Suppose we wanted a function that would generate not just the list of words in a sentence but a representation of the complete syntax of a sentence.
-For example, instead of the list `(a woman took a ball)`, we want to get the nested list:
+情報を宣言的な形 — Lispの関数ではなく規則や事実として — で表すもう1つの利点は、その情報を複数の目的に使いやすくなることです。
+文中の語の並びだけでなく、文の統語構造を丸ごと表したものを生成する関数が欲しいとしましょう。
+たとえばリスト `(a woman took a ball)` の代わりに、次のような入れ子のリストが欲しいわけです。
 
 ```lisp
 (SENTENCE (NOUN-PHRASE (ARTICLE A) (NOUN WOMAN))
@@ -399,16 +399,16 @@ For example, instead of the list `(a woman took a ball)`, we want to get the nes
                        (NOUN-PHRASE (ARTICLE A) (NOUN BALL))))
 ```
 
-This corresponds to the tree that linguists draw as in figure 2.1.
+これは言語学者が図2.1のように描く木に対応します。
 
 | <a id="fig-02-01"></a>[]() |
 |---|
 | <img src="images/chapter2/fig-02-01.svg" onerror="this.src='images/chapter2/fig-02-01.png'; this.onerror=null;" alt="Figure 2.1" /> |
-| **Figure 2.1: Sentence Parse Tree** |
+| **図2.1: 文の構文木** |
 
-Using the "straightforward functions" approach we would be stuck; we'd have to rewrite every function to generate the additional structure.
-With the "new notation" approach we could keep the grammar as it is and just write one new function: a version of `generate` that produces nested lists.
-The two changes are to `cons` the category onto the front of each rewrite, and then not to `append` together the results but rather just list them with `mapcar`:
+「素直な関数」の方式では手詰まりです。追加の構造を生成するために、すべての関数を書き直さねばなりません。
+「新しい記法」の方式なら、文法はそのままにして、新しい関数を1つ書くだけで済みます。入れ子のリストを作る `generate` です。
+変更点は2つ。各書き換えの先頭にカテゴリを `cons` することと、結果を `append` でつなげるのではなく `mapcar` で並べるだけにすることです。
 
 ```lisp
 (defun generate-tree (phrase)
@@ -422,7 +422,7 @@ The two changes are to `cons` the category onto the front of each rewrite, and t
         (t (list phrase))))
 ```
 
-Here are some examples:
+例をいくつか挙げます。
 
 ```lisp
 > (generate-tree 'Sentence)
@@ -441,10 +441,10 @@ Here are some examples:
                        (NOUN-PHRASE (ARTICLE A) (NOUN BALL))))
 ```
 
-As another example of the one-data/multiple-program approach, we can develop a function to generate all possible rewrites of a phrase.
-The function `generate-all` returns a list of phrases rather than just one, and we define an auxiliary function, `combine-all`, to manage the combination of results.
-Also, there are four cases instead of three, because we have to check for nil explicitly.
-Still, the complete program is quite simple:
+1つのデータを複数のプログラムで使う方式のもう1つの例として、ある句について可能な書き換えをすべて生成する関数を作れます。
+`generate-all` は句を1つではなく句の並びを返します。結果の組み合わせを扱うために、補助関数 `combine-all` も定義します。
+また、nil を明示的に調べる必要があるので、場合分けは3つではなく4つになります。
+それでもプログラム全体はかなり単純です。
 
 ```lisp
 (defun generate-all (phrase)
@@ -466,9 +466,9 @@ Still, the complete program is quite simple:
            ylist))
 ```
 
-We can now use `generate-all` to test our original little grammar.
-Note that a serious drawback of `generate-all` is that it can't deal with recursive grammar rules like 'Adj\* => Adj + Adj\*' that appear in `*bigger-grammar*,` since these lead to an infinite number of outputs.
-But it works fine for finite languages, like the language generated by `*simple-grammar*`:
+これで `generate-all` を使って、最初の小さな文法を試せます。
+`generate-all` の重大な欠点は、`*bigger-grammar*` に現れる 'Adj\* => Adj + Adj\*' のような再帰的な文法規則を扱えないことです。出力が無限個になってしまうからです。
+しかし `*simple-grammar*` が生成する言語のような有限の言語なら、問題なく動きます。
 
 ```lisp
 > (generate-all 'Article)
@@ -487,21 +487,21 @@ But it works fine for finite languages, like the language generated by `*simple-
 256
 ```
 
-There are 256 sentences because every sentence in this language has the form Article-Noun-Verb-Article-Noun, and there are two articles, four nouns and four verbs (2 x 4 x 4 x 2 x 4 = 256).
+文が256個あるのは、この言語のどの文も「冠詞-名詞-動詞-冠詞-名詞」の形をしており、冠詞が2つ、名詞が4つ、動詞が4つあるからです（2 x 4 x 4 x 2 x 4 = 256）。
 
-## 2.7 Exercises
+## 2.7 練習問題
 
-&#9635; **Exercise  2.3 [h]** Write a trivial grammar for some other language.
-This can be a natural language other than English, or perhaps a subset of a computer language.
+&#9635; **練習問題 2.3 [h]** 別の言語について、ごく簡単な文法を書け。
+英語以外の自然言語でもよいし、プログラミング言語の部分集合でもよい。
 
-&#9635; **Exercise  2.4 [m]** One way of describing `combine-all` is that it calculates the cross-product of the function `append` on the argument lists.
-Write the higher-order function `cross-product`, and define `combine-all` in terms of it.
+&#9635; **練習問題 2.4 [m]** `combine-all` は、引数のリストに対する `append` 関数の直積を計算するものだと説明できる。
+高階関数 `cross-product` を書き、それを使って `combine-all` を定義せよ。
 
-The moral is to make your code as general as possible, because you never know what you may want to do with it next.
+教訓は、コードはできるかぎり一般的に書けということです。次に何をしたくなるかは分からないのですから。
 
-## 2.8 Answers
+## 2.8 解答
 
-### Answer 2.1
+### 解答 2.1
 
 ```lisp
   (defun generate (phrase)
@@ -514,7 +514,7 @@ The moral is to make your code as general as possible, because you never know wh
        (t (list phrase)))))
 ```
 
-### Answer 2.2
+### 解答 2.2
 
 ```lisp
 (defun generate (phrase)
@@ -530,7 +530,7 @@ The moral is to make your code as general as possible, because you never know wh
   (not (null (rewrites category))))
 ```
 
-### Answer 2.4
+### 解答 2.4
 
 ```lisp
 (defun cross-product (fn xlist ylist)
@@ -545,7 +545,7 @@ The moral is to make your code as general as possible, because you never know wh
   (cross-product #'append xlist ylist))
 ```
 
-Now we can use the `cross-product` in other ways as well:
+これで `cross-product` を他の使い方もできます。
 
 ```
 > (cross-product #'+ '(1 2 3) '(10 20 30))
@@ -568,4 +568,4 @@ Now we can use the `cross-product` in other ways as well:
 ----------------------
 
 <a id="fn02-1"></a><sup>[1](#tfn02-1)</sup>
-We will soon see "Kleene plus" notation, wherein *PP+* denotes one or more repetition of *PP*.
+じきに「クリーネプラス」記法も出てきます。*PP+* は *PP* の1回以上の繰り返しを表します。

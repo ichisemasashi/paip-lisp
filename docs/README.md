@@ -1,405 +1,405 @@
 
-# *Paradigms of Artificial Intelligence Programming*
+# *人工知能プログラミングのパラダイム*
 
 ![PAIP](https://norvig.com/paip-cover.gif)
 
-# Table of Contents
+# 目次
 
-- Preface
-  * Why Lisp?  Why Common Lisp?
-  * Outline of the Book
-  * How to use This Book
-  * Supplementary Texts and Reference Books
-  * A Note on Exercises
-  * Acknowledgments
-- **Part I  Introduction to Common Lisp**
-- **1  Introduction to Lisp**
-  * 1.1  Symbolic Computation
-  * 1.2  Variables
-  * 1.3  Special Forms
-  * 1.4  Lists
-  * 1.5  Defining New Functions
-  * 1.6  Using Functions
-  * 1.7  Higher-Order Functions
-  * 1.8  Other Data Types
-  * 1.9  Summary:  The Lisp Evaluation Rule
-  * 1.10  What Makes Lisp Different?
-  * 1.11  Exercises
-  * 1.12  Answers
-- **2  A Simple Lisp Program**
-  * 2.1  A Grammar for a Subset of English
-  * 2.2  A Straightforward Solution
-  * 2.3  A Rule-Based Solution
-  * 2.4  Two paths to Follow
-  * 2.5  Changing the Grammar without Changing the Program
-  * 2.6  Using the Same Data for Several Programs
-  * 2.7  Exercises
-  * 2.8  Answers
-- **3  Overview of Lisp**
-  * 3.1  A Guide to Lisp Style
-  * 3.2  Special Forms
-      * Special Forms for Definitions
-      * Special Forms for Conditionals
-      * Special Forms for Dealing with Variables and Places
-      * Functions and Special Forms for Repetition
-      * Repetition through Recursion
-      * Other Special Forms
-      * Macros
-      * Backquote Notation
-  * 3.3  Functions on Lists
-  * 3.4  Equality and Internal Representation
-  * 3.5  Functions on Sequences
-  * 3.6  Functions for Maintaining Tables
-  * 3.7  Functions on Trees
-  * 3.8  Functions on Numbers
-  * 3.9  Functions on Sets
-  * 3.10  Destructive Functions
-  * 3.11 Overview of Data types
-  * 3.12  Input/Output
-  * 3.13  Debugging tools
-  * 3.14  Antibugging Tools
-      * Timing Tools
-  * 3.15  Evaluation
-  * 3.16  Closures
-  * 3.17  Special Variables
-  * 3.18  Multiple Values
-  * 3.19  More about Parameters
-  * 3.20  The Rest of Lisp
-  * 3.21  Exercises
-  * 3.22  Answers
-- **Part II  Early AI Programs**
-- **4  GPS:  The General problem Solver**
-  * 4.1  Stage 1:  Description
-  * 4.2  Stage 2:  Specification
-  * 4.3  Stage 3:  Implementation
-  * 4.4  Stage 4:  Test
-  * 4.5  Stage 5:  Analysis, or &quot;We Lied about the G&quot;
-  * 4.6  The Running Around the Block Problem
-  * 4.7  The Clobbered Sibling Goal Problem
-  * 4.8  The Leaping before You Look Problem
-  * 4.9  The recursive Subgoal problem
-  * 4.10  The Lack of Intermediate Information Problem
-  * 4.11  GPS Version 2:  A More General problem Solver
-  * 4.12  The New Domain problem:  Monkey and Bananas
-  * 4.13  The Maze Searching Domain
-  * 4.14  The Blocks World Domain
-      * The Sussman Anomaly
-  * 4.15  Stage 5 Repeated:  Analysis of Version 2
-  * 4.16  The Not Looking after You Don&#39;t Leap Problem
-  * 4.17  The Lack of Descriptive Power Problem
-  * 4.18  The Perfect Information Problem
-  * 4.19  The Interacting Goals Problem
-  * 4.20  The End of GPS
-  * 4.21  History and References
-  * 4.22 Exercises
-  * 4.23  Answers
-- **5  Eliza:  Dialog with a Machine**
-  * 5.1  Describing and Specifying Eliza
-  * 5.2  Pattern Matching
-  * 5.3  Segment Pattern Matching
-  * 5.4  The Eliza Program:  A Rule-Based Translator
-  * 5.5  History and References
-  * 5.6  Exercises
-  * 5.7  Answers
-- **6  Building Software Tools**
-  * 6.1  An Interactive Interpreter Tool
-  * 6.2  A Pattern-Matching Tool
-  * 6.3  A Rule-Based Translator Tool
-  * 6.4  A Set of Searching Tools
-      * Searching Trees
-      * Guiding the Search
-      * Search Paths
-      * Guessing versus Guaranteeing a Good Solution
-      * Searching Graphs
-  * 6.5  GPS as Search
-  * 6.6  History and References
-  * 6.7  Exercises
-  * 6.8  Answers
-- **7  Student:  Solving Algebra Word Problems**
-  * 7.1  Translating English into Equations
-  * 7.2  Solving Algebraic Equations
-  * 7.3  Examples
-  * 7.4  History and References
-  * 7.5  Exercises
-  * 7.6  Answers
-- **8  Symbolic Mathematics:  A Simplification Program**
-  * 8.1  Converting Infix to Prefix Notation
-  * 8.2  Simplification Rules
-  * 8.3  Associativity and Commutativity
-  * 8.4  Logs, Trig, and Differentiation
-  * 8.5  Limits of Rule-Based Approaches
-  * 8.6  Integration
-  * 8.7  History and References
-  * 8.8. Exercises
-- **Part III  Tools and Techniques**
-- **9  Efficiency Issues**
-  * 9.1  Caching Results of Previous Computations:   Memoization
-  * 9.2  Compiling One Language into Another
-  * 9.3  Delaying Computation
-  * 9.4  Indexing Data
-  * 9.5  Instrumentation:  Deciding What to Optimize
-  * 9.6  A Case Study in Efficiency:  The SIMPLIFY Program
-      * Memoization
-      * Indexing
-      * Compilation
-      * The Single-Rule Compiler
-      * The Rule-Set Compiler
-  * 9.7  History and References
-  * 9.8  Exercises
-  * 9.9  Answers
-- **10  Low-Level Efficiency Issues**
-  * 10.1  use Declarations
-  * 10.2  Avoid Generic Functions
-  * 10.3  Avoid Complex Argument Lists
-  * 10.4  Avoid Unnecessary Consing
-      * Avoid Consing:  Unique Lists
-      * Avoid Consing:  Multiple Values
-      * Avoid Consing:  Resources
-  * 10.5  Use the Right Data Structures
-      * The Right Data Structure:  Variables
-      * The Right Data Structure:  Queues
-      * The Right Data Structure:  Tables
-  * 10.6  Exercises
-  * 10.7  Answers
-- **11  Logic Programming**
-  * 11.1  Idea 1:  A Uniform Data Base
-  * 11.2  Idea 2:  Unification of Logic Variables
-      * Programming with Prolog
-  * 11.3  Idea 3:  Automatic Backtracking
-      * Approaches to Backtracking
-      * Anonymous Variables
-  * 11.4  The Zebra Puzzle
-  * 11.5  The Synergy of Backtracking and Unification
-  * 11.6  Destructive Unification
-  * 11.7  Prolog in Prolog
-  * 11.8  Prolog Compared to Lisp
-  * 11.9  History and References
-  * 11.10  Exercises
-  * 11.11  Answers
-- **12  Compiling Logic programs**
-  * 12.1  A prolog Compiler
-  * 12.2  Fixing the Errors in the Compiler
-  * 12.3  Improving the Compiler
-  * 12.4  Improving the Compilation of Unification
-  * 12.5  Further Improvements to Unification
-  * 12.6  The User Interface to the Compiler
-  * 12.7  Benchmarking the Compiler
-  * 12.8  Adding More Primitives
-  * 12.9  The Cut
-  * 12.10  &quot;Real&quot; Prolog
-  * 12.11 History and References
-  * 12.12  Exercises
-  * 12.13  Answers
-- **13  Object-Oriented Programming**
-  * 13.1  Object-Oriented Programming
-  * 13.2  Objects
-  * 13.3  Generic Functions
-  * 13.4  Classes
-  * 13.5  Delegation
-  * 13.6  Inheritance
-  * 13.7  CLOS:  The Common Lisp Object System
-  * 13.8  A CLOS Example:  Searching Tools
-      * Best-First Search
-  * 13.9  Is CLOS Object-Oriented?
-  * 13.10  Advantages of Object-Oriented programming
-  * 13.11  History and References
-  * 13.12  Exercises
-- **14  Knowledge Representation and Reasoning**
-  * 14.1  A Taxonomy of Representation Languages
-  * 14.2  Predicate Calculus and its Problems
-  * 14.3  A Logical Language: Prolog
-  * 14.4  Problems with Prolog&#39;s Expressiveness
-  * 14.5  Problems with Predicate Calculus&#39;s Expressiveness
-  * 14.6  Problems with Completeness
-  * 14.7  Problems with Efficiency:  Indexing
-  * 14.8  A Solution to the Indexing Problem
-  * 14.9  A Solution to the Completeness Problem
-  * 14.10  Solutions to the Expressiveness Problems
-      * Higher-Order Predications
-      * Improvements
-      * A Frame Language
-      * Possible Worlds:  Truth, Negation, and Disjunction
-      * Unification, Equality, Types, and Skolem Constants
-  * 14.11  History and References
-  * 14.12  Exercises
-  * 14.13  Answers
-- **Part IV  Advanced AI Programs**
-- **15  Symbolic Mathematics with Canonical Forms**
-  * 15.1  A Canonical Form for Polynomials
-  * 15.2  Differentiating Polynomials
-  * 15.3  Converting between Infix and Prefix
-  * 15.4  Benchmarking the Polynomial Simplifier
-  * 15.5  A Canonical Form for Rational Expressions
-  * 15.6  Extending Rational Expressions
-  * 15.7  History and References
-  * 15.8  Exercises
-  * 15.9  Answers
-- **16  Expert Systems**
-  * 16.1  Dealing with Uncertainty
-  * 16.2  Caching Derived Facts
-  * 16.3  Asking Questions
-  * 16.4  Contexts Instead of Variables
-  * 16.5  Backward-Chaining Revisited
-  * 16.6  Interacting with the Expert
-  * 16.7  Interacting with the Client
-  * 16.8  MYCIN, A Medical Expert System
-  * 16.9  Alternatives to Certainty Factors
-  * 16.10  History and References
-  * 16.11  Exercises
-  * 16.12  Answers
-- **17  Line-Diagram Labeling by Constraint Satisfaction**
-  * 17.1  The Line-Labeling Problem
-  * 17.2  Combining Constraints and Searching
-  * 17.3  Labeling Diagrams
-  * 17.4  Checking Diagrams for Errors
-  * 17.5  History and References
-  * 17.6  Exercises
-- **18  Search and the Game of Othello**
-  * 18.1  The Rules of the Game
-  * 18.2  Representation Choices
-  * 18.3  Evaluating Positions
-  * 18.4  Searching Ahead:  Minimax
-  * 18.5  Smarter Searching:  Alpha-Beta Search
-  * 18.6  An Analysis of Some Games
-  * 18.7  The Tournament Version of Othello
-  * 18.8  Playing a Series of Games
-  * 18.9  More Efficient Searching
-  * 18.10  It Pays to Precycle
-  * 18.11  Killer Moves
-  * 18.12  Championship Programs:  Iago and Bill
-      * Mobility
-      * Edge Stability
-      * Combining the Factors
-  * 18.13  Other Techniques
-      * Interative Deepening
-      * Forward Pruning
-      * Nonspeculative Forward Pruning
-      * Aspiration Search
-      * Think-Ahead
-      * Hashing and Opening Book Moves
-      * The End Game
-      * Metareasoning
-      * Learning
-  * 18.14  History and References
-  * 18.15  Exercises
-  * 18.16  Answers
-- **19  Introduction to Natural Language**
-  * 19.1  Parsing with a Phrase-Structure Grammar
-  * 19.2  Extending the Grammar and Recognizing Ambiguity
-  * 19.3  More Efficient parsing
-  * 19.4  The Unknown-Word Problem
-  * 19.5  Parsing into a Semantic Representation
-  * 19.6  Parsing with Preferences
-  * 19.7  The Problem with Context-Free Phrase-Structure Rules
-  * 19.8  History and References
-  * 19.9  Exercises
-  * 19.10  Answers
-- **20  Unification Grammars**
-  * 20.1  Parsing as Deduction
-  * 20.2  Definite Clause Grammars
-  * 20.3  A Simple Grammar In DCG Format
-  * 20.4  A DCG Grammar with Quantifiers
-  * 20.5  Preserving Quantifier Scope Ambiguity
-  * 20.6  Long-Distance Dependencies
-  * 20.7  Augmenting DCG Rules
-  * 20.8  History and References
-  * 20.9  Exercises
-  * 20.10  Answers
-- **21  A Grammar of English**
-  * 21.1  Noun Phrases
-  * 21.2  Modifiers
-  * 21.3  Noun Modifiers
-  * 21.4  Determiners
-  * 21.5  Verb Phrases
-  * 21.6  Adverbs
-  * 21.7  Clauses
-  * 21.8  Sentences
-  * 21.9  XPs
-  * 21.10  Word Categories
-  * 21.11  The Lexicon
-      * Verbs
-      * Auxiliary Verbs
-      * Nouns
-      * Pronouns
-      * Names
-      * Adjectives
-      * Adverbs
-      * Articles
-      * Cardinal and Ordinal Numbers
-      * Prepositions
-  * 21.12  Supporting the Lexicon
-  * 21.13  Other Primitives
-  * 21.14  Examples
-  * 21.15  History and References
-  * 21.16  Exercises
-- **Part V  The Rest of Lisp**
-- **22  Scheme:  An Uncommon Lisp**
-  * 22.1  A Scheme Interpreter
-  * 22.2  Syntactic Extension with Macros
-  * 22.3  A Properly Tail-Recursive Interpreter
-  * 22.4  Throw, Catch, and Call/cc
-  * 22.5  An interpreter Supporting Call/cc
-  * 22.6  History and References
-  * 22.7  Exercises
-  * 22.8  Answers
-- **23  Compiling Lisp**
-  * 23.1  A Properly Tail-Recursive Lisp Compiler
-  * 23.2  Introducing Call/cc
-  * 23.3  The Abstract Machine
-  * 23.4  A Peephole Optimizer
-  * 23.5  Languages with Different Lexical Conventions
-  * 23.6  History and References
-  * 23.7  Exercises
-  * 23.8  Answers
+- まえがき
+  * なぜLispか、なぜCommon Lispか
+  * 本書の構成
+  * 本書の使い方
+  * 補助教材と参考書
+  * 練習問題について
+  * 謝辞
+- **第I部  Common Lisp入門**
+- **1  Lisp入門**
+  * 1.1  記号計算
+  * 1.2  変数
+  * 1.3  特殊形式
+  * 1.4  リスト
+  * 1.5  新しい関数を定義する
+  * 1.6  関数を使う
+  * 1.7  高階関数
+  * 1.8  その他のデータ型
+  * 1.9  まとめ: Lispの評価規則
+  * 1.10  Lispは何が違うのか
+  * 1.11  練習問題
+  * 1.12  解答
+- **2  単純なLispプログラム**
+  * 2.1  英語の部分集合の文法
+  * 2.2  素直な解法
+  * 2.3  規則に基づく解法
+  * 2.4  進むべき2つの道
+  * 2.5  プログラムを変えずに文法を変える
+  * 2.6  同じデータを複数のプログラムで使う
+  * 2.7  練習問題
+  * 2.8  解答
+- **3  Lispの概観**
+  * 3.1  Lispの作法の手引き
+  * 3.2  特殊形式
+      * 定義のための特殊形式
+      * 条件分岐のための特殊形式
+      * 変数と場所を扱う特殊形式
+      * 繰り返しのための関数と特殊形式
+      * 再帰による繰り返し
+      * その他の特殊形式
+      * マクロ
+      * 逆引用符の記法
+  * 3.3  リストを扱う関数
+  * 3.4  等価性と内部表現
+  * 3.5  列を扱う関数
+  * 3.6  表を管理する関数
+  * 3.7  木を扱う関数
+  * 3.8  数を扱う関数
+  * 3.9  集合を扱う関数
+  * 3.10  破壊的な関数
+  * 3.11 データ型の概観
+  * 3.12  入出力
+  * 3.13  デバッグの道具
+  * 3.14  バグを防ぐ道具
+      * 時間を測る道具
+  * 3.15  評価
+  * 3.16  クロージャ
+  * 3.17  スペシャル変数
+  * 3.18  多値
+  * 3.19  引数についてもう少し
+  * 3.20  Lispの残りの部分
+  * 3.21  練習問題
+  * 3.22  解答
+- **第II部  初期のAIプログラム**
+- **4  GPS: 汎用問題解決器**
+  * 4.1  第1段階: 記述
+  * 4.2  第2段階: 仕様
+  * 4.3  第3段階: 実装
+  * 4.4  第4段階: 試験
+  * 4.5  第5段階: 分析、あるいは「Gについては嘘をついた」
+  * 4.6  街区をぐるぐる回る問題
+  * 4.7  同胞ゴールを潰す問題
+  * 4.8  見る前に跳ぶ問題
+  * 4.9  部分ゴールが再帰する問題
+  * 4.10  途中経過が分からない問題
+  * 4.11  GPS 第2版: より汎用の問題解決器
+  * 4.12  新しい領域の問題: サルとバナナ
+  * 4.13  迷路探索の領域
+  * 4.14  積み木の世界の領域
+      * サスマン・アノマリー
+  * 4.15  第5段階ふたたび: 第2版の分析
+  * 4.16  跳ばなかったあとで見ない問題
+  * 4.17  記述力が足りない問題
+  * 4.18  完全情報の問題
+  * 4.19  ゴールが干渉しあう問題
+  * 4.20  GPSの終わり
+  * 4.21  歴史と参考文献
+  * 4.22 練習問題
+  * 4.23  解答
+- **5  ELIZA: 機械との対話**
+  * 5.1  ELIZAを記述し仕様を定める
+  * 5.2  パターン照合
+  * 5.3  区間のパターン照合
+  * 5.4  ELIZAプログラム: 規則に基づく変換器
+  * 5.5  歴史と参考文献
+  * 5.6  練習問題
+  * 5.7  解答
+- **6  ソフトウェア道具の構築**
+  * 6.1  対話型インタプリタの道具
+  * 6.2  パターン照合の道具
+  * 6.3  規則に基づく変換器の道具
+  * 6.4  探索の道具立て
+      * 木の探索
+      * 探索を導く
+      * 探索の経路
+      * よい解を当てにいくか、保証するか
+      * グラフの探索
+  * 6.5  探索としてのGPS
+  * 6.6  歴史と参考文献
+  * 6.7  練習問題
+  * 6.8  解答
+- **7  STUDENT: 代数の文章題を解く**
+  * 7.1  英語を方程式に直す
+  * 7.2  代数方程式を解く
+  * 7.3  例
+  * 7.4  歴史と参考文献
+  * 7.5  練習問題
+  * 7.6  解答
+- **8  記号数学: 式の簡約プログラム**
+  * 8.1  中置記法を前置記法に直す
+  * 8.2  簡約の規則
+  * 8.3  結合則と交換則
+  * 8.4  対数、三角関数、微分
+  * 8.5  規則に基づく方式の限界
+  * 8.6  積分
+  * 8.7  歴史と参考文献
+  * 8.8. 練習問題
+- **第III部  道具と技法**
+- **9  効率の問題**
+  * 9.1  過去の計算結果をためる: メモ化
+  * 9.2  ある言語を別の言語にコンパイルする
+  * 9.3  計算を遅らせる
+  * 9.4  データに索引をつける
+  * 9.5  計測: 何を最適化するかを決める
+  * 9.6  効率の事例研究: SIMPLIFYプログラム
+      * メモ化
+      * 索引付け
+      * コンパイル
+      * 単一規則のコンパイラ
+      * 規則集合のコンパイラ
+  * 9.7  歴史と参考文献
+  * 9.8  練習問題
+  * 9.9  解答
+- **10  低水準の効率の問題**
+  * 10.1  宣言を使う
+  * 10.2  総称関数を避ける
+  * 10.3  複雑な引数リストを避ける
+  * 10.4  不要なコンスを避ける
+      * コンスを避ける: 一意なリスト
+      * コンスを避ける: 多値
+      * コンスを避ける: 資源プール
+  * 10.5  適切なデータ構造を使う
+      * 適切なデータ構造: 変数
+      * 適切なデータ構造: キュー
+      * 適切なデータ構造: 表
+  * 10.6  練習問題
+  * 10.7  解答
+- **11  論理プログラミング**
+  * 11.1  着想1: 一様なデータベース
+  * 11.2  着想2: 論理変数の単一化
+      * Prologでプログラムを書く
+  * 11.3  着想3: 自動バックトラック
+      * バックトラックの実現方式
+      * 無名変数
+  * 11.4  シマウマのパズル
+  * 11.5  バックトラックと単一化の相乗効果
+  * 11.6  破壊的な単一化
+  * 11.7  Prolog上のProlog
+  * 11.8  PrologとLispの比較
+  * 11.9  歴史と参考文献
+  * 11.10  練習問題
+  * 11.11  解答
+- **12  論理プログラムのコンパイル**
+  * 12.1  Prologコンパイラ
+  * 12.2  コンパイラの誤りを直す
+  * 12.3  コンパイラを改良する
+  * 12.4  単一化のコンパイルを改良する
+  * 12.5  単一化のさらなる改良
+  * 12.6  コンパイラの利用者インタフェース
+  * 12.7  コンパイラの性能を測る
+  * 12.8  基本手続きを追加する
+  * 12.9  カット
+  * 12.10  「本物の」Prolog
+  * 12.11 歴史と参考文献
+  * 12.12  練習問題
+  * 12.13  解答
+- **13  オブジェクト指向プログラミング**
+  * 13.1  オブジェクト指向プログラミング
+  * 13.2  オブジェクト
+  * 13.3  総称関数
+  * 13.4  クラス
+  * 13.5  委譲
+  * 13.6  継承
+  * 13.7  CLOS: Common Lisp Object System
+  * 13.8  CLOSの例: 探索の道具
+      * 最良優先探索
+  * 13.9  CLOSはオブジェクト指向か
+  * 13.10  オブジェクト指向プログラミングの利点
+  * 13.11  歴史と参考文献
+  * 13.12  練習問題
+- **14  知識表現と推論**
+  * 14.1  表現言語の分類
+  * 14.2  述語論理とその問題
+  * 14.3  論理の言語: Prolog
+  * 14.4  Prologの表現力の問題
+  * 14.5  述語論理の表現力の問題
+  * 14.6  完全性の問題
+  * 14.7  効率の問題: 索引付け
+  * 14.8  索引付けの問題への解
+  * 14.9  完全性の問題への解
+  * 14.10  表現力の問題への解
+      * 高階の述語
+      * 改良
+      * フレーム言語
+      * 可能世界: 真理、否定、選言
+      * 単一化、等価性、型、スコーレム定数
+  * 14.11  歴史と参考文献
+  * 14.12  練習問題
+  * 14.13  解答
+- **第IV部  進んだAIプログラム**
+- **15  標準形による記号数学**
+  * 15.1  多項式の標準形
+  * 15.2  多項式を微分する
+  * 15.3  中置記法と前置記法を相互に変換する
+  * 15.4  多項式簡約器の性能を測る
+  * 15.5  有理式の標準形
+  * 15.6  有理式を拡張する
+  * 15.7  歴史と参考文献
+  * 15.8  練習問題
+  * 15.9  解答
+- **16  エキスパートシステム**
+  * 16.1  不確かさを扱う
+  * 16.2  導かれた事実をためる
+  * 16.3  質問する
+  * 16.4  変数の代わりに文脈を使う
+  * 16.5  後ろ向き連鎖ふたたび
+  * 16.6  専門家とのやりとり
+  * 16.7  依頼者とのやりとり
+  * 16.8  MYCIN — 医療エキスパートシステム
+  * 16.9  確信度に代わるもの
+  * 16.10  歴史と参考文献
+  * 16.11  練習問題
+  * 16.12  解答
+- **17  制約充足による線画のラベル付け**
+  * 17.1  線ラベル付けの問題
+  * 17.2  制約の組み合わせと探索
+  * 17.3  図にラベルを付ける
+  * 17.4  図の誤りを調べる
+  * 17.5  歴史と参考文献
+  * 17.6  練習問題
+- **18  探索とオセロ**
+  * 18.1  ゲームの規則
+  * 18.2  表現の選択
+  * 18.3  局面を評価する
+  * 18.4  先読み: ミニマックス
+  * 18.5  賢い探索: アルファベータ探索
+  * 18.6  いくつかの対局の分析
+  * 18.7  大会仕様のオセロ
+  * 18.8  連戦する
+  * 18.9  もっと効率のよい探索
+  * 18.10  先に使い回すと得をする
+  * 18.11  キラー手
+  * 18.12  優勝プログラム: IagoとBill
+      * 着手可能性
+      * 辺の安定性
+      * 要素を組み合わせる
+  * 18.13  その他の技法
+      * 反復深化
+      * 前向き枝刈り
+      * 当て推量によらない前向き枝刈り
+      * アスピレーション探索
+      * 先読み思考
+      * ハッシュと定石
+      * 終盤
+      * メタ推論
+      * 学習
+  * 18.14  歴史と参考文献
+  * 18.15  練習問題
+  * 18.16  解答
+- **19  自然言語入門**
+  * 19.1  句構造文法による構文解析
+  * 19.2  文法を広げ、曖昧さを見つける
+  * 19.3  もっと効率のよい構文解析
+  * 19.4  未知語の問題
+  * 19.5  意味表現への構文解析
+  * 19.6  選好を用いた構文解析
+  * 19.7  文脈自由な句構造規則の問題
+  * 19.8  歴史と参考文献
+  * 19.9  練習問題
+  * 19.10  解答
+- **20  単一化文法**
+  * 20.1  演繹としての構文解析
+  * 20.2  定節文法
+  * 20.3  DCG形式の単純な文法
+  * 20.4  量化子を持つDCG文法
+  * 20.5  量化子のスコープの曖昧さを保つ
+  * 20.6  長距離依存
+  * 20.7  DCG規則を拡張する
+  * 20.8  歴史と参考文献
+  * 20.9  練習問題
+  * 20.10  解答
+- **21  英語の文法**
+  * 21.1  名詞句
+  * 21.2  修飾語
+  * 21.3  名詞の修飾語
+  * 21.4  限定詞
+  * 21.5  動詞句
+  * 21.6  副詞
+  * 21.7  節
+  * 21.8  文
+  * 21.9  XP
+  * 21.10  語のカテゴリ
+  * 21.11  語彙
+      * 動詞
+      * 助動詞
+      * 名詞
+      * 代名詞
+      * 固有名詞
+      * 形容詞
+      * 副詞
+      * 冠詞
+      * 基数と序数
+      * 前置詞
+  * 21.12  語彙を支える仕組み
+  * 21.13  その他の基本要素
+  * 21.14  例
+  * 21.15  歴史と参考文献
+  * 21.16  練習問題
+- **第V部  Lispの残りの部分**
+- **22  Scheme: 風変わりなLisp**
+  * 22.1  Schemeインタプリタ
+  * 22.2  マクロによる構文の拡張
+  * 22.3  末尾再帰を正しく扱うインタプリタ
+  * 22.4  throw、catch、call/cc
+  * 22.5  call/ccを支えるインタプリタ
+  * 22.6  歴史と参考文献
+  * 22.7  練習問題
+  * 22.8  解答
+- **23  Lispのコンパイル**
+  * 23.1  末尾再帰を正しく扱うLispコンパイラ
+  * 23.2  call/ccを導入する
+  * 23.3  抽象機械
+  * 23.4  のぞき穴最適化器
+  * 23.5  字句の作法が異なる言語
+  * 23.6  歴史と参考文献
+  * 23.7  練習問題
+  * 23.8  解答
 - **24  ANSI Common Lisp**
-  * 24.1  Packages
-  * The Seven Name Spaces
-  * 24.2  Conditions and Error Handling
-      * Signaling Errors
-      * Handling Errors
-  * 24.3  Pretty Printing
-  * 24.4  Series
-  * 24.5  The Loop Macro
-      * Anatomy of a Loop
-      * Iteration Control (26.6)
-      * End-Test Control (26.7)
-      * Value Accumulation (26.8)
-      * Variable Initialization (26.9)
-      * Conditional Execution (26.10)
-      * Unconditional Execution (26.11)
-      * Miscellaneous Features (26.12)
-  * 24.6  Sequence Functions
-      * Once-only:  A Lesson in Macrology
-      * Avoid Overusing Macros
+  * 24.1  パッケージ
+  * 7つの名前空間
+  * 24.2  コンディションとエラー処理
+      * エラーを通知する
+      * エラーを処理する
+  * 24.3  整形出力
+  * 24.4  series
+  * 24.5  loopマクロ
+      * loopの解剖
+      * 繰り返しの制御 (26.6)
+      * 終了判定の制御 (26.7)
+      * 値の蓄積 (26.8)
+      * 変数の初期化 (26.9)
+      * 条件つき実行 (26.10)
+      * 無条件の実行 (26.11)
+      * その他の機能 (26.12)
+  * 24.6  列を扱う関数
+      * once-only: マクロ学の一課
+      * マクロを使いすぎない
       * MAP-INTO
-      * REDUCE with :key
-  * 24.7  Exercises
-  * 24.8  Answers
-- **25  Troubleshooting**
-  * 25.1  Nothing Happens
-  * 25.2  Change to Variable Has No Effect
-  * 25.3  Change to Function Has No Effect
-  * 25.4  Values Change &quot;by Themselves&quot;
-  * 25.5  Built-In Functions Don&#39;t Find Elements
-  * 25.6  Multiple Values Are Lost
-  * 25.7  Declarations Are Ignored
-  * 25.8  My Lisp Does the Wrong Thing
-  * 25.9  How to Find the Function You Want
-  * 25.10  Syntax of LOOP
-  * 25.11  Syntax of COND
-  * 25.12  Syntax of CASE
-  * 25.13  Syntax of LET and LET*
-  * 25.14  Problems with Macros
-  * 25.15  A Style Guide to Lisp
-      * When to Define a Function
-      * When to Define a Special Variable
-      * When to Bind a Lexical Variable
-      * How to Choose a Name
-      * Deciding on the Order of Parameters
-  * 25.16  Dealing with Files, Packages, and Systems
-  * 25.17  Portability Problems
-  * 25.18  Exercises
-  * 25.19  Answers
-- Appendix
-- Bibliography
-- Index
+      * :key付きのREDUCE
+  * 24.7  練習問題
+  * 24.8  解答
+- **25  不具合の切り分け**
+  * 25.1  何も起こらない
+  * 25.2  変数を変えても効かない
+  * 25.3  関数を変えても効かない
+  * 25.4  値が「ひとりでに」変わる
+  * 25.5  組み込み関数が要素を見つけてくれない
+  * 25.6  多値が失われる
+  * 25.7  宣言が無視される
+  * 25.8  自分のLispが間違ったことをする
+  * 25.9  目当ての関数の探し方
+  * 25.10  LOOPの構文
+  * 25.11  CONDの構文
+  * 25.12  CASEの構文
+  * 25.13  LETとLET*の構文
+  * 25.14  マクロにまつわる問題
+  * 25.15  Lispの作法の手引き
+      * どんなときに関数を定義するか
+      * どんなときにスペシャル変数を定義するか
+      * どんなときにレキシカル変数を束縛するか
+      * 名前の選び方
+      * 引数の順序を決める
+  * 25.16  ファイル、パッケージ、システムを扱う
+  * 25.17  移植性の問題
+  * 25.18  練習問題
+  * 25.19  解答
+- 付録
+- 参考文献
+- 索引

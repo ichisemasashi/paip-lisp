@@ -1,50 +1,50 @@
-# Chapter 22
-## Scheme: An Uncommon Lisp
+# 第22章
+## Scheme: 風変わりなLisp
 
-> The best laid schemes o' mice an' men
+> ネズミと人間の、どんなに周到な企ても
 
-> -Robert Burns (1759-1796)
+> —Robert Burns（1759-1796）
 
-This chapter presents the Scheme dialect of Lisp and an interpreter for it.
-While it is not likely that you would use this interpreter for any serious programming, understanding how the interpreter works can give you a better appreciation of how Lisp works, and thus make you a better programmer.
-A Scheme interpreter is used instead of a Common Lisp one because Scheme is simpler, and also because Scheme is an important language that is worth knowing about.
+本章では、Lispの方言であるSchemeと、そのインタプリタを示します。
+このインタプリタを本格的なプログラミングに使うことはまずないでしょうが、その働きを理解すればLispの働きへの理解も深まり、より良いプログラマになれます。
+Common LispではなくSchemeのインタプリタを使うのは、Schemeのほうが単純だからであり、またSchemeが知っておく値打ちのある重要な言語だからでもあります。
 
-Scheme is the only dialect of Lisp besides Common Lisp that is currently flourishing.
-Where Common Lisp tries to standardize all the important features that are in current use by Lisp programmers, Scheme tries to give a minimal set of very powerful features that can be used to implement the others.
-It is interesting that among all the programming languages in the world, Scheme is one of the smallest, while Common Lisp is one of the largest.
-The Scheme manual is only 45 pages (only 38 if you omit the example, bibliography, and index), while *Common Lisp the Language*, 2d edition, is 1029 pages.
-Here is a partial list of the ways Scheme is simpler than Common Lisp:
+Schemeは、Common Lisp以外で現在栄えている唯一のLispの方言です。
+Common LispがLispプログラマの使う重要な機能をすべて標準化しようとするのに対し、Schemeは他の機能を実装するのに使える、ごく強力な機能の最小の組を与えようとします。
+世界中のプログラミング言語のなかで、Schemeがもっとも小さい部類であり、Common Lispがもっとも大きい部類であるのは興味深いことです。
+Schemeのマニュアルはわずか45ページ（例・文献・索引を除けばわずか38ページ）ですが、*Common Lisp the Language* 第2版は1029ページあります。
+SchemeがCommon Lispより単純である点を、一部だけ挙げます。
 
-1.  Scheme has fewer built-in functions and special forms.
+1.  Schemeは組み込みの関数と特殊形式が少ない。
 
-2.  Scheme has no special variables, only lexical variables.
+2.  Schemeには特殊変数がなく、レキシカル変数だけがある。
 
-3.  Scheme uses the same name space for functions and variables (and everything else).
+3.  Schemeは関数と変数（とその他すべて）に同じ名前空間を使う。
 
-4.  Scheme evaluates the function part of a function call in exactly the same way as the arguments.
+4.  Schemeは関数呼び出しの関数の部分を、引数とまったく同じやり方で評価する。
 
-5.  Scheme functions can not have optional and keyword parameters.
-However, they can have the equivalent of a `&rest` parameter.
+5.  Schemeの関数は省略可能引数とキーワード引数を持てない。
+ただし `&rest` 引数に相当するものは持てる。
 
-6.  Scheme has no `block`, `return`, `go`, or `throw`; a single function `(call/cc)` replaces all of these (and does much more).
+6.  Schemeには `block`、`return`、`go`、`throw` がない。関数 `(call/cc)` 1つがそのすべてに取って代わる（しかもそれ以上のことをする）。
 
-7.  Scheme has no packages.
-Lexical variables can be used to implement package-like structures.
+7.  Schemeにはパッケージがない。
+レキシカル変数を使えばパッケージのような構造を実装できる。
 
-8.  Scheme, as a standard, has no macros, although most implementations provide macros as an extension.
+8.  Schemeには標準としてのマクロがない。ただしたいていの実装は拡張としてマクロを備えている。
 
-9.  Scheme has no special forms for looping; instead it asks the user to use recursion and promises to implement the recursion efficiently.
+9.  Schemeには繰り返しのための特殊形式がない。代わりに再帰を使うよう利用者に求め、その再帰を効率よく実装すると約束する。
 
-The five main special forms in Scheme are `quote` and `if`, which are just as in Common Lisp; `begin` and `set!`, which are just different spellings for `progn` and `setq`; and `lambda`, which is as in Common Lisp, except that it doesn't require a `#'` before it.
-In addition, Scheme allows variables, constants (numbers, strings, and characters), and function calls.
-The function call is different because the function itself is evaluated in the same way as the arguments.
-In Common Lisp, (`f x`) means to look up the function binding of `f` and apply that to the value of `x`.
-In Scheme, `(f x)` means to evaluate `f` (in this case by looking up the value of the variable `f` ), evaluate `x` (by looking up the value of the variable in exactly the same way) and then apply the function to the argument.
-Any expression can be in the function position, and it is evaluated just like the arguments.
-Another difference is that Scheme uses `#t` and `#f` for true and false, instead of `t` and `nil`.
-The empty list is denoted by `()`, and it is distinct from the false value, `#f`.
-There are also minor lexical differences in the conventions for complex numbers and numbers in different bases, but these can be ignored for all the programs in this book.
-Also, in Scheme a single macro, `define`, serves to define both variables and functions.
+Schemeのおもな特殊形式は5つです。`quote` と `if` はCommon Lispとまったく同じ、`begin` と `set!` は `progn` と `setq` の綴りが違うだけ、そして `lambda` は前に `#'` が要らない点を除けばCommon Lispと同じです。
+加えてSchemeは、変数、定数（数・文字列・文字）、そして関数呼び出しを許します。
+関数呼び出しが違うのは、関数そのものが引数と同じやり方で評価されるからです。
+Common Lispでは (`f x`) は、`f` の関数の束縛を引いて、それを `x` の値に適用することを意味します。
+Schemeでは `(f x)` は、`f` を評価し（この場合は変数 `f` の値を引くことで）、`x` を評価し（まったく同じやり方で変数の値を引くことで）、それから関数を引数に適用することを意味します。
+関数の位置にはどんな式でも置けて、それは引数と同じように評価されます。
+もう1つの違いは、Schemeが真と偽に `t` と `nil` ではなく `#t` と `#f` を使うことです。
+空のリストは `()` で表され、偽の値 `#f` とは別のものです。
+複素数や異なる基数の数の書き方の約束にも細かな字面の違いがありますが、本書のプログラムではすべて無視してかまいません。
+また、Schemeでは `define` という1つのマクロが、変数の定義にも関数の定義にも使えます。
 
 | Scheme                           | Common Lisp                              |
 |----------------------------------|------------------------------------------|
@@ -62,8 +62,8 @@ Also, in Scheme a single macro, `define`, serves to define both variables and fu
 | (`define` *var exp*)             | (`defparameter` *var exp*)               |
 | (`define` (*fn parm*...) *body*) | (`defun` *fn* (*parm*...) *body*)        |
 
-**Exercise  22**.**1** [**s**] What does the following expression evaluate to in Scheme?
-How many errors does it have as a Common Lisp expression?
+**練習問題 22**.**1** [**s**] 次の式はSchemeで何に評価されるか。
+Common Lispの式としては、いくつ誤りがあるか。
 
 ```lisp
 ((if (= (+  2 2) 4)
@@ -73,21 +73,21 @@ How many errors does it have as a Common Lisp expression?
   6)
 ```
 
-A great many functions, such as `car`, `cdr`, `cons`, `append`, +, `*`, and `list` are the same (or nearly the same) in both dialects.
-However, Scheme has some spelling conventions that are different from Common Lisp.
-Most Scheme mutators, like `set!`, end in '`!`'
-Common Lisp has no consistent convention for this; some mutators start with `n` (`nreverse`, `nsubst`, `nintersection`) while others have idiosyncratic names (`delete` versus `remove`).
-Scheme would use consistent names - `reverse!` and `remove!` - if these functions were defined at all (they are not defined in the standard).
-Most Scheme predicates end in '`?`', not '`p`'.
-This makes predicates more obvious and eliminates the complicated conventions for adding a hyphen before the `p`.<a id="tfn22-1"></a><sup>[1](#fn22-1)</sup>
-The only problem with this convention is in spoken language: is `equal?` pronounced "equal-question-mark" or "equal-q" or perhaps equal, with rising intonation?
-This would make Scheme a tone language, like Chinese.
+`car`、`cdr`、`cons`、`append`、+、`*`、`list` など、実に多くの関数が両方の方言で同じ（かほぼ同じ）です。
+しかしSchemeには、Common Lispとは違う綴りの約束がいくつかあります。
+`set!` のように、Schemeの変更を伴う操作はたいてい '`!`' で終わります。
+Common Lispにはこれについて一貫した約束がありません。`n` で始まるもの（`nreverse`、`nsubst`、`nintersection`）もあれば、独特の名前を持つもの（`remove` に対する `delete`）もあります。
+Schemeなら、これらの関数が定義されていれば一貫した名前 `reverse!` と `remove!` を使うでしょう（標準では定義されていません）。
+Schemeの述語はたいてい '`p`' ではなく '`?`' で終わります。
+これによって述語がはっきりわかるようになり、`p` の前にハイフンを付けるかどうかという込み入った約束もなくなります。<a id="tfn22-1"></a><sup>[1](#fn22-1)</sup>
+この約束の唯一の困りごとは、話し言葉です。`equal?` は「equal-question-mark」と読むのか、「equal-q」と読むのか、それとも語尾を上げて equal と読むのでしょうか。
+そうなるとSchemeは、中国語のような声調言語になってしまいます。
 
-In Scheme, it is an error to apply `car` or `cdr` to the empty list.
-Despite the fact that Scheme has `cons`, it calls the result a `pair` rather than a cons cell, so the predicate is `pair?`, not `consp`.
+Schemeでは、空のリストに `car` や `cdr` を適用するのは誤りです。
+Schemeには `cons` があるにもかかわらず、その結果はコンスセルではなく `pair` と呼ばれるので、述語は `consp` ではなく `pair?` です。
 
-Scheme recognizes not all lambda expressions will be "functions" according to the mathematical definition of function, and so it uses the term "procedure" instead.
-Here is a partial list of correspondences between the two dialects:
+Schemeは、すべてのラムダ式が数学的な意味での「関数」になるわけではないと認めており、そのため代わりに「手続き」という語を使います。
+2つの方言の対応を一部だけ挙げます。
 
 | Scheme Procedure | Common Lisp Function |
 |------------------|----------------------|
@@ -112,65 +112,65 @@ Here is a partial list of correspondences between the two dialects:
 | `vector-set!`    | `setf`               |
 | `string-set!`    | `setf`               |
 
-## 22.1 A Scheme Interpreter
+## 22.1 Schemeインタプリタ
 
-As we have seen, an interpreter takes a program (or expression) as input and returns the value computed by that program.
-The Lisp function `eval` is thus an interpreter, and that is essentially the function we are trying to write in this section.
-We have to be careful, however, in that it is possible to confuse the notions of interpreter and compiler.
-A compiler takes a program as input and produces as output a translation of that program into some other language-usually a language that can be directly (or more easily) executed on some machine.
-So it is also possible to write `eval` by compiling the argument and then interpreting the resulting machine-level program.
-Most modern Lisp systems support both possibilities, although some only interpret code directly, and others compile all code before executing it.
-To make the distinction clear, we will not write a function called `eval`.
-Instead, we will write versions of two functions: `interp`, a Scheme interpreter, and, in the next chapter, `comp`, a Scheme compiler.
+見てきたとおり、インタプリタはプログラム（あるいは式）を入力に取り、そのプログラムが計算する値を返します。
+ですからLispの関数 `eval` はインタプリタであり、本節で書こうとしているのは本質的にその関数です。
+ただし、インタプリタとコンパイラという考えを混同しかねない点には気をつけねばなりません。
+コンパイラはプログラムを入力に取り、それを別の言語へ訳したものを出力します。ふつうその言語は、ある機械の上で直に（あるいはより容易に）実行できるものです。
+ですから `eval` を、引数をコンパイルしてからその機械水準のプログラムを解釈する形で書くこともできます。
+現代のたいていのLispシステムは両方に対応していますが、コードを直に解釈するだけのものも、実行前にすべてコンパイルするものもあります。
+区別をはっきりさせるため、`eval` という名前の関数は書きません。
+代わりに2つの関数を書きます。Schemeインタプリタ `interp` と、次章でSchemeコンパイラ `comp` です。
 
-An interpreter that handles the Scheme primitives is easy to write.
-In the interpreter `interp`, the main conditional has eight cases, corresponding to the five special forms, symbols, other atoms, and procedure applications (otherwise known as function calls).
-For the moment we will stick with `t` and `nil` instead of `#t` and `#f`.
-After developing a simple interpreter, we will add support for macros, then develop a tail-recursive interpreter, and finally a continuation-passing interpreter.
-(These terms will be defined when the time comes.).
-The glossary for `interp` is in [figure 22.1](#f0010).
+Schemeの基本要素を扱うインタプリタを書くのは簡単です。
+インタプリタ `interp` では、主たる条件分岐に8つの場合があります。5つの特殊形式、シンボル、その他のアトム、そして手続きの適用（いわゆる関数呼び出し）に対応します。
+当面は `#t` と `#f` ではなく `t` と `nil` を使い続けます。
+単純なインタプリタを作ったあと、マクロへの対応を加え、次に末尾再帰のインタプリタを、最後に継続渡しのインタプリタを作ります。
+（これらの用語は、しかるべきときに定義します。）
+`interp` の用語一覧は[図22.1](#f0010)にあります。
 
-| | **Top-Level Functions** |
+| | **トップレベルの関数** |
 |---|---|
-| `scheme` | A Scheme read-interp-print loop |
-| `interp` | Interpret (evaluate) an expression in an environment. |
-| `def-scheme-macro` | Define a Scheme macro. |
-| | **Special Variables** |
-| `*scheme-procs*` | Some procedures to store in the global environment. |
-| | **Auxiliary Functions** |
-| `set-var!` | Set a variable to a value |
-| `get-var` | Get the value of a variable in an environment. |
-| `set-global-var!` | Set a global variable to a value. |
-| `get-global-var` | Get the value of a variable from the global environment. |
-| `extend-env` | Add some variables and values to an environment. |
-| `init-scheme-iterp` | Initialize some global variables. |
-| `init-scheme-proc` | Define a primitive Scheme procedure. |
-| `scheme-macro` | Retrieve the Scheme macro for a symbol. |
-| `scheme-macro-expand` | Macro-expand a Scheme expression. |
-| `maybe-add` | Add an element to the front of a non-singleton list. |
-| `print-proc` | Print a procedure. |
-| | **Data Type (tail-recursive version only)** |
-| `proc` | A Scheme procedure. |
-| | **Functions (continuation version only)** |
-| `interp-begin` | Interpret a `begin` expression. |
-| `interp-call` | Interpret a function application. |
-| `map-interp` | Map `interp` over a list. |
-| `call/cc` | call with current continuation. |
-| | **Previously Defined Functions** |
-| `lastl` | Select the last element of a list. |
-| `length=1` | Is this a list of length 1? |
-| Table 22.1: Glossary for the Scheme Interpreter |
+| `scheme` | Schemeの読み込み・解釈・表示のループ |
+| `interp` | 環境のもとで式を解釈（評価）する。 |
+| `def-scheme-macro` | Schemeのマクロを定義する。 |
+| | **特殊変数** |
+| `*scheme-procs*` | 大域環境に格納する手続き。 |
+| | **補助的な関数** |
+| `set-var!` | 変数に値を設定する。 |
+| `get-var` | 環境のもとで変数の値を得る。 |
+| `set-global-var!` | 大域変数に値を設定する。 |
+| `get-global-var` | 大域環境から変数の値を得る。 |
+| `extend-env` | 環境に変数と値を加える。 |
+| `init-scheme-iterp` | 大域変数を初期化する。 |
+| `init-scheme-proc` | Schemeの基本手続きを定義する。 |
+| `scheme-macro` | シンボルに対応するSchemeのマクロを取ってくる。 |
+| `scheme-macro-expand` | Schemeの式をマクロ展開する。 |
+| `maybe-add` | 要素が1つでない並びの先頭に要素を加える。 |
+| `print-proc` | 手続きを表示する。 |
+| | **データ型（末尾再帰版のみ）** |
+| `proc` | Schemeの手続き。 |
+| | **関数（継続版のみ）** |
+| `interp-begin` | `begin` の式を解釈する。 |
+| `interp-call` | 関数の適用を解釈する。 |
+| `map-interp` | 並びに `interp` を写す。 |
+| `call/cc` | 現在の継続を伴う呼び出し。 |
+| | **すでに定義した関数** |
+| `lastl` | 並びの最後の要素を取り出す。 |
+| `length=1` | これは長さ1の並びか。 |
+| 表22.1: Schemeインタプリタの用語一覧            |
 
-The simple interpreter has eight cases to worry about: (1) If the expression is a symbol, look up its value in the environment.
-(2) If it is an atom that is not a symbol (such as a number), just return it.
-Otherwise, the expression must be a list.
-(3) If it starts with `quote`, return the quoted expression.
-(4) If it starts with `begin`, interpret each subexpression, and return the last one.
-(5) If it starts with `set!`, interpret the value and then set the variable to that value.
-(6) If it starts with `if`, then interpret the conditional, and depending on if it is true or not, interpret the then-part or the else-part.
-(7) If it starts with `lambda`, build a new procedure-a closure over the current environment.
-(8) Otherwise, it must be a procedure application.
-Interpret the procedure and all the arguments, and apply the procedure value to the argument values.
+単純なインタプリタが気にすべき場合は8つあります。(1) 式がシンボルなら、環境のなかでその値を引く。
+(2) それが（数のように）シンボルでないアトムなら、そのまま返す。
+そうでなければ、式は並びのはずです。
+(3) `quote` で始まるなら、クォートされた式を返す。
+(4) `begin` で始まるなら、各部分式を解釈し、最後のものを返す。
+(5) `set!` で始まるなら、値を解釈してから変数をその値に設定する。
+(6) `if` で始まるなら、条件を解釈し、それが真かどうかに応じてthenの部分かelseの部分を解釈する。
+(7) `lambda` で始まるなら、新しい手続き、すなわち現在の環境を包むクロージャを組み立てる。
+(8) そうでなければ、手続きの適用のはずである。
+手続きとすべての引数を解釈し、手続きの値を引数の値に適用する。
 
 ```lisp
 (defun interp (x &optional env)
@@ -196,24 +196,24 @@ Interpret the procedure and all the arguments, and apply the procedure value to 
                               (rest x))))))))
 ```
 
-An environment is represented as an association list of variable/value pairs, except for the global environment, which is represented by values on the `global-val` property of symbols.
-It would be simpler to represent the global environment in the same way as local environments, but it is more efficient to use property lists than one big global a-list.
-Furthermore, the global environment is distinct in that every symbol is implicitly defined in the global environment, while local environments only contain variables that are explicitly mentioned (in a `lambda` expression).
+環境は変数と値の対の連想リストとして表されます。ただし大域環境だけは別で、シンボルの `global-val` 属性の値として表されます。
+大域環境も局所環境と同じように表すほうが単純でしょうが、1つの大きな大域的な連想リストより属性リストを使うほうが効率的です。
+さらに大域環境は、すべてのシンボルが暗にそこで定義されている点でも別格です。局所環境には（`lambda` の式で）明示的に挙げられた変数しか含まれません。
 
-As an example, suppose we interpret the function call `(f 1 2 3)`, and that the functions `f` has been defined by the Scheme expression:
+例として、関数呼び出し `(f 1 2 3)` を解釈するとし、関数 `f` が次のSchemeの式で定義されているとしましょう。
 
 ```lisp
 (set! f (lambda (a b c) (+ a (g b c))))
 ```
 
-Then we will interpret `( f 1 2 3 )` by interpreting the body of `f` with the environment:
+すると `( f 1 2 3 )` は、次の環境のもとで `f` の本体を解釈することで解釈されます。
 
 ```lisp
 ((a 1) (b 2) (c 3))
 ```
 
-Scheme procedures are implemented as Common Lisp functions, and in fact all the Scheme data types are implemented by the corresponding Common Lisp types.
-I include the function `init-scheme-interp` to initialize a few global values and repeat the definitions of `last1` and `length=1`:
+Schemeの手続きはCommon Lispの関数として実装され、実のところSchemeのデータ型はすべて、対応するCommon Lispの型で実装されます。
+大域的な値をいくつか初期化する関数 `init-scheme-interp` を入れ、`last1` と `length=1` の定義も再掲します。
 
 ```lisp
 (defun set-var! (var val env)
@@ -280,7 +280,7 @@ I include the function `init-scheme-interp` to initialize a few global values an
   (first (last list)))
 ```
 
-To test the interpreter, we add a simple read-eval-print loop:
+インタプリタを試すために、簡単な読み込み・評価・表示のループを加えます。
 
 ```lisp
 (defun scheme ()
@@ -290,8 +290,8 @@ To test the interpreter, we add a simple read-eval-print loop:
         (print (interp (read) nil))))
 ```
 
-And now we're ready to try out the interpreter.
-Note the Common Lisp prompt is `>`, while the Scheme prompt is `==>`.
+これでインタプリタを試す用意ができました。
+Common Lispの入力促し記号は `>`、Schemeのそれは `==>` であることに注意してください。
 
 ```lisp
 > (scheme)
@@ -337,24 +337,24 @@ NIL
 ==> [ABORT]
 ```
 
-## 22.2 Syntactic Extension with Macros
+## 22.2 マクロによる構文の拡張
 
-Scheme has a number of other special forms that were not listed above.
-Actually, Scheme uses the term "syntax" where we have been using "special form." The remaining syntax can be defined as "derived expressions" in terms of the five primitives.
-The Scheme standard does not recognize a concept of macros, but it is clear that a "derived expression" is like a macro, and we will implement them using macros.
-The following forms are used (nearly) identically in Scheme and Common Lisp:
+Schemeには、上に挙げなかった特殊形式が他にもいくつかあります。
+実のところ、私たちが「特殊形式」と呼んできたものをSchemeは「構文」と呼びます。残りの構文は、5つの基本要素を使った「派生式」として定義できます。
+Schemeの標準はマクロという考えを認めていませんが、「派生式」がマクロのようなものであるのは明らかなので、ここではマクロを使って実装します。
+次の形式は、SchemeとCommon Lispで（ほぼ）同じように使われます。
 
 ```lisp
 let let* and or do cond case
 ```
 
-One difference is that Scheme is less lenient as to what counts as a binding in `let`, `let*` and `do`.
-Every binding must be `(`*var init*`)`; just `(`*var*`)` or *var* is not allowed.
-In do, a binding can be either (*var init step*) or (*var init*).
-Notice there is no `do*`.
-The other difference is in `case` and `cond`.
-Where Common Lisp uses the symbol `t` or `otherwise` to mark the final case, Scheme uses `else`.
-The final three syntactic extensions are unique to Scheme:
+1つの違いは、`let`、`let*`、`do` で何を束縛と見なすかについて、Schemeのほうが厳しいことです。
+どの束縛も `(`*var init*`)` でなければならず、`(`*var*`)` や *var* だけでは許されません。
+doでは、束縛は (*var init step*) か (*var init*) のいずれかになれます。
+`do*` がないことに注意してください。
+もう1つの違いは `case` と `cond` にあります。
+Common Lispが最後の場合を示すのにシンボル `t` や `otherwise` を使うところで、Schemeは `else` を使います。
+最後の3つの構文の拡張はSchemeに固有のものです。
 
 ```lisp
 (define *var val*)      *or*          (define (*proc*-*name arg*...) *body*...)
@@ -362,17 +362,17 @@ The final three syntactic extensions are unique to Scheme:
 (letrec ((*var init*)...) *body*...)
 ```
 
-`define` is a combination of `defun` and `defparameter`.
-In its first form, it assigns a value to a variable.
-Since there are no special variables in Scheme, this is no different than using `set!`.
-(There is a difference when the `define` is nested inside another definition, but that is not yet considered.) In the second form, it defines a function.
-`delay` is used to delay evaluation, as described in [section 9.3](chapter9.md#s0020), page 281.
-`letrec` is similar to `let`.
-The difference is that all the *init* forms are evaluated in an environment that includes all the *vars*.
-Thus, `letrec` can be used to define local recursive functions, just as `labels` does in Common Lisp.
+`define` は `defun` と `defparameter` を合わせたものです。
+1つ目の形では、変数に値を代入します。
+Schemeには特殊変数がないので、これは `set!` を使うのと変わりません。
+（`define` が別の定義の内側に入れ子になっている場合は違いがありますが、それはまだ考えません。）2つ目の形では、関数を定義します。
+`delay` は評価を遅らせるのに使います。[9.3節](chapter9.md#s0020)、281ページで述べたとおりです。
+`letrec` は `let` に似ています。
+違いは、すべての *init* の形式が、すべての *var* を含む環境のもとで評価されることです。
+ですから `letrec` は、Common Lispの `labels` と同じく、局所的な再帰関数を定義するのに使えます。
 
-The first step in implementing these syntactic extensions is to change `interp` to allow macros.
-Only one clause has to be added, but we'll repeat the whole definition:
+この構文の拡張を実装する最初の段は、マクロを許すよう `interp` を変えることです。
+加える必要があるのは1つの節だけですが、定義全体を再掲します。
 
 ```lisp
 (defun interp (x &optional env)
@@ -400,15 +400,15 @@ Only one clause has to be added, but we'll repeat the whole definition:
                               (rest x))))))))
 ```
 
-Now we provide a mechanism for defining macros.
-The macro definitions can be in any convenient language; the easiest choices are Scheme itself or Common Lisp.
-I have chosen the latter.
-This makes it clear that macros are not part of Scheme itself but rather are used to implement Scheme.
-If we wanted to offer the macro facility to the Scheme programmer, we would make the other choice.
-(But then we would be sure to add the backquote notation, which is so useful in writing macros.) `def-scheme-macro` (which happens to be a macro itself) provides a way of adding new Scheme macros.
-It does that by storing a Common Lisp function on the `scheme-macro` property of a symbol.
-This function, when given a list of arguments, returns the code that the macro call should expand into.
-The function `scheme-macro` tests if a symbol has a macro attached to it, and `scheme-macro-expand` does the actual macro-expansion:
+次に、マクロを定義する仕組みを用意します。
+マクロの定義は都合のよいどんな言語で書いてもかまいません。もっとも楽な選択はScheme自身かCommon Lispです。
+私は後者を選びました。
+こうすれば、マクロがScheme自身の一部ではなく、Schemeを実装するのに使われるものだとはっきりします。
+マクロの機能をSchemeのプログラマに提供したいなら、もう一方を選ぶことになるでしょう。
+（ただしその場合は、マクロを書くのにたいそう役立つ逆クォートの記法を必ず加えることになるでしょう。）`def-scheme-macro`（これ自身もたまたまマクロです）が、新しいSchemeのマクロを加える手立てを与えます。
+これは、シンボルの `scheme-macro` 属性にCommon Lispの関数を格納することで行います。
+この関数は引数の並びを与えられると、そのマクロ呼び出しが展開されるべきコードを返します。
+関数 `scheme-macro` はシンボルにマクロが付いているかを調べ、`scheme-macro-expand` が実際のマクロ展開を行います。
 
 ```lisp
 (defun scheme-macro (symbol)
@@ -425,7 +425,7 @@ The function `scheme-macro` tests if a symbol has a macro attached to it, and `s
               x))
 ```
 
-Here are the definitions of nine important macros in Scheme:
+Schemeの重要なマクロ9つの定義を示します。
 
 ```lisp
 (def-scheme-macro let (bindings &rest body)
@@ -479,7 +479,7 @@ Here are the definitions of nine important macros in Scheme:
    .,body))
 ```
 
-We can test out the macro facility:
+マクロの仕掛けを試してみましょう。
 
 ```lisp
 > (scheme-macro-expand '(and p q)) => (IF P (AND Q))
@@ -519,52 +519,52 @@ REVERSE
 (5 10)
 ```
 
-The macro `define` is just like `set!`, except that it returns the symbol rather than the value assigned to the symbol.
-In addition, `define` provides an optional syntax for defining functions-it serves the purposes of both `defun` and `defvar`.
-The syntax (`define` (*fn* . *args*) . *body*) is an abbreviation for (`define` *fn* (`lambda` *args* . *body*)).
+マクロ `define` は `set!` とちょうど同じですが、シンボルに代入した値ではなくシンボルそのものを返す点が違います。
+加えて `define` は、関数を定義するための構文も備えており、`defun` と `defvar` の両方の役目を果たします。
+構文 (`define` (*fn* . *args*) . *body*) は (`define` *fn* (`lambda` *args* . *body*)) の略記です。
 
-In addition, Scheme provides a notation where `define` can be used inside a function definition in a way that makes it work like `let` rather than `set!.`
+さらにSchemeには、関数定義のなかで `define` を使い、`set!` ではなく `let` のように働かせる記法もあります。
 
-The advantage of the macro-based approach to special forms is that we don't have to change the interpreter to add new special forms.
-The interpreter remains simple, even while the language grows.
-This also holds for the compiler, as we see in the next section.
+特殊形式をマクロで扱う方式の利点は、新しい特殊形式を加えるのにインタプリタを変えずに済むことです。
+言語が育っても、インタプリタは単純なままです。
+これは次節で見るとおり、コンパイラについても当てはまります。
 
-## 22.3 A Properly Tail-Recursive Interpreter
+## 22.3 末尾再帰を正しく扱うインタプリタ
 
-Unfortunately, the interpreter presented above can not lay claim to the name Scheme, because a true Scheme must be properly tail-recursive.
-Our interpreter is tail-recursive only when run in a Common Lisp that is tail-recursive.
-To see the problem, consider the following Scheme procedure:
+あいにく、上に示したインタプリタはSchemeを名乗れません。真のSchemeは末尾再帰を正しく扱わねばならないからです。
+私たちのインタプリタが末尾再帰的なのは、末尾再帰的なCommon Lispの上で走らせたときだけです。
+問題を見るために、次のSchemeの手続きを考えてみましょう。
 
 ```lisp
 (define (traverse lyst)
   (if lyst (traverse (cdr lyst))))
 ```
 
-Trace the function `interp` and execute `(interp '(traverse '(a b c d)))`.
-The nested calls to `interp` go 16 levels deep.
-In general, the level of nesting is 4 plus 3 times the length of the list.
-Each call to `interp` requires Common Lisp to allocate some storage on the stack, so for very long lists, we will eventually run out of storage.
-To earn the name Scheme, a language must guarantee that such a program does not run out of storage.
+関数 `interp` をトレースして `(interp '(traverse '(a b c d)))` を実行してみてください。
+`interp` の入れ子の呼び出しは16段の深さになります。
+一般に、入れ子の深さは並びの長さの3倍に4を足したものです。
+`interp` を呼ぶたびにCommon Lispはスタックに場所を割り当てるので、非常に長い並びではいずれ場所が尽きます。
+Schemeの名に値するには、そうしたプログラムが場所を使い果たさないことを言語が保証せねばなりません。
 
-The problem, in this example, lies in two places.
-Everytime we interpret an `if` form or a procedure call, we descend another recursive level into `interp`.
-But that extra level is not necessary.
-Consider the `if` form.
-It is certainly necessary to call `interp` recursively to decide if the test is true or not.
-For the sake of argument, let's say the test is true.
-Then we call `interp` again on the *then* part.
-This recursive call will return a value, which will then be immediately returned as the value of the original call as well.
+この例では、問題は2か所にあります。
+`if` の形式や手続きの呼び出しを解釈するたびに、`interp` の再帰の段を1つ下ります。
+しかしその余分な段は必要ありません。
+`if` の形式を考えてみましょう。
+検査が真かどうかを決めるために `interp` を再帰的に呼ぶのは、たしかに必要です。
+話を進めるために、検査が真だとしましょう。
+すると *then* の部分にもう一度 `interp` を呼びます。
+この再帰呼び出しは値を返し、その値はそのまま元の呼び出しの値としてもすぐに返されます。
 
-The alternative is to replace the recursive call to `interp` with a renaming of variables, followed by a `goto` statement.
-That is, instead of calling `interp` and thereby binding a new instance of the variable `x` to the *then* part, we just assign the *then* part to `x`, and branch to the top of the `interp` routine.
-This works because we know we have no more use for the old value of `x`.
-A similar technique is used to eliminate the recursive call for the last expression in a `begin` form.
-(Many programmers have been taught the "structured programming" party line that `goto` statements are harmful.
-In this case, the `goto` is necessary to implement a low-level feature efficiently.)
+代わりに、`interp` への再帰呼び出しを、変数の付け替えと、それに続く `goto` 文で置き換えられます。
+つまり `interp` を呼んで変数 `x` の新しい実例を *then* の部分に束縛するのではなく、*then* の部分を `x` に代入して、`interp` のルーチンの先頭へ分岐するのです。
+これが働くのは、`x` の古い値にもう用がないとわかっているからです。
+同じような技法を使えば、`begin` の形式の最後の式についても再帰呼び出しをなくせます。
+（多くのプログラマは、`goto` 文は有害だという「構造化プログラミング」の建前を教わってきました。
+この場合、低水準の機能を効率よく実装するには `goto` が必要です。）
 
-The final thing we need to do is explicitly manage Scheme procedures.
-Instead of implementing Scheme procedures as Common Lisp closures, we will define a structure, `proc`, to contain the code, environment, parameter list, and optionally the name of the procedure.
-Then when we are evaluating a procedure call, we can assign the body of the procedure to `x` rather than recursively calling `interp`.
+最後にすべきは、Schemeの手続きを明示的に管理することです。
+Schemeの手続きをCommon Lispのクロージャとして実装するのではなく、コード・環境・引数の並び・そして任意で手続きの名前を収める構造体 `proc` を定義します。
+そうすれば手続きの呼び出しを評価するとき、`interp` を再帰的に呼ぶ代わりに、手続きの本体を `x` に代入できます。
 
 ```lisp
 (defstruct (proc (:print-function print-proc))
@@ -572,12 +572,12 @@ Then when we are evaluating a procedure call, we can assign the body of the proc
   code (env nil)(name nil) (parms nil))
 ```
 
-The following is a properly tail-recursive interpreter.
-The macro `prog` sets up a `tagbody` within which we can use `go` statements to branch to labels, and it also sets up a `block` from which we can return a value.
-It can also bind variables like `let`, although in this usage, the variable list is empty.
-Any symbol within the body of a `prog` is considered a label.
-In this case, the label `:INTERP` is the target of the branch statements `(GO :INTERP)`.
-I use uppercase to indicate that go-to statements are being used, but this convention has not been widely adopted.
+次に示すのが、末尾再帰を正しく扱うインタプリタです。
+マクロ `prog` は `tagbody` を用意し、そのなかで `go` 文によってラベルへ分岐できるようにします。また値を返せる `block` も用意します。
+`let` のように変数を束縛することもできますが、ここでの使い方では変数の並びは空です。
+`prog` の本体のなかのシンボルは、どれもラベルと見なされます。
+この場合、ラベル `:INTERP` が分岐文 `(GO :INTERP)` の行き先です。
+go文を使っていることを示すために大文字を使っていますが、この約束は広く採り入れられてはいません。
 
 ```lisp
 (defun interp (x &optional env)
@@ -625,53 +625,53 @@ I use uppercase to indicate that go-to statements are being used, but this conve
   (format stream "{~a}" (or (proc-name proc) '??)))
 ```
 
-By tracing the tail-recursive version of `interp`, you can see that calls to `traverse` descend only three recursive levels of `interp`, regardless of the length of the list traversed.
+末尾再帰版の `interp` をトレースすれば、`traverse` の呼び出しが、たどる並びの長さによらず `interp` の再帰を3段しか下らないことがわかります。
 
-Note that we are not claiming that this interpreter allocates no storage when it makes tail-recursive calls.
-Indeed, it wastes quite a bit of storage in evaluating arguments and building environments.
-The claim is that since the storage is allocated on the heap rather than on the stack, it can be reclaimed by the garbage collector.
-So even if `traverse` is applied to an infinitely long list (i.e., a circular list), the interpreter will never run out of space-it will always be able to garbage-collect and continue.
+このインタプリタが末尾再帰の呼び出しで場所をまったく割り当てない、と言っているのではないことに注意してください。
+実際、引数の評価と環境の組み立てでかなりの場所を無駄にしています。
+言いたいのは、その場所がスタックではなくヒープに割り当てられるので、ごみ集めが回収できるということです。
+ですから `traverse` を無限に長い並び（すなわち循環した並び）に適用しても、インタプリタが場所を使い果たすことはありません。常にごみを集めて続けられます。
 
-There are many improvements that could be made to this interpreter, but effort is better spent in improving a compiler rather than an interpreter.
-The next chapter does just that.
+このインタプリタには改良の余地が数多くありますが、労力はインタプリタよりコンパイラの改良に注ぐほうがよいでしょう。
+次章ではまさにそれを行います。
 
-## 22.4 Throw, Catch, and Call/cc
+## 22.4 throw、catch、call/cc
 
-Tail-recursion is crucial to Scheme.
-The idea is that when the language is guaranteed to optimize tail-recursive calls, then there is no need for special forms to do iteration.
-All loops can be written using recursion, without any worry of overflowing the runtime stack.
-This helps keep the language simple and rules out the `goto` statement, the scourge of the structured programming movement.
-However, there are cases where some kind of nonlocal exit is the best alternative.
-Suppose that some unexpected event happens deep inside your program.
-The best action is to print an error message and pop back up to the top level of your program.
-This could be done trivially with a goto-like statement.
-Without it, every function along the calling path would have to be altered to accept either a valid result or an indication of the exceptional condition, which just gets passed up to the next level.
+末尾再帰はSchemeにとって決定的に重要です。
+言語が末尾再帰の呼び出しを最適化すると保証されていれば、繰り返しのための特殊形式は要らない、という考えです。
+どのループも再帰で書けて、実行時のスタックがあふれる心配もありません。
+これは言語を単純に保つのに役立ち、構造化プログラミング運動の目の敵であった `goto` 文を締め出します。
+とはいえ、何らかの非局所的な脱出が最良の選択となる場合もあります。
+プログラムの奥深くで、思いがけない出来事が起きたとしましょう。
+最良の対応は、誤りのメッセージを表示してプログラムの最上位まで一気に戻ることです。
+これはgotoのような文があれば造作もなくできます。
+それがなければ、呼び出しの経路上のすべての関数を、正しい結果か例外的な状態の表示かのどちらかを受け取り、それをただ上の段へ渡すように変えねばなりません。
 
-In Common Lisp, the functions `throw` and `catch` are provided for this kind of nonlocal exit.
-Scott Zimmerman, the perennial world Frisbee champion, is also a programmer for a Southern California firm.
-He once told me, "I'm starting to learn Lisp, and it must be a good language because it's got `throw` and `catch` in it."
-Unfortunately for Scott, `throw` and `catch` don't refer to Frisbees but to transfer of control.
-They are both special forms, with the following syntax:
+Common Lispでは、この種の非局所的な脱出のために関数 `throw` と `catch` が用意されています。
+長年フリスビーの世界王者であるScott Zimmermanは、南カリフォルニアの会社のプログラマでもあります。
+あるとき彼は私にこう言いました。「Lispを学び始めたんだが、あれは良い言語に違いない。`throw` と `catch` があるんだから」。
+Scottには気の毒ですが、`throw` と `catch` はフリスビーのことではなく、制御の移動のことです。
+どちらも特殊形式で、構文は次のとおりです。
 
 ```lisp
 (catch tag body...)
 (throw tag value)
 ```
 
-The first argument to `catch` is a tag, or label.
-The remaining arguments are evaluated one at a time, and the last one is returned.
-Thus, `catch` is much like `progn`.
-The difference is that if any code in the dynamic extent of the body of the `catch` evaluates the special form `throw`, then control is immediately passed to the enclosing `catch` with the same tag.
+`catch` の第1引数はタグ、すなわちラベルです。
+残りの引数は1つずつ評価され、最後のものが返されます。
+ですから `catch` は `progn` によく似ています。
+違いは、`catch` の本体の動的範囲にあるコードが特殊形式 `throw` を評価すると、制御がただちに同じタグを持つ外側の `catch` へ移ることです。
 
-For example, the form
+たとえば次の形式は
 
 ```lisp
 (catch 'tag
   (print 1) (throw 'tag 2) (print 3))
 ```
 
-prints `1` and returns `2`, without going on to print `3`.
-A more representative example is:
+`1` を表示して `2` を返し、`3` の表示へは進みません。
+もっと典型的な例を示します。
 
 ```lisp
 (defun print-table (l)
@@ -688,19 +688,19 @@ A more representative example is:
 "huh?"
 ```
 
-Here `print-table` calls `print-sqrt-abs`, which calls `must-be-number`.
-The first three times all is fine and the values 1, 2, 3 get printed.
-The next time `x` is not a number, so the value `"huh?"` gets thrown to the tag `not-a-number` established by `catch` in `f`.
-The throw bypasses the pending calls to `abs`, `sqrt`, and `print`, as well as the rest of the call to `mapcar`.
+ここでは `print-table` が `print-sqrt-abs` を呼び、それが `must-be-number` を呼びます。
+最初の3回は問題なく、値1、2、3が表示されます。
+次は `x` が数ではないので、値 `"huh?"` が、`f` のなかの `catch` が設けたタグ `not-a-number` へ投げられます。
+この投げは、保留中の `abs`、`sqrt`、`print` の呼び出しと、`mapcar` の呼び出しの残りを飛ばします。
 
-This kind of control is provided in Scheme with a very general and powerful procedure, `call-with-current-continuation`, which is often abbreviated `call/cc`.
-`call/cc` is a normal procedure (not a special form like `throw` and `catch`) that takes a single argument.
-Let's call the argument `computation`.
-`computation` must be a procedure of one argument.
-When `call/cc` is invoked, it calls `computation`, and whatever `computation` returns is the value of the call to `call/cc`.
-The trick is that the procedure `computation` also takes an argument (which we'll call `cc`) that is another procedure representing the current continuation point.
-If `cc` is applied to some value, that value is returned as the value of the call to `call/cc`.
-Here are some examples:
+この種の制御は、Schemeではきわめて一般的で強力な手続き `call-with-current-continuation`、しばしば `call/cc` と略されるものによって与えられます。
+`call/cc` は（`throw` や `catch` のような特殊形式ではなく）引数を1つ取るふつうの手続きです。
+その引数を `computation` と呼ぶことにします。
+`computation` は引数1つの手続きでなければなりません。
+`call/cc` が呼ばれると `computation` を呼び、`computation` が返すものが `call/cc` の呼び出しの値になります。
+仕掛けは、手続き `computation` も引数（これを `cc` と呼びます）を取り、それが現在の継続の地点を表す別の手続きだ、というところにあります。
+`cc` を何らかの値に適用すると、その値が `call/cc` の呼び出しの値として返ります。
+例をいくつか示します。
 
 ```lisp
 > (scheme)
@@ -708,31 +708,31 @@ Here are some examples:
 321
 ```
 
-This example ignores `cc` and just computes `(+ 1 (+ 20 300))`.
-More precisely, it is equivalent to:
+この例は `cc` を無視して、単に `(+ 1 (+ 20 300))` を計算します。
+より正確には、次と同じことです。
 
 ```lisp
 ((lambda (val) (+ 1 val))
   (+ 20 300))
 ```
 
-The next example does make use of `cc`:
+次の例は `cc` を実際に使います。
 
 ```lisp
 => (+ 1 (call/cc (lambda (cc) (+ 20 (cc 300)))))
 301
 ```
 
-This passes `300` to `cc`, thus bypassing the addition of `20`.
-It effectively throws `300` out of the computation to the catch point established by `call/cc`.
-It is equivalent to:
+これは `300` を `cc` へ渡し、`20` の加算を飛ばします。
+事実上、`300` を計算の外へ、`call/cc` が設けた捕捉点まで投げるのです。
+これは次と同じことです。
 
 ```lisp
 ((lambda (val) (+ 1 val))
   300)
 ```
 
-or to:
+あるいは次とも同じです。
 
 ```lisp
 ((lambda (val) (+ 1 val))
@@ -741,7 +741,7 @@ or to:
       (throw 'cc 300))))
 ```
 
-Here's how the `throw/catch` mechanism would look in Scheme:
+`throw/catch` の仕組みをSchemeで書くとどうなるかを示します。
 
 ```lisp
 (define (print-table l )
@@ -764,9 +764,9 @@ Here's how the `throw/catch` mechanism would look in Scheme:
        (map fn (rest 1)))))
 ```
 
-The ability to return to a pending point in the computation is useful for this kind of error and interrupt handling.
-However, the truly amazing, wonderful thing about `call/cc` is the ability to return to a continuation point more than once.
-Consider a slight variation:
+計算の保留中の地点へ戻れる能力は、この種の誤りや割り込みの処理に役立ちます。
+しかし `call/cc` の本当に驚くべき、すばらしい点は、継続の地点へ2度以上戻れることです。
+少し変えた例を考えてみましょう。
 
 ```lisp
 => (+ 1 (call/cc (lambda (cc)
@@ -778,9 +778,9 @@ Consider a slight variation:
 501
 ```
 
-Here, we first computed 301, just as before, but along the way saved `cc` in the global variable `old-cc`.
-Afterward, calling `(old-cc 500)` returns (for the second time) to the point in the computation where 1 is added, this time returning `501`.
-The equivalent Common Lisp code leads to an error:
+ここではまず、先ほどと同じく301を計算しますが、その途中で `cc` を大域変数 `old-cc` に保存しています。
+そのあと `(old-cc 500)` を呼ぶと、（2度目に）1を足す計算の地点へ戻り、今度は `501` を返します。
+これに相当するCommon Lispのコードは誤りになります。
 
 ```lisp
 > (+ 1 (catch 'tag (+ 20 (throw 'tag 300))))
@@ -790,19 +790,19 @@ The equivalent Common Lisp code leads to an error:
 *Error*: *there was no pending CATCH for the tag TAG*
 ```
 
-In other words, `call/cc`'s continuations have indefinite extent, while throw/catch tags only have dynamic extent.
+言い換えれば、`call/cc` の継続は無期限の範囲を持つのに対し、throw/catchのタグは動的範囲しか持たないのです。
 
-We can use `call/cc` to implement automatic backtracking (among other things).
-Suppose we had a special form, `amb`, the "ambiguous" operator, which returns one of its arguments, chosen at random.
-We could write:
+`call/cc` を使えば、（他にもいろいろできますが）自動のバックトラックを実装できます。
+「あいまいな」演算子である特殊形式 `amb` があるとしましょう。これは引数のうち1つをでたらめに選んで返します。
+次のように書けます。
 
 ```lisp
 (define (integer) (amb 1 (+ 1 (integer))))
 ```
 
-and a call to `integer` would return some random positive integer.
-In addition, suppose we had a function, `fail`, which doesn't return at all but instead causes execution to continue at a prior `amb` point, with the other choice taken.
-Then we could write succinct<a id="tfn22-2"></a><sup>[2](#fn22-2)</sup> backtracking code like the following:
+そして `integer` を呼べば、でたらめな正の整数が返るでしょう。
+さらに、まったく戻らずに、代わりに手前の `amb` の地点から別の選択肢を取って実行を続けさせる関数 `fail` があるとしましょう。
+そうすれば、次のような簡潔な<a id="tfn22-2"></a><sup>[2](#fn22-2)</sup>バックトラックのコードが書けます。
 
 ```lisp
 (define (prime)
@@ -810,22 +810,22 @@ Then we could write succinct<a id="tfn22-2"></a><sup>[2](#fn22-2)</sup> backtrac
  (if (prime? n) n (fail))))
 ```
 
-If `prime?` is a predicate that returns true only when its argument is a prime number, then `prime` will always return some prime number, decided by generating random integers.
-While this looks like a major change to the language-adding backtracking and nondeterminism-it turns out that `amb` and `fail` can be implemented quite easily with `call/cc`.
-First, we need to make `amb` be a macro:
+`prime?` が、引数が素数のときにだけ真を返す述語なら、`prime` は常に何らかの素数を返します。でたらめな整数を生成して決めるのです。
+これは言語への大きな変更、すなわちバックトラックと非決定性の追加に見えますが、`amb` と `fail` は `call/cc` でごく簡単に実装できることがわかります。
+まず `amb` をマクロにする必要があります。
 
 ```lisp
 (def-scheme-macro amb (x y)
   '(random-choice (lambda () ,x) (lambda () ,y))))
 ```
 
-The rest is pure Scheme.
-We maintain a list of `backtrack-points`, which are implemented as functions of no arguments.
-To backtrack, we just call one of these functions.
-That is what `fail` does.
-The function `choose-first` takes two functions and pushes the second, along with the proper continuation, on `backtrack-points`, and then calls the first, returning that value.
-The function `random-choice` is what `amb` expands into: it decides which choice is first, and which is second.
-(Note that the convention in Scheme is to write global variables like `backtrack-points` without asterisks.)
+残りは純粋なSchemeです。
+引数なしの関数として実装した `backtrack-points` の並びを保ちます。
+バックトラックするには、この関数のどれかを呼ぶだけです。
+`fail` がしているのはそれです。
+関数 `choose-first` は2つの関数を取り、2つ目を適切な継続とともに `backtrack-points` に積み、それから1つ目を呼んでその値を返します。
+関数 `random-choice` が `amb` の展開先です。どちらの選択肢を先にし、どちらを後にするかを決めます。
+（Schemeの約束では、`backtrack-points` のような大域変数はアスタリスクを付けずに書くことに注意してください。）
 
 ```lisp
 (define backtrack-points nil)
@@ -845,43 +845,43 @@ The function `random-choice` is what `amb` expands into: it decides which choice
    (f))))
 ```
 
-This implements chronological backtracking, as in Prolog.
-However, we actually have the freedom to do other kinds of backtracking as well.
-Instead of having `fail` take the first element of `backtrack-points`, we could choose a random element instead.
-Or, we could do some more complex analysis to choose a good backtrack point.
+これはPrologと同じく、時間順のバックトラックを実装しています。
+しかし実のところ、他の種類のバックトラックを行う自由もあります。
+`fail` に `backtrack-points` の最初の要素を取らせる代わりに、でたらめな要素を選ぶこともできます。
+あるいは、もっと込み入った分析をして良いバックトラックの地点を選ぶこともできます。
 
-`call/cc` can be used to implement a variety of control structures.
-As another example, many Lisp implementations provide a `reset` function that aborts the current computation and returns control to the top-level read-eval-print loop.
-`reset` can be defined quite easily using `call/cc`.
-The trick is to capture a continuation that is at the top level and save it away for future use.
-The following expression, evaluated at the top level, saves the appropriate continuation in the value of `reset`:
+`call/cc` はさまざまな制御構造の実装に使えます。
+別の例として、多くのLispの実装は、現在の計算を打ち切って最上位の読み込み・評価・表示のループへ制御を戻す `reset` 関数を備えています。
+`reset` は `call/cc` を使えばごく簡単に定義できます。
+仕掛けは、最上位にある継続を捕まえて、あとで使うために取っておくことです。
+次の式を最上位で評価すると、適切な継続が `reset` の値として保存されます。
 
 ```lisp
 (call/cc (lambda (cc) (set! reset (lambda ()
                 (cc "Back to top level")))))
 ```
 
-**Exercise 22.2 [m]** Can you implement `call/cc` in Common Lisp?
+**練習問題 22.2 [m]** Common Lispで `call/cc` を実装できるか。
 
-**Exercise 22.3 [s]** Can you implement `amb` and `fail` in Common Lisp?
+**練習問題 22.3 [s]** Common Lispで `amb` と `fail` を実装できるか。
 
-**Exercise 22.4 [m]** `fail` could be written `(define (fail) ((pop backtrack-points)))` if we had the pop macro in Scheme.
-Write `pop.`
+**練習問題 22.4 [m]** Schemeにpopマクロがあれば、`fail` は `(define (fail) ((pop backtrack-points)))` と書けたはずである。
+`pop` を書け。
 
-## 22.5 An Interpreter Supporting Call/cc
+## 22.5 call/ccを支えるインタプリタ
 
-It is interesting that the more a host language has to offer, the easier it is to write an interpreter.
-Perhaps the hardest part of writing a Lisp interpreter (or compiler) is garbage collection.
-By writing our interpreter in Lisp, we bypassed the problem all together-the host language automatically collects garbage.
-Similarly, if we are using a Common Lisp that is properly tail-recursive, then our interpreter will be too, without taking any special steps.
-If not, the interpreter must be rewritten to take care of tail-recursion, as we have seen above.
+土台の言語が多くを備えているほどインタプリタを書くのが楽になる、というのは興味深いことです。
+Lispのインタプリタ（やコンパイラ）を書くうえで、おそらくもっとも難しいのはごみ集めです。
+インタプリタをLispで書くことで、この問題をまるごと迂回しました。土台の言語が自動でごみを集めてくれるのです。
+同じく、末尾再帰を正しく扱うCommon Lispを使っていれば、私たちのインタプリタも特別なことをせずにそうなります。
+そうでなければ、上で見たように末尾再帰を扱うようインタプリタを書き直さねばなりません。
 
-It is the same with `call/cc`.
-If our host language provides continuations with indefinite extent, then it is trivial to implement `call/cc`.
-If not, we have to rewrite the whole interpreter, so that it explicitly handles continuations.
-The best way to do this is to make `interp` a function of three arguments: an expression, an environment, and a continuation.
-That means the top level will have to change too.
-Rather than having `interp` return a value that gets printed, we just pass it the function `print` as a continuation:
+`call/cc` についても同じことです。
+土台の言語が無期限の範囲を持つ継続を備えていれば、`call/cc` の実装は造作もありません。
+そうでなければ、継続を明示的に扱うようインタプリタ全体を書き直さねばなりません。
+そのいちばん良いやり方は、`interp` を式・環境・継続という3引数の関数にすることです。
+つまり最上位も変えねばなりません。
+`interp` に、表示される値を返させるのではなく、関数 `print` を継続として渡すだけにします。
 
 ```lisp
 (defun scheme ()
@@ -892,18 +892,18 @@ Rather than having `interp` return a value that gets printed, we just pass it th
               (interp (read) nil #'print)))
 ```
 
-Now we are ready to tackle `interp`.
-For clarity, we will base it on the non-tail-recursive version.
-The cases for symbols, atoms, macros, and `quote` are almost the same as before.
-The difference is that the result of each computation gets passed to the continuation, `cc`, rather than just being returned.
+これで `interp` に取りかかる用意ができました。
+わかりやすさのため、末尾再帰でない版を土台にします。
+シンボル・アトム・マクロ・`quote` の場合は、ほぼこれまでどおりです。
+違いは、各計算の結果が単に返されるのではなく、継続 `cc` へ渡されることです。
 
-The other cases are all more complex, because they all require explicit representation of continuations.
-That means that calls to `interp` cannot be nested.
-Instead, we call `interp` with a continuation that includes another call to `interp`.
-For example, to interpret (`if p x y`), we first call `interp` on the second element of the form, the predicate `p`.
-The continuation for this call is a function that tests the value of `p` and interprets either `x` or `y` accordingly, using the original continuation for the recursive call to `interp`.
-The other cases are similar.
-One important change is that Scheme procedures are implemented as Lisp functions where the first argument is the continuation:
+他の場合はどれももっと込み入っています。継続を明示的に表す必要があるからです。
+つまり `interp` の呼び出しを入れ子にできないということです。
+代わりに、別の `interp` の呼び出しを含む継続を渡して `interp` を呼びます。
+たとえば (`if p x y`) を解釈するには、まずその形式の2番目の要素である述語 `p` に `interp` を呼びます。
+この呼び出しの継続は、`p` の値を調べ、それに応じて `x` か `y` を解釈する関数です。`interp` への再帰呼び出しには元の継続を使います。
+他の場合も同様です。
+重要な変更の1つは、Schemeの手続きが、第1引数を継続とするLispの関数として実装されることです。
 
 ```lisp
 (defun interp (x env cc)
@@ -936,7 +936,7 @@ One important change is that Scheme procedures are implemented as Lisp functions
 (t   (interp-call x env cc))))))
 ```
 
-A few auxiliary functions are defined, in the same continuation-passing style:
+補助関数もいくつか、同じ継続渡しの流儀で定義します。
 
 ```lisp
 (defun interp-begin (body env cc)
@@ -964,7 +964,7 @@ A few auxiliary functions are defined, in the same continuation-passing style:
                                 (funcall cc (cons x y))))))))
 ```
 
-Because Scheme procedures expect a continuation as the first argument, we need to redefine `init-scheme-proc` to install procedures that accept and apply the continuation:
+Schemeの手続きは第1引数に継続を期待するので、継続を受け取って適用する手続きを据えるよう `init-scheme-proc` を定義しなおす必要があります。
 
 ```lisp
 (defun init-scheme-proc (f)
@@ -974,15 +974,15 @@ Because Scheme procedures expect a continuation as the first argument, we need t
       (set-global-var! f (symbol-function f))))
 ```
 
-We also need to define `call/cc`.
-Think for a moment about what `call/cc` must do.
-Like all Scheme procedures, it takes the current continuation as its first argument.
-The second argument is a procedure-a computation to be performed.
-`call/cc` performs the computation by calling the procedure.
-This is just a normal call, so it uses the current continuation.
-The tricky part is what `call/cc` passes the computation as its argument.
-It passes an escape procedure, which can be invoked to return to the same point that the original call to `call/cc` would have returned to.
-Once the working of `call/cc` is understood, the implementation is obvious:
+`call/cc` も定義する必要があります。
+`call/cc` が何をせねばならないかを少し考えてみてください。
+Schemeのすべての手続きと同じく、第1引数として現在の継続を取ります。
+第2引数は手続き、すなわち実行されるべき計算です。
+`call/cc` はその手続きを呼ぶことで計算を行います。
+これはふつうの呼び出しなので、現在の継続を使います。
+厄介なのは、`call/cc` がその計算に何を引数として渡すかです。
+渡すのは脱出の手続きで、これを呼べば、もとの `call/cc` の呼び出しが返るはずだった地点へ戻れます。
+`call/cc` の働きさえ理解すれば、実装は自明です。
 
 ```lisp
 (defun call/cc (cc computation)
@@ -998,65 +998,65 @@ Once the working of `call/cc` is understood, the implementation is obvious:
 (set-global-var! 'call-with-current-continuation #'call/cc)
 ```
 
-## 22.6 History and References
+## 22.6 歴史と参考文献
 
-Lisp interpreters and AI have a long history together.
-MIT AI Lab Memo No. 1 ([McCarthy 1958](bibliography.md#bb0790)) was the first paper on Lisp.
-McCarthy's students were working on a Lisp compiler, had written certain routines-`read`, `print`, etc. - in assembly language, and were trying to develop a full Lisp interpreter in assembler.
-Sometime around the end of 1958, McCarthy wrote a theoretical paper showing that Lisp was powerful enough to write the universal function, `eval`.
-A programmer on the project, Steve Russell, saw the paper, and, according to McCarthy:
+LispのインタプリタとAIには、長い付き合いの歴史があります。
+MIT AI研究所のメモ第1号（[McCarthy 1958](bibliography.md#bb0790)）が、Lispについての最初の論文でした。
+McCarthyの学生たちはLispのコンパイラに取り組み、`read` や `print` などのルーチンをアセンブリ言語で書き、完全なLispインタプリタをアセンブラで作ろうとしていました。
+1958年の終わり頃、McCarthyは、Lispが万能関数 `eval` を書けるほど強力であることを示す理論的な論文を書きました。
+計画に加わっていたプログラマのSteve Russellがその論文を見て、McCarthyによれば次のようなことが起きました。
 
-> Steve Russell said, look, why don't I program this `eval` and-you remember the interpreter-and I said to him, ho, ho, you're confusing theory with practice, this `eval` is intended for reading not for computing.
-But he went ahead and did it.
-That is, he compiled the `eval` in my paper into 704 machine code fixing bugs and then advertised this as a Lisp interpreter, which it certainly was.<a id="tfn22-3"></a><sup>[3](#fn22-3)</sup>
+> Steve Russellが言うには、ねえ、この `eval` を私がプログラムにしたらどうでしょう、というのだ。例のインタプリタのことだ。私は彼に言った。おいおい、理論と実践を取り違えているぞ、この `eval` は読むためのものであって計算するためのものではない、と。
+しかし彼はかまわずやってのけた。
+つまり私の論文の `eval` を704の機械語へ人手でコンパイルし、不具合を直し、これをLispインタプリタだと言って回った。まさにそのとおりのものだった。<a id="tfn22-3"></a><sup>[3](#fn22-3)</sup>
 
 
-So the first Lisp interpreter was the result of a programmer ignoring his boss's advice.
-The first compiler was for the Lisp 1.5 system ([McCarthy et al.
-1962](bibliography.md#bb0815)).
-The compiler was written in Lisp; it was probably the first compiler written in its own language.
+つまり最初のLispインタプリタは、プログラマが上司の助言を無視した結果だったわけです。
+最初のコンパイラはLisp 1.5のシステム（[McCarthy ほか
+1962](bibliography.md#bb0815)）のためのものでした。
+このコンパイラはLispで書かれており、おそらく自分自身の言語で書かれた最初のコンパイラでした。
 
-Allen's *Anatomy of Lisp* (1978) was one of the first overviews of Lisp implementation techniques, and it remains one of the best.
-However, it concentrates on the dynamic-scoping Lisp dialects that were in use at the time.
-The more modern view of a lexically scoped Lisp was documented in an influential pair of papers by Guy Steele ([1976a](bibliography.md#bb1130),[b](bibliography.md#bb1135)).
-His papers "Lambda: the ultimate goto" and "Compiler optimization based on viewing lambda as rename plus goto" describe properly tail-recursive interpreters and compilers.
+Allenの *Anatomy of Lisp*（1978）は、Lispの実装技法の最初期の概観の1つであり、いまなお最良のものの1つです。
+ただし、当時使われていた動的スコープのLispの方言に絞られています。
+レキシカルスコープのLispというより現代的な見方は、Guy Steeleの影響力ある2本の論文（[1976a](bibliography.md#bb1130)、[b](bibliography.md#bb1135)）に記されました。
+その論文「Lambda: the ultimate goto」と「Compiler optimization based on viewing lambda as rename plus goto」は、末尾再帰を正しく扱うインタプリタとコンパイラを述べています。
 
-The Scheme dialect was invented by Gerald Sussman and Guy Steele around 1975 (see their MIT AI Memo 349).
-The *Revised*<sup>4</sup> *Report on the Algorithmic Language Scheme* ([Clinger et al.
-1991](bibliography.md#bb0205)) is the definitive reference manual for the current version of Scheme.
+Schemeという方言は、1975年頃にGerald SussmanとGuy Steeleが考案しました（MIT AIメモ349を参照）。
+*Revised*<sup>4</sup> *Report on the Algorithmic Language Scheme*（[Clinger ほか
+1991](bibliography.md#bb0205)）が、現在の版のSchemeの決定的な参照マニュアルです。
 
-[Abelson and Sussman (1985)](bibliography.md#bb0010) is probably the best introduction to computer science ever written.
-It may or may not be a coincidence that it uses Scheme as the programming language.
-It includes a Scheme interpreter.
-Winston and Horn's *Lisp* (1989) also develops a Lisp interpreter.
+[Abelson and Sussman（1985）](bibliography.md#bb0010)は、おそらくこれまでに書かれた計算機科学への最良の入門書です。
+プログラミング言語にSchemeを使っているのが偶然かどうかはわかりません。
+Schemeのインタプリタも含まれています。
+WinstonとHornの *Lisp*（1989）もLispのインタプリタを作り上げます。
 
-The `amb` operator for nondeterministic choice was proposed by [John McCarthy (1963)](bibliography.md#bb0800) and used in SCHEMER ([Zabih et al.
-1987](bibliography.md#bb1440)), a nondeterministic Lisp.
-[Ruf and Weise (1990)](bibliography.md#bb1015) present another implementation of backtracking in Scheme that incorporates all of logic programming.
+非決定的な選択のための演算子 `amb` は[John McCarthy（1963）](bibliography.md#bb0800)が提案し、非決定的なLispであるSCHEMER（[Zabih ほか
+1987](bibliography.md#bb1440)）で使われました。
+[Ruf and Weise（1990）](bibliography.md#bb1015)は、論理プログラミングをまるごと取り込んだ、Schemeでのバックトラックの別の実装を示しています。
 
-## 22.7 Exercises
+## 22.7 練習問題
 
-**Exercise  22.5 [m]** While Scheme does not provide full-blown support for optional and keyword arguments, it does support rest parameters.
-Modify the interpreter to support the Scheme syntax for rest parameters:
+**練習問題 22.5 [m]** Schemeは省略可能引数とキーワード引数を本格的には備えていないが、残余引数は備えている。
+残余引数のScheme構文を扱えるようインタプリタを変えよ。
 
 | Scheme                      | Common Lisp                       |
 |-----------------------------|-----------------------------------|
 | (`lambda x` *body*)         | (`lambda` (`&rest x`) *body*)     |
 | (`lambda (x y . z)` *body*) | (`lambda` (`x y &rest z`) *body*) |
 
-**Exercise  22.6 [h]** The representation of environments is somewhat wasteful.
-Currently it takes 3*n* cons cells to represent an environment with *n* variables.
-Change the representation to take less space.
+**練習問題 22.6 [h]** 環境の表現はいささか無駄が多い。
+いまは *n* 個の変数を持つ環境を表すのに 3*n* 個のコンスセルを使う。
+より少ない場所で済むよう表現を変えよ。
 
-**Exercise  22.7 [m]** As we've implemented macros, they need to be expanded each time they are encountered.
-This is not so bad for the compiler-you expand the source code and compile it, and then never refer to the source code again.
-But for the interpreter, this treatment of macros is most unsatisfactory: the work of macroexpansion must be done again and again.
-How can you eliminate this duplicated effort?
+**練習問題 22.7 [m]** 私たちの実装したマクロは、出くわすたびに展開する必要がある。
+コンパイラならさほど悪くない。ソースコードを展開してコンパイルすれば、以後そのソースコードを参照しないからだ。
+しかしインタプリタでは、このマクロの扱いはきわめて不満の残るものである。マクロ展開の仕事を何度も何度もやり直さねばならない。
+この重複した手間をどうすればなくせるか。
 
-**Exercise  22.8 [m]** It turns out Scheme allows some additional syntax in `let` and `cond`.
-First, there is the "named-let" expression, which binds initial values for variables but also defines a local function that can be called within the body of the `let`.
-Second, `cond` recognizes the symbol `=>` when it is the second element of a cond clause, and treats it as a directive to pass the value of the test (when it is not false) to the third element of the clause, which must be a function of one argument.
-Here are two examples:
+**練習問題 22.8 [m]** Schemeは `let` と `cond` にさらにいくつかの構文を許している。
+第一に「名前つきlet」の式がある。これは変数に初期値を束縛するとともに、`let` の本体のなかで呼べる局所関数も定義する。
+第二に、`cond` はcondの節の2番目の要素がシンボル `=>` のときそれを認識し、検査の値を（偽でなければ）節の3番目の要素へ渡す指示として扱う。3番目の要素は引数1つの関数でなければならない。
+例を2つ示す。
 
 ```lisp
 (define (fact n)
@@ -1069,7 +1069,7 @@ Here are two examples:
           (else #f)))
 ```
 
-These are equivalent to:
+これらは次と同じことである。
 
 ```lisp
 (define (fact n)
@@ -1086,10 +1086,10 @@ These are equivalent to:
         #f)))
 ```
 
-Write macro definitions for `let` and `cond` allowing these variations.
+この変種を許す `let` と `cond` のマクロ定義を書け。
 
-**Exercise  22.9 [h]** Some Scheme implementations permit `define` statements inside the body of a `lambda` (and thus of a `define`, `let`, `let*`, or `letrec` as well).
-Here is an example:
+**練習問題 22.9 [h]** Schemeの実装のなかには、`lambda` の本体（したがって `define`、`let`、`let*`、`letrec` の本体でも）に `define` 文を許すものがある。
+例を示す。
 
 ```lisp
 (define (length l)
@@ -1098,8 +1098,8 @@ Here is an example:
  (len l 0))
 ```
 
-The internal definition of len is interpreted not as defining a global name but rather as defining a local name as if with `letrec`.
-The above definition is equivalent to:
+lenの内部の定義は、大域的な名前を定義するのではなく、`letrec` を使ったかのように局所的な名前を定義するものと解釈される。
+上の定義は次と同じことである。
 
 ```lisp
 (define (length l)
@@ -1108,23 +1108,23 @@ The above definition is equivalent to:
   (len l 0)))
 ```
 
-Make changes to the interpreter to allow this kind of internal definition.
+この種の内部定義を許すようインタプリタを変えよ。
 
-**Exercise 22.10** Scheme programmers are often disdainful of the `function` or `#'` notation in Common Lisp.
-Is it possible (without changing the compiler) to make Common Lisp accept `(lambda ( ) ... )` instead of `#'(lambda () ... )` and `fn` instead of `#'fn`?
+**練習問題 22.10** Schemeのプログラマは、Common Lispの `function` あるいは `#'` の記法をしばしば軽んじる。
+（コンパイラを変えずに）Common Lispが `#'(lambda () ... )` の代わりに `(lambda ( ) ... )` を、`#'fn` の代わりに `fn` を受け付けるようにできるか。
 
-**Exercise 22.11 [m]** The top level of the continuation-passing version of `scheme` includes the call: `(interp (read) nil #'print)`.
-Will this always result in some value being printed?
-Or is it possible that the expression read might call some escape function that ignores the value without printing anything?
+**練習問題 22.11 [m]** 継続渡し版の `scheme` の最上位には、呼び出し `(interp (read) nil #'print)` が含まれている。
+これは常に何らかの値が表示される結果になるか。
+それとも、読み込んだ式が何かの脱出関数を呼び、何も表示せずに値を無視することもありうるか。
 
-**Exercise  22.12 [h]** What would have to be added or changed to turn the Scheme interpreter into a Common Lisp interpreter?
+**練習問題 22.12 [h]** SchemeのインタプリタをCommon Lispのインタプリタに変えるには、何を加え、何を変える必要があるか。
 
-**Exercise  22.13 [h]** How would you change the interpreter to allow for multiple values?
-Explain how this would be done both for the first version of the interpreter and for the continuation-passing version.
+**練習問題 22.13 [h]** 多値を許すには、インタプリタをどう変えるか。
+最初の版のインタプリタと継続渡しの版の両方について、どう行うかを説明せよ。
 
-## 22.8 Answers
+## 22.8 解答
 
-**Answer 22.2** There is no way to implement a full `call/cc` to Common Lisp, but the following works for cases where the continuation is only used with dynamic extent:
+**解答 22.2** Common Lispで完全な `call/cc` を実装する手立てはないが、継続が動的範囲でしか使われない場合には次のもので働く。
 
 ```lisp
 (defun call/cc (cc computation)
@@ -1136,11 +1136,11 @@ Explain how this would be done both for the first version of the interpreter and
                (funcall cc val))))
 ```
 
-**Answer 22.3** No.
-`fail` requires continuations with dynamic extent.
+**解答 22.3** できない。
+`fail` は動的範囲を持つ継続を必要とする。
 
-**Answer 22.5** We need only modify `extend-env` to know about an atomic `vars` list.
-While we're at it, we might as well add some error checking:
+**解答 22.5** `extend-env` が、アトムである `vars` を知るように変えればよい。
+ついでに誤りの検査も加えておこう。
 
 ```lisp
 (defun extend-env (vars vals env)
@@ -1155,11 +1155,11 @@ While we're at it, we might as well add some error checking:
                       (extend-env (rest vars) (rest vals) env)))))
 ```
 
-**Answer 22.6** Storing the environment as an association list, `((*var val*)...)`, makes it easy to look up variables with `assoc`.
-We could save one cons cell per variable just by changing to ((*var* . *val*)...).
-But even better is to switch to a different representation, one presented by Steele and Sussman in *The Art of the Interpreter* (1978).
-In this representation we switch from a single list of var/val pairs to a list of frames, where each frame is a var-list/val-list pair.
-It looks like this:
+**解答 22.6** 環境を連想リスト `((*var val*)...)` として格納すると、`assoc` で変数を引きやすい。
+((*var* . *val*)...) に変えるだけで、変数あたりコンスセルを1つ節約できる。
+しかしもっと良いのは、SteeleとSussmanが *The Art of the Interpreter*（1978）で示した別の表現に切り替えることである。
+この表現では、変数と値の対の並び1つから、フレームの並びへと切り替える。各フレームは変数の並びと値の並びの対である。
+次のような形になる。
 
 ```lisp
 (((*var*...) . (*val*...))
@@ -1167,7 +1167,7 @@ It looks like this:
 ...)
 ```
 
-Now `extend-env` is trivial:
+こうすると `extend-env` は自明になる。
 
 ```lisp
 (defun extend-env (vars vals env)
@@ -1175,12 +1175,12 @@ Now `extend-env` is trivial:
   (nconc (mapcar #'list vars vals) env))
 ```
 
-The advantage of this approach is that in most cases we already have a list of variables (the procedure's parameter list) and values (from the `mapcar` of `interp` over the arguments).
-So it is cheaper to just cons these two lists together, rather than arranging them into pairs.
-Of course, `get-var` and `set-var!` become more complex.
+この方式の利点は、たいていの場合、変数の並び（手続きの引数の並び）と値の並び（引数への `interp` の `mapcar` から得たもの）がすでに手元にあることである。
+ですから、対に組み替えるより2つの並びをコンスでつなぐだけのほうが安上がりである。
+もちろん `get-var` と `set-var!` はより込み入ったものになる。
 
-**Answer 22.7** One answer is to destructively alter the source code as it is macro-expanded, so that the next time the source code is interpreted, it will already be expanded.
-The following code takes care of that:
+**解答 22.7** 1つの答えは、マクロ展開のときにソースコードを破壊的に書き換え、次にそのソースコードを解釈するときにはすでに展開済みにしておくことである。
+次のコードがそれを行う。
 
 ```lisp
 (defun scheme-macro-expand (x)
@@ -1194,8 +1194,8 @@ The following code takes care of that:
         (displace old '(begin ,new))))
 ```
 
-One drawback to this approach is that the user's source code is actually changed, which may make debugging confusing.
-An alternative is to expand into something that keeps both the original and macro-expanded code around:
+この方式の難点は、利用者のソースコードが実際に変わってしまうことで、デバッグを紛らわしくするかもしれない。
+別の道は、元のコードとマクロ展開したコードの両方を残す形へ展開することである。
 
 ```lisp
 (defun displace (old new)
@@ -1205,8 +1205,8 @@ An alternative is to expand into something that keeps both the original and macr
   old)
 ```
 
-This means that `DISPLACED` is a new special form, and we need a clause for it in the interpreter.
-It would look something like this:
+つまり `DISPLACED` が新しい特殊形式になるので、インタプリタにその節が要る。
+次のような形になる。
 
 ```lisp
 (case (first x)
@@ -1215,9 +1215,9 @@ It would look something like this:
   ...
 ```
 
-We'd also need to modify the printing routines to print just `old` whenever they see `(displaced old new)`.
+表示のルーチンも、`(displaced old new)` を見たら `old` だけを表示するよう変える必要がある。
 
-**Answer 22.8**
+**解答 22.8**
 
 ```lisp
 (def-scheme-macro let (vars &rest body)
@@ -1246,35 +1246,35 @@ We'd also need to modify the printing routines to print just `old` whenever they
           (cond .,(rest clauses)))))))
 ```
 
-**Answer 22.10** It is easy to define `lambda` as a macro, eliminating the need for `#'(lambda ...)`:
+**解答 22.10** `lambda` をマクロとして定義し、`#'(lambda ...)` を要らなくするのは簡単である。
 
 ```lisp
 (defmacro lambda (args &rest body)
   '(function (lambda .args .@body)))
 ```
 
-If this were part of the Common Lisp standard, I would gladly use it.
-But because it is not, I have avoided it, on the grounds that it can be confusing.
+これがCommon Lispの標準の一部なら、私は喜んで使うだろう。
+しかしそうではないので、紛らわしくなりうるという理由で避けてきた。
 
-It is also possible to write a new function-defining macro that would do the following type of expansion:
+次の型の展開をする、新しい関数定義のマクロを書くこともできる。
 
 ```lisp
 (defn double (x) (* 2 x)) =>
 (defparameter double (defun double (x) (* 2 x)))
 ```
 
-This makes `double` a special variable, so we can write `double` instead of `#'double`.
-But this approach is not recommended-it is dangerous to define special variables that violate the asterisk convention, and the Common Lisp compiler may not be able to optimize special variable references the way it can `function` special forms.
-Also, this approach would not interact properly with `flet` and `labels`.
+これは `double` を特殊変数にするので、`#'double` の代わりに `double` と書ける。
+しかしこの方式は勧められない。アスタリスクの約束を破る特殊変数を定義するのは危ういし、Common Lispのコンパイラは、`function` の特殊形式にできるようには特殊変数の参照を最適化できないかもしれない。
+また、この方式は `flet` や `labels` と正しく噛み合わない。
 
 ----------------------
 
 <a id="fn22-1"></a><sup>[1](#tfn22-1)</sup>
-One writes `numberp` because there is no hyphen in `number` but `random-state-p` because there is a hyphen in `random-state`.
-However, `defstruct` concatenates `-p` in all its predicates, regardless of the presence of a hyphen in the structure's name.
+`number` にハイフンがないので `numberp` と書き、`random-state` にはハイフンがあるので `random-state-p` と書きます。
+しかし `defstruct` は、構造体の名前にハイフンがあるかどうかにかかわらず、どの述語にも `-p` をつなげます。
 
 <a id="fn22-2"></a><sup>[2](#tfn22-2)</sup>
-although inefficient
+効率は悪いものの
 
 <a id="fn22-3"></a><sup>[3](#tfn22-3)</sup>
-McCarthy's words from a talk on the history of Lisp, 1974, recorded by [Stoyan (1984)](bibliography.md#bb1205).
+1974年のLispの歴史についての講演でのMcCarthyの言葉。[Stoyan（1984）](bibliography.md#bb1205)による記録。

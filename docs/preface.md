@@ -1,300 +1,300 @@
-# Preface
+# まえがき
 
-> **paradigm** *n* **1** an example or pattern; *esp* an outstandingly clear or typical example.  
+> **paradigm**（パラダイム）*名* **1** 手本、型。*特に* きわだって明快な、あるいは典型的な例。  
 > -*Longman's Dictionary of the English Language*, 1984
 
-This book is concerned with three related topics: the field of artificial intelligence, or AI; the skill of computer programming; and the programming language Common Lisp.
-Careful readers of this book can expect to come away with an appreciation of the major questions and techniques of AI, an understanding of some important AI programs, and an ability to read, modify, and create programs using Common Lisp.
-The examples in this book are designed to be clear examples of good programming style-paradigms of programming.
-They are also paradigms of AI research-historically significant programs that use widely applicable techniques to solve important problems.
+本書は、たがいに関わりあう3つの話題を扱います。人工知能（AI）という分野、計算機のプログラミングという技能、そしてCommon Lispというプログラミング言語です。
+本書を丁寧に読めば、AIの主要な問いと技法への理解、重要ないくつかのAIプログラムの把握、そしてCommon Lispでプログラムを読み・直し・書く力が身につくはずです。
+本書の例は、よいプログラミングの作法の明快な手本 — プログラミングのパラダイム — となるように作ってあります。
+同時にAI研究のパラダイムでもあります。応用の広い技法を使って重要な問題を解いた、歴史的に意義のあるプログラムたちです。
 
 <a id="tfnpreface-1"></a>
-Just as a liberal arts education includes a course in "the great books" of a culture, so this book is, at one level, a course in "the great programs" that define the AI culture.<sup>[1](#fnpreface-1)</sup>
+教養課程にその文化の「名著」を読む講義があるように、本書もある水準においては、AIの文化を形づくった「名プログラム」を読む講義です。<sup>[1](#fnpreface-1)</sup>
 
-At another level, this book is a highly technical compendium of the knowledge you will need to progress from being an intermediate Lisp programmer to being an expert.
-Parts I and II are designed to help the novice get up to speed, but the complete beginner may have a hard time even with this material.
-Fortunately, there are at least five good texts available for the beginner; see [page xiii](#page-xiii) for my recommendations.
+また別の水準では、本書は中級のLispプログラマから熟練者へ進むために要る知識を、技術的に細かくまとめた一冊です。
+第I部と第II部は初学者が追いつけるように作ってありますが、まったくの初心者にはこの内容でも骨が折れるかもしれません。
+幸い、初心者向けのよい教科書が少なくとも5冊あります。私の推薦は [xiii ページ](#page-xiii) をご覧ください。
 
-All too often, the teaching of computer programming consists of explaining the syntax of the chosen language, showing the student a 10-line program, and then asking the student to write programs.
-In this book, we take the approach that the best way to learn to write is to read (and conversely, a good way to improve reading skills is to write).
-After the briefest of introductions to Lisp, we start right off with complex programs and ask the reader to understand and make small modifications to these programs.
+プログラミングの教え方はあまりにも往々にして、選んだ言語の構文を説明し、10行のプログラムを見せ、そのうえで学生にプログラムを書かせる、というものです。
+本書では、書けるようになる最良の道は読むことだ、という立場をとります（逆に、読む力を鍛えるよい方法は書くことです）。
+Lispをごく手短に紹介したあとは、すぐに複雑なプログラムから始め、それを理解し、少しずつ手を入れてもらいます。
 
-The premise of this book is that you can only write something useful and interesting when you both understand what makes good writing and have something interesting to say.
-This holds for writing programs as well as for writing prose.
-As Kernighan and Plauger put it on the cover of *Software Tools in Pascal:*
+本書の前提はこうです。役に立って面白いものが書けるのは、よい文章とは何かを分かっていて、かつ言うべき面白いことを持っているときだけである。
+これは散文を書くことにも、プログラムを書くことにも当てはまります。
+KernighanとPlaugerが *Software Tools in Pascal* の表紙に記したとおりです。
 
-> Good programming is not learned from generalities, but by seeing how significant programs can be made clean, easy to read, easy to maintain and modify, human-engineered, efficient, and reliable, by the application of common sense and good programming practices.
-Careful study and imitation of good programs leads to better writing.
+> よいプログラミングは一般論から学ばれるものではない。意義あるプログラムが、常識とよい作法の適用によって、いかに整い、読みやすく、保守と変更がしやすく、人に優しく、効率よく、頼りになるものになりうるかを見ることで学ばれる。
+よいプログラムを丹念に読み、まねることが、よりよい書き手をつくる。
 
-The proud craftsman is often tempted to display only the finished work, without any indication of the false starts and mistakes that are an unfortunate but unavoidable part of the creative process.
-Unfortunately, this reluctance to unveil the process is a barrier to learning; a student of mathematics who sees a beautiful 10-line proof in a textbook can marvel at its conciseness but does not learn how to construct such a proof.
-This book attempts to show the complete programming process, "warts and all." Each chapter starts with a simple version of a program, one that works on some examples but fails on others.
-Each chapter shows how these failures can be analyzed to build increasingly sophisticated versions of the basic program.
-Thus, the reader can not only appreciate the final result but also see how to learn from mistakes and refine an initially incomplete design.
-Furthermore, the reader who finds a particular chapter is becoming too difficult can skip to the next chapter, having gained some appreciation of the problem area, and without being overwhelmed by the details.
+腕に覚えのある職人は、出来上がったものだけを見せたくなるものです。創作につきものの、残念ながら避けられない出だしのしくじりや間違いは、伏せておきたくなる。
+しかし過程を見せたがらないことは、学びの妨げになります。教科書で10行の美しい証明を見た数学の学生は、その簡潔さに感嘆はしても、そうした証明の組み立て方は学べません。
+本書は、プログラミングの過程を「あばたも含めて」丸ごと見せようとします。各章はまず単純な版のプログラムから始めます。ある例ではうまくいくが、別の例では失敗する版です。
+そして各章は、その失敗をどう分析して、基本のプログラムをしだいに洗練された版へ育てていくかを示します。
+こうすることで、読者は最終形を味わうだけでなく、間違いから学び、最初は不完全だった設計を練り上げていく道筋も見ることができます。
+さらに、ある章が難しすぎると感じた読者は、その問題領域の感触だけをつかんで、細部に押しつぶされる前に次の章へ飛べます。
 
-This book presents a body of knowledge loosely known as "AI programming techniques," but it must be recognized that there are no clear-cut boundaries on this body of knowledge.
-To be sure, no one can be a good AI programmer without first being a good programmer.
-Thus, this book presents topics (especially in parts III and V) that are not AI per se, but are essential background for any AI practitioner.
+本書は「AIプログラミングの技法」とゆるく呼ばれる知識の体系を提示しますが、この体系にはっきりした境界がないことは認めておかねばなりません。
+確かなのは、まずよいプログラマでなければ、よいAIプログラマにはなれないということです。
+そのため本書は（とくに第III部と第V部で）、AIそのものではないけれども、AIに携わる者にとって欠かせない下地となる話題も扱います。
 
-## Why Lisp? Why Common Lisp?
+## なぜLispか、なぜCommon Lispか
 
-Lisp is one of the oldest programming languages still in widespread use today.
-There have been many versions of Lisp, each sharing basic features but differing in detail.
-In this book we use the version called Common Lisp, which is the most widely accepted standard.
-Lisp has been chosen for three reasons.
+Lispは、今日なお広く使われているプログラミング言語のなかで最も古い部類に入ります。
+Lispには多くの版があり、基本的な特徴は共有しつつ、細部が異なっています。
+本書では、最も広く受け入れられている標準であるCommon Lispという版を使います。
+Lispを選んだ理由は3つあります。
 
-First, Lisp is the most popular language for AI programming, particularly in the United States.
-If you're going to learn a language, it might as well be one with a growing literature, rather than a dead tongue.
+第一に、Lispは — とくにアメリカでは — AIプログラミングで最も広く使われている言語です。
+どうせ言語を学ぶなら、死語よりも文献が増えつづけているもののほうがよいでしょう。
 
-Second, Lisp makes it easy to capture relevant generalizations in defining new objects.
-In particular, Lisp makes it easy to define new languages especially targeted to the problem at hand.
-This is especially handy in AI applications, which often manipulate complex information that is most easily represented in some novel form.
-Lisp is one of the few languages that allows full flexibility in defining and manipulating programs as well as data.
-All programming languages, by definition, provide a means of defining programs, but many other languages limit the ways in which a program can be used, or limit the range of programs that can be defined, or require the programmer to explicitly state irrelevant details.
+第二に、Lispでは新しいオブジェクトを定義するときに、意味のある一般化を捉えやすい。
+とりわけ、目の前の問題に合わせた新しい言語を定義するのが容易です。
+これはAIの応用で特に重宝します。AIでは、目新しい形で表すのがいちばん扱いやすいような複雑な情報を、しばしば操作するからです。
+データだけでなくプログラムそのものを定義し操作することに、完全な自由を許す数少ない言語の1つがLispです。
+どんなプログラミング言語も、定義上、プログラムを定義する手段は備えています。しかし多くの言語は、プログラムの使い道を狭め、定義できるプログラムの範囲を狭め、あるいは本質と関係のない細部をプログラマに明示させます。
 
-Third, Lisp makes it very easy to develop a working program fast.
-Lisp programs are concise and are uncluttered by low-level detail.
-Common Lisp offers an unusually large number of useful predefined objects, including over 700 functions.
-The programming environment (such as debugging tools, incremental compilers, integrated editors, and interfaces to window systems) that surround Lisp systems are usually very good.
-And the dynamic, interactive nature of Lisp makes it easy to experiment and change a program while it is being developed.
+第三に、Lispでは動くプログラムを素早く仕上げるのがとても容易です。
+Lispのプログラムは簡潔で、低水準の細部で散らかりません。
+Common Lispは、700を超える関数を含む、異例なほど多くの便利な既定のオブジェクトを備えています。
+Lisp処理系を取り巻く開発環境（デバッグ道具、逐次コンパイラ、統合されたエディタ、ウィンドウシステムとの接続など）も、たいていとても良質です。
+そしてLispの動的で対話的な性質のおかげで、開発しながら試し、書き換えることが容易です。
 
-It must be mentioned that in Europe and Japan, Prolog has been as popular as Lisp for AI work.
-Prolog shares most of Lisp's advantages in terms of flexibility and conciseness.
-Recently, Lisp has gained popularity worldwide, and Prolog is becoming more well known in the United States.
-As a result, the average AI worker today is likely to be bilingual.
-This book presents the key ideas behind Prolog in [chapters 11](chapter11.md) and [12](chapter12.md), and uses these ideas in subsequent chapters, particularly [20](chapter20.md) and [21](chapter21.md).
+付け加えておくと、ヨーロッパと日本では、AIの仕事にPrologがLispと同じくらい使われてきました。
+Prologは、柔軟さと簡潔さという点でLispの長所の大半を共有しています。
+近年はLispが世界的に広まり、Prologもアメリカで知られるようになってきました。
+その結果、今日のAI技術者は両刀使いであることが多いでしょう。
+本書では [第11章](chapter11.md) と [第12章](chapter12.md) でPrologの中心にある考えを示し、以降の章、とくに [第20章](chapter20.md) と [第21章](chapter21.md) でそれを使います。
 
-The dialect of Lisp known as Scheme is also gaining in popularity, but primarily for teaching and experimenting with programming language design and techniques, and not so much for writing large AI programs.
-Scheme is presented in [chapters 22](chapter22.md) and [23](chapter23.md).
-Other dialects of Lisp such as Franz Lisp, MacLisp, InterLisp, ZetaLisp, and Standard Lisp are now considered obsolete.
-The only new dialect of Lisp to be proposed recently is EuLisp, the European Lisp.
-A few dialects of Lisp live on as embedded extension languages.
-For example, the Gnu Emacs text editor uses elisp, and the AutoCad computer-aided design package uses AutoLisp, a derivative of Xlisp.
-In the future, it is likely that Scheme will become a popular extension language, since it is small but powerful and has an officially sanctioned standard definition.
+Schemeと呼ばれるLispの方言も広まりつつありますが、主に教育や、プログラミング言語の設計・技法の実験のためであって、大きなAIプログラムを書くためではありません。
+Schemeは [第22章](chapter22.md) と [第23章](chapter23.md) で扱います。
+Franz Lisp、MacLisp、InterLisp、ZetaLisp、Standard Lispといった他の方言は、今では過去のものと見なされています。
+近年になって提案された新しい方言は、ヨーロッパのLispであるEuLispだけです。
+いくつかの方言は、組み込みの拡張言語として生き延びています。
+たとえばテキストエディタGnu Emacsはelispを使い、CADソフトのAutoCadはXlispから派生したAutoLispを使っています。
+将来は、小さいながら強力で、公式に認められた標準の定義を持つSchemeが、拡張言語として広く使われるようになりそうです。
 
-There is a myth that Lisp (and Prolog) are "special-purpose" languages, while languages like Pascal and C are "general purpose." Actually, just the reverse is true.
-Pascal and C are special-purpose languages for manipulating the registers and memory of a von Neumann-style computer.
-The majority of their syntax is devoted to arithmetic and Boolean expressions, and while they provide some facilities for forming data structures, they have poor mechanisms for procedural abstraction or control abstraction.
-In addition, they are designed for the state-oriented style of programming: computing a result by changing the value of variables through assignment statements.
+Lisp（やProlog）は「特定用途向け」の言語で、PascalやCのような言語こそ「汎用」だ、という俗説があります。実際は逆です。
+PascalとCは、ノイマン型計算機のレジスタとメモリを操作するための特定用途向け言語です。
+その構文の大半は算術式と論理式に費やされており、データ構造を組み立てる仕組みはいくらかあるものの、手続きの抽象化や制御の抽象化の仕組みは貧弱です。
+加えて、状態に基づく流儀 — 代入文で変数の値を変えていくことで結果を計算する — のために設計されています。
 
-Lisp, on the other hand, has no special syntax for arithmetic.
-Addition and multiplication are no more or less basic than list operations like appending, or string operations like converting to upper case.
-But Lisp provides all you will need for programming in general: defining data structures, functions, and the means for combining them.
+一方Lispには、算術のための特別な構文がありません。
+加算や乗算は、リストの連結のような操作や、大文字に変換するような文字列操作と比べて、より基本的でもより基本的でなくもありません。
+それでもLispは、プログラミング一般に必要なものをすべて備えています。データ構造の定義、関数の定義、そしてそれらを組み合わせる手立てです。
 
-The assignment-dominated, state-oriented style of programming is possible in Lisp, but in addition object-oriented, rule-based, and functional styles are all supported within Lisp.
-This flexibility derives from two key features of Lisp: First, Lisp has a powerful *macro* facility, which can be used to extend the basic language.
-When new styles of programming were invented, other languages died out; Lisp simply incorporated the new styles by defining some new macros.
-The macro facility is possible because Lisp programs are composed of a simple data structure: the list.
-In the early days, when Lisp was interpreted, most manipulation of programs was done through this data structure.
-Nowadays, Lisp is more often compiled than interpreted, and programmers rely more on Lisp's second great flexible feature: the *function*.
-Of course, other languages have functions, but Lisp is rare in allowing the creation of new functions while a program is running.
+代入を軸にした状態中心の流儀もLispで書けますが、それに加えてオブジェクト指向、規則に基づく流儀、関数的な流儀のいずれもLispの中で支えられています。
+この柔軟さは、Lispの2つの重要な特徴に由来します。第一に、Lispは基本の言語を拡張できる強力な *マクロ* の仕組みを持っています。
+新しいプログラミングの流儀が生まれるたびに他の言語は滅んでいきましたが、Lispは新しいマクロをいくつか定義するだけで、その流儀を取り込んでしまいました。
+マクロの仕組みが成り立つのは、Lispのプログラムが単純なデータ構造 — リスト — でできているからです。
+Lispが解釈実行されていた初期には、プログラムの操作の大半がこのデータ構造を通して行われていました。
+今日ではLispは解釈されるよりコンパイルされることが多く、プログラマはLispのもう1つの大きな柔軟さ — *関数* — に頼るようになっています。
+もちろん他の言語にも関数はありますが、プログラムの実行中に新しい関数を作れる言語は稀です。
 
-Lisp's flexibility allows it to adapt as programming styles change, but more importantly, Lisp can adapt to your particular programming problem.
-In other languages you fit your problem to the language; with Lisp you extend the language to fit your problem.
+Lispの柔軟さは、プログラミングの流儀の変化に合わせて自らを変えることを許します。しかしもっと大事なのは、Lispがあなたの目の前の問題に合わせて変われることです。
+他の言語では問題を言語に合わせます。Lispでは言語を問題に合わせて広げます。
 
-Because of its flexibility, Lisp has been successful as a high-level language for rapid prototyping in areas such as AI, graphics, and user interfaces.
-Lisp has also been the dominant language for exploratory programming, where the problems are so complex that no clear solution is available at the start of the project.
-Much of AI falls under this heading.
+この柔軟さゆえに、Lispは、AI・グラフィックス・ユーザインタフェースといった分野で、素早く試作するための高水準言語として成功してきました。
+また、問題が複雑すぎて着手の時点では明確な解が見えていない、探索的なプログラミングの主役でもありました。
+AIの多くはこれに当てはまります。
 
-The size of Common Lisp can be either an advantage or a disadvantage, depending on your outlook.
-In David Touretzky's (1989) fine book for beginning programmers, the emphasis is on simplicity.
-He chooses to write some programs slightly less concisely, rather than introduce an esoteric new feature (he cites `pushnew` as an example).
-That approach is entirely appropriate for beginners, but this book goes well past the level of beginner.
-This means exposing the reader to new features of the language whenever they are appropriate.
-Most of the time, new features are described as they are introduced, but sometimes explaining the details of a low-level function would detract from the explanation of the workings of a program.
-In accepting the privilege of being treated as an "adult," the reader also accepts a responsibility-to look up unfamiliar terms in an appropriate reference source.
+Common Lispの大きさは、見方によって長所にも短所にもなります。
+David Touretzkyの初心者向けの好著（1989）では、単純さが重んじられています。
+彼は、込み入った新機能を持ち出すくらいなら、多少簡潔さを落としてプログラムを書くほうを選びます（例として `pushnew` を挙げています）。
+初心者にはまったく適切なやり方ですが、本書は初心者の水準をはるかに越えて進みます。
+つまり、ふさわしい場面では言語の新しい機能を遠慮なく読者に見せる、ということです。
+たいていは、機能を出したところで説明します。ただ、低水準の関数の細部を説明すると、プログラムの動きの説明が損なわれてしまう場面もあります。
+「大人」として扱われる特権を受け取る以上、読者は責任も引き受けることになります。見慣れない用語は、しかるべき資料で自分で引く、という責任です。
 
-## Outline of the Book
+## 本書の構成
 
-This book is organized into five parts.
+本書は5つの部からなります。
 
-**Part I** introduces the Common Lisp programming language.
+**第I部** はCommon Lispというプログラミング言語を紹介します。
 
-[Chapter 1](chapter1.md) gives a quick introduction by way of small examples that demonstrate the novel features of Lisp.
-It can be safely skipped or skimmed by the experienced programmer.
+[第1章](chapter1.md) は、Lispの目新しい特徴を示す小さな例を通して、手早く入門します。
+経験のあるプログラマは飛ばすか、ざっと目を通すだけで構いません。
 
-[Chapter 2](chapter2.md) is a more extended example showing how the Lisp primitives can be put together to form a program.
-It should be studied carefully by the novice, and even the experienced programmer will want to look through it to get a feel for my programming style.
+[第2章](chapter2.md) はもう少し長い例で、Lispの基本要素を組み合わせてプログラムを作る様子を見せます。
+初学者は丁寧に読むべきですし、経験者も私のプログラミングの流儀をつかむために目を通しておきたいところです。
 
-[Chapter 3](chapter3.md) provides an overview of the Lisp primitives.
-It can be skimmed on first reading and used as a reference whenever an unfamiliar function is mentioned in the text.
+[第3章](chapter3.md) はLispの基本要素を概観します。
+初読では流し読みし、本文に見慣れない関数が出てきたときの参照先として使うとよいでしょう。
 
-Part I has been kept intentionally brief, so that there is more room for presenting actual AI programs.
-Unfortunately, that means that another text or reference book (or online help) may be needed to clarify some of the more esoteric features of the language.
-My recommendations for texts are on page xiii.
+第I部は、実際のAIプログラムに紙幅を割くために、意図して短くしてあります。
+そのぶん、言語の込み入った機能を理解するには、別の教科書や参考書（あるいはオンラインのヘルプ）が要るかもしれません。
+私の推薦する教科書は xiii ページにあります。
 
-The reader may also want to refer to [chapter 25](chapter25.md), which offers some debugging and troubleshooting hints.
+デバッグと不具合の切り分けの手がかりを載せた [第25章](chapter25.md) も参考になるでしょう。
 
-**Part II** covers four early AI programs that all use rule-based pattern-matching techniques.
-By starting with relatively simple versions of the programs and then improving them and moving on to more complex programs, the reader is able to gradually acquire increasingly advanced programming skills.
+**第II部** では、いずれも規則に基づくパターン照合の技法を使う、初期のAIプログラム4つを扱います。
+比較的単純な版から始めて改良し、より複雑なプログラムへ進むことで、読者はしだいに高度なプログラミングの技を身につけられます。
 
-[Chapter 4](chapter4.md) presents a reconstruction of GPS, the General Problem Solver.
-The implementation follows the STRIPS approach.
+[第4章](chapter4.md) は、汎用問題解決器GPSを作り直してみせます。
+実装はSTRIPSの流儀に沿っています。
 
-[Chapter 5](chapter5.md) describes ELIZA, a program that mimics human dialogue.
-This is followed by a chapter that generalizes some of the techniques used in GPS and ELIZA and makes them available as tools for use in subsequent programs.
+[第5章](chapter5.md) は、人間の対話をまねるプログラムELIZAを説明します。
+続く章では、GPSとELIZAで使った技法のいくつかを一般化し、以降のプログラムで使える道具として仕立てます。
 
-[Chapter 7](chapter7.md) covers STUDENT, a program that solves high-school-level algebra word problems.
+[第7章](chapter7.md) は、高校程度の代数の文章題を解くプログラムSTUDENTを扱います。
 
-[Chapter 8](chapter8.md) develops a small subset of the MACSYMA program for doing symbolic algebra, including differential and integral calculus.
-It may be skipped by those who shy away from heavy mathematics.
+[第8章](chapter8.md) では、微分積分を含む記号代数を行うMACSYMAの小さな部分集合を作ります。
+重めの数学が苦手な方は飛ばしても構いません。
 
-**Part III** detours from AI for a moment to present some general tools for more efficient programming.
-The reader who masters the material in this part can be considered an advanced Lisp programmer.
+**第III部** はしばらくAIを離れ、より効率のよいプログラミングのための汎用の道具を紹介します。
+この部の内容を修めた読者は、上級のLispプログラマと言ってよいでしょう。
 
-[Chapter 9](chapter9.md) is a detailed study of efficiency techniques, concentrating on caching, indexing, compilation, and delaying computation.
-[Chapter 10](chapter10.md) covers lower-level efficiency issues such as using declarations, avoiding garbage generation, and choosing the right data structure.
+[第9章](chapter9.md) は効率の技法を詳しく調べます。キャッシュ、索引付け、コンパイル、計算の遅延が中心です。
+[第10章](chapter10.md) は、宣言の利用、ごみの発生を抑えること、適切なデータ構造の選択といった、より低水準の効率の問題を扱います。
 
-[Chapter 11](chapter11.md) presents the Prolog language.
-The aim is two-fold: to show how to write an interpreter for another language, and to introduce the important features of Prolog, so that they can be used where appropriate.
-[Chapter 12](chapter12.md) shows how a compiler for Prolog can be 20 to 200 times faster than the interpreter.
+[第11章](chapter11.md) はProlog言語を紹介します。
+狙いは2つ。別の言語のインタプリタの書き方を示すことと、Prologの重要な特徴を紹介して、ふさわしい場面で使えるようにすることです。
+[第12章](chapter12.md) では、Prologのコンパイラがインタプリタより20倍から200倍速くなりうることを示します。
 
-[Chapter 13](chapter13.md) introduces object-oriented programming in general, then explores the Common Lisp Object System (CLOS).
+[第13章](chapter13.md) はオブジェクト指向プログラミング全般を紹介し、続いてCommon Lisp Object System（CLOS）を掘り下げます。
 
-[Chapter 14](chapter14.md) discusses the advantages and limitations of both logic-oriented and object-oriented programming, and develops a knowledge representation formalism using all the techniques of part III.
+[第14章](chapter14.md) は論理指向とオブジェクト指向それぞれの長所と限界を論じ、第III部の技法を総動員して知識表現の枠組みを作ります。
 
-**Part IV** covers some advanced AI programs.
+**第IV部** では、進んだAIプログラムをいくつか扱います。
 
-[Chapter 15](chapter15.md) uses the techniques of part III to come up with a much more efficient implementation of MACSYMA. It uses the idea of a canonical form, and replaces the very general rewrite rule approach with a series of more specific functions.
+[第15章](chapter15.md) は第III部の技法を使い、MACSYMAのはるかに効率のよい実装を導きます。標準形という考えを用い、きわめて一般的な書き換え規則の方式を、より個別の関数の連なりに置き換えます。
 
-[Chapter 16](chapter16.md) covers the EMYCIN expert system shell, a backward chaining rule-based system based on certainty factors.
-The MYCIN medical expert system is also covered briefly.
+[第16章](chapter16.md) は、確信度に基づく後ろ向き連鎖の規則型システムであるエキスパートシステムの殻EMYCINを扱います。
+医療エキスパートシステムMYCINにも短く触れます。
 
-[Chapter 17](chapter17.md) covers the Waltz line-labeling algorithm for polyhedra (using Huffman-Clowes labels).
-Different approaches to constraint propagation and backtracking are discussed.
+[第17章](chapter17.md) は、多面体に対するWaltzの線ラベル付けアルゴリズム（Huffman-Clowesのラベルを使う）を扱います。
+制約伝播とバックトラックのさまざまな方式を論じます。
 
-[Chapter 18](chapter18.md) presents a program that plays an excellent game of Othello.
-The technique used, alpha-beta searching, is appropriate to a wide variety of two-person games.
+[第18章](chapter18.md) は、見事なオセロを指すプログラムを示します。
+用いる技法であるアルファベータ探索は、さまざまな二人ゲームに適します。
 
-[Chapter 19](chapter19.md) is an introduction to natural language processing.
-It covers context-free grammar, top-down and bottom-up parsing, chart parsing, and some semantic interpretation and preferences.
+[第19章](chapter19.md) は自然言語処理への入門です。
+文脈自由文法、下向き・上向きの構文解析、チャート法による構文解析、そして意味解釈と選好にいくらか触れます。
 
-[Chapter 20](chapter20.md) extends the linguistic coverage of the previous chapter and introduces logic grammars, using the Prolog compiler developed in [chapter 11](chapter11.md).
+[第20章](chapter20.md) は前章の言語的な守備範囲を広げ、[第11章](chapter11.md) で作ったPrologコンパイラを使って論理文法を紹介します。
 
-[Chapter 21](chapter21.md) is a fairly comprehensive grammar of English using the logic grammar formalism.
-The problems of going from a simple idea to a realistic, comprehensive program are discussed.
+[第21章](chapter21.md) は、論理文法の枠組みによる、かなり網羅的な英語の文法です。
+単純な着想から現実的で網羅的なプログラムへ進むときの難しさを論じます。
 
-**Part V** includes material that is peripheral to AI but important for any serious Lisp programmer.
+**第V部** は、AIの周辺にあるけれども、本気のLispプログラマには重要な内容を収めています。
 
-[Chapter 22](chapter22.md) presents the Scheme dialect of Lisp.
-A simple Scheme interpreter is developed, then a properly tail-recursive interpreter, then an interpreter that explicitly manipulates continuations and supports `call/cc`.
-[Chapter 23](chapter23.md) presents a Scheme compiler.
+[第22章](chapter22.md) はLispの方言Schemeを紹介します。
+まず単純なSchemeインタプリタを作り、次に末尾再帰を正しく扱うインタプリタ、さらに継続を明示的に操作して `call/cc` を支えるインタプリタへと進みます。
+[第23章](chapter23.md) はSchemeのコンパイラを示します。
 
-[Chapter 24](chapter24.md) presents the features that are unique to American National Standards Institute (ANSI) Common Lisp.
-This includes the `loop` macro, as well as error handling, pretty printing, series and sequences, and the package facility.
+[第24章](chapter24.md) は、米国規格協会（ANSI）版のCommon Lisp固有の機能を示します。
+`loop` マクロのほか、エラー処理、整形出力、seriesとsequence、パッケージの仕組みが含まれます。
 
-[Chapter 25](chapter25.md) is a guide to troubleshooting and debugging Lisp programs.
+[第25章](chapter25.md) はLispプログラムの不具合の切り分けとデバッグの手引きです。
 
-The bibliography lists over 200 sources, and there is a comprehensive index.
-In addition, the appendix provides a directory of publicly available Lisp programs.
+参考文献には200を超える資料を挙げ、詳しい索引も付けてあります。
+さらに付録では、公開されているLispプログラムの一覧を示します。
 
-## How to Use This Book
+## 本書の使い方
 
-The intended audience for this book is broad: anyone who wants to become an advanced Lisp programmer, and anyone who wants to be an advanced AI practitioner.
-There are several recommended paths through the book:
+本書が想定する読者は幅広い — 上級のLispプログラマになりたい人、そして進んだAIの実践者になりたい人すべてです。
+本書のたどり方をいくつか挙げます。
 
-*   *In an Introductory AI Course:* Concentrate on parts I and II, and at least one example from part IV.
+*   *AI入門の講義で:* 第I部と第II部を中心に、第IV部から少なくとも1つの例を。
 
-*   *In an Advanced AI Programming Course:* Concentrate on parts I, II and IV, skipping chapters that are of less interest and adding as much of part III as time permits.
+*   *AIプログラミングの上級講義で:* 第I部・第II部・第IV部を中心に、関心の薄い章は飛ばし、時間が許すかぎり第III部を加える。
 
-*   *In an Advanced Programming Languages Course:* Concentrate on parts I and V, with selections from part III.
-Cover [chapters 11](chapter11.md) and [13](chapter13.md) if similar material is not presented with another text.
+*   *プログラミング言語の上級講義で:* 第I部と第V部を中心に、第III部から適宜選ぶ。
+同様の内容を別の教科書で扱っていなければ、[第11章](chapter11.md) と [第13章](chapter13.md) も取り上げてください。
 
-*   *For the Professional Lisp Programmer:* Read as much of the book as possible, and refer back to it often.
-Part III and [chapter 25](chapter25.md) are particularly important.
+*   *職業としてのLispプログラマへ:* できるかぎり多くを読み、何度も参照してください。
+第III部と [第25章](chapter25.md) がとりわけ重要です。
 
-## Supplementary Texts and Reference Books
+## 補助教材と参考書
 <a name="page-xiii"></a>
 
-The definitive reference source is [Steele](https://en.wikipedia.org/wiki/Guy_L._Steele_Jr.)'s [*Common Lisp the Language*](https://www.cs.cmu.edu/Groups/AI/html/cltl/cltl2.html).
-From 1984 to 1990, this unambiguously defined the language Common Lisp.
-However, in 1990 the picture became more complicated by the publication of [*Common Lisp the Language*, 2d edition](https://www.cs.cmu.edu/Groups/AI/html/cltl/cltl2.html).
-This book, also by Steele, contains the recommendations of ANSI subcommittee X3J13, whose charter is to define a standard for Lisp.
-These recommendations include many minor changes and clarifications, as well as brand new material on object-oriented programming, error condition handling, and the loop macro.
-The new material doubles the size of the book from 465 to 1029 pages.
+決定版の参照元は [Steele](https://en.wikipedia.org/wiki/Guy_L._Steele_Jr.) の [*Common Lisp the Language*](https://www.cs.cmu.edu/Groups/AI/html/cltl/cltl2.html) です。
+1984年から1990年まで、これがCommon Lispという言語を曖昧さなく定めていました。
+しかし1990年、[*Common Lisp the Language* 第2版](https://www.cs.cmu.edu/Groups/AI/html/cltl/cltl2.html) の刊行で事情は込み入りました。
+同じくSteeleによるこの本には、Lispの標準を定めることを任務とするANSI小委員会X3J13の勧告が収められています。
+勧告には、細かな変更や明確化が多数含まれるほか、オブジェクト指向プログラミング、エラー条件の処理、loopマクロについてまったく新しい内容が加わっています。
+新しい内容によって、本の厚みは465ページから1029ページへと倍増しました。
 
-Until the ANSI recommendations are formally accepted, Common Lisp users are in the unfortunate situation of having two distinct and incompatible standards: "original" Common Lisp and ANSI Common Lisp.
-Most of the code in this book is compliant with both standards.
-The most significant use of an ANSI function is the `loop` macro.
-The ANSI `map-into`, `complement`, and `reduce` functions are also used, although rarely.
-Definitions for all these functions are included, so even those using an "original" Common Lisp system can still run all the code in the book.
+ANSIの勧告が正式に受け入れられるまで、Common Lispの利用者は、たがいに異なり両立しない2つの標準 —「元の」Common LispとANSI Common Lisp — を抱えるという困った状況に置かれます。
+本書のコードの大半は両方の標準に適合しています。
+ANSI固有のもので最も目立つのは `loop` マクロの使用です。
+ANSIの `map-into`、`complement`、`reduce` も、まれにですが使っています。
+これらの関数の定義はすべて収めてあるので、「元の」Common Lisp処理系を使っている方でも本書のコードはすべて動かせます。
 
-While *Common Lisp the Language* is the definitive standard, it is sometimes terse and can be difficult for a beginner.
-[*Common Lisp: the Reference*](https://archive.org/details/commonlisprefere00fran), published by Franz Inc., offers complete coverage of the language with many helpful examples.
-[*Common LISPcraft*](https://www.amazon.com/Common-LISPcraft-Robert-Wilensky/dp/0393955443), by [the late] [Robert Wilensky](https://www2.eecs.berkeley.edu/Faculty/Homepages/wilensky.html), and *Artificial Intelligence Programming*, by Charniak et al., also include brief summaries of the Common Lisp functions.
-They are not as comprehensive, but that can be a blessing, because it can lead the reader more directly to the functions that are important (at least in the eyes of the author).
+*Common Lisp the Language* は決定版の標準ですが、記述が簡潔すぎて初心者には難しいことがあります。
+Franz Inc.が出した [*Common Lisp: the Reference*](https://archive.org/details/commonlisprefere00fran) は、言語を余さず扱い、役立つ例を多く載せています。
+[故] [Robert Wilensky](https://www2.eecs.berkeley.edu/Faculty/Homepages/wilensky.html) の [*Common LISPcraft*](https://www.amazon.com/Common-LISPcraft-Robert-Wilensky/dp/0393955443) と、Charniakらの *Artificial Intelligence Programming* にも、Common Lispの関数の短いまとめがあります。
+網羅性では劣りますが、それはむしろ幸いかもしれません。（少なくとも著者の目に）重要な関数へ、より直接に導いてくれるからです。
 
-It is a good idea to read this book with a computer at hand, to try out the examples and experiment with examples of your own.
-A computer is also handy because Lisp is self-documenting, through the functions `apropos`, `describe`, and `documentation`.
-Many implementations also provide more extensive documentation through some kind of 'help' command or menu.
+本書は計算機を手元に置いて読むのがよいでしょう。例を動かし、自分なりの例で試すためです。
+Lispは `apropos`、`describe`、`documentation` といった関数によって自分自身を説明できるので、その点でも計算機は重宝します。
+多くの処理系は、何らかの「ヘルプ」コマンドやメニューを通じて、さらに詳しい文書も提供しています。
 
-The five introductory Lisp textbooks I recommend are listed below.
-The first is more elementary than the others.
+私が薦めるLispの入門書5冊を挙げます。
+最初の1冊は他より初歩的です。
 
-*   [*Common Lisp: A Gentle Introduction to Symbolic Computation*](https://www.cs.cmu.edu/~dst/LispBook/book.pdf) by [David Touretzky](http://www.cs.cmu.edu/~dst/).
-Most appropriate for beginners, including those who are not computer scientists.
+*   [*Common Lisp: A Gentle Introduction to Symbolic Computation*](https://www.cs.cmu.edu/~dst/LispBook/book.pdf) — [David Touretzky](http://www.cs.cmu.edu/~dst/)著。
+初心者に最も向いています。計算機科学が専門でない方にも。
 
-*   *A Programmer's Guide to Common Lisp* by Deborah G. Tatar.
-Appropriate for those with experience in another programming language, but none in Lisp.
+*   *A Programmer's Guide to Common Lisp* — Deborah G. Tatar著。
+他のプログラミング言語の経験はあるがLispは初めて、という方に向いています。
 
-*   *Common LISPcraft* by Robert Wilensky.
-More comprehensive and faster paced, but still useful as an introduction as well as a reference.
+*   *Common LISPcraft* — Robert Wilensky著。
+より網羅的で進みも速いですが、入門書としても参考書としても使えます。
 
-*   *Common Lisp* by Wade L. Hennessey.
-Somewhat hit-and-miss in terms of the topics it covers, but with an enlightened discussion of implementation and efficiency issues that do not appear in the other texts.
+*   *Common Lisp* — Wade L. Hennessey著。
+扱う話題にはむらがありますが、他書にない実装と効率の問題について、目の開かれる議論があります。
 
-*   *LISP* (3d edition) by Patrick H. Winston and Bertold Horn.
-Covers the most ground in terms of programming advice, but not as comprehensive as a reference.
-May be difficult for beginners.
-Includes some AI examples.
+*   *LISP*（第3版）— Patrick H. WinstonとBertold Horn著。
+プログラミングの助言という点では最も広く扱っていますが、参考書としての網羅性は劣ります。
+初心者には難しいかもしれません。
+AIの例もいくつか含みます。
 
-While it may be distracting for the beginner to be continually looking at some reference source, the alternative-to have this book explain every new function in complete detail as it is introduced-would be even more distracting.
-It would interrupt the description of the AI programs, which is what this book is all about.
+絶えず参考書を引くのは初心者には気の散ることかもしれませんが、その代わりに本書が新しい関数を出るたび細部まで説明したら、もっと気が散るでしょう。
+AIプログラムの説明が途切れてしまいます。本書の眼目はそこにあるのです。
 
-There are a few texts that show how to write AI programs and tools, but none that go into the depth of this book.
-Nevertheless, the expert AI programmer will want to be familiar with all the following texts, listed in rough order of increasing sophistication:
+AIプログラムや道具の書き方を示す本はいくつかありますが、本書ほど掘り下げたものはありません。
+とはいえ、熟練のAIプログラマなら次の本にはひととおり通じておきたいところです。おおよそ高度になる順に並べます。
 
-*   *LISP* (3d edition).
-(See above.)
+*   *LISP*（第3版）。
+（前掲）
 
-*   *Programming Paradigms in Lisp* by Rajeev Sangal.
-Presents the different styles of programming that Lisp accommodates, illustrating them with some useful AI tools.
+*   *Programming Paradigms in Lisp* — Rajeev Sangal著。
+Lispが受け入れるさまざまなプログラミングの流儀を、役に立つAIの道具で例示しながら示します。
 
-*   *Programming for Artificial Intelligence* by Wolfgang Kreutzer and Bruce McKenzie.
-Covers some of the basics of rule-based and pattern-matching systems well, but covers Lisp, Prolog, and Smalltalk, and thus has no time left for details in any of the languages.
+*   *Programming for Artificial Intelligence* — Wolfgang KreutzerとBruce McKenzie著。
+規則型・パターン照合型システムの基礎をよく押さえていますが、Lisp・Prolog・Smalltalkを扱うため、どの言語も細部まで踏み込む余裕がありません。
 
-*   *Artificial Intelligence Programming* (2d edition) by Eugene Charniak, Christopher Riesbeck, Drew McDermott, and James Meehan.
-Contains 150 pages of Lisp overview, followed by an advanced discussion of AI tools, but no actual AI programs.
+*   *Artificial Intelligence Programming*（第2版）— Eugene Charniak、Christopher Riesbeck、Drew McDermott、James Meehan著。
+150ページのLisp概観に続いてAIの道具を高度に論じますが、実際のAIプログラムは載っていません。
 
-*   *AI in Practice: Examples in Pop-11* by Allan Ramsey and Rosalind Barrett.
-Advanced, high-quality implementations of five AI programs, unfortunately using a language that has not gained popularity.
+*   *AI in Practice: Examples in Pop-11* — Allan RamseyとRosalind Barrett著。
+5つのAIプログラムの高度で質の高い実装ですが、あいにく広まらなかった言語を使っています。
 
-The current text combines the virtues of the last two entries: it presents both actual AI programs and the tools necessary to build them.
-Furthermore, the presentation is in an incremental fashion, with simple versions presented first for clarity, followed by more sophisticated versions for completeness.
+本書は最後の2冊の美点を兼ねます。実際のAIプログラムと、それを組み立てるのに要る道具の両方を示します。
+しかも段階を追って示します。まず明快さのために単純な版を、続いて完全さのためにより洗練された版を出します。
 
-## A Note on Exercises
+## 練習問題について
 
-Sample exercises are provided throughout.
-Readers can test their level of understanding by faithfully doing the exercises.
-The exercises are graded on the scale [s], [m], [h], [d], which can be interpreted either as a level of difficulty or as an expected time it will take to do the exercise:
+練習問題を随所に置いてあります。
+きちんと解くことで、自分の理解の程度を測れます。
+問題には [s]、[m]、[h]、[d] の等級を付けてあります。難しさとも、解くのにかかる見込みの時間とも読めます。
 
-| Code | Difficulty | Time to Do |
+| 記号 | 難しさ | 所要時間 |
 |------|------------|------------|
-| [s]  | Simple     | Seconds    |
-| [m]  | Medium     | Minutes    |
-| [h]  | Hard       | Hours      |
-| [d]  | Difficult  | Days       |
+| [s]  | 単純     | 秒     |
+| [m]  | 中くらい | 分     |
+| [h]  | 難しい   | 時間   |
+| [d]  | 至難     | 日     |
 
-The time to do the exercise is measured from the point that the concepts have been well understood.
-If the reader is unclear on the underlying concepts, it might take hours of review to understand a [m] problem.
-Answers to the exercises can be found in a separate section at the end of each chapter.
+所要時間は、概念をよく理解できている時点から測ったものです。
+土台となる概念が曖昧なままなら、[m] の問題を理解するのに何時間も復習が要るかもしれません。
+解答は各章の末尾に別の節としてまとめてあります。
 
-## Acknowledgments
+## 謝辞
 
-A great many people contributed to this book.
-First of all I would like to thank my students at USC and Berkeley, as well as James Martin's students at Colorado and Michael Pazzani's students at Irvine, who course-tested earlier versions of this book.
-Useful suggestions, corrections, and additions were made by:
+実に多くの方が本書に力を貸してくださいました。
+まず、本書の初期の版を授業で試してくれた、USCとBerkeleyの私の学生たち、そしてColoradoのJames Martinの学生たちとIrvineのMichael Pazzaniの学生たちに感謝します。
+有益な提案・訂正・補足をくださったのは次の方々です。
 
 Nina Amenta (Berkeley), Ray S.
 Babcock and John Paxton (Montana State), Bryan A.
@@ -308,22 +308,22 @@ Loeffler (MCC), George Luger (New Mexico), Rob MacLachlan (CMU), Barry Margolin 
 Ressler, Robert S.
 Rist (University of Technology, Sydney), Paul Snively (Apple), Peter Van Roy (Berkeley), David Gumby Wallace (Cygnus), and Jeff Wu (Colorado).
 
-Sam Dooley and Eric Wefald both wrote Othello-playing programs without which I would not have written [chapter 18](chapter18.md).
-Eric also showed me Aristotle's quotes on means-ends analysis.
-Tragically, Eric died in August 1989.
-He is sorely missed by his friends and colleagues.
-Richard Fateman made suggestions for [chapter 8](chapter8.md), convinced me to write [chapter 15](chapter15.md), and, with help from Peter Klier, wrote a substantial program from which I adapted some code for that chapter.
-Charley Cox (Franz Inc.), Jamie Zawinski (Lucid Inc.), and Paul Fuqua (Texas Instruments) explained the inner workings of their respective companies' compilers.
-Mike Harrison, Paul Hilfinger, Marc Luria, Ethan Munson, and Stephan Slade helped with LATEX.
-Narciso Jarimillo tested all the code and separated it into the files that are available to the reader (see page 897).
+Sam DooleyとEric Wefaldはどちらもオセロを指すプログラムを書いており、それなしには [第18章](chapter18.md) は書けませんでした。
+Ericはまた、手段目標分析についてのアリストテレスの言葉を教えてくれました。
+痛ましいことに、Ericは1989年8月に亡くなりました。
+友人と同僚は今も彼を惜しんでいます。
+Richard Fatemanは [第8章](chapter8.md) に助言をくれ、[第15章](chapter15.md) を書くよう私を説得し、Peter Klierの助けを借りて大きなプログラムを書いてくれました。その章のコードの一部はそこから直したものです。
+Charley Cox（Franz Inc.）、Jamie Zawinski（Lucid Inc.）、Paul Fuqua（Texas Instruments）は、それぞれの会社のコンパイラの内側を説明してくれました。
+Mike Harrison、Paul Hilfinger、Marc Luria、Ethan Munson、Stephan SladeにはLATEXで助けてもらいました。
+Narciso Jarimilloは全コードを検証し、読者が入手できるファイルへと分けてくれました（897ページ参照）。
 
-During the writing of this book I was supported by a grant from the Defense Advanced Research Projects Agency (DoD), Arpa Order No.
-4871, monitored by Space and Naval Warfare Systems Command under Contract N00039-84-C-0089.
-Special thanks to DARPA and to Robert Wilensky and the rest of my colleagues and students at Berkeley for providing a stimulating environment for research, programming, and writing.
+本書の執筆中、私は国防高等研究計画局（DoD）の助成を受けていました。Arpa Order No.
+4871、契約 N00039-84-C-0089 のもとSpace and Naval Warfare Systems Commandの監督によるものです。
+DARPAに、そして研究・プログラミング・執筆に刺激的な環境を与えてくれたRobert WilenskyをはじめとするBerkeleyの同僚と学生たちに、特別の感謝を。
 
-Finally, thanks to Mike Morgan and Yonie Overton for overseeing the production of the book and encouraging me to finish on time.
+最後に、本書の制作を見守り、期日どおりに仕上げるよう励ましてくれたMike MorganとYonie Overtonに感謝します。
 
 ----------------------
 
 <a id="fnpreface-1"></a>
-<sup>[1](#tfnpreface-1)</sup> This does not imply that the programs chosen are the best of all AI programs-just that they are representative.
+<sup>[1](#tfnpreface-1)</sup> これは、選んだプログラムがAIプログラムのなかで最良だという意味ではありません。代表的だ、というだけです。

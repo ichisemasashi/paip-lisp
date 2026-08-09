@@ -1,138 +1,138 @@
-# Chapter 17
-## Line-Diagram Labeling by Constraint Satisfaction
+# 第17章
+## 制約充足による線画のラベル付け
 
-> It is wrong to think of Waltz's work only as a statement of the epistemology of line drawings of polyhedra.
-Instead I think it is an elegant case study of a paradigm we can expect to see again and again.
+> Waltzの仕事を、多面体の線画についての認識論を述べたものとしてのみ捉えるのは誤りである。
+むしろ、これから何度も目にすることになるであろうひとつの範型の、みごとな事例研究だと私は思う。
 >
-> -Patrick Winston
+> —Patrick Winston
 >
-> The Psychology of Computer Vision (1975)
+> The Psychology of Computer Vision（1975）
 
-This book touches only the areas of AI that deal with abstract reasoning.
-There is another side of AI, the field of *robotics,* that deals with interfacing abstract reasoning with the real world through sensors and motors.
-A robot receives input from cameras, microphones, sonar, and touch-sensitive devices, and produces "output" by moving its appendages or generating sounds.
-The real world is a messier place than the abstract worlds we have been covering.
-A robot must deal with noisy data, faulty components, and other agents and events in the world that can affect changes in the environment.
+本書が触れているのは、抽象的な推論を扱うAIの領域だけです。
+AIにはもう一つの側面、*ロボット工学*という分野があります。これは、抽象的な推論をセンサやモータを通じて現実の世界とつなぐことを扱います。
+ロボットはカメラ・マイク・ソナー・触覚装置から入力を受け取り、手足を動かしたり音を出したりして「出力」します。
+現実の世界は、私たちがこれまで扱ってきた抽象的な世界より、ずっと雑然とした場所です。
+ロボットは、雑音まじりのデータ、故障した部品、そして環境に変化をもたらしうる世界のなかの他の行為者や出来事に対処せねばなりません。
 
-Computer vision is the subfield of robotics that deals with interpreting visual information.
-Low-level vision takes its input directly from a camera and detects lines, regions and textures.
-We will not be concerned with this.
-High-level vision uses the findings of the low-level component to build a three-dimensional model of the objects depicted in the scene.
-This chapter covers one small aspect of high-level vision.
+計算機視覚は、視覚の情報を解釈することを扱うロボット工学の下位分野です。
+低水準の視覚はカメラから直に入力を取り、線・領域・肌理を検出します。
+これは本章では扱いません。
+高水準の視覚は、低水準の部分が見つけたものを使って、その場面に描かれた対象の三次元の模型を組み立てます。
+本章では、高水準の視覚のごく小さな一面を扱います。
 
-## 17.1 The Line-Labeling Problem
+## 17.1 線ラベル付けの問題
 
-In this chapter we look at the line-diagram labeling problem: Given a list of lines and the vertexes at which they intersect, how can we determine what the lines represent?
-For example, given the nine lines in [figure 17.1](#fig-17-01), how can we interpret the diagram as a cube?
+本章では線画のラベル付けの問題を見ます。線の並びと、それらが交わる頂点が与えられたとき、その線が何を表しているかをどうやって見定められるでしょうか。
+たとえば[図17.1](#fig-17-01)の9本の線が与えられたとき、この図をどうやって立方体と解釈できるでしょうか。
 
 
 | <a id="fig-17-01"></a>[]() |
 |---|
 | <img src="images/chapter17/fig-17-01.svg" onerror="this.src='images/chapter17/fig-17-01.png'; this.onerror=null;" alt="Figure 17.1" /> |
-| **Figure 17.1:  A Cube** |
+| **図17.1: 立方体** |
 
-Before we can arrive at an interpretation, we have to agree on what the candidates are.
-After all, [figure 17.1](#fig-17-01) could be just a hexagon with three lines in the middle.
-For the purposes of this chapter, we will consider only diagrams that depict one or more *polyhedra-*three-dimensional solid figures whose surfaces are flat faces bounded by straight lines.
-In addition, we will only allow *trihedral* vertexes.
-That is, each vertex must be formed by the intersection of three faces, as in the corner of a cube, where the top, front, and side of the cube come together.
-A third restriction on diagrams is that no so-called *accidental* vertexes are allowed.
-For example, [figure 17.1](#fig-17-01) might be a picture of three different cubes hanging in space, which just happen to line up so that the edge of one is aligned with the edge of another from our viewpoint.
-We will assume that this is not the case.
+解釈にたどり着く前に、候補が何であるかについて話を合わせておく必要があります。
+なにしろ[図17.1](#fig-17-01)は、真ん中に3本の線が引かれた六角形にすぎないかもしれないのですから。
+本章の目的のためには、1つ以上の*多面体*を描いた図だけを考えます。多面体とは、表面が直線で囲まれた平らな面からなる三次元の立体のことです。
+加えて、*三面*頂点だけを許すことにします。
+つまり各頂点は、立方体の角で上面・正面・側面が集まるように、3つの面の交わりでできていなければなりません。
+図への3つ目の制限は、いわゆる*偶然の*頂点を許さないことです。
+たとえば[図17.1](#fig-17-01)は、空中に浮かぶ3つの別々の立方体の絵で、たまたま私たちの視点から一方の辺ともう一方の辺が重なって見えているだけかもしれません。
+そうではないものとします。
 
-Given a diagram that fits these three restrictions, our goal is to identify each line, placing it in one of three classes:
+この3つの制限に合う図が与えられたとき、私たちの目標は各線を見分け、3つの種類のいずれかに振り分けることです。
 
-1.  A convex line separates two visible faces of a polyhedron such that a line from one face to the other would lie inside the polyhedron.
-It will be marked with a plus sign: `+`.
+1.  凸線は、多面体の見えている2つの面を分けており、一方の面からもう一方へ引いた線がその多面体の内側を通るようなものである。
+これはプラス記号 `+` で印をつける。
 
-2.  A concave line separates two faces of two polyhedra such that a line between the two spaces would pass through empty space.
-It will be marked with a minus sign: `-`.
+2.  凹線は、2つの多面体の2つの面を分けており、その2つの空間のあいだの線が何もない空間を通るようなものである。
+これはマイナス記号 `-` で印をつける。
 
-3.  A boundary line denotes the same physical situation as a convex line, but the diagram is oriented in such a way that only one of the two faces of the polyhedron is visible.
-Thus, the line marks the boundary between the polyhedron and the background.
-It will be marked with an arrow: &rarr;.
-Traveling along the line from the tail to the point of the arrow, the polyhedron is on the right, and the background is on the left.
+3.  境界線は凸線と同じ物理的な状況を表すが、多面体の2つの面のうち一方しか見えない向きに図が置かれている場合である。
+つまりこの線は、多面体と背景の境目を示す。
+これは矢印 &rarr; で印をつける。
+矢印の尾から先端へと線をたどると、多面体は右側、背景は左側にある。
 
-[Figure 17.2](#f0015) shows a labeling of the cube using these conventions.
-Vertex A is the near corner of the cube, and the three lines coming out of it are all convex lines.
-Lines GD and DF are concave lines, indicating the junction between the cube and the surface on which it is resting.
-The remaining lines are boundary lines, indicating that there is no physical connection between the cube and the background there, but that there are other sides of the cube that cannot be seen.
+[図17.2](#f0015)は、この約束に従って立方体にラベルを付けたものです。
+頂点Aは立方体の手前の角で、そこから出ている3本の線はすべて凸線です。
+線GDとDFは凹線で、立方体とそれが載っている面との継ぎ目を表しています。
+残りの線は境界線で、そこでは立方体と背景に物理的なつながりはないが、立方体には見えない別の側面があることを表しています。
 
 
 | <a id="fig-17-02"></a>[]() |
 |---|
 | <img src="images/chapter17/fig-17-02.svg" onerror="this.src='images/chapter17/fig-17-02.png'; this.onerror=null;" alt="Figure 17.2" /> |
-| **Figure 17.2: A Line-labeled Cube** |
+| **図17.2: 線にラベルを付けた立方体** |
 
-The line-labeling technique developed in this chapter is based on a simple idea.
-First we enumerate all the possible vertexes, and all the possible labelings for each vertex.
-It turns out there are only four different vertex types in the trihedral polygon world.
-We call them L, Y, W, and T vertexes, because of their shape.
-The Y and W vertexes are also known as forks and arrows, respectively.
-The vertexes are listed in [figure 17.3](#fig-17-03).
-Each vertex imposes some constraints on the lines that compose it.
-For example, in a W vertex, the middle line can be labeled with a + or -, but not with an arrow.
+本章で組み立てる線ラベル付けの技法は、単純な考えにもとづいています。
+まず、ありうる頂点をすべて数え上げ、各頂点についてありうるラベル付けをすべて数え上げます。
+三面多角形の世界には、頂点の型は4種類しかないことがわかっています。
+その形から、L頂点・Y頂点・W頂点・T頂点と呼びます。
+Y頂点とW頂点は、それぞれフォーク、アローとしても知られています。
+頂点の一覧は[図17.3](#fig-17-03)にあります。
+各頂点は、それを構成する線にいくつかの制約を課します。
+たとえばW頂点では、真ん中の線は + か - のラベルを付けられますが、矢印は付けられません。
 
 | <a id="fig-17-03"></a>[]() |
 |---|
 | <img src="images/chapter17/fig-17-03.svg" onerror="this.src='images/chapter17/fig-17-03.png'; this.onerror=null;" alt="Figure 17.3" /> |
-| **Figure 17.3: The Possible Vertexes and Labels** |
+| **図17.3: ありうる頂点とラベル** |
 
-Each line connects two vertexes, so it must satisfy both constraints.
-This suggests a simple algorithm for labeling a diagram based on constraint propagation: First, label each vertex with all the possible labelings for the vertex type.
-An L vertex has six possibilities, Y has five, T has four, and W has three.
-Next, pick a vertex, V.
-Consider a neighboring vertex, N (that is, N and V are connected by a line).
-N will also have a set of possible labelings.
-If N and V agree on the possible labelings for the line between them, then we have gained nothing.
-But if the intersection of the two possibility sets is smaller than V's possibility set, then we have found a constraint on the diagram.
-We adjust N and V's possible labelings accordingly.
-Every time we add a constraint at a vertex, we repeat the whole process for all the neighboring vertexes, to give the constraint a chance to propagate as far as possible.
-When every vertex has been visited at least once and there are no more constraints to propagate, then we are done.
+各線は2つの頂点をつないでいるので、その両方の制約を満たさねばなりません。
+ここから、制約伝播にもとづく図のラベル付けの単純なアルゴリズムが見えてきます。まず、各頂点にその頂点の型についてありうるラベル付けをすべて与えます。
+L頂点には6通り、Yには5通り、Tには4通り、Wには3通りの可能性があります。
+次に、頂点Vを1つ選びます。
+隣の頂点Nを考えます（つまりNとVは線でつながっています）。
+Nもまた、ありうるラベル付けの集合を持っています。
+NとVが、そのあいだの線についてありうるラベル付けで一致するなら、何も得られていません。
+しかし2つの可能性の集合の共通部分がVの可能性の集合より小さければ、図についての制約を1つ見つけたことになります。
+それに応じてNとVのありうるラベル付けを調整します。
+ある頂点に制約を加えるたびに、隣接するすべての頂点について同じ過程を繰り返し、制約ができるかぎり遠くまで伝わる機会を与えます。
+すべての頂点を少なくとも一度は訪れ、伝えるべき制約がなくなれば終わりです。
 
-[Figure 17.4](#fig-17-04) illustrates this process.
-On the left we start with a cube.
-All vertexes have all possible labelings, except that we know line GD is concave (-), indicating that the cube is resting on a surface.
-This constrains vertex D in such a way that line DA must be convex (+).
-In the middle picture the constraint on vertex D has propagated to vertex A, and in the right-hand picture it propagates to vertex B.
-Soon, the whole cube will be uniquely labeled.
+[図17.4](#fig-17-04)がこの過程を示しています。
+左では立方体から始めます。
+すべての頂点がありうるラベル付けをすべて持っていますが、線GDが凹（-）であることだけはわかっており、これは立方体が面の上に載っていることを表しています。
+これが頂点Dを制約し、線DAが凸（+）でなければならないことになります。
+真ん中の図では頂点Dの制約が頂点Aへ伝わり、右の図では頂点Bへ伝わっています。
+まもなく立方体全体が一意にラベル付けされます。
 
 
 | <a id="fig-17-04"></a>[]() |
 |---|
 | <img src="images/chapter17/fig-17-04.svg" onerror="this.src='images/chapter17/fig-17-04.png'; this.onerror=null;" alt="Figure 17.4" /> |
-| **Figure 17.4: Propagating Constraints** |
+| **図17.4: 制約の伝播** |
 
-Many diagrams will be labeled uniquely by this constraint propagation process.
-Some diagrams, however, are ambiguous.
-They will still have multiple labelings after constraint propagation has finished.
-In this case, we can search for a solution.
-Simply choose an ambiguous vertex, choose one of the possible labelings for that vertex, and repeat the constraint propagation/search process.
-Keep going until the diagram is either unambiguous or inconsistent.
+多くの図は、この制約伝播の過程によって一意にラベル付けされます。
+しかし図のなかには、あいまいなものもあります。
+制約伝播が終わったあとも、複数のラベル付けが残ります。
+その場合は、解を探索できます。
+あいまいな頂点を1つ選び、その頂点についてありうるラベル付けを1つ選んで、制約伝播と探索の過程を繰り返すだけです。
+図があいまいでなくなるか、矛盾するまで続けます。
 
-That completes the sketch of the line-labeling algorithm.
-We are now ready to implement a labeling program.
-Its glossary is in [figure 17.5](#fig-17-05).
+これで線ラベル付けのアルゴリズムの素描は終わりです。
+ラベル付けのプログラムを実装する用意ができました。
+その用語一覧は[図17.5](#fig-17-05)にあります。
 
 | []()                                                |
 |-----------------------------------------------------|
 | ![f17-05](images/chapter17/f17-05.jpg)              |
-| Figure 17.5: Glossary for the Line-Labeling Program |
+| 図17.5: 線ラベル付けプログラムの用語一覧            |
 
-*(ed: should be a markdown table)*
+*（編注: ここはMarkdownの表にすべき）*
 
-The two main data structures are the `diagram` and the `vertex`.
-It would have been possible to implement a data type for `lines`, but it is not necessary: lines are defined implicitly by the two vertexes at their end points.
+おもなデータ構造は2つ、`diagram` と `vertex` です。
+`lines` のデータ型を実装することもできたでしょうが、その必要はありません。線は、その端点にある2つの頂点によって暗に定まるからです。
 
-A diagram is completely specified by its list of vertexes, so the structure `diagram` needs only one slot.
-A vertex, on the other hand, is a more complex structure.
-Each vertex has an identifying name (usually a single letter), a vertex type (L, Y, W, or T), a list of neighboring vertexes, and a list of possible labelings.
-A labeling is a list of line labels.
-For example, a Y vertex will initially have a list of five possible labelings.
-If it is discovered that the vertex is the interior of a concave corner, then it will have the single labeling ( - - - ).
-We give type information on the slots of vertex because it is a complicated data type.
-The syntax of `defstruct` is such that you cannot specify a `:type` without first specifying a default value.
-We chose L as the default value for the `type` slot at random, but note that it would have been an error to give `nil` as the default value, because `nil` is not of the right type.
+図はその頂点の並びによって完全に定まるので、構造体 `diagram` に必要なスロットは1つだけです。
+一方、頂点はもっと込み入った構造体です。
+各頂点は、見分けるための名前（ふつうは1文字）、頂点の型（L、Y、W、Tのいずれか）、隣接する頂点の並び、そしてありうるラベル付けの並びを持ちます。
+ラベル付けとは、線のラベルの並びのことです。
+たとえばY頂点は、最初はありうるラベル付けを5つ持ちます。
+その頂点が凹んだ角の内側だとわかれば、( - - - ) というただ1つのラベル付けを持つことになります。
+vertexは込み入ったデータ型なので、そのスロットには型の情報を与えます。
+`defstruct` の構文では、先に既定値を指定しないと `:type` を指定できません。
+`type` スロットの既定値としてLを適当に選びましたが、既定値に `nil` を与えるのは誤りだったであろうことに注意してください。`nil` は正しい型ではないからです。
 
 ```lisp
 (defstruct diagram "A diagram is a list of vertexes." vertexes)
@@ -144,14 +144,14 @@ We chose L as the default value for the `type` slot at random, but note that it 
   (labelings nil :type list)) ; of lists of (member + - L R)))))
 ```
 
-An ambiguous vertex will have several labelings, while an unambiguous vertex has exactly one, and a vertex with no labelings indicates an impossible diagram.
-Initially we don't know which vertexes are what, so they all start with several possible labelings.
-Note that a labeling is a list, not a set: the order of the labels is significant and matches the order of the neighboring vertexes.
-The function `possible-labelings` gives a list of all possible labelings for each vertex type.
-We use R and L instead of arrows as labels, because the orientation of the arrows is significant.
-An R means that as you travel from the vertex to its neighbor, the polyhedron is on the right and the background object is on the left.
-Thus, an R is equivalent to an arrow pointing away from the vertex.
-The L is just the reverse.
+あいまいな頂点はラベル付けをいくつも持ち、あいまいでない頂点はちょうど1つを持ちます。ラベル付けが1つもない頂点は、その図がありえないことを示します。
+最初はどの頂点がどれなのかわからないので、すべてがありうるラベル付けをいくつか持った状態で始まります。
+ラベル付けは集合ではなく並びであることに注意してください。ラベルの順序には意味があり、隣接する頂点の順序と対応しています。
+関数 `possible-labelings` は、頂点の型ごとにありうるラベル付けをすべて並べて返します。
+ラベルには矢印の代わりにRとLを使います。矢印の向きに意味があるからです。
+Rは、その頂点から隣の頂点へ進むとき、多面体が右側、背景の対象が左側にあることを意味します。
+つまりRは、その頂点から外を向いた矢印と同じことです。
+Lはその逆にすぎません。
 
 ```lisp
 (defun ambiguous-vertex-p (vertex)
@@ -180,10 +180,10 @@ The L is just the reverse.
     ((W) '((L R +) (- - +) (+ + -)))))
 ```
 
-## 17.2 Combining Constraints and Searching
+## 17.2 制約の組み合わせと探索
 
-The main function `print-labelings` takes a diagram as input, reduces the number of labelings on each vertex by constraint propagation, and then searches for all consistent interpretations.
-Output is printed before and after each step.
+主関数 `print-labelings` は図を入力に取り、制約伝播によって各頂点のラベル付けの数を減らし、それから筋の通る解釈をすべて探索します。
+各段の前後で出力を表示します。
 
 ```lisp
 (defun print-labelings (diagram)
@@ -203,21 +203,21 @@ Output is printed before and after each step.
   (values))
 ```
 
-The function `propagate-constraints` takes a vertex and considers the constraints imposed by neighboring vertexes to get a list of all the `consistent-labelings` for the vertex.
-If the number of consistent labelings is less than the number before we started, then the neighbors' constraints have had an effect on this vertex, so we propagate the new-found constraints on this vertex back to each neighbor.
-The function returns nil and thus immediately stops the propagation if there is an impossible vertex.
-Otherwise, propagation continues until there are no more changes to the labelings.
+関数 `propagate-constraints` は頂点を取り、隣接する頂点が課す制約を考えて、その頂点について筋の通るラベル付け（`consistent-labelings`）をすべて並べて得ます。
+筋の通るラベル付けの数が始める前より少なければ、隣の制約がこの頂点に効いたということなので、この頂点について新たに見つかった制約を各隣接頂点へ伝え返します。
+ありえない頂点があれば、この関数はnilを返し、伝播をただちに止めます。
+そうでなければ、ラベル付けに変化がなくなるまで伝播は続きます。
 
-The whole propagation algorithm is started by a call to `every` in `print-labelings`, which propagates constraints from each vertex in the diagram.
-But it is not obvious that this is all that is required.
-After propagating from each vertex once, couldn't there be another vertex that needs relabeling?
-The only vertex that could possibly need relabeling would be one that had a neighbor changed since its last update.
-But any such vertex would have been visited by `propagate-constraint`, since we propagate to all neighbors.
-Thus, a single pass through the vertexes, compounded with recursive calls, will find and apply all possible constraints.
+伝播のアルゴリズム全体は、`print-labelings` のなかの `every` の呼び出しによって始まり、図の各頂点から制約を伝えていきます。
+しかし、これで足りるというのは自明ではありません。
+各頂点から一度ずつ伝播したあと、ラベルを付け直すべき頂点がまだ残っていないでしょうか。
+付け直しが要りうる頂点は、前回の更新以降に隣が変わった頂点だけです。
+しかしそうした頂点は、すべての隣へ伝播している以上、`propagate-constraint` が訪れているはずです。
+ですから、再帰呼び出しと合わさった頂点への1回の走査で、ありうる制約はすべて見つかり適用されます。
 
-The next question worth asking is if the algorithm is guaranteed to terminate.
-Clearly, it is, because `propagate-constraints` can only produce recursive calls when it removes a labeling.
-But since there are a finite number of labelings initially (no more than six per vertex), there must be a finite number of calls to `propagate-constraints.`
+次に尋ねる値打ちのある問いは、このアルゴリズムが必ず停止すると保証されているかです。
+明らかに保証されています。`propagate-constraints` が再帰呼び出しを生むのは、ラベル付けを取り除いたときだけだからです。
+最初のラベル付けの数は有限（頂点あたり多くて6つ）なので、`propagate-constraints` の呼び出しも有限回であるはずです。
 
 ```lisp
 (defun propagate-constraints (vertex)
@@ -232,10 +232,10 @@ But since there are a finite number of labelings initially (no more than six per
       t)))
 ```
 
-The function `consistent-labelings` is passed a vertex.
-It gets all the labels for this vertex from the neighboring vertexes, collecting them in `neighbor-labels`.
-It then checks all the labels on the current vertex, keeping only the ones that are consistent with all the neighbors' constraints.
-The auxiliary function `labels-for` finds the labels for a particular neighbor at a vertex, and `reverse-label` accounts for the fact that `L` and `R` labels are interpreted with respect to the vertex they point at.
+関数 `consistent-labelings` には頂点が渡されます。
+隣接する頂点から、この頂点についてのラベルをすべて取ってきて `neighbor-labels` に集めます。
+次に現在の頂点のラベルをすべて調べ、隣のすべての制約と筋の通るものだけを残します。
+補助関数 `labels-for` は、ある頂点について特定の隣に対応するラベルを見つけ、`reverse-label` は `L` と `R` のラベルが、それが向いている頂点を基準に解釈されるという事情を吸収します。
 
 ```lisp
 (defun consistent-labelings (vertex)
@@ -253,14 +253,14 @@ The auxiliary function `labels-for` finds the labels for a particular neighbor a
       (vertex-labelings vertex))))
 ```
 
-Constraint propagation is often sufficient to yield a unique interpretation.
-But sometimes the diagram is still underconstrained, and we will have to search for solutions.
-The function `search-solutions` first checks to see if the diagram is ambiguous, by seeing if it has an ambiguous vertex, `v`.
-If the diagram is unambiguous, then it is a solution, and we return it (in a list, since `search-solutions` is designed to return a list of all solutions).
-Otherwise, for each of the possible labelings for the ambiguous vertex, we create a brand new copy of the diagram and set `v`'s labeling in the copy to one of the possible labelings.
-In effect, we are guessing that a labeling is a correct one.
-We call `propagate-constraints`; if it fails, then we have guessed wrong, so there are no solutions with this labeling.
-But if it succeeds, then we call `search-solutions` recursively to give us the list of solutions generated by this labeling.
+制約伝播だけで一意の解釈が得られることはよくあります。
+しかし図の制約が足りないままのこともあり、その場合は解を探索せねばなりません。
+関数 `search-solutions` はまず、あいまいな頂点 `v` があるかを見て、図があいまいかどうかを調べます。
+図があいまいでなければ、それが解なので返します（`search-solutions` はすべての解の並びを返すよう作られているので、並びに入れて返します）。
+そうでなければ、あいまいな頂点についてありうるラベル付けそれぞれについて、図をまるごと新しく複製し、その複製のなかの `v` のラベル付けを、ありうるラベル付けの1つに設定します。
+要するに、あるラベル付けが正しいと当て推量しているわけです。
+`propagate-constraints` を呼び、それが失敗したら推量が外れたということなので、このラベル付けでの解はありません。
+成功したら、`search-solutions` を再帰的に呼び、このラベル付けから生まれる解の並びを得ます。
 
 ```lisp
 (defun search-solutions (diagram)
@@ -284,8 +284,8 @@ But if it succeeds, then we call `search-solutions` recursively to give us the l
           (vertex-labelings v)))))
 ```
 
-That's all there is to the algorithm; all that remains are some auxiliary functions.
-Here are three of them:
+アルゴリズムはこれで全部です。あとは補助関数がいくつか残っているだけです。
+そのうち3つを示します。
 
 ```lisp
 (defun labels-for (vertex from)
@@ -303,11 +303,11 @@ Here are three of them:
   (find name (diagram-vertexes diagram) :key #'vertex-name))
 ```
 
-Here are the printing functions.
-`print-vertex` prints a vertex in short form.
-It obeys the `print` convention of returning the first argument.
-The functions `show-vertex` and `show-diagram` print more detailed forms.
-They obey the convention for `describe`-like functions of returning no values at all.
+表示の関数を示します。
+`print-vertex` は頂点を短い形で表示します。
+第1引数を返すという `print` の約束に従っています。
+関数 `show-vertex` と `show-diagram` は、より詳しい形で表示します。
+これらは、値をまったく返さないという `describe` 系の関数の約束に従っています。
 
 ```lisp
 (defun print-vertex (vertex stream depth)
@@ -339,8 +339,8 @@ They obey the convention for `describe`-like functions of returning no values at
   (values)))
 ```
 
-`Note` that `matrix-transpose` is called by `show-vertex` to turn the matrix of labelings on its side.
-It works like this:
+`show-vertex` がラベル付けの行列を横倒しにするために `matrix-transpose` を呼んでいることに注目してください。
+次のように働きます。
 
 ```lisp
 (possible-labelings 'Y)
@@ -355,8 +355,8 @@ It works like this:
   (+ - - R L))
 ```
 
-The implementation of `matrix-transpose` is surprisingly concise.
-It is an old Lisp trick, and well worth understanding:
+`matrix-transpose` の実装は驚くほど簡潔です。
+これは古くからのLispの技で、理解しておく値打ちがあります。
 
 ```lisp
 (defun matrix-transpose (matrix)
@@ -364,21 +364,21 @@ It is an old Lisp trick, and well worth understanding:
   (if matrix (apply #'mapcar #'list matrix)))
 ```
 
-The remaining code has to do with creating diagrams.
-We need some handy way of specifying diagrams.
-One way would be with a line-recognizing program operating on digitized input from a camera or bitmap display.
-Another possibility is an interactive drawing program using a mouse and bitmap display.
-But since there is not yet a Common Lisp standard for interacting with such devices, we will have to settle for a textual description.
-The macro `defdiagram` defines and names a diagram.
-The name is followed by a list of vertex descriptions.
-Each description is a list consisting of the name of a vertex, the vertex type (Y, A, L, or T), and the names of the neighboring vertexes.
-Here again is the `defdiagram` description for the cube shown in [figure 17.6](#fig-17-06).
+残りのコードは、図を作ることに関わるものです。
+図を指定する手軽なやり方が要ります。
+1つのやり方は、カメラやビットマップ表示から digitize した入力を扱う線認識のプログラムを使うことでしょう。
+もう1つは、マウスとビットマップ表示を使う対話的な描画プログラムです。
+しかし、そうした装置とやりとりするCommon Lispの標準はまだないので、文字による記述で我慢するほかありません。
+マクロ `defdiagram` が図を定義し、名前を付けます。
+名前のあとに、頂点の記述の並びが続きます。
+各記述は、頂点の名前、頂点の型（Y、A、L、Tのいずれか）、そして隣接する頂点の名前からなる並びです。
+[図17.6](#fig-17-06)に示した立方体の `defdiagram` による記述を、あらためて示します。
 
 <!-- 17.6 is a copy of 17.1 -->
 | <a id="fig-17-06"></a>[]() |
 |---|
 | <img src="images/chapter17/fig-17-01.svg" onerror="this.src='images/chapter17/fig-17-01.png'; this.onerror=null;" alt="Figure 17.6" /> |
-| **Figure 17.6: A Cube** |
+| **図17.6: 立方体** |
 
 ```lisp
 (defdiagram cube
@@ -391,13 +391,13 @@ Here again is the `defdiagram` description for the cube shown in [figure 17.6](#
   (g L b d))
 ```
 
-The macro `defdiagram` calls `construct-diagram` to do the real work.
-It would be feasible to have `defdiagram` expand into a `defvar,` making the names be special variables.
-But then it would be the user's responsibility to make copies of such a variable before passing it to a destructive function.
-Instead, I use `put-diagram` and `diagram` to put and get diagrams in a table, `diagram` retrieves the named diagram and makes a copy of it.
-Thus, the user cannot corrupt the original diagrams stored in the table.
-Another possibility would be to have `defdiagram` expand into a function definition for `name` that returns a copy of the diagram.
-I chose to keep the diagram name space separate from the function name space, since names like `cube` make sense in both spaces.
+マクロ `defdiagram` は、実際の仕事をさせるために `construct-diagram` を呼びます。
+`defdiagram` を `defvar` に展開して、名前を特殊変数にすることもできたでしょう。
+しかしそうすると、破壊的な関数へ渡す前にその変数を複製するのは利用者の責任になってしまいます。
+そうする代わりに、表に図を入れたり取り出したりする `put-diagram` と `diagram` を使います。`diagram` は名前の付いた図を取ってきて、その複製を作ります。
+ですから利用者が、表に格納されたもとの図を壊してしまうことはありません。
+もう1つの手は、`defdiagram` を、図の複製を返す `name` という関数の定義に展開することでしょう。
+私は図の名前空間を関数の名前空間と分けておくことにしました。`cube` のような名前は、どちらの空間でも意味をなすからです。
 
 ```lisp
 (defmacro defdiagram (name &rest vertex-descriptors)
@@ -417,7 +417,7 @@ I chose to keep the diagram name space separate from the function name space, si
   name))
 ```
 
-The function `construct-diagram` translates each vertex description, using `construct-vertex`, and then fills in the neighbors of each vertex.
+関数 `construct-diagram` は `construct-vertex` を使って各頂点の記述を変換し、それから各頂点の隣を埋めます。
 
 ```lisp
 (defun construct-diagram (vertex-descriptors)
@@ -447,8 +447,8 @@ The function `construct-diagram` translates each vertex description, using `cons
   (rest (rest vertex-descriptor)))
 ```
 
-The `defstruct` for `diagram` automatically creates the function `copy-diagram,` but it just copies each field, without copying the contents of each field.
-Thus we need `make-copy-diagram` to create a copy that shares no structure with the original.
+`diagram` の `defstruct` は関数 `copy-diagram` を自動的に作りますが、これは各欄を写すだけで、各欄の中身までは写しません。
+ですから、もとの図と構造をまったく共有しない複製を作る `make-copy-diagram` が要ります。
 
 ```lisp
 (defun make-copy-diagram (diagram)
@@ -465,10 +465,10 @@ Thus we need `make-copy-diagram` to create a copy that shares no structure with 
     new))
 ```
 
-## 17.3 Labeling Diagrams
+## 17.3 図にラベルを付ける
 
-We are now ready to try labeling diagrams.
-First the cube:
+これで図にラベルを付けてみる用意ができました。
+まずは立方体です。
 
 ```lisp
 > (print-labelings (diagram 'cube))
@@ -530,15 +530,15 @@ Diagram:
   G/1 L: GB=[-] GD=[L]
 ```
 
-The four interpretations correspond, respectively, to the cases where the cube is free floating, attached to the floor (GD and DF = -), attached to a wall on the right (EC and CF = -), or attached to a wall on the left (BG and BE = -).
-These are shown in [figure 17.7](#fig-17-07).
-It would be nice if we could supply information about where the cube is attached, and see if we can get a unique interpretation.
-The function `ground` takes a diagram and modifies it by making one or more lines be grounded lines-lines that have a concave (-) label, corresponding to a junction with the ground.
+4つの解釈はそれぞれ、立方体が空中に浮かんでいる場合、床に接している場合（GDとDFが -）、右の壁に接している場合（ECとCFが -）、左の壁に接している場合（BGとBEが -）に対応します。
+これらを[図17.7](#fig-17-07)に示します。
+立方体がどこに接しているかの情報を与えて、一意の解釈が得られるかを見られると具合がよいでしょう。
+関数 `ground` は図を取り、1本以上の線を接地線にすることで図を書き換えます。接地線とは凹（-）のラベルを持つ線で、地面との継ぎ目に対応します。
 
 | <a id="fig-17-07"></a>[]() |
 |---|
 | <img src="images/chapter17/fig-17-07.svg" onerror="this.src='images/chapter17/fig-17-07.png'; this.onerror=null;" alt="Figure 17.7" /> |
-| **Figure 17.7: Four Interpretations of the Cube** |
+| **図17.7: 立方体の4つの解釈** |
 
 ```lisp
 (defun ground (diagram vertex-a vertex-b)
@@ -554,7 +554,7 @@ The function `ground` takes a diagram and modifies it by making one or more line
     diagram))
 ```
 
-We can see how this works on the cube:
+これが立方体でどう働くかを見てみましょう。
 
 ```lisp
 > (print-labelings (ground (diagram 'cube) 'g 'd))
@@ -578,23 +578,23 @@ After constraint propagation the diagram is:
  G/1 L: GB=[R] GD=[-]
 ```
 
-Note that the user only had to specify one of the two ground lines, GD.
-The program found that DF is also grounded.
-Similarly, in programming `ground-line`, we only had to update one of the vertexes.
-The rest is done by constraint propagation.
+利用者が指定したのは2本の接地線のうちGDだけであることに注意してください。
+DFも接地していることは、プログラムが見つけました。
+同じく `ground-line` を書くときも、更新する必要があったのは頂点の一方だけです。
+残りは制約伝播が行います。
 
-The next example yields the same four interpretations, in the same order (free floating, attached at bottom, attached at right, and attached at left) when interpreted ungrounded.
-The grounded version yields the unique solution shown in the following output and in [figure 17.9](#fig-17-09).
+次の例は、接地させずに解釈すると、同じ4つの解釈を同じ順（空中に浮かぶ、下で接する、右で接する、左で接する）で返します。
+接地させた版は、次の出力と[図17.9](#fig-17-09)に示す唯一の解を返します。
 
 | <a id="fig-17-08"></a>[]() |
 |---|
 | <img src="images/chapter17/fig-17-08.svg" onerror="this.src='images/chapter17/fig-17-08.png'; this.onerror=null;" alt="Figure 17.8" /> |
-| **Figure 17.8: Cube on a Plate** |
+| **図17.8: 板の上の立方体** |
 
 | <a id="fig-17-09"></a>[]() |
 |---|
 | <img src="images/chapter17/fig-17-09.svg" onerror="this.src='images/chapter17/fig-17-09.png'; this.onerror=null;" alt="Figure 17.9" /> |
-| **Figure 17.9: Labeled Cube on a Plate** |
+| **図17.9: ラベルを付けた、板の上の立方体** |
 
 ```lisp
 (defdiagram cube-on-plate
@@ -645,8 +645,8 @@ After constraint propagation the diagram is
   M/1 L: MK=[-] MI=[L]
 ```
 
-It is interesting to try the algorithm on an "impossible" diagram.
-It turns out the algorithm correctly finds no interpretation for this well-known illusion:
+「ありえない」図でこのアルゴリズムを試してみるのは面白いことです。
+このよく知られた錯視の図について、アルゴリズムは正しく解釈なしと判定します。
 
 ```lisp
 (defdiagram poiuyt
@@ -697,7 +697,7 @@ For 2,073,600 interpretations.
 There are zero solutions:
 ```
 
-Now we try a more complex diagram:
+次に、もっと込み入った図を試します。
 
 ```lisp
 (defdiagram tower
@@ -746,7 +746,7 @@ The initial diagram is:
 For 1,614,252,037,500,000 interpretations.
 ```
 
-After constraint propagation the diagram is:
+制約伝播のあと、図は次のようになります。
 
 ```lisp
   A/1 Y: AB=[+] AC=[+] AD=[+]
@@ -777,9 +777,9 @@ After constraint propagation the diagram is:
   Z/1 Y: ZT=[-] ZU=[-] ZV=[-]
 ```
 
-We see that the algorithm was able to arrive at a single interpretation.
-Moreover, even though there were a large number of possibilities-over a quadrillion-the computation is quite fast.
-Most of the time is spent printing, so to get a good measurement, we define a function to find solutions without printing anything:
+アルゴリズムがただ1つの解釈にたどり着けたことがわかります。
+しかも、可能性が千兆を超えるほど大量にあったにもかかわらず、計算はかなり速いのです。
+時間のほとんどは表示に費やされているので、きちんと測るために、何も表示せずに解を見つける関数を定義します。
 
 ```lisp
 (defun find-labelings (diagram)
@@ -788,30 +788,30 @@ Most of the time is spent printing, so to get a good measurement, we define a fu
   (search-solutions diagram))
 ```
 
-When we time the application of `find-labelings` to the grounded tower and the poiuyt, we find the tower takes 0.11 seconds, and the poiuyt 21 seconds.
-This is over 180 times longer, even though the poiuyt has only half as many vertexes and only about half a million interpretations, compared to the tower's quadrillion.
-The poiuyt takes a long time to process because there are few local constraints, so violations are discovered only by considering several widely separated parts of the figure all at the same time.
-It is interesting that the same fact that makes the processing of the poiuyt take longer is also responsible for its interest as an illusion.
+接地させた塔とポイユットに `find-labelings` を適用して時間を測ると、塔は0.11秒、ポイユットは21秒かかります。
+180倍以上も長くかかっています。ポイユットの頂点は塔の半分しかなく、解釈も塔の千兆に対してわずか50万ほどだというのにです。
+ポイユットの処理に時間がかかるのは、局所的な制約が少なく、そのため矛盾が、図の遠く離れた複数の部分を同時に考えて初めて見つかるからです。
+ポイユットの処理を長引かせているのと同じ事情が、錯視としての面白さも生んでいるというのは興味深いところです。
 
-## 17.4 Checking Diagrams for Errors
+## 17.4 図の誤りを調べる
 
-This section considers one more example, and considers what to do when there are apparent errors in the input.
-The example is taken from Charniak and McDermott's *Introduction to Artificial Intelligence*, page 138, and shown in [figure 17.12](#fig-17-12).
+本節ではもう1つ例を取り上げ、入力に明らかな誤りがあるときにどうするかを考えます。
+例はCharniakとMcDermottの *Introduction to Artificial Intelligence* の138ページから採ったもので、[図17.12](#fig-17-12)に示します。
 
 | <a id="fig-17-10"></a>[]() |
 |---|
 | <img src="images/chapter17/fig-17-10.svg" onerror="this.src='images/chapter17/fig-17-10.png'; this.onerror=null;" alt="Figure 17.10" /> |
-| **Figure 17.10: An Impossible Figure (A Poiuyt)** |
+| **図17.10: ありえない図形（ポイユット）** |
 
 | <a id="fig-17-11"></a>[]() |
 |---|
 | <img src="images/chapter17/fig-17-11.svg" onerror="this.src='images/chapter17/fig-17-11.png'; this.onerror=null;" alt="Figure 17.11" /> |
-| **Figure 17.11: A Tower** |
+| **図17.11: 塔** |
 
 | <a id="fig-17-12"></a>[]() |
 |---|
 | <img src="images/chapter17/fig-17-12.svg" onerror="this.src='images/chapter17/fig-17-12.png'; this.onerror=null;" alt="Figure 17.12" /> |
-| **Figure 17.12: Diagram of an arch** |
+| **図17.12: アーチの図** |
 
 ```lisp
 (defdiagram arch
@@ -832,9 +832,9 @@ The example is taken from Charniak and McDermott's *Introduction to Artificial I
   (o W P 1 h)    (4 T u l v))
 ```
 
-Unfortunately, running this example results in no consistent interpretations after constraint propagation.
-This seems wrong.
-Worse, when we try to ground the diagram on the line XZ and call `print-labelings` on that, we get the following error:
+あいにく、この例を走らせると、制約伝播のあとに筋の通る解釈が1つも残りません。
+これはおかしいように思えます。
+さらに悪いことに、線XZで図を接地させて `print-labelings` を呼ぶと、次の誤りが出ます。
 
 ```lisp
 >>>ERROR: The first argument to NTH was of the wrong type.
@@ -847,23 +847,23 @@ LABELS-FOR (P.C. = 23)
   Arg 1 (FROM): 4/4
 ```
 
-What has gone wrong?
-A good guess is that the diagram is somehow inconsistent- somewhere an error was made in transcribing the diagram.
-It could be that the diagram is in fact impossible, like the poiuyt.
-But that is unlikely, as it is easy for us to provide an intuitive interpretation.
-We need to debug the diagram, and it would also be a good idea to handle the error more gracefully.
+何がまずかったのでしょうか。
+当たりをつけるなら、図がどこかで筋が通っていない、つまり図を書き写すときにどこかで誤りが入った、というところでしょう。
+ポイユットのように、図が本当にありえないものである可能性もあります。
+しかしそれはありそうにありません。私たちは直観的な解釈をたやすく与えられるのですから。
+図をデバッグする必要がありますし、誤りをもっと穏やかに扱うようにするのも良い考えでしょう。
 
-One property of the diagram that is easy to check for is that every line should be mentioned twice.
-If there is a line between vertexes A and B, there should be two entries in the vertex descriptors of the following form:
+図の性質のうち調べやすいものの1つが、どの線も2度現れるはずだということです。
+頂点AとBのあいだに線があるなら、頂点の記述に次の形の項目が2つあるはずです。
 
 ```lisp
 (A ? ... B ...)
 (B ? ... A ...)
 ```
 
-Here the symbol `?` means we aren't concerned about the type of the vertexes, only with the presence of the line in two places.
-The following code makes this check when a diagram is defined.
-It also checks that each vertex is one of the four legal types, and has the right number of neighbors.
+ここで記号 `?` は、頂点の型は問わず、線が2か所に現れることだけを気にしている、という意味です。
+次のコードは、図が定義されたときにこの検査を行います。
+また、各頂点が4つの正しい型のいずれかであり、隣の数が正しいことも調べます。
 
 ```lisp
 (defmacro defdiagram (name &rest vertex-descriptors)
@@ -899,7 +899,7 @@ It also checks that each vertex is one of the four legal types, and has the righ
   vertex-descriptors)
 ```
 
-Now let's try the arch again:
+では、アーチをもう一度試してみましょう。
 
 ```lisp
 (defdiagram arch
@@ -929,8 +929,8 @@ Warning: Inconsistent vertex: 4-L
 `>>ERROR: Inconsistent diagram.
 6 total errors.`
 
-The `defdiagram` was transcribed from a hand-labeled diagram, and it appears that the transcription has fallen prey to one of the oldest problems in mathematical notation: confusing a "u" with a "v." The other problem was in seeing the line U-L as a single line, when in fact it is broken up into two segments, U-4 and 4-L.
-Repairing these bugs gives the diagram:
+この `defdiagram` は手でラベルを付けた図から書き写したもので、どうやら数学の記法で最も古くからある問題の1つ、「u」と「v」の取り違えにやられたようです。もう1つの問題は、線U-Lを1本の線と見てしまったことでした。実際にはU-4と4-Lという2つの区間に分かれています。
+これらの誤りを直すと、次の図になります。
 
 ```lisp
 (defdiagram arch
@@ -951,8 +951,8 @@ Repairing these bugs gives the diagram:
   (o W P 1 h)    (4 T u l v))
 ```
 
-This time there are no errors detected by `check-diagram`, but running `print-labelings` again still does not give a solution.
-To get more information about which constraints are applied, I modified `propagate-constraints` to print out some information:
+今度は `check-diagram` が誤りを見つけませんが、`print-labelings` をまた走らせても、やはり解は得られません。
+どの制約が適用されているかをもっと知るために、`propagate-constraints` を書き換えて情報を表示させました。
 
 ```lisp
 (defun propagate-constraints (vertex)
@@ -970,7 +970,7 @@ To get more information about which constraints are applied, I modified `propaga
       vertex)))
 ```
 
-Running the problem again gives the following trace:
+問題をもう一度走らせると、次の追跡が得られます。
 
 ```lisp
 > (print-labelings (ground (diagram 'arch) 'x 'z))
@@ -1068,8 +1068,8 @@ After constraint propagation the diagram is:
   4/2 T: 4U=[RR] 4 L=[LL] 4 V=[-  R]
 ```
 
-From the diagram after constraint propagation we can see that the vertexes A, B, C, D, G, and H have no interpretations, so they are a good place to look first for an error.
-From the trace generated by `propagate-constraints` (the lines beginning with a semicolon), we see that constraint propagation started at P and after seven propagations reached some of the suspect vertexes:
+制約伝播のあとの図から、頂点A、B、C、D、G、Hに解釈がないことがわかるので、誤りを探すならまずここを見るのがよいでしょう。
+`propagate-constraints` が生成した追跡（セミコロンで始まる行）から、制約伝播はPから始まり、7回の伝播のあとに疑わしい頂点のいくつかに達したことがわかります。
 
 ```lisp
 ; A/2: (E/2 B/6 C/5)    ((L R +) (- - + ))
@@ -1077,12 +1077,12 @@ From the trace generated by `propagate-constraints` (the lines beginning with a 
 ; D/3: (C/5 B/3 M/6)    ((- - -) (- L R) (R - L))
 ```
 
-A and B look acceptable, but look at the entry for vertex D.
-It shows three interpretations, and it shows that the neighbors are C, B, and M.
-Note that line DC, the first entry in each of the interpretations, must be either -, - or R.
-But this is an error, because the "correct" interpretation has DC as a + line.
-Looking more closely, we notice that D is in fact a W-type vertex, not a Y vertex as written in the definition.
-We should have:
+AとBは差し支えなさそうですが、頂点Dの項目を見てください。
+解釈が3つあり、隣がC、B、Mであることが示されています。
+各解釈の最初の項目である線DCが、-、-、Rのいずれかでなければならないことに注意してください。
+しかしこれは誤りです。「正しい」解釈ではDCは + の線だからです。
+よく見ると、Dは定義に書かれたY頂点ではなく、実はW型の頂点であることに気づきます。
+次のようにすべきでした。
 
 ```lisp
 (defdiagram arch
@@ -1103,16 +1103,16 @@ We should have:
   (o W P 1 h)    (4 T u l v))
 ```
 
-By running the problem again and inspecting the trace output, we soon discover the real root of the problem: the most natural interpretation of the diagram is beyond the scope of the program!
-There are many interpretations that involve blocks floating in air, but if we ground lines OP, TU and XZ, we run into trouble.
-Remember, we said that we were considering trihedral vertexes only.
-But vertex 1 would be a quad-hedral vertex, formed by the intersection of four planes: the top and back of the base, and the bottom and left-hand side of the left pillar.
-The intuitively correct labeling for the diagram would have O1 be a concave (-) line and Al be an occluding line, but our repertoire of labelings for T vertexes does not allow this.
-Hence, the diagram cannot be labeled consistently.
+問題をもう一度走らせて追跡の出力を調べると、問題の本当の根がすぐに見つかります。この図のもっとも自然な解釈は、このプログラムの守備範囲の外にあるのです。
+積み木が空中に浮かぶ解釈は数多くありますが、線OP、TU、XZを接地させると行き詰まります。
+三面頂点だけを考えると述べたことを思い出してください。
+しかし頂点1は四面の頂点になってしまいます。土台の上面と背面、そして左の柱の底面と左側面という、4つの平面の交わりでできているからです。
+この図の直観的に正しいラベル付けでは、O1が凹（-）の線で、A1が遮蔽する線になるはずですが、私たちが用意したT頂点のラベル付けの持ち札ではこれを許せません。
+ですからこの図は、筋の通る形ではラベル付けできないのです。
 
-Let's go back and consider the error that came up in the first version of the diagram.
-Even though the error no longer occurs on this diagram, we want to make sure that it won't show up in another case.
-Here's the error:
+話を戻して、最初の版の図で出た誤りを考えてみましょう。
+この図ではもう起きないとはいえ、別の場合に現れないことを確かめておきたいところです。
+誤りは次のものでした。
 
 ```lisp
 >>>ERROR: The first argument to NTH was of the wrong type.
@@ -1124,49 +1124,49 @@ LABELS-FOR (P.C. = 23)
    Arg 1 (FROM): 4/4
 ```
 
-Looking at the definition of `labels-for`, we see that it is looking for the `from` vertex, which in this case is 4, among the neighbors of `U`.
-It was not found, so `pos` became `nil`, and the function `nth` complained that it was not given an integer as an argument.
-So this error, if we had pursued it earlier, would have pointed out that 4 was not listed as a neighbor of `U`, when it should have been.
-Of course, we found that out by other means.
-In any case, there is no bug here to fix - as long as a diagram is guaranteed to be consistent, the `labels-for` bug will not appear again.
+`labels-for` の定義を見ると、`from` の頂点、この場合は4を、`U` の隣のなかから探していることがわかります。
+見つからなかったので `pos` は `nil` になり、関数 `nth` が引数に整数が渡されていないと文句を言ったのです。
+ですからこの誤りは、もっと早く追いかけていれば、4が `U` の隣として挙げられているべきなのに挙げられていないことを教えてくれたはずでした。
+もっとも、それは別の手立てで見つけたわけですが。
+いずれにせよ、ここに直すべき不具合はありません。図の筋が通っていることが保証されているかぎり、`labels-for` の不具合が再び現れることはないのです。
 
-This section has made two points: First, write code that checks the input as thoroughly as possible.
-Second, even when input checking is done, it is still up to the user to understand the limitations of the program.
+本節では2つのことを述べました。第一に、入力をできるかぎり徹底して調べるコードを書くこと。
+第二に、入力の検査をしてもなお、プログラムの限界を理解するのは利用者の務めだということです。
 
-## 17.5 History and References
+## 17.5 歴史と参考文献
 
-[Guzman (1968)](bibliography.md#bb0500) was one of the first to consider the problem of interpreting line diagrams.
-He classified vertexes, and defined some heuristics for combining information from adjacent vertexes.
-[Huffman (1971)](bibliography.md#bb0560) and [Clowes (1971)](bibliography.md#bb0215) independently came up with more formal and complete analyses, and David [Waltz (1975)](bibliography.md#bb1300) extended the analysis to handle shadows, and introduced the constraint propagation algorithm to cut down on the need for search.
-The algorithm is sometimes called "Waltz filtering" in his honor.
-With shadows and nontrihedral angles, there are thousands of vertex labelings instead of 18, but there are also more constraints, so the constraint propagation actually does better than it does in our limited world.
-Waltz's approach and the Huffman-Clowes labels are covered in most introductory AI books, including Rich and Knight 1990, [Charniak and McDermott 1985](bibliography.md#bb0175), and [Winston 1984](bibliography.md#bb1405).
-Waltz's original paper appears in *The Psychology of Computer Vision* ([Winston 1975](bibliography.md#bb1400)), an influential volume collecting early work done at MIT.
-He also contributed a summary article on Waltz filtering ([Waltz 1990](bibliography.md#bb1305)).
+[Guzman（1968）](bibliography.md#bb0500)は、線画を解釈する問題を考えた最初期の1人です。
+頂点を分類し、隣接する頂点からの情報を組み合わせるためのヒューリスティックをいくつか定めました。
+[Huffman（1971）](bibliography.md#bb0560)と[Clowes（1971）](bibliography.md#bb0215)は、独立により形式的で完全な分析を編み出し、David [Waltz（1975）](bibliography.md#bb1300)はその分析を影も扱えるよう拡張し、探索の必要を減らすために制約伝播のアルゴリズムを導入しました。
+このアルゴリズムは、その功績にちなんで「ウォルツのフィルタリング」と呼ばれることもあります。
+影と三面でない角を入れると、頂点のラベル付けは18通りではなく数千通りになりますが、制約も増えるので、制約伝播はむしろ私たちの限られた世界より良く働きます。
+Waltzの方式とHuffman-Clowesのラベルは、Rich and Knight 1990、[Charniak and McDermott 1985](bibliography.md#bb0175)、[Winston 1984](bibliography.md#bb1405)をはじめ、たいていのAIの入門書で扱われています。
+Waltzの元の論文は *The Psychology of Computer Vision*（[Winston 1975](bibliography.md#bb1400)）に収められています。これはMITでの初期の仕事を集めた、影響力のある本です。
+また、ウォルツのフィルタリングについての総説（[Waltz 1990](bibliography.md#bb1305)）も書いています。
 
-Many introductory AI texts give vision short coverage, but [Charniak and McDermott (1985)](bibliography.md#bb0175) and [Tanimoto (1990)](bibliography.md#bb1220) provide good overviews of the field.
-[Zucker (1990)](bibliography.md#bb1450) provides an overview of low-level vision.
+AIの入門書の多くは視覚の扱いが短いのですが、[Charniak and McDermott（1985）](bibliography.md#bb0175)と[Tanimoto（1990）](bibliography.md#bb1220)はこの分野のよい概観を与えています。
+[Zucker（1990）](bibliography.md#bb1450)は低水準の視覚の概観を与えています。
 
-[Ramsey and Barrett (1987)](bibliography.md#bb0975) give an implementation of a line-recognition program.
-It would make a good project to connect their program to the one presented in this chapter, and thereby go all the way from pixels to 3-D descriptions.
+[Ramsey and Barrett（1987）](bibliography.md#bb0975)は、線認識のプログラムの実装を示しています。
+そのプログラムを本章のものにつなぎ、画素から三次元の記述まで一気通貫でたどるのは、良い課題になるでしょう。
 
-## 17.6 Exercises
+## 17.6 練習問題
 
-This chapter has solved the problem of line-labeling for polyhedra made of trihedral vertexes.
-The following exercises extend this solution.
+本章では、三面頂点からなる多面体の線ラベル付けの問題を解きました。
+次の練習問題は、この解を広げるものです。
 
-**Exercise  17.1 [h]** Use the line-labeling to produce a face labeling.
-Write a function that takes a labeled diagram as input and produces a list of the faces (planes) that comprise the diagram.
+**練習問題 17.1 [h]** 線のラベル付けを使って、面のラベル付けを作れ。
+ラベルの付いた図を入力に取り、その図を構成する面（平面）の並びを作る関数を書け。
 
-**Exercise  17.2 [h]** Use the face labeling to produce a polyhedron labeling.
-Write a function that takes a list of faces and a diagram and produces a list of polyhedra (blocks) that comprise the diagram.
+**練習問題 17.2 [h]** 面のラベル付けを使って、多面体のラベル付けを作れ。
+面の並びと図を取り、その図を構成する多面体（積み木）の並びを作る関数を書け。
 
-**Exercise  17.3 [d]** Extend the system to include quad-hedral vertexes and/or shadows.
-There is no conceptual difficulty in this, but it is a very demanding task to find all the possible vertex types and labelings for them.
-Consult [Waltz 1975](bibliography.md#bb1300).
+**練習問題 17.3 [d]** 四面の頂点や影を含むようシステムを拡張せよ。
+考え方のうえでの難しさはないが、ありうる頂点の型とそのラベル付けをすべて見つけるのは、たいそう骨の折れる仕事である。
+[Waltz 1975](bibliography.md#bb1300)を参照せよ。
 
-**Exercise  17.4 [d]** Implement a program to recognize lines from pixels.
+**練習問題 17.4 [d]** 画素から線を認識するプログラムを実装せよ。
 
-**Exercise  17.5 [d]** If you have access to a workstation with a graphical interface, implement a program to allow a user to draw diagrams with a mouse.
-Have the program generate output in the form expected by `construct-diagram`.
+**練習問題 17.5 [d]** 図形的な操作環境を持つワークステーションが使えるなら、利用者がマウスで図を描けるプログラムを実装せよ。
+`construct-diagram` が期待する形で出力を生成させること。
 

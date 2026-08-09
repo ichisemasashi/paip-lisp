@@ -1,60 +1,60 @@
-# Chapter 8
-## Symbolic Mathematics: A Simplification Program
+# 第8章
+## 記号数学: 式の簡約プログラム
 
-> *Our life is frittered away by detail....*
+> *われらの生は些事にすり減らされていく……。*
 
-> *Simplify, simplify.*
+> *簡素にせよ、簡素にせよ。*
 
 > -Henry David Thoreau, *Walden* (1854)
 
-"Symbolic mathematics" is to numerical mathematics as algebra is to arithmetic: it deals with variables and expressions rather than just numbers.
-Computers were first developed primarily to solve arithmetic problems: to add up large columns of numbers, to multiply many-digit numbers, to solve systems of linear equations, and to calculate the trajectories of ballistics.
-Encouraged by success in these areas, people hoped that computers could also be used on more complex problems; to differentiate or integrate a mathematical expression and come up with another expression as the answer, rather than just a number.
-Several programs were developed along these lines in the 1960s and 1970s.
-They were used primarily by professional mathematicians and physicists with access to large mainframe computers.
-Recently, programs like MATHLAB, DERIVE, and MATHEMATICA have given these capabilities to the average personal computer user.
+「記号数学」が数値数学に対する関係は、代数が算術に対する関係と同じです。数だけでなく、変数と式を扱うのです。
+計算機はもともと、主に算術の問題を解くために作られました。大きな数の列を足し合わせ、桁数の多い数を掛け、連立一次方程式を解き、弾道の軌跡を計算するためです。
+こうした分野での成功に励まされ、人々は計算機をもっと複雑な問題にも使えるのではと期待しました。数式を微分あるいは積分して、単なる数ではなく別の式を答えとして出すことです。
+この筋でいくつかのプログラムが1960年代から1970年代にかけて作られました。
+それらは主に、大型のメインフレーム計算機を使える専門の数学者や物理学者に用いられました。
+近年ではMATHLAB、DERIVE、MATHEMATICAといったプログラムが、この能力を並のパソコン利用者にも与えています。
 
-It is interesting to look at some of the history of symbolic algebra, beginning in 1963 with SAINT, James Slagle's program to do symbolic integration.
-Originally, SAINT was heralded as a triumph of AI.
-It used general problem-solving techniques, similar in kind to GPS, to search for solutions to difficult problems.
-The program worked its way through an integration problem by choosing among the techniques known to it and backing up when an approach failed to pan out.
-SAINT's behavior on such problems was originally similar to (and eventually much better than) the performance of undergraduate calculus students.
+記号代数の歴史を少し見てみるのも面白いでしょう。始まりは1963年、James Slagleの記号積分を行うプログラムSAINTです。
+当初、SAINTはAIの勝利として喧伝されました。
+GPSと同種の汎用問題解決の技法を使い、難しい問題の解を探索したのです。
+このプログラムは、知っている技法の中から選び、方式がうまくいかなければ後戻りしながら積分問題を進めていきました。
+そうした問題でのSAINTの振る舞いは、当初は微積分を学ぶ大学生の成績に似ており、やがてそれをはるかに上回りました。
 
-Over time, the AI component of symbolic integration began to disappear.
-Joel Moses implemented a successor to SAINT called SIN.
-It used many of the same techniques, but instead of relying on search to find the right combination of techniques, it had additional mathematical knowledge that led it to pick the right technique at each step, without any provision for backing up and trying an alternative.
-SIN solved more problems and was much faster than SAINT, although it was not perfect: it still occasionally made the wrong choice and failed to solve a problem it could have.
+時とともに、記号積分におけるAIの要素は消え始めました。
+Joel MosesがSAINTの後継としてSINを実装しました。
+同じ技法の多くを使いましたが、正しい技法の組み合わせを探索で見つけることに頼る代わりに、各段階で正しい技法を選ばせる数学的な知識を加えて持ち、後戻りして別の手を試す備えは持ちませんでした。
+SINはSAINTより多くの問題を解き、はるかに速かったのですが、完璧ではありませんでした。ときに誤った選択をし、解けたはずの問題を解きそこねることもあったのです。
 
-By 1970, the mathematician R.
-Risch and others developed algorithms for indefinite integration of any expression involving algebraic, logarithmic, or exponential extensions of rational functions.
-In other words, given a "normal" function, the Risch algorithm will return either the indefinite integral of the function or an indication that no closed-form integral is possible in terms of elementary functions.
-Such work effectively ended the era of considering integration as a problem in search.
+1970年までに、数学者のR.
+Rischらが、有理関数の代数的・対数的・指数的な拡張を含む任意の式の不定積分のアルゴリズムを開発しました。
+言い換えれば、「普通の」関数が与えられると、Rischのアルゴリズムはその関数の不定積分を返すか、初等関数の範囲では閉じた形の積分が不可能だと示すかのいずれかです。
+こうした仕事は、積分を探索の問題と見なす時代を事実上終わらせました。
 
-SIN was further refined, merged with parts of the Risch algorithm, and put into the evolving MACSYMA<a id="tfn08-1"></a><sup>[1](#fn08-1)</sup> program.
-For the most part, refinement of MACSYMA consisted of the incorporation of new algorithms.
-Few heuristics of any sort survive.
-Today MACSYMA is no longer considered an AI program.
-It is used daily by scientists and mathematicians, while ELIZA and STUDENT are now but historical footnotes.
+SINはさらに洗練され、Rischのアルゴリズムの一部と統合され、進化するMACSYMA<a id="tfn08-1"></a><sup>[1](#fn08-1)</sup> プログラムに組み込まれました。
+MACSYMAの洗練は、その大半が新しいアルゴリズムの取り込みからなっていました。
+いかなる種類の発見的方法もほとんど生き残っていません。
+今日、MACSYMAはもはやAIプログラムとは見なされていません。
+科学者や数学者に日々使われている一方で、ELIZAとSTUDENTは今や歴史の脚注にすぎません。
 
-With ELIZA and STUDENT we were able to develop miniature programs that duplicated most of the features of the original.
-We won't even try to develop a program worthy of the name MACSYMA; instead we will settle for a modest program to do symbolic simplification, which we will call (simply) `simplifier`.
-Then, we will extend `simplifier` to do differentiation, and some integration problems.
-The idea is that given an expression like (2 - 1)*x* + 0, we want the program to compute the simplified form *x*.
+ELIZAとSTUDENTでは、元のものの機能の大半を再現した小型のプログラムを作れました。
+MACSYMAの名に値するプログラムを作ろうとはしません。代わりに、記号による簡約を行うささやかなプログラムで満足することにし、それを（そのまま）`simplifier` と呼びます。
+そのうえで、`simplifier` を微分と、いくつかの積分の問題ができるよう拡張します。
+考えは、(2 - 1)*x* + 0 のような式が与えられたら、プログラムに簡約した形 *x* を計算させたい、というものです。
 
-According to the *Mathematics Dictionary* (James and James 1949), the word "simplified" is "probably the most indefinite term used seriously in mathematics." The problem is that "simplified" is relative to what you want to use the expression for next.
-Which is simpler, *x*<sup>2</sup> + 3*x* + 2 or (*x* + 1)(*x* + 2)?
-The first makes it easier to integrate or differentiate, the second easier to find roots.
-We will be content to limit ourselves to "obvious" simplifications.
-For example, *x* is almost always preferable to 1*x* + 0.
+*Mathematics Dictionary*（James and James 1949）によれば、「simplified（簡約された）」という語は「おそらく数学で真面目に使われる最も曖昧な用語」です。問題は、「簡約された」が、その式を次に何に使いたいかによって相対的だということです。
+*x*<sup>2</sup> + 3*x* + 2 と (*x* + 1)(*x* + 2) では、どちらが簡単でしょうか。
+前者は積分や微分をしやすくし、後者は根を見つけやすくします。
+私たちは「明らかな」簡約に自らを限って満足することにします。
+たとえば *x* は、ほとんど常に 1*x* + 0 より好ましいのです。
 
-## 8.1 Converting Infix to Prefix Notation
+## 8.1 中置記法を前置記法に直す
 
-We will represent simplifications as a list of rules, much like the rules for STUDENT and ELIZA.
-But since each simplification rule is an algebraic equation, we will store each one as an exp rather than as a `rule`.
-To make things more legible, we will write each expression in infix form, but store them in the prefix form expected by `exp`.
-This requires an `infix->prefix` function to convert infix expressions into prefix notation.
-We have a choice as to how general we want our infix notation to be.
-Consider:
+簡約を、STUDENTやELIZAの規則とよく似た、規則の並びとして表します。
+ただし各簡約規則は代数方程式なので、それぞれを `rule` ではなく exp として格納します。
+読みやすくするため、各式は中置の形で書きますが、`exp` が期待する前置の形で格納します。
+これには、中置の式を前置記法に変換する `infix->prefix` 関数が要ります。
+中置記法をどれだけ汎用にするかには選択の余地があります。
+次を考えてみましょう。
 
 ```lisp
 (((a * (x ^ 2)) + (b * x)) + c)
@@ -63,18 +63,18 @@ Consider:
 a x^2 + b*x+c
 ```
 
-The first is fully parenthesized infix, the second makes use of operator precedence (multiplication binds tighter than addition and is thus performed first), and the third makes use of implicit multiplication as well as operator precedence.
-The fourth requires a lexical analyzer to break Lisp symbols into pieces.
+1つ目は完全に括弧を付けた中置、2つ目は演算子の優先順位（乗算は加算より強く結び付き、したがって先に行われる）を用いたもの、3つ目は演算子の優先順位に加えて暗黙の乗算を用いたものです。
+4つ目はLispのシンボルを部分に分ける字句解析器を要します。
 
-Suppose we only wanted to handle the fully parenthesized case.
-To write `infix->prefix`, one might first look at `prefix->infix` (on [page 228](chapter7.md#p228)) trying to adapt it to our new purposes.
-In doing so, the careful reader might discover a surprise: `infix->prefix` and `prefix->infix` are in fact the exact same function!
-Both leave atoms unchanged, and both transform three-element lists by swapping the `exp-op` and `exp-lhs`.
-Both apply themselves recursively to the (possibly rearranged) input list.
-Once we discover this fact, it would be tempting to avoid writing `infix->prefix`, and just call `prefix->infix` instead.
-Avoid this temptation at all costs.
-Instead, define `infix->prefix` as shown below.
-The intent of your code will be clearer:
+完全に括弧を付けた場合だけを扱いたいとしましょう。
+`infix->prefix` を書くために、まず `prefix->infix`（[228ページ](chapter7.md#p228)）を見て、新しい目的に合わせようとするかもしれません。
+そうするうちに、注意深い読者は驚くべきことに気づくかもしれません。`infix->prefix` と `prefix->infix` は、実はまったく同じ関数なのです。
+どちらもアトムは変えず、どちらも3要素のリストを `exp-op` と `exp-lhs` を入れ替えて変形します。
+どちらも（並べ替えられたかもしれない）入力リストに自分自身を再帰的に適用します。
+この事実に気づくと、`infix->prefix` を書くのをやめて、代わりに `prefix->infix` を呼びたくなるでしょう。
+この誘惑は何としても避けてください。
+代わりに、下に示すとおり `infix->prefix` を定義してください。
+コードの意図がより明快になります。
 
 ```lisp
 (defun infix->prefix (infix-exp)
@@ -83,11 +83,11 @@ The intent of your code will be clearer:
  (prefix->infix infix-exp))
 ```
 
-As we saw above, fully parenthesized infix can be quite ugly, with all those extra parentheses, so instead we will use operator precedence.
-There are a number of ways of doing this, but the easiest way for us to proceed is to use our previously defined tool `rule-based-translator` and its subtool, `pat-match`.
-Note that the third clause of `infix->prefix`, the one that calls `rule-based-translator` is unusual in that it consists of a single expression.
-Most cond-clauses have two expressions: a test and a result, but ones like this mean, "Evaluate the test, and if it is non-nil, return it.
-Otherwise go on to the next clause."
+上で見たとおり、完全に括弧を付けた中置は、あの余分な括弧のせいでかなり不格好になりえます。ですから代わりに演算子の優先順位を使います。
+やり方はいくつもありますが、私たちにとって最も楽なのは、以前に定義した道具 `rule-based-translator` と、その下位の道具 `pat-match` を使うことです。
+`infix->prefix` の3番目の節、すなわち `rule-based-translator` を呼ぶ節が、1つの式だけからなっている点で変わっていることに注意してください。
+たいていのcond節は判定と結果という2つの式を持ちますが、これのようなものは「判定を評価し、それが nil でなければそれを返す。
+そうでなければ次の節へ進む」という意味です。
 
 ```lisp
 (defun infix->prefix (exp)
@@ -110,7 +110,7 @@ Otherwise go on to the next clause."
         (t (error "Illegal exp"))))
 ```
 
-Because we are doing mathematics in this chapter, we adopt the mathematical convention of using certain one-letter variables, and redefine `variable-p` so that variables are only the symbols `m` through `z`.
+この章では数学を扱うので、特定の一文字の変数を使うという数学の流儀を採り入れ、`variable-p` を定義し直して、変数を `m` から `z` までのシンボルだけに限ります。
 
 ```lisp
 (defun variable-p (exp)
@@ -138,11 +138,11 @@ Because we are doing mathematics in this chapter, we adopt the mathematical conv
   "A list of rules, ordered by precedence.")
 ```
 
-## 8.2 Simplification Rules
+## 8.2 簡約の規則
 
-Now we are ready to define the simplification rules.
-We use the definition of the data types rule and exp ([page 221](chapter7.md#p221)) and `prefix->infix` ([page 228](chapter7.md#p228)) from STUDENT.
-They are repeated here:
+これで簡約の規則を定義する準備が整いました。
+STUDENTのデータ型 rule と exp（[221ページ](chapter7.md#p221)）、および `prefix->infix`（[228ページ](chapter7.md#p228)）の定義を使います。
+ここに再掲します。
 
 ```lisp
 (defstruct (rule (:type list)) pattern response)
@@ -166,13 +166,13 @@ They are repeated here:
   (and (exp-p x) (= (length (exp-args x)) 2)))
 ```
 
-We also use `rule-based-translator` ([page 188](chapter6.md#p188)) once again, this time on a list of simplification rules.
-A reasonable list of simplification rules is shown below.
-This list covers the four arithmetic operators, addition, subtraction, multiplication, and division, as well as exponentiation (raising to a power), denoted by the symbol `^`.
+`rule-based-translator`（[188ページ](chapter6.md#p188)）もここで再び使います。今度は簡約規則の並びに対してです。
+妥当な簡約規則の並びを以下に示します。
+この並びは4つの算術演算子 — 加算・減算・乗算・除算 — に加え、記号 `^` で表すべき乗（累乗）を扱います。
 
-Again, it is important to note that the rules are ordered, and that later rules will be applied only when earlier rules do not match.
-So, for example, 0 / 0 simplifies to `undefined`, and not to 1 or 0, because the rule for 0 / 0 comes before the other rules.
-See [exercise 8.8](#st0045) for a more complete treatment of this.
+ここでも、規則には順序があり、後の規則は前の規則が合致しないときにのみ適用されることに注意するのが大切です。
+ですからたとえば 0 / 0 は 1 でも 0 でもなく `undefined` に簡約されます。0 / 0 の規則が他の規則より前に来るからです。
+これのより完全な扱いは [練習問題8.8](#st0045) を参照してください。
 
 ```lisp
 (defparameter *simplification-rules* (mapcar #'infix->prefix '(
@@ -210,38 +210,38 @@ See [exercise 8.8](#st0045) for a more complete treatment of this.
 (defun ^ (x y) "Exponentiation" (expt x y))
 ```
 
-We are now ready to go ahead and write the simplifier.
-The main function, `simplifier`, will repeatedly print a prompt, read an input, and print it in simplified form.
-Input and output is in infix and the computation is in prefix, so we need to convert accordingly; the function `simp` does this, and the function `simplify` takes care of a single prefix expression.
-It is summarized in [figure 8.1](#f0010).
+これで簡約器を書き進める準備が整いました。
+主となる関数 `simplifier` は、プロンプトを表示し、入力を読み、それを簡約した形で表示することを繰り返します。
+入力と出力は中置、計算は前置なので、それに応じて変換する必要があります。関数 `simp` がこれを行い、関数 `simplify` が1つの前置の式を扱います。
+概要を [図8.1](#f0010) にまとめます。
 
-| Symbol                   | Use                                                   |
+| 記号                     | 用途                                                  |
 | ------                   | ---                                                   |
-|                          | **Top-Level Function**                                |
-| `simplifier`             | A rad-simplify-print loop.                            |
-| `simp`                   | Simplify an infix expression.                         |
-| `simplify`               | Simplify a prefix expression.                         |
-|                          | **Special Variables**                                 |
-| `*infix->prefix-rules*`  | Rules to translate from infix to prefix.              |
-| `*simplification-rules*` | Rules to simplify an expression.                      |
-|                          | **Data Types**                                        |
-| `exp`                    | A prefix expression                                   |
-|                          | **Auxiliary Functions**                               |
-| `simplify-exp`           | Simplify a non-atomic prefix expression.              |
-| `infix->prefix`          | Convert infix to prefix notation.                     |
-| `variable-p`             | The symbols m through z are variables.                |
-| `^`                      | An alias for `expt`, exponentiation.                  |
-| `evaluable`              | Decide if an expression can be numerically evaluated. |
-| `simp-rule`              | Transform a rule into proper format.                  |
-| `length=1`               | Is the argument a list of length 1?                   |
-|                          | **Previously Defined Functions**                      |
-| `pat-match`              | Match pattern against an input. (p. 180)              |
-| `rule-based-translator`  | Apply a set of rules. (p. 189)                        |
-| `pat-match-abbrev`       | Define an abbreviation for use in `pat-match`         |
+|                          | **最上位の関数**                                      |
+| `simplifier`             | 読み取り・簡約・表示のループ。                        |
+| `simp`                   | 中置の式を簡約する。                                  |
+| `simplify`               | 前置の式を簡約する。                                  |
+|                          | **スペシャル変数**                                    |
+| `*infix->prefix-rules*`  | 中置から前置へ変換する規則。                          |
+| `*simplification-rules*` | 式を簡約する規則。                                    |
+|                          | **データ型**                                          |
+| `exp`                    | 前置の式。                                            |
+|                          | **補助の関数**                                        |
+| `simplify-exp`           | アトムでない前置の式を簡約する。                      |
+| `infix->prefix`          | 中置記法を前置記法に変換する。                        |
+| `variable-p`             | m から z までのシンボルが変数。                       |
+| `^`                      | べき乗 `expt` の別名。                                |
+| `evaluable`              | 式を数値として評価できるかを判断する。                |
+| `simp-rule`              | 規則を正しい形式に変換する。                          |
+| `length=1`               | 引数は長さ1のリストか。                               |
+|                          | **既出の関数**                                        |
+| `pat-match`              | パターンを入力に照合する。(180ページ)                 |
+| `rule-based-translator`  | 規則の組を適用する。(189ページ)                       |
+| `pat-match-abbrev`       | `pat-match` で使う省略記法を定義する。                |
 
-**Figure 8.1:** Glossary for the Simplifier
+**図8.1:** 簡約器の用語一覧
 
-Here is the program:
+プログラムを示します。
 
 ```lisp
 (defun simplifier ()
@@ -275,20 +275,20 @@ Here is the program:
                 (integerp (second (exp-args exp)))))))
 ```
 
-The function `simplify` assures that any compound expression will be simplified by first simplifying the arguments and then calling `simplify-exp`.
-This latter function searches through the simplification rules, much like `use-eliza-rules` and `translate-to-expression`.
-When it finds a match, `simplify-exp` substitutes in the proper variable values and calls `simplify` on the result.
-`simplify-exp` also has the ability to call `eval` to simplify an arithmetic expression to a number.
-As in STUDENT, it is for the sake of this `eval` that we require expressions to be represented as lists in prefix notation.
-Numeric evaluation is done *after* checking the rules so that the rules can intercept expressions like `(/ 1 0)` and simplify them to `undefined`.
-If we did the numeric evaluation first, these expressions would yield an error when passed to `eval`.
-Because Common Lisp supports arbitrary precision rational numbers (fractions), we are guaranteed there will be no round-off error, unless the input explicitly includes inexact (floating-point) numbers.
-Notice that we allow computations involving the four arithmetic operators, but exponentiation is only allowed if the exponent is an integer.
-That is because expressions like `(^ 4 1/2)` are not guaranteed to return 2 (the exact square root of 4); the answer might be 2.0 (an inexact number).
-Another problem is that -2 is also a square root of 4, and in some contexts it is the correct one to use.
+関数 `simplify` は、まず引数を簡約してから `simplify-exp` を呼ぶことで、どんな複合式も簡約されることを保証します。
+後者の関数は、`use-eliza-rules` や `translate-to-expression` とよく似て、簡約規則を探します。
+合致を見つけると、`simplify-exp` は正しい変数の値を差し込み、その結果に `simplify` を呼びます。
+`simplify-exp` はまた、算術式を数に簡約するために `eval` を呼ぶこともできます。
+STUDENTと同じく、式を前置記法のリストとして表すよう求めているのは、この `eval` のためです。
+数値としての評価は規則を調べた*後*に行われます。規則が `(/ 1 0)` のような式を横取りして `undefined` に簡約できるようにするためです。
+もし数値としての評価を先に行えば、こうした式は `eval` に渡されたときエラーになってしまいます。
+Common Lispは任意精度の有理数（分数）を支えているので、入力が明示的に不正確な（浮動小数点の）数を含まないかぎり、丸め誤差は生じないと保証されます。
+4つの算術演算子を含む計算は許しますが、べき乗は指数が整数のときにのみ許すことに注意してください。
+それは、`(^ 4 1/2)` のような式が2（4の厳密な平方根）を返すと保証されないからです。答えは2.0（不正確な数）になるかもしれません。
+もう1つの問題は、-2 もまた4の平方根であり、文脈によってはそちらを使うのが正しいことです。
 
-The following trace shows some examples of the simplifier in action.
-First we show that it can be used as a calculator; then we show more advanced problems.
+次の追跡は、簡約器の働きの例をいくつか示しています。
+まず電卓として使えることを示し、次にもっと進んだ問題を示します。
 
 ```lisp
 >(simplifier)
@@ -310,29 +310,29 @@ SIMPLIFIER> [Abort]
 >
 ```
 
-Here we have terminated the loop by hitting the abort key on the terminal.
-(The details of this mechanism varies from one implementation of Common Lisp to another.) The simplifier seems to work fairly well, although it errs on the last example: `(3 * (2 * X ) )` should simplify to `( 6 * X )`.
-In the next section, we will correct that problem.
+ここでは端末の中止キーを押してループを終えました。
+（この仕組みの詳細はCommon Lispの処理系ごとに異なります。）簡約器はかなりうまく働くようですが、最後の例で誤ります。`(3 * (2 * X ) )` は `( 6 * X )` に簡約されるべきです。
+次の節でその問題を正します。
 
-## 8.3 Associativity and Commutativity
+## 8.3 結合則と交換則
 
-We could easily add a rule to rewrite `(3 * (2 * X))` as `((3 * 2) * X)` and hence `(6 * X)`.
-The problem is that this rule would also rewrite `(X * (2 * 3))` as `((X * 2) * 3)`, unless we had a way to limit the rule to apply only when it would group numbers together.
-Fortunately, `pat-match` does provide just this capability, with the `?is` pattern.
-We could write this rule:
+`(3 * (2 * X))` を `((3 * 2) * X)`、ひいては `(6 * X)` に書き換える規則を加えるのは簡単です。
+問題は、数どうしをまとめるときにのみ適用するよう規則を限る手立てがなければ、この規則が `(X * (2 * 3))` を `((X * 2) * 3)` にも書き換えてしまうことです。
+幸い、`pat-match` は `?is` パターンでまさにこの能力を備えています。
+次の規則が書けます。
 
 ```lisp
 (((?is n numberp) * ((?is m numberp) * x)) = ((n * m) * x))
 ```
 
-This transforms `(3 * (2 * x))` into `((3 * 2) * x)`, and hence into `(6 * x)`.
-Unfortunately, the problem is not as simple as that.
-We also want to simplify `((2 * x) * (y * 3))` to `(6 *(x * y))`.
-We can do a better job of gathering numbers together by adopting three conventions.
-First, make numbers first in products: change `x * 3` to `3 * x`.
-Second, combine numbers in an outer expression with a number in an inner expression: change `3 * (5 * x)` to `(3 * 5) * x`.
-Third, move numbers out of inner expressions whenever possible: change `(3 * x) * y` to `3 * (x * y)`.
-We adopt similar conventions for addition, except that we prefer numbers last there: `x + 1` instead of `1 + x`.
+これは `(3 * (2 * x))` を `((3 * 2) * x)`、ひいては `(6 * x)` に変形します。
+あいにく問題はそれほど単純ではありません。
+`((2 * x) * (y * 3))` も `(6 *(x * y))` に簡約したいのです。
+3つの流儀を採り入れれば、数をまとめる仕事をもっとうまくやれます。
+第一に、積では数を先にする。`x * 3` を `3 * x` に変える。
+第二に、外側の式の数を内側の式の数と組み合わせる。`3 * (5 * x)` を `(3 * 5) * x` に変える。
+第三に、可能なときはいつでも数を内側の式の外へ出す。`(3 * x) * y` を `3 * (x * y)` に変える。
+加算にも同様の流儀を採り入れますが、そこでは数を最後にするほうを好みます。`1 + x` ではなく `x + 1` です。
 
 ```lisp
 ;; Define n and m as numbers; s as a non-number:
@@ -360,8 +360,8 @@ We adopt similar conventions for addition, except that we prefer numbers last th
     ((x + n) + y = (x + y) + n)))))
 ```
 
-With the new rules in place, we are ready to try again.
-For some problems we get just the right answers:
+新しい規則を据えたので、もう一度試す準備ができました。
+いくつかの問題では、ちょうど正しい答えが得られます。
 
 ```lisp
 > (simplifier)
@@ -377,7 +377,7 @@ SIMPLIFIER > (2 * x * 3 * x * 4 * (l / x) * 5 * 6)
 (720 * X)
 ```
 
-Unfortunately, there are other problems that aren't simplified properly:
+あいにく、正しく簡約されない問題もあります。
 
 ```lisp
 SIMPLIFIER > (3 + x + 4 - x)
@@ -388,22 +388,22 @@ SIMPLIFIER > (3 * x + 4 * x)
 ((3 * X) + (4 * X))
 ```
 
-We will return to these problems in [section 8.5](#s0030).
+これらの問題には [8.5節](#s0030) で立ち戻ります。
 
-**Exercise 8.1** Verify that the set of rules just prior does indeed implement the desired conventions, and that the conventions have the proper effect, and always terminate.
-As an example of a potential problem, what would happen if we used the rule `(x * n = n * x)` instead of the rule `(s * n = n * s)`?
+**練習問題 8.1** 直前の規則の組が確かに望んだ流儀を実装していること、その流儀が正しい効果を持ち、常に終わることを確かめよ。
+起こりうる問題の例として、規則 `(s * n = n * s)` の代わりに規則 `(x * n = n * x)` を使ったらどうなるか。
 
-## 8.4 Logs, Trig, and Differentiation
+## 8.4 対数、三角関数、微分
 
-In the previous section, we restricted ourselves to the simple arithmetic functions, so as not to intimidate those who are a little leery of complex mathematics.
-In this section, we add a little to the mathematical complexity, without having to alter the program itself one bit.
-Thus, the mathematically shy can safely skip to the next section without feeling they are missing any of the fun.
+前節では、込み入った数学を少し敬遠する人を怖じ気づかせないよう、単純な算術の関数に自らを限りました。
+この節では、プログラム自体を少しも変えることなく、数学の複雑さをいくらか加えます。
+ですから数学が苦手な方は、楽しみを取り逃がすと感じることなく次の節へ安心して飛べます。
 
-We start off by representing some elementary properties of the logarithmic and trigonometric functions.
-The new rules are similar to the "zero and one" rules we needed for the arithmetic operators, except here the constants `e` and `pi` (*e* = 2.71828... and *&pi;* = 3.14159...) are important in addition to 0 and 1.
-We also throw in some rules relating logs and exponents, and for sums and differences of logs.
-The rules assume that complex numbers are not allowed.
-If they were, log *e<sup>x</sup>* (and even *x<sup>y</sup>*) would have multiple values, and it would be wrong to arbitrarily choose one of these values.
+まず、対数関数と三角関数の初歩的な性質をいくつか表すことから始めます。
+新しい規則は、算術演算子に必要だった「0と1」の規則に似ていますが、ここでは0と1に加えて定数 `e` と `pi`（*e* = 2.71828... と *&pi;* = 3.14159...）が重要です。
+対数と指数を関係づける規則や、対数の和と差についての規則もいくつか放り込みます。
+これらの規則は複素数が許されないことを前提としています。
+もし許されたら、log *e<sup>x</sup>*（や *x<sup>y</sup>* さえも）は多価になり、その値の1つを勝手に選ぶのは誤りとなるでしょう。
 
 ```lisp
 (setf *simplification-rules*
@@ -427,26 +427,26 @@ If they were, log *e<sup>x</sup>* (and even *x<sup>y</sup>*) would have multiple
   ))))
 ```
 
-Now we would like to go a step further and extend the system to handle differentiation.
-This is a favorite problem, and one which has historical significance: in the summer of 1958 John McCarthy decided to investigate differentiation as an interesting symbolic computation problem, which was difficult to express in the primitive programming languages of the day.
-This investigation led him to see the importance of functional arguments and recursive functions in the field of symbolic computation.
-For example, McCarthy invented what we now call `mapcar` to express the idea that the derivative of a sum is the sum of the derivative function applied to each argument.
-Further work led McCarthy to the publication in October 1958 of MIT AI Lab Memo No.
-1: "An Algebraic Language for the Manipulation of Symbolic Expressions," which defined the precursor of Lisp.
+次にもう一歩進めて、微分を扱えるようにシステムを拡張したいと思います。
+これは人気のある問題であり、歴史的な意義も持ちます。1958年の夏、John McCarthyは微分を、当時の原始的なプログラミング言語では表しにくい、興味深い記号計算の問題として調べることにしたのです。
+この調査は、記号計算の分野における関数引数と再帰関数の重要性を彼に気づかせました。
+たとえばMcCarthyは、和の微分が各引数に微分の関数を適用した和である、という考えを表すために、今私たちが `mapcar` と呼ぶものを考案しました。
+さらなる仕事の末、McCarthyは1958年10月にMIT AI Lab Memo No.
+1「An Algebraic Language for the Manipulation of Symbolic Expressions」を発表し、これがLispの前身を定義しました。
 
-In McCarthy's work and in many subsequent texts you can see symbolic differentiation programs with a simplification routine tacked on the end to make the output more readable.
-Here, we take the opposite approach: the simplification routine is central, and differentiation is handled as just another operator, with its own set of simplification rules.
-We will require a new infix-to-prefix translation rule.
-While we're at it, we'll add a rule for indefinite integration as well, although we won't write simplification rules for integration yet.
-Here are the new notations:
+McCarthyの仕事や、その後の多くの教科書では、出力を読みやすくするために末尾に簡約の手続きを付け足した記号微分のプログラムを見ることができます。
+ここでは逆の方式を採ります。簡約の手続きが中心で、微分は独自の簡約規則の組を持つ、もう1つの演算子として扱われます。
+新しい中置から前置への変換規則が要ります。
+ついでに不定積分の規則も加えますが、積分の簡約規則はまだ書きません。
+新しい記法を示します。
 
 | []()        |             |             |
 |-------------|-------------|-------------|
-| math        | infix       | prefix      |
+| 数学        | 中置        | 前置        |
 | *dy*/*dx*   | `d y / d x` | `(d y x)`   |
 | &int; *ydx* | `Int y d x` | `(int y x)` |
 
-And here are the necessary infix-to-prefix rules:
+そして必要な中置から前置への規則を示します。
 
 ```lisp
 (defparameter *infix->prefix-rules*
@@ -463,11 +463,11 @@ And here are the necessary infix-to-prefix rules:
       ((x+ ^ y+) (^ x y)))))
 ```
 
-Since the new rule for differentiation occurs before the rule for division, there won't be any confusion with a differential being interpreted as a quotient.
-On the other hand, there is a potential problem with integrals that contain `d` as a variable.
-The user can always avoid the problem by using (`d`) instead of `d` inside an integral.
+微分の新しい規則が除算の規則より前に来るので、微分が商と解釈される混乱は生じません。
+一方、`d` を変数として含む積分には起こりうる問題があります。
+利用者は積分の中で `d` の代わりに (`d`) を使えば、この問題をいつでも避けられます。
 
-Now we augment the simplification rules, by copying a differentiation table out of a reference book:
+次に、参考書から微分の表を写して簡約規則を増やします。
 
 ```lisp
 (setf *simplification-rules*
@@ -489,10 +489,10 @@ Now we augment the simplification rules, by copying a differentiation table out 
   (d u / d x       = 0)))))
 ```
 
-We have added a default rule, `(d u / d x = 0)`; this should only apply when the expression `u` is free of the variable `x` (that is, when `u` is not a function of `x`).
-We could use `?if` to check this, but instead we rely on the fact that differentiation is closed over the list of operators described here-as long as we don't introduce any new operators, the answer will always be correct.
-Note that there are two rules for exponentiation, one for the case when the exponent is a number, and one when it is not.
-This was not strictly necessary, as the second rule covers both cases, but that was the way the rules were written in the table of differentials I consulted, so I left both rules in.
+既定の規則 `(d u / d x = 0)` を加えました。これは式 `u` が変数 `x` を含まないとき（つまり `u` が `x` の関数でないとき）にのみ適用されるべきです。
+これを調べるのに `?if` を使うこともできますが、代わりに、微分がここで述べた演算子の並びについて閉じているという事実に頼ります。新しい演算子を導入しないかぎり、答えは常に正しくなります。
+べき乗の規則が2つあることに注意してください。指数が数の場合のものと、そうでない場合のものです。
+2つ目の規則が両方の場合を覆うので、これは厳密には必要ありませんでしたが、私が参照した微分の表ではそのように書かれていたので、両方の規則を残しました。
 
 ```lisp
 SIMPLIFIER > (d (x + x) / d x)
@@ -521,26 +521,26 @@ SIMPLIFIER > (sin(x + x) * sin(d x ^ 2 / d x) +
 1
 ```
 
-The program handles differentiation problems well and is seemingly clever in its use of the identity sin<sup>2</sup>*x* + cos<sup>2</sup>*x* = 1.
+このプログラムは微分の問題をうまく扱い、恒等式 sin<sup>2</sup>*x* + cos<sup>2</sup>*x* = 1 の使い方も一見賢く見えます。
 
-## 8.5 Limits of Rule-Based Approaches
+## 8.5 規則に基づく方式の限界
 
-In this section we return to some examples that pose problems for the simplifier.
-Here is a simple one:
+この節では、簡約器にとって問題となるいくつかの例に立ち戻ります。
+単純なものを1つ示します。
 
 `SIMPLIFIER > (x + y + y + x)`=> `(X + (Y + (Y + X)))`
 
-We would prefer `2 * (x + y)`.
-The problem is that, although we went to great trouble to group numbers together, there was no effort to group non-numbers.
-We could write rules of the form:
+私たちは `2 * (x + y)` のほうを好むでしょう。
+問題は、数どうしをまとめるのには大変な骨を折ったのに、数でないものをまとめる努力はしなかったことです。
+次の形の規則が書けます。
 
 ```lisp
 (y + (y + x) = (2 * y) + x)
 (y + (x + y) = (2 * y) + x)
 ```
 
-These would work for the example at hand, but they would not work for `(x + y + z + y + x)`.
-For that we would need more rules:
+これらは目の前の例では働きますが、`(x + y + z + y + x)` では働きません。
+そのためにはもっと規則が要ります。
 
 ```lisp
 (y + (z + (y + x)) = (2 * y) + x + z)
@@ -549,13 +549,13 @@ For that we would need more rules:
 (y + ((x + y) + z) = (2 * y) + x + z)
 ```
 
-To handle all the cases, we would need an infinite number of rules.
-The pattern-matching language is not powerful enough to express this succinctly.
-It might help if nested sums (and products) were unnested; that is, if we allowed + to take an arbitrary number of arguments instead of just one.
-Once the arguments are grouped together, we could sort them, so that, say, all the `ys` appear before `z` and after `x`.
-Then like terms could be grouped together.
-We have to be careful, though.
-Consider these examples:
+すべての場合を扱うには、無限個の規則が要るでしょう。
+パターン照合の言語は、これを簡潔に表せるほど強力ではありません。
+入れ子になった和（や積）の入れ子を解けば助けになるかもしれません。つまり、+ が1つだけでなく任意個の引数をとれるようにするのです。
+引数をまとめてしまえば、それらを並べ替えて、たとえば `y` がすべて `z` の前、`x` の後に来るようにできます。
+そうすれば同類項をまとめられます。
+ただし気をつけねばなりません。
+次の例を考えてみましょう。
 
 ```lisp
 SIMPLIFIER > (3 * x + 4 * x)
@@ -564,23 +564,23 @@ SIMPLIFIER > (3 * x + y + x + 4 * x)
 ((3 * X) + (Y + (X + (4 * X))))
 ```
 
-We would want `(3 * x)` to sort to the same place as `x` and `(4 * x )` so that they could all be combined to `(8 * x)`.
-In [chapter 15](chapter15.md), we develop a new version of the program that handles this problem.
+`(3 * x)` を `x` や `(4 * x )` と同じ位置に並べて、すべてを `(8 * x)` にまとめられるようにしたいのです。
+[第15章](chapter15.md)では、この問題を扱う新しい版のプログラムを作ります。
 
-## 8.6 Integration
+## 8.6 積分
 
-So far, the algebraic manipulations have been straightforward.
-There is a direct algorithm for computing the derivative of every expression.
-When we consider integrals, or antiderivatives,<a id="tfn08-2"></a><sup>[2](#fn08-2)</sup> the picture is much more complicated.
-As you may recall from freshman calculus, there is a fine art to computing integrals.
-In this section, we try to see how far we can get by encoding just a few of the many tricks available to the calculus student.
+ここまで、代数的な操作は素直なものでした。
+あらゆる式の微分を計算する直接的なアルゴリズムがあります。
+積分、すなわち原始関数<a id="tfn08-2"></a><sup>[2](#fn08-2)</sup> を考えると、様相はずっと込み入ってきます。
+大学1年の微積分を思い出せば分かるように、積分の計算には巧みな技があります。
+この節では、微積分を学ぶ学生が使える多くの技のうちごくわずかを符号化するだけで、どこまで行けるかを見てみます。
 
-The first step is to recognize that entries in the simplification table will not be enough.
-Instead, we will need an algorithm to evaluate or "simplify" integrals.
-We will add a new case to `simplify-exp` to check each operator to see if it has a simplification function associated with it.
-These simplification functions will be associated with operators through the functions `set-simp-fn` and `simp-fn`.
-If an operator does have a simplification function, then that function will be called instead of consulting the simplification rules.
-The simplification function can elect not to handle the expression after all by returning nil, in which case we continue with the other simplification methods.
+最初の段階は、簡約の表の項目だけでは足りないと気づくことです。
+代わりに、積分を評価あるいは「簡約」するアルゴリズムが要ります。
+`simplify-exp` に新しい場合を加え、各演算子に簡約の関数が結び付いているかを調べます。
+これらの簡約の関数は、`set-simp-fn` と `simp-fn` という関数を通じて演算子に結び付けられます。
+演算子に簡約の関数があれば、簡約規則を参照する代わりにその関数が呼ばれます。
+簡約の関数は、nil を返すことで結局その式を扱わないことを選べます。その場合は他の簡約の手法で続けます。
 
 ```lisp
 (defun simp-fn (op) (get op 'simp-fn))
@@ -608,41 +608,41 @@ The simplification function can elect not to handle the expression after all by 
         (simplify result))))
 ```
 
-Freshman calculus classes teach a variety of integration techniques.
-Fortunately, one technique-the derivative-divides technique-can be adopted to solve most of the problems that come up at the freshman calculus level, perhaps 90% of the problems given on tests.
-The basic rule is:
+大学1年の微積分の授業では、さまざまな積分の技法を教えます。
+幸い、1つの技法 — 微分で割る技法 — を採り入れれば、大学1年の微積分の水準で出てくる問題の大半、おそらく試験に出る問題の90%が解けます。
+基本の規則は次のとおりです。
 
 &int;*f(x)dx* = &int;*f(u)<sup>du</sup>/<sub>dx</sub>dx*
 
-As an example, consider &int;*xsin(x<sup>2</sup>)dx*.
-Using the substitution *u* = *x*<sup>2</sup>, we can differentiate to get *du*/*dx* = 2*x*.
-Then by applying the basic rule, we get:
+例として &int;*xsin(x<sup>2</sup>)dx* を考えましょう。
+置換 *u* = *x*<sup>2</sup> を使えば、微分して *du*/*dx* = 2*x* が得られます。
+そして基本の規則を適用すると、次が得られます。
 
 &int;*xsin(x<sup>2</sup>)dx* = <sup>1</sup>/<sub>2</sub>&int;*sin(u)<sup>du</sup>/<sub>dx</sub>dx* = <sup>1</sup>/<sub>2</sub>&int;*sin(u)du*
 
-Assume we have a table of integrals that includes the rule &int;*sin(x)dx* = -*cos(x)*.
-Then we can get the final answer:
+&int;*sin(x)dx* = -*cos(x)* という規則を含む積分の表があると仮定します。
+すると最終的な答えが得られます。
 
 -<sup>1</sup>/<sub>2</sub>*cos(x<sup>2</sup>)*.
 
-Abstracting from this example, the general algorithm for integrating an expression *y* with respect to *x* is:
+この例から抽象すると、式 *y* を *x* について積分する一般的なアルゴリズムは次のとおりです。
 
-1. Pick a factor of *y*, calling it *f(u)*.
+1. *y* の因子を1つ選び、それを *f(u)* と呼ぶ。
 
-2. Compute the derivative *du*/*dx*.
+2. 微分 *du*/*dx* を計算する。
 
-3. Divide *y* by *f(u)* * *du*/*dx*, calling the quotient *k*.
+3. *y* を *f(u)* * *du*/*dx* で割り、その商を *k* と呼ぶ。
 
-4. If *k* is a constant (with respect to *x*), then the result is *k* &int; *f*(*u*)*du*.
+4. *k* が（*x* について）定数なら、結果は *k* &int; *f*(*u*)*du* である。
 
-This algorithm is nondeterministic, as there may be many factors of *y*.
-In our example, *f*(*u*) = sin(*x*<sup>2</sup>), *u* = *x*<sup>2</sup>, and *du*/*dx* = 2*x*.
-So *k = <sup>1</sup>/<sub>2</sub>*, and the answer is -*<sup>1</sup>/<sub>2</sub>cos(x<sup>2</sup>)*.
+このアルゴリズムは非決定的です。*y* の因子は多数ありうるからです。
+この例では *f*(*u*) = sin(*x*<sup>2</sup>)、*u* = *x*<sup>2</sup>、*du*/*dx* = 2*x* です。
+よって *k = <sup>1</sup>/<sub>2</sub>* であり、答えは -*<sup>1</sup>/<sub>2</sub>cos(x<sup>2</sup>)* です。
 
-The first step in implementing this technique is to make sure that division is done correctly.
-We need to be able to pick out the factors of *y*, divide expressions, and then determine if a quotient is free of *x*.
-The function `factorize` does this.
-It keeps a list of factors and a running product of constant factors, and augments them with each call to the local function `fac`.
+この技法を実装する最初の段階は、除算が正しく行われることを確かめることです。
+*y* の因子を取り出し、式を割り、そして商が *x* を含まないかを判断できる必要があります。
+関数 `factorize` がこれを行います。
+因子の並びと、定数因子の走行積を保ち、局所関数 `fac` の呼び出しごとにそれらを増やしていきます。
 
 ```lisp
 (defun factorize (exp)
@@ -679,7 +679,7 @@ It keeps a list of factors and a running product of constant factors, and augmen
         (t `((^ ,constant 1) .,factors))))))
 ```
 
-`factorize` maps from an expression to a list of factors, but we also need `unfactorize` to turn a list back into an expression:
+`factorize` は式から因子の並びへの対応づけを行いますが、並びを式に戻す `unfactorize` も必要です。
 
 ```lisp
 (defun unfactorize (factors)
@@ -689,10 +689,10 @@ It keeps a list of factors and a running product of constant factors, and augmen
         (t `(* ,(first factors) ,(unfactorize (rest factors))))))
 ```
 
-The derivative-divides method requires a way of dividing two expressions.
-We do this by factoring each expression and then dividing by cancelling factors.
-There may be cases where, for example, two factors in the numerator could be multiplied together to cancel a factor in the denominator, but this possibility is not considered.
-It turns out that most problems from freshman calculus do not require such sophistication.
+微分で割る手法には、2つの式を割る手立てが要ります。
+これは各式を因数分解し、因子を打ち消すことで割って行います。
+たとえば分子の2つの因子を掛け合わせて分母の因子を打ち消せる場合もありうるでしょうが、この可能性は考えません。
+大学1年の微積分の問題の大半は、そうした洗練を要さないことが分かっています。
 
 ```lisp
 (defun divide-factors (numer denom)
@@ -707,7 +707,7 @@ It turns out that most problems from freshman calculus do not require such sophi
     (delete 0 result :key #'exp-rhs)))
 ```
 
-Finally, the predicate `free-of` returns true if an expression does not have any occurrences of a particular variable in it.
+最後に、述語 `free-of` は、式が特定の変数を1つも含まなければ真を返します。
 
 ```lisp
 (defun free-of (exp var)
@@ -722,8 +722,8 @@ Finally, the predicate `free-of` returns true if an expression does not have any
         ((find-anywhere item (rest tree)))))
 ```
 
-In `factorize` we made use of the auxiliary function `length=1`.
-The function call `(length=1 x)` is faster than `(= (length x) 1)` because the latter has to compute the length of the whole list, while the former merely has to see if the list has a `rest` element or not.
+`factorize` では補助関数 `length=1` を使いました。
+関数呼び出し `(length=1 x)` は `(= (length x) 1)` より速いのです。後者はリスト全体の長さを計算せねばなりませんが、前者はリストに `rest` の要素があるかないかを見るだけで済むからです。
 
 ```lisp
 (defun length=1 (x)
@@ -731,11 +731,11 @@ The function call `(length=1 x)` is faster than `(= (length x) 1)` because the l
   (and (consp x) (null (rest x))))
 ```
 
-Given these preliminaries, the function `integrate` is fairly easy.
-We start with some simple cases for integrating sums and constant expressions.
-Then, we factor the expression and split the list of factors into two: a list of constant factors, and a list of factors containing *x*.
-(This is done with `partition-if`, a combination of `remove-if` and `remove-if-not`.) Finally, we call `deriv-divides`, giving it a chance with each of the factors.
-If none of them work, we return an expression indicating that the integral is unknown.
+これらの準備が済めば、関数 `integrate` はかなり簡単です。
+まず、和や定数の式を積分する単純な場合から始めます。
+次に、式を因数分解し、因子の並びを2つに分けます。定数の因子の並びと、*x* を含む因子の並びです。
+（これは `remove-if` と `remove-if-not` を組み合わせた `partition-if` で行います。）最後に `deriv-divides` を呼び、各因子で試させます。
+どれもうまくいかなければ、積分が不明だと示す式を返します。
 
 ```lisp
 (defun integrate (exp x)
@@ -776,9 +776,9 @@ If none of them work, we return an expression indicating that the integral is un
     (values (nreverse yes-list) (nreverse no-list))))
 ```
 
-Note that the place in integrate where other techniques could be added is marked.
-We will only implement the derivative-divides method.
-It turns out that the function is a little more complicated than the simple four-step algorithm outlined before:
+integrate の中で、他の技法を加えられる箇所に印を付けてあることに注意してください。
+ここでは微分で割る手法だけを実装します。
+この関数は、先に述べた単純な4段階のアルゴリズムより少し込み入っていることが分かります。
 
 ```lisp
 (defun deriv-divides (factor factors x)
@@ -805,14 +805,14 @@ It turns out that the function is a little more complicated than the simple four
                      ,(unfactorize k2))))))))
 ```
 
-There are three cases.
-In any case, all factors are of the form `(^ u n)`, so we separate the factor into a base, `u`, and exponent, `n`.
-If *u* or *u*<sup>*n*</sup> evenly divides the original expression (here represented as factors), then we have an answer.
-But we need to check the exponent, because *&int; u<sup>n</sup>du* is *u*<sup>*n*+1</sup>/(*n* + 1) for *n* &ne; -1, but it is log (*u*) for *n* = -1.
-But there is a third case to consider.
-The factor may be something like `(^ (sin (^ x 2)) 1)`, in which case we should consider *f*(*u*) = sin(*x*<sup>2</sup>).
-This case is handled with the help of an integral table.
-We don't need a derivative table, because we can just use the simplifier for that.
+3つの場合があります。
+いずれの場合も、すべての因子は `(^ u n)` の形なので、因子を底 `u` と指数 `n` に分けます。
+*u* か *u*<sup>*n*</sup> が元の式（ここでは因子として表されている）を割り切れば、答えが得られます。
+ただし指数を調べる必要があります。*&int; u<sup>n</sup>du* は *n* &ne; -1 のときは *u*<sup>*n*+1</sup>/(*n* + 1) ですが、*n* = -1 のときは log (*u*) だからです。
+しかし考えるべき3つ目の場合があります。
+因子が `(^ (sin (^ x 2)) 1)` のようなものかもしれず、その場合は *f*(*u*) = sin(*x*<sup>2</sup>) を考えるべきです。
+この場合は積分の表の助けを借りて扱います。
+微分の表は要りません。それには簡約器をそのまま使えるからです。
 
 ```lisp
 (defun deriv (y x) (simplify `(d ,y ,x)))
@@ -844,24 +844,24 @@ We don't need a derivative table, because we can just use the simplifier for tha
     ))
 ```
 
-The last step is to install integrate as the simplification function for the operator Int.
-The obvious way to do this is:
+最後の段階は、integrate を演算子 Int の簡約の関数として組み込むことです。
+これを行う分かりやすい方法は次のとおりです。
 
 ```lisp
 (set-simp-fn 'Int 'integrate)
 ```
 
-Unfortunately, that does not quite work.
-The problem is that integrate expects two arguments, corresponding to the two arguments *`y`* and *`x`* in `( Int *y x*)`.
-But the convention for simplification functions is to pass them a single argument, consisting of the whole expression `( Int *y x*)`.
-We could go back and edit `simplify-exp` to change the convention, but instead I choose to make the conversion this way:
+あいにく、それはうまくいきません。
+問題は、integrate が `( Int *y x*)` の2つの引数 *`y`* と *`x`* に対応する2つの引数を期待することです。
+しかし簡約の関数の流儀は、式全体 `( Int *y x*)` からなる1つの引数を渡すことです。
+`simplify-exp` に戻ってその流儀を変えることもできますが、代わりに次のように変換することにします。
 
 ```lisp
 (set-simp-fn 'Int #'(lambda (exp)
           (integrate (exp-lhs exp) (exp-rhs exp))))
 ```
 
-Here are some examples, taken from chapters 8 and 9 of *Calculus* ([Loomis 1974](bibliography.md#bb0750)):
+*Calculus*（[Loomis 1974](bibliography.md#bb0750)）の第8章と第9章から取った例をいくつか示します。
 
 ```lisp
 SIMPLIFIER > (Int x * sin(x ^ 2) d x)
@@ -880,8 +880,8 @@ SIMPLIFIER > (Int 8 * x ^ 2 / (x ^ 3 + 2) ^ 3 d x)
 (8 * ((1/3 * (((X ^ 3) + 2) ^ -2)) / -2))
 ```
 
-All the answers are correct, although the last one could be made simpler.
-One quick way to simplify such an expression is to factor and unfactor it, and then simplify again:
+答えはすべて正しいのですが、最後のものはもっと簡単にできます。
+そうした式を簡約する手早い方法の1つは、因数分解してから元に戻し、もう一度簡約することです。
 
 ```lisp
 (set-simp-fn 'Int
@@ -891,77 +891,77 @@ One quick way to simplify such an expression is to factor and unfactor it, and t
           (integrate (exp-lhs exp) (exp-rhs exp))))))
 ```
 
-With this change, we get:
+この変更を加えると、次が得られます。
 
 ```lisp
 SIMPLIFIER > (Int 8 * x ^ 2 / (x ^ 3 + 2) ^ 3 d x)
 (-4/3 * (((X ^ 3) + 2) ^ -2))
 ```
 
-## 8.7 History and References
+## 8.7 歴史と参考文献
 
-A brief history is given in the introduction to this chapter.
-An interesting point is that the history of Lisp and of symbolic algebraic manipulation are deeply intertwined.
-It is not too gross an exaggeration to say that Lisp was invented by John McCarthy to express the symbolic differentiation algorithm.
-And the development of the first high-quality Lisp system, MacLisp, was driven largely by the needs of MACSYMA, one of the first large Lisp systems.
-See [McCarthy 1958](bibliography.md#bb0790) for early Lisp history and the differentiation algorithm, and [Martin and Fateman 1971](bibliography.md#bb0775) and [Moses (1975)](bibliography.md#bb0875) for more details on MACSYMA.
-A comprehensive book on computer algebra systems is [Davenport 1988](bibliography.md#bb0270).
-It covers the MACSYMA and REDUCE systems as well as the algorithms behind those systems.
+手短な歴史はこの章の導入で述べました。
+興味深いのは、Lispの歴史と記号代数操作の歴史が深く絡み合っていることです。
+Lispは記号微分のアルゴリズムを表すためにJohn McCarthyが考案した、と言ってもさほど大げさな誇張ではありません。
+そして最初の高品質なLispシステムMacLispの開発は、最初の大型Lispシステムの1つであるMACSYMAの要求に大きく突き動かされました。
+初期のLispの歴史と微分のアルゴリズムについては [McCarthy 1958](bibliography.md#bb0790) を、MACSYMAのより詳しい内容については [Martin and Fateman 1971](bibliography.md#bb0775) と [Moses (1975)](bibliography.md#bb0875) を参照してください。
+計算機による代数システムを網羅した本が [Davenport 1988](bibliography.md#bb0270) です。
+MACSYMAとREDUCEのシステム、そしてそれらの背後にあるアルゴリズムを扱っています。
 
-Because symbolic differentiation is historically important, it is presented in a number of text books, from the original Lisp 1.5 Primer ([Weissman 1967](bibliography.md#bb1370)) and Allen's influential [*Anatomy of Lisp* (1978)](bibliography.md#bb0040) to recent texts like [Brooks 1985](bibliography.md#bb0135), [Hennessey 1989](bibliography.md#bb0530), and [Tanimoto 1990](bibliography.md#bb1220).
-Many of these books use rules or data-driven programming, but each treats differentiation as the main task, with simplification as a separate problem.
-None of them use the approach taken here, where differentiation is just another kind of simplification.
+記号微分は歴史的に重要なので、多くの教科書で紹介されています。元祖の Lisp 1.5 Primer（[Weissman 1967](bibliography.md#bb1370)）やAllenの影響力のある [*Anatomy of Lisp*（1978）](bibliography.md#bb0040) から、[Brooks 1985](bibliography.md#bb0135)、[Hennessey 1989](bibliography.md#bb0530)、[Tanimoto 1990](bibliography.md#bb1220) のような新しい教科書までです。
+これらの本の多くは規則やデータ駆動のプログラミングを使いますが、いずれも微分を主たる課題とし、簡約を別の問題として扱っています。
+微分を簡約の一種にすぎないものとして扱う、ここで採った方式を使っているものはありません。
 
-The symbolic integration programs SAINT and SIN are covered in [Slagle 1963](bibliography.md#bb1115) and [Moses 1967](bibliography.md#bb0870), respectively.
-The mathematical solution to the problem of integration in closed term is addressed in [Risch 1969](bibliography.md#bb0985), but be warned; this paper is not for the mathematically naive, and it has no hints on programming the algorithm.
-A better reference is [Davenport et al.
-1988](bibliography.md#bb0270).
+記号積分のプログラムSAINTとSINは、それぞれ [Slagle 1963](bibliography.md#bb1115) と [Moses 1967](bibliography.md#bb0870) で扱われています。
+閉じた形での積分の問題への数学的な解決は [Risch 1969](bibliography.md#bb0985) で扱われていますが、警告しておきます。この論文は数学に不慣れな人向けではなく、アルゴリズムをプログラムする手がかりもありません。
+よりよい参考文献は [Davenport ら
+1988](bibliography.md#bb0270) です。
 
-In this book, techniques for improving the efficiency of algebraic manipulation are covered in [sections 9.6](chapter9.md#s0035) and [10.4](chapter10.md#s0025).
-[Chapter 15](chapter15.md) presents a reimplementation that does not use pattern-matching, and is closer to the techniques used in MACSYMA.
+本書では、代数操作の効率を高める技法を [9.6節](chapter9.md#s0035) と [10.4節](chapter10.md#s0025) で扱います。
+[第15章](chapter15.md)では、パターン照合を使わず、MACSYMAで用いられた技法により近い再実装を示します。
 
-## 8.8 Exercises
+## 8.8 練習問題
 
-**Exercise 8.2 [s]** Some notations use the operator ** instead of ^ to indicate exponentiation.
-Fix `infix->prefix` so that either notation is allowed.
+**練習問題 8.2 [s]** 記法によっては、べき乗を表すのに ^ の代わりに演算子 ** を使う。
+どちらの記法も許すよう `infix->prefix` を直せ。
 
-**Exercise 8.3 [m]** Can the system as is deal with imaginary numbers?
-What are some of the difficulties?
+**練習問題 8.3 [m]** このシステムはそのままで虚数を扱えるか。
+どんな難しさがあるか。
 
-**Exercise 8.4 [h]** There are some simple expressions involving sums that are not handled by the `integrate` function.
-The function can integrate *ax*<sup>2</sup> + *bx* + *c* but not 5(*ax*<sup>2</sup> + *bx* + *c*).
-Similarly, it can integrate *x*<sup>4</sup> + 2*x*<sup>3</sup> + *x*<sup>2</sup> but not (*x*<sup>2</sup> + *x*)<sup>2</sup>, and it can do *x*<sup>3</sup> + *x*<sup>2</sup> + *x* + 1 but not (*x*<sup>2</sup> + 1)(*x* + 1).
-Modify `integrate` so that it expands out products (or small exponents) of sums.
-You will probably want to try the usual techniques first, and do the expansion only when that fails.
+**練習問題 8.4 [h]** 和を含む単純な式のうち、`integrate` 関数が扱えないものがある。
+この関数は *ax*<sup>2</sup> + *bx* + *c* は積分できるが、5(*ax*<sup>2</sup> + *bx* + *c*) はできない。
+同様に、*x*<sup>4</sup> + 2*x*<sup>3</sup> + *x*<sup>2</sup> は積分できるが (*x*<sup>2</sup> + *x*)<sup>2</sup> はできず、*x*<sup>3</sup> + *x*<sup>2</sup> + *x* + 1 はできるが (*x*<sup>2</sup> + 1)(*x* + 1) はできない。
+和の積（や小さな指数）を展開するよう `integrate` を変えよ。
+おそらく、まず通常の技法を試し、それが失敗したときにのみ展開したくなるだろう。
 
-**Exercise 8.5 [d]** Another very general integration technique is called integration by parts.
-It is based on the rule:
+**練習問題 8.5 [d]** もう1つのきわめて一般的な積分の技法が、部分積分と呼ばれるものである。
+それは次の規則に基づく。
 
 &int;*udv=uv-&int;vdu*
 
-So, for example, given
+たとえば次が与えられたとき、
 
 &int;*xcos(x)dx*
 
-we can take *u* = *x*, *dv = cos(x)dx*.
-Then we can determine *v* = *sin(x)* by integration, and come up with the solution:
+*u* = *x*、*dv = cos(x)dx* と取れる。
+すると積分によって *v* = *sin(x)* を求められ、次の解にたどり着く。
 
 &int;*xcos(x)dx=xsin(x)*-&int;*sin(x)* * *1dx=xsin(x)+cos(x)*
 
-It is easy to program an integration by parts routine.
-The hard part is to program the control component.
-Integration by parts involves a recursive call to `integrate`, and of all the possible ways of breaking up the original expression into a *u* and a *dv*, few, if any, will lead to a successful integration.
-One simple control rule is to allow integration by parts only at the top level, not at the recursive level.
-Implement this approach.
+部分積分の手続きをプログラムするのは簡単である。
+難しいのは、制御の部分をプログラムすることである。
+部分積分は `integrate` の再帰呼び出しを伴い、元の式を *u* と *dv* に分けるありうるすべてのやり方のうち、積分の成功に至るものはあってもごくわずかである。
+1つの単純な制御規則は、部分積分を再帰の水準ではなく最上位でのみ許すことである。
+この方式を実装せよ。
 
-**Exercise 8.6 [d]** A more complicated approach is to try to decide which ways of breaking up the original expression are promising and which are not.
-Derive some heuristics for making this division, and reimplement `integrate` to include a search component, using the search tools of [chapter 6](chapter6.md).
+**練習問題 8.6 [d]** より込み入った方式は、元の式を分けるやり方のうちどれが有望でどれがそうでないかを判断しようとすることである。
+この分け方のための発見的方法をいくつか導き、[第6章](chapter6.md)の探索の道具を使って探索の部分を含むよう `integrate` を再実装せよ。
 
-Look in a calculus textbook to see how &int;sin<sup>2</sup>*(x)dx* is evaluated by two integrations by parts and a division.
-Implement this technique as well.
+微積分の教科書で、&int;sin<sup>2</sup>*(x)dx* が2回の部分積分と1回の除算でどう評価されるかを見よ。
+この技法も実装せよ。
 
-**Exercise 8.7 [m]** Write simplification rules for predicate calculus expressions.
-For example,
+**練習問題 8.7 [m]** 述語論理の式のための簡約規則を書け。
+たとえば次のようになる。
 
 ```lisp
 (true and x = x)
@@ -970,19 +970,19 @@ For example,
 (false or x = false)
 ```
 
-**Exercise 8.8 [m]** The simplification rule `(x / 0 = undefined)` is necessary to avoid problems with division by zero, but the treatment of `undefined` is inadequate.
-For example, the expression `((0 / 0) - (0 / 0))` will simplify to zero, when it should simplify to `undefined`.
-Add rules to propagate `undefined` values and prevent them from being simplified away.
+**練習問題 8.8 [m]** 簡約規則 `(x / 0 = undefined)` は0で割る問題を避けるのに必要だが、`undefined` の扱いは不十分である。
+たとえば式 `((0 / 0) - (0 / 0))` は `undefined` に簡約されるべきなのに、0に簡約されてしまう。
+`undefined` の値を伝播させ、簡約で消えてしまうのを防ぐ規則を加えよ。
 
-**Exercise 8.9 [d]** Extend the method used to handle `undefined` to handle `+infinity` and `-infinity` as well.
+**練習問題 8.9 [d]** `undefined` を扱う手法を拡張して、`+infinity` と `-infinity` も扱えるようにせよ。
 
 ----------------------
 
 <a id="fn08-1"></a><sup>[1](#tfn08-1)</sup>
-MACSYMA is the Project MAC SYMbolic MAthematics program.
-Project MAC is the MIT research organization that was the precursor of MIT's Laboratory for Computer Science.
-MAC stood either for Machine-Aided Cognition or Multiple-Access Computer, according to one of their annual reports.
-The cynical have claimed that MAC really stood for Man Against Computer.
+MACSYMAは Project MAC SYMbolic MAthematics（プロジェクトMACの記号数学）プログラムです。
+Project MACは、MITの計算機科学研究所の前身であったMITの研究組織です。
+MACは、彼らの年次報告書の1つによれば、Machine-Aided Cognition（機械支援認知）か Multiple-Access Computer（多重アクセス計算機）のいずれかを表していました。
+皮肉屋は、MACは本当は Man Against Computer（計算機に立ち向かう人間）を表していたのだと言い張っています。
 
 <a id="fn08-2"></a><sup>[2](#tfn08-2)</sup>
-The term antiderivative is more correct, because of branch point problems.
+分岐点の問題があるため、原始関数（antiderivative）という語のほうが正確です。

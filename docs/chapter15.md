@@ -1,145 +1,145 @@
-# Chapter 15
-## Symbolic Mathematics with Canonical Forms
+# 第15章
+## 標準形による記号数学
 
-> Anything simple always interests me.
+> 単純なものには、いつだって心を引かれる。
 
-> -David Hockney
+> —David Hockney
 
-[Chapter 8](chapter8.md) started with high hopes: to take an existing pattern matcher, copy down some mathematical identities out of a reference book, and come up with a usable symbolic algebra system.
-The resulting system *was* usable for some purposes, and it showed that the technique of rule-based translation is a powerful one.
-However, the problems of [section 8.5](chapter8.md#s0030) show that not everything can be done easily and efficiently within the rule-based pattern matching framework.
+[第8章](chapter8.md)は大きな望みを抱いて始まりました。既存のパターン照合器を持ってきて、参考書から数学の恒等式をいくつか書き写せば、使える記号代数のシステムができあがる、というわけです。
+できあがったシステムは、目的によっては確かに使えるものでしたし、規則にもとづく変換という技法が強力であることも示しました。
+しかし[8.5節](chapter8.md#s0030)の問題は、規則にもとづくパターン照合の枠組みのなかで何もかもが簡単かつ効率よくできるわけではないことを示しています。
 
-There are important mathematical transformations that are difficult to express in the rule-based approach.
-For example, dividing two polynomials to obtain a quotient and remainder is a task that is easier to express as an algorithm-a program-than as a rule or set of rules.
+規則にもとづく方式では表しにくい、重要な数学的変換があります。
+たとえば2つの多項式を割って商と余りを得るという仕事は、規則あるいは規則の集まりとしてより、アルゴリズム、すなわちプログラムとして表すほうが簡単です。
 
-In addition, there is a problem with efficiency.
-Pieces of the input expressions are simplified over and over again, and much time is spent interpreting rules that do not apply.
-[Section 9.6](chapter9.md#s0035) showed some techniques for speeding up the program by a factor of 100 on inputs of a dozen or so symbols, but for expressions with a hundred or so symbols, the speed-up is not enough.
-We can do better by designing a specialized representation from the ground up.
+それに加えて、効率の問題もあります。
+入力の式の断片が何度も何度も簡約され、当てはまらない規則を解釈するのに多くの時間が費やされます。
+[9.6節](chapter9.md#s0035)では、シンボルが十数個ほどの入力に対してプログラムを100倍速くする技法をいくつか示しましたが、シンボルが百個ほどの式となると、その速度向上では足りません。
+専用の表現を土台から設計すれば、もっとうまくやれます。
 
-Serious algebraic manipulation programs generally enforce a notion of *canonical simplification.* That is, expressions are converted into a canonical internal format that may be far removed from the input form.
-They are then manipulated, and translated back to external form for output.
-Of course, the simplifier we have already does this kind of translation, to some degree.
-It translates `(3 + x + -3 + y)` into `(+ x y)` internally, and then outputs it as `(x + y)`.
-But a *canonical* representation must have the property that any two expressions that are equal have identical canonical forms.
-In our system the expression `(5 + y + x + -5)` is translated to the internal form `(+ y x)`, which is not identical to `(+ x y)`, even though the two expressions are equal.
-Thus, our system is not canonical.
-Most of the problems of the previous section stem from the lack of a canonical form.
+本格的な代数操作のプログラムは、たいてい*標準的な簡約*という考えを徹底します。つまり式は、入力の形とはかけ離れているかもしれない標準的な内部形式へと変換されます。
+それを操作してから、出力のために外部の形へ戻すのです。
+もちろん、すでに持っている簡約器もある程度はこの種の変換をしています。
+`(3 + x + -3 + y)` を内部で `(+ x y)` に変換し、`(x + y)` として出力します。
+しかし*標準的な*表現は、等しい2つの式なら標準形も同一である、という性質を持たねばなりません。
+私たちのシステムでは、式 `(5 + y + x + -5)` は内部形式 `(+ y x)` に変換されますが、これは `(+ x y)` と同一ではありません。2つの式は等しいというのにです。
+つまり私たちのシステムは標準的ではないのです。
+前節の問題のほとんどは、標準形がないことから生じています。
 
-Adhering to canonical form imposes grave restrictions on the representation.
-For example, *x<sup>2</sup>* - 1 and (*x* - 1)(*x* + 1) are equal, so they must be represented identically.
-One way to insure this is to multiply out all factors and collect similar terms.
-So (*x* - 1)(*x* + 1) is *x<sup>2</sup>* - *x* + *x* - 1, which simplifies to *x<sup>2</sup>* - 1, in whatever the canonical internal form is.
-This approach works fine for *x<sup>2</sup>* - 1, but for an expression like (*x* - 1)<sup>1000</sup>, multiplying out all factors would be quite time- (and space-) consuming.
-It is hard to find a canonical form that is ideal for all problems.
-The best we can do is choose one that works well for the problems we are most likely to encounter.
+標準形を守ろうとすると、表現に重い制約が課されます。
+たとえば *x<sup>2</sup>* - 1 と (*x* - 1)(*x* + 1) は等しいので、同一に表現されねばなりません。
+これを保証する1つのやり方は、因数をすべて展開して同類項をまとめることです。
+ですから (*x* - 1)(*x* + 1) は *x<sup>2</sup>* - *x* + *x* - 1 であり、標準的な内部形式が何であれ、それは *x<sup>2</sup>* - 1 に簡約されます。
+この方式は *x<sup>2</sup>* - 1 にはうまく働きますが、(*x* - 1)<sup>1000</sup> のような式では、因数をすべて展開するのに時間（と場所）がかなりかかってしまいます。
+あらゆる問題にとって理想的な標準形を見つけるのは難しいことです。
+できるのはせいぜい、いちばん出くわしそうな問題にうまく働くものを選ぶことです。
 
-## 15.1 A Canonical Form for Polynomials
+## 15.1 多項式の標準形
 
-This section will concentrate on a canonical form for *polynomials.* Mathematically speaking, a polynomial is a function (of one or more variables) that can be computed using only addition and multiplication.
-We will speak of a polynomial's *main variable, coefficients,* and *degree.* In the polynomial:
+本節では*多項式*の標準形に絞って話を進めます。数学的に言えば、多項式とは、加算と乗算だけを使って計算できる（1つ以上の変数の）関数のことです。
+多項式の*主変数*、*係数*、*次数*について述べていきます。次の多項式では、
 
 <img src="images/chapter15/si1_e.svg"
 onerror="this.src='images/chapter15/si1_e.png'; this.onerror=null;"
 alt="5 \times x^{3} +b \times x^{2} +c \times x + 1" />
 
-the main variable is *x,* the degree is 3 (the highest power of *x*), and the coefficients are 5, *b, c* and 1.
-We can define an input format for polynomials as follows:
+主変数は *x*、次数は3（*x* の最高の冪）、係数は5、*b*、*c*、1です。
+多項式の入力形式は次のように定義できます。
 
-1.  Any Lisp number is a polynomial.
+1.  どんなLispの数も多項式である。
 
-2.  Any Lisp symbol is a polynomial.
+2.  どんなLispのシンボルも多項式である。
 
-3.  If *p* and *q* are polynomials, so are (*p + q*) and (*p \* q*).
+3.  *p* と *q* が多項式なら、(*p + q*) と (*p \* q*) も多項式である。
 
-4.  If *p* is a polynomial and *n* is a positive integer, then (*p* ^ *n*) is a polynomial.
+4.  *p* が多項式で *n* が正の整数なら、(*p* ^ *n*) は多項式である。
 
-However, the input format cannot be used as the canonical form, because it would admit both `(x + y)` and `(y + x)`, and both `4` and `(2 + 2)`.
+しかしこの入力形式は標準形としては使えません。`(x + y)` と `(y + x)` の両方を、また `4` と `(2 + 2)` の両方を認めてしまうからです。
 
-Before considering a canonical form for polynomials, let us see why polynomials were chosen as the target domain.
-First, the volume of programming needed to support canonical forms for a larger class of expressions grows substantially.
-To make things easier, we have eliminated complications like log and trig functions.
-Polynomials are a good choice because they are closed under addition and multiplication: the sum or product of any two polynomials is a polynomial.
-If we had allowed division, the result would not be closed, because the quotient of two polynomials need not be a polynomial.
-As a bonus, polynomials are also closed under differentiation and integration, so we can include those operators as well.
+多項式の標準形を考える前に、なぜ多項式を対象の領域に選んだのかを見ておきましょう。
+第一に、もっと広い種類の式について標準形を支えようとすると、必要なプログラムの量が大幅に増えます。
+話を楽にするため、対数関数や三角関数といった厄介なものは省きました。
+多項式が良い選択なのは、加算と乗算について閉じているからです。どんな2つの多項式の和も積も多項式になります。
+除算を許していたら閉じなくなっていたでしょう。2つの多項式の商は多項式とはかぎらないからです。
+おまけに、多項式は微分と積分についても閉じているので、それらの演算子も含められます。
 
-Second, for sufficiently large classes of expressions it becomes not just difficult but impossible to define a canonical form.
-This may be surprising, and we don't have space here to explain exactly why it is so, but here is an argument: Consider what would happen if we added enough functionality to duplicate all of Lisp.
-Then "converting to canonical form" would be the same as "running a program." But it is an elementary result of computability theory that it is in general impossible to determine the result of running an arbitrary program (this is known as the halting problem).
-Thus, it is not surprising that it is impossible to canonicalize complex expressions.
+第二に、式の種類が十分に広くなると、標準形を定義するのは難しいどころか不可能になります。
+これは意外かもしれませんし、なぜそうなのかを正確に説明する紙幅はここにありませんが、次のように考えてみてください。Lispのすべてを再現できるだけの機能を加えたらどうなるでしょうか。
+そうなると「標準形に変換すること」は「プログラムを走らせること」と同じになります。しかし、任意のプログラムを走らせた結果を一般には決定できないというのは、計算可能性の理論の初歩の結果です（停止問題として知られています）。
+ですから、込み入った式を標準形にできないのは驚くにあたりません。
 
-Our task is to convert a polynomial as previously defined into some canonical form.<a id="tfn15-1"></a><sup>[1](#fn15-1)</sup>
-Much of the code and some of the commentary on this format and the routines to manipulate it was written by Richard Fateman, with some enhancements made by Peter Klier.
+私たちの仕事は、先に定義した多項式を何らかの標準形へ変換することです。<a id="tfn15-1"></a><sup>[1](#fn15-1)</sup>
+この形式とそれを操作するルーチンについて、コードの多くと解説の一部はRichard Fatemanが書いたもので、Peter Klierがいくらか手を入れています。
 
-The first design decision is to assume that we will be dealing mostly with *dense* polynomials, rather than *sparse* ones.
-That is, we expect most of the polynomials to be like *ax*<sup>3</sup> + *bx*<sup>2</sup> + *cx* + *d,* not like *ax*<sup>100</sup>+ *bx*<sup>50</sup> + *c.*
-For dense polynomials, we can save space by representing the main variable (*x* in these examples) and the individual coefficients (*a*, *b*, *c*, and *d* in these examples) explicitly, but representing the exponents only implicitly, by position.
-Vectors will be used instead of lists, to save space and to allow fast access to any element.
-Thus, the representation of 5*x*<sup>3</sup> + 10*x*<sup>2</sup> + 20*x* + 30 will be the vector:
+最初の設計上の決めごとは、扱うのはおもに*疎*な多項式ではなく*密*な多項式だと仮定することです。
+つまり多項式のほとんどは *ax*<sup>100</sup>+ *bx*<sup>50</sup> + *c* のようなものではなく、*ax*<sup>3</sup> + *bx*<sup>2</sup> + *cx* + *d* のようなものだと見込むわけです。
+密な多項式なら、主変数（この例では *x*）と個々の係数（この例では *a*、*b*、*c*、*d*）は明示的に表し、指数は位置によって暗黙に表すことで、場所を節約できます。
+場所を節約し、どの要素にも速くアクセスできるよう、リストの代わりにベクタを使います。
+ですから 5*x*<sup>3</sup> + 10*x*<sup>2</sup> + 20*x* + 30 の表現は次のベクタになります。
 
 ```lisp
 #(x 30 20 10 5)
 ```
 
-The main variable, *x*, is in the 0th element of the vector, and the coefficient of the *i*th power of *x* is in element *i* + 1 of the vector.
-A single variable is represented as a vector whose first coefficient is 1, and a number is represented as itself:
+主変数 *x* はベクタの0番目の要素にあり、*x* の *i* 乗の係数はベクタの *i* + 1 番目の要素にあります。
+変数1つは、最初の係数が1であるベクタとして表され、数はそれ自身として表されます。
 
 | []()              |                                                              |
 |-------------------|--------------------------------------------------------------|
-| `#(x 30 20 10 5)` | represents 5*x*<sup>3</sup> + 10*x*<sup>2</sup> + 20*x* + 30 |
-| `#(x 0 1)`        | represents *x*                                               |
-| `5`               | represents 5                                                 |
+| `#(x 30 20 10 5)` | 5*x*<sup>3</sup> + 10*x*<sup>2</sup> + 20*x* + 30 を表す   |
+| `#(x 0 1)`        | *x* を表す                                                   |
+| `5`               | 5 を表す                                                     |
 
-The fact that a number is represented as itself is a possible source of confusion.
-The number 5, for example, is a polynomial by our mathematical definition of polynomials.
-But it is represented as 5, not as a vector, so `(typep 5 'polynomial)` will be false.
-The word "polynomial" is used ambiguously to refer to both the mathematical concept and the Lisp type, but it should be clear from context which is meant.
+数がそれ自身として表されるという事実は、混乱のもとになりえます。
+たとえば数の5は、私たちの数学的な定義からすれば多項式です。
+しかしベクタではなく5として表されるので、`(typep 5 'polynomial)` は偽になります。
+「多項式」という語は、数学的な概念とLispの型の両方を指してあいまいに使われますが、どちらの意味かは文脈からはっきりするはずです。
 
-A glossary for the canonical simplifier program is given in [figure 15.1](#f0010).
+標準形の簡約器のプログラムの用語一覧を[図15.1](#f0010)に挙げます。
 
-| Function           | Description                                                         |
+| 関数               | 説明                                                                |
 |--------------------|---------------------------------------------------------------------|
-|                    | **Top-Level Functions**                                             |
-| `canon-simplifier` | A read-canonicalize-print loop.                                     |
-| `canon`            | Canonicalize argument and convert it back to infix.                 |
-|                    | **Data Types**                                                      |
-| `polynomial`       | A vector of main variable and coefficients.                         |
-|                    | **Major Functions**                                                 |
-| `prefix->canon`    | Convert a prefix expression to canonical polynomial.                |
-| `canon->prefix`    | Convert a canonical polynomial to a prefix expression.              |
-| `poly+poly`        | Add two polynomials.                                                |
-| `poly*poly`        | Multiply two polynomials.                                           |
-| `poly^n`           | Raise the polynomial *p* to the nth power, *n*>=0.                  |
-| `deriv-poly`       | Return the derivative, *dp/dx*, of the polynomial *p*.              |
-|                    | **Auxiliary Functions**                                             |
-| `poly`             | Construct a polynomial with given coefficients.                     |
-| `make-poly`        | Construct a polynomial of given degree.                             |
-| `coef`             | Pick out the ith coefficient of a polynomial.                       |
-| `main-var`         | The main variable of a polynomial.                                  |
-| `degree`           | The degree of a polynomial; e.g., `(degree` *x*<sup>2</sup>`) = 2`. |
-| `var=`             | Are two variables identical?                                        |
-| `var>`             | Is one variable ordered before another?                             |
-| `poly+`            | Unary or binary polynomial addition.                                |
-| `poly-`            | Unary or binary polynomial subtraction.                             |
-| `k+poly`           | Add a constant *k* to a polynomial *p*.                             |
-| `k*poly`           | Multiply a polynomial *p* by a constant *k*.                        |
-| `poly+same`        | Add two polynomials with the same main variable.                    |
-| `poly*same`        | Multiply two polynomials with the same main variable.               |
-| `normalize-poly`   | Alter a polynomial by dropping trailing zeros.                      |
-| `exponent->prefix` | Used to convert to prefix.                                          |
-| `args->prefix`     | Used to convert to prefix.                                          |
-| `rat-numerator`    | Select the numerator of a rational.                                 |
-| `rat-denominator`  | Select the denominator of a rational.                               |
-| `rat*rat`          | Multiply two rationals.                                             |
-| `rat+rat`          | Add two rationals.                                                  |
-| `rat/rat`          | Divide two rationals.                                               |
+|                    | **トップレベルの関数**                                              |
+| `canon-simplifier` | 読み込み・標準形化・表示のループ。                                  |
+| `canon`            | 引数を標準形にし、中置記法へ戻す。                                  |
+|                    | **データ型**                                                        |
+| `polynomial`       | 主変数と係数からなるベクタ。                                        |
+|                    | **主要な関数**                                                      |
+| `prefix->canon`    | 前置記法の式を標準形の多項式へ変換する。                            |
+| `canon->prefix`    | 標準形の多項式を前置記法の式へ変換する。                            |
+| `poly+poly`        | 2つの多項式を足す。                                                 |
+| `poly*poly`        | 2つの多項式を掛ける。                                               |
+| `poly^n`           | 多項式 *p* を *n* 乗する（*n*>=0）。                                |
+| `deriv-poly`       | 多項式 *p* の導関数 *dp/dx* を返す。                                |
+|                    | **補助的な関数**                                                    |
+| `poly`             | 与えた係数で多項式を組み立てる。                                    |
+| `make-poly`        | 与えた次数の多項式を組み立てる。                                    |
+| `coef`             | 多項式の i 番目の係数を取り出す。                                   |
+| `main-var`         | 多項式の主変数。                                                    |
+| `degree`           | 多項式の次数。例: `(degree` *x*<sup>2</sup>`) = 2`。                |
+| `var=`             | 2つの変数は同一か。                                                 |
+| `var>`             | 一方の変数はもう一方より前の順序か。                                |
+| `poly+`            | 単項または2項の多項式の加算。                                       |
+| `poly-`            | 単項または2項の多項式の減算。                                       |
+| `k+poly`           | 多項式 *p* に定数 *k* を足す。                                      |
+| `k*poly`           | 多項式 *p* に定数 *k* を掛ける。                                    |
+| `poly+same`        | 主変数が同じ2つの多項式を足す。                                     |
+| `poly*same`        | 主変数が同じ2つの多項式を掛ける。                                   |
+| `normalize-poly`   | 末尾の0を落として多項式を書き換える。                               |
+| `exponent->prefix` | 前置記法への変換に使う。                                            |
+| `args->prefix`     | 前置記法への変換に使う。                                            |
+| `rat-numerator`    | 有理式の分子を取り出す。                                            |
+| `rat-denominator`  | 有理式の分母を取り出す。                                            |
+| `rat*rat`          | 2つの有理式を掛ける。                                               |
+| `rat+rat`          | 2つの有理式を足す。                                                 |
+| `rat/rat`          | 2つの有理式を割る。                                                 |
 
-Figure 15.1: Glossary for the Symbolic Manipulation Program
+図15.1: 記号操作プログラムの用語一覧
 
-The functions defining the type `polynomial` follow.
+型 `polynomial` を定義する関数を次に示します。
 
-Because we are concerned with efficiency, we proclaim certain short functions to be compiled inline, use the specific function `svref` (simple-vector reference) rather than the more general aref, and provide declarations for the polynomials using the special form the.
-More details on efficiency issues are given in [Chapter 9](chapter9.md).
+効率を気にしているので、いくつかの短い関数はインラインでコンパイルするよう宣言し、より一般的な aref ではなく専用の関数 `svref`（simple-vector reference）を使い、多項式には特殊形式 the による宣言を添えます。
+効率の問題については[第9章](chapter9.md)でより詳しく述べています。
 
 ```lisp
 (proclaim '(inline main-var degree coef
@@ -152,18 +152,18 @@ More details on efficiency issues are given in [Chapter 9](chapter9.md).
 (defun degree (p)   (-(length (the polynomial p)) 2))
 ```
 
-We had to make another design decision in defining `coef`, the function to extract a coefficient from a polynomial.
-As stated above, the *i*th coefficient of a polynomial is in element *i* + 1 of the vector.
-If we required the caller of `coef` to pass in *i* + 1 to get *i,* we might be able to save a few addition operations.
-The design decision was that this would be too confusing and error prone.
-Thus, `coef` expects to be passed *i* and does the addition itself.
+多項式から係数を取り出す関数 `coef` を定義するにあたっても、設計上の決めごとが必要でした。
+上で述べたとおり、多項式の *i* 番目の係数はベクタの *i* + 1 番目の要素にあります。
+*i* を得るのに *i* + 1 を渡すことを `coef` の呼び手に求めれば、加算の操作をいくらか省けるかもしれません。
+しかしそれは紛らわしく、誤りを招きやすいと判断しました。
+ですから `coef` は *i* が渡されることを想定し、加算は自分で行います。
 
-For our format, we will insist that main variables be symbols, while coefficients can be numbers or other polynomials.
-A "production" version of the program might have to account for main variables like `(sin x)`, as well as other complications like + and * with more than two arguments, and noninteger powers.
+私たちの形式では、主変数はシンボルでなければならないとし、係数は数でも他の多項式でもよいこととします。
+「実運用の」版のプログラムなら、`(sin x)` のような主変数や、引数が3つ以上の + と *、整数でない冪といった厄介ごとにも対処せねばならないでしょう。
 
-Now we can extract information from a polynomial, but we also need to build and modify polynomials.
-The function `poly` takes a variable and some coefficients and builds a vector representing the polynomial.
-`make-poly` takes a variable and a degree and produces a polynomial with all zero coefficients.
+これで多項式から情報を取り出せるようになりましたが、多項式を組み立てたり変えたりする手立ても要ります。
+関数 `poly` は変数といくつかの係数を取り、その多項式を表すベクタを組み立てます。
+`make-poly` は変数と次数を取り、係数がすべて0の多項式を作ります。
 
 ```lisp
 (defun poly (x &rest coefs)
@@ -178,7 +178,7 @@ The function `poly` takes a variable and some coefficients and builds a vector r
     p))
 ```
 
-A polynomial can be altered by setting its main variable or any one of its coefficients using the following `defsetf` forms.
+多項式は、次の `defsetf` 形式を使って主変数やいずれかの係数を設定することで変えられます。
 
 ```lisp
 (defsetf main-var (p) (val)
@@ -188,24 +188,24 @@ A polynomial can be altered by setting its main variable or any one of its coeff
   `(setf (svref (the polynomial ,p) (+ ,i 1)) ,val))
 ```
 
-The function `poly` constructs polynomials in a fashion similar to `list` or `vector`: with an explicit list of the contents, `make-poly`, on the other hand, is like `make-array`: it makes a polynomial of a specified size.
+関数 `poly` は `list` や `vector` と似たやり方で、中身を明示的に並べて多項式を組み立てます。一方 `make-poly` は `make-array` のようなもので、指定した大きさの多項式を作ります。
 
-We provide `setf` methods for modifying the main variable and coefficients.
-Since this is the first use of `defsetf`, it deserves some explanation.
-A `defsetf` form takes a function (or macro) name, an argument list, and a second argument list that must consist of a single argument, the value to be assigned.
-The body of the form is an expression that stores the value in the proper place.
-So the `defsetf` for `main-var` says that `(setf (main-varp) val)` is equivalent to `(setf (svref (the polynomial p) 0) val)`.
-A `defsetf` is much like a `defmacro`, but there is a little less burden placed on the writer of `defsetf`.
-Instead of passing `p` and `val` directly to the `setf` method, Common Lisp binds local variables to these expressions, and passes those variables to the `setf` method.
-That way, the writer does not have to worry about evaluating the expressions in the wrong order or the wrong number of times.
-It is also possible to gain finer control over the whole process with `define-setf-method`, as explained on [page 884](chapter25.md#p884).
+主変数と係数を変えるための `setf` メソッドを用意します。
+`defsetf` を使うのはこれが初めてなので、少し説明しておきましょう。
+`defsetf` の形式は、関数（あるいはマクロ）の名前、引数の並び、そして代入される値という引数1つだけからなる2つ目の引数の並びを取ります。
+その形式の本体は、値をしかるべき場所に格納する式です。
+ですから `main-var` の `defsetf` は、`(setf (main-varp) val)` が `(setf (svref (the polynomial p) 0) val)` と同じことだと述べています。
+`defsetf` は `defmacro` によく似ていますが、`defsetf` を書く側の負担は少し軽くなっています。
+`p` と `val` を直に `setf` メソッドへ渡すのではなく、Common Lispがこれらの式を局所変数に束縛し、その変数を `setf` メソッドへ渡すからです。
+おかげで書く側は、式を誤った順序で評価したり、誤った回数だけ評価したりする心配をせずに済みます。
+[884ページ](chapter25.md#p884)で説明するとおり、`define-setf-method` を使えば、この過程全体をより細かく制御することもできます。
 
-The functions `poly+poly, poly*poly` and `poly^n` perform addition, multiplication, and exponentiation of polynomials, respectively.
-They are defined with several helping functions.
-`k*poly` multiplies a polynomial by a constant, `k`, which may be a number or another polynomial that is free of polynomial `p`'s main variable.
-`poly*same` is used to multiply two polynomials with the same main variable.
-For addition, the functions `k+poly` and `poly+same` serve analogous purposes.
-With that in mind, here's the function to convert from prefix to canonical form:
+関数 `poly+poly, poly*poly`、`poly^n` は、それぞれ多項式の加算・乗算・冪乗を行います。
+これらはいくつかの補助関数とともに定義されます。
+`k*poly` は多項式に定数 `k` を掛けます。`k` は数でも、多項式 `p` の主変数を含まない別の多項式でもかまいません。
+`poly*same` は、主変数が同じ2つの多項式を掛けるのに使います。
+加算については、関数 `k+poly` と `poly+same` が同じような役目を果たします。
+それを踏まえて、前置記法から標準形へ変換する関数を次に示します。
 
 ```lisp
 (defun prefix->canon (x)
@@ -220,11 +220,11 @@ With that in mind, here's the function to convert from prefix to canonical form:
         (t (error "Not a polynomial: ~a" x))))
 ```
 
-It is data-driven, based on the `prefix->canon` property of each operator.
-In the following we install the appropriate functions.
-The existing functions `poly*poly` and `poly^n` can be used directly.
-But other operators need interface functions.
-The operators + and - need interface functions that handle both unary and binary.
+これは各演算子の `prefix->canon` 属性にもとづく、データ駆動の関数です。
+次に、しかるべき関数を据えつけます。
+既存の関数 `poly*poly` と `poly^n` はそのまま使えます。
+しかし他の演算子には橋渡しの関数が要ります。
+演算子 + と - には、単項と2項の両方を扱う橋渡しの関数が要ります。
 
 ```lisp
 (dolist (item '((+ poly+) (- poly-) (* poly*poly)
@@ -245,25 +245,25 @@ The operators + and - need interface functions that handle both unary and binary
     (2 (poly+poly (first args) (poly*poly -1 (second args))))))
 ```
 
-The function `prefix->canon` accepts inputs that were not part of our definition of polynomials: unary positive and negation operators and binary subtraction and differentiation operators.
-These are permissible because they can all be reduced to the elementary `+` and `*` operations.
+関数 `prefix->canon` は、私たちの多項式の定義に含まれていなかった入力も受け付けます。単項の正号と負号、そして2項の減算と微分の演算子です。
+これらが許されるのは、いずれも基本の `+` と `*` の操作に還元できるからです。
 
-Remember that our problems with canonical form all began with the inability to decide which was simpler: `(+ x y)` or `(+ y x)`.
-In this system, we define a canonical form by imposing an ordering on variables (we use alphabetic ordering as defined by `string>`).
-The rule is that a polynomial `p` can have coefficients that are polynomials in a variable later in the alphabet than `p`'s main variable, but no coefficients that are polynomials in variables earlier than `p`'s main variable.
-Here's how to compare variables:
+標準形をめぐる私たちの悩みは、`(+ x y)` と `(+ y x)` のどちらがより簡単かを決められないところから始まったのを思い出してください。
+このシステムでは、変数に順序を課すことで標準形を定義します（`string>` が定めるアルファベット順を使います）。
+規則はこうです。多項式 `p` は、`p` の主変数よりアルファベット順で後ろの変数の多項式を係数として持てるが、`p` の主変数より前の変数の多項式を係数として持つことはできない。
+変数を比べるやり方は次のとおりです。
 
 ```lisp
 (defun var= (x y) (eq x y))
 (defun var> (x y) (string> x y))
 ```
 
-The canonical form of the variable `x` will be `#(x 0 1)`, which is 0 *x*<sup>0</sup> + 1 *x*<sup>1</sup>.
-The canonical form of `(+ x y)` is `#(x #(y 0 1) 1)`.
-It couldn't be `#(y #(x 0 1) 1)`, because then the resulting polynomial would have a coefficient with a lesser main variable.
-The policy of ordering variables assures canonicality, by properly grouping like variables together and by imposing a particular ordering on expressions that would otherwise be commutative.
+変数 `x` の標準形は `#(x 0 1)`、すなわち 0 *x*<sup>0</sup> + 1 *x*<sup>1</sup> になります。
+`(+ x y)` の標準形は `#(x #(y 0 1) 1)` です。
+`#(y #(x 0 1) 1)` にはなりえません。そうすると、できあがる多項式が、より小さい主変数を持つ係数を抱えてしまうからです。
+変数に順序をつけるという方針は、同じ変数を適切にまとめ、そうしなければ可換であるような式に特定の順序を課すことで、標準性を保証します。
 
-Here, then, is the code for adding two polynomials:
+では、2つの多項式を足すコードを示します。
 
 ```lisp
 (defun poly+poly (p q)
@@ -301,7 +301,7 @@ Here, then, is the code for adding two polynomials:
   (copy-seq p))
 ```
 
-and the code for multiplying polynomials:
+そして多項式を掛けるコードです。
 
 ```lisp
 (defun poly*poly (p q)
@@ -329,10 +329,10 @@ and the code for multiplying polynomials:
        r))))
 ```
 
-The hard part is multiplying two polynomials with the same main variable.
-This is done by creating a new polynomial, `r`, whose degree is the sum of the two input polynomials `p` and `q`.
-Initially, all of `r`'s coefficients are zero.
-A doubly nested loop multiplies each coefficient of `p` and `q` and adds the `result` into the appropriate coefficient of `r`.
+難しいのは、主変数が同じ2つの多項式を掛けるところです。
+これは、入力の2つの多項式 `p` と `q` の次数の和を次数とする新しい多項式 `r` を作ることで行います。
+最初は `r` の係数はすべて0です。
+二重の入れ子のループが `p` と `q` の各係数を掛け合わせ、その `result` を `r` の適切な係数に足し込みます。
 
 ```lisp
 (defun poly*same (p q)
@@ -350,10 +350,10 @@ A doubly nested loop multiplies each coefficient of `p` and `q` and adds the `re
     r))
 ```
 
-Both `poly+poly` and `poly*poly` make use of the function `normalize-poly` to "normalize" the result.
-The idea is that `(- (^ 5) (^ x 5))` should return `0`, not `#(x 0 0 0 0 0 0)`.
-Note that `normalize-poly` is a destructive operation: it calls `delete`, which can actually alter its argument.
-Normally this is a dangerous thing, but since `normalize-poly` is replacing something with its conceptual equal, no harm is done.
+`poly+poly` も `poly*poly` も、結果を「正規化」するのに関数 `normalize-poly` を使います。
+考え方は、`(- (^ 5) (^ x 5))` は `#(x 0 0 0 0 0 0)` ではなく `0` を返すべきだ、ということです。
+`normalize-poly` が破壊的な操作であることに注意してください。`delete` を呼んでおり、これは実際に引数を書き換えかねません。
+ふつうこれは危ういことですが、`normalize-poly` は概念のうえで等しいものに置き換えているだけなので、害はありません。
 
 ```lisp
 (defun normalize-poly (p)
@@ -369,8 +369,8 @@ Normally this is a dangerous thing, but since `normalize-poly` is replacing some
               (t p)))))
 ```
 
-There are a few loose ends to clean up.
-First, the exponentiation function:
+始末をつけておくべき細かい点がいくつかあります。
+まず、冪乗の関数です。
 
 ```lisp
 (defun poly^n (p n)
@@ -381,9 +381,9 @@ First, the exponentiation function:
    (t (poly*poly p (poly^n p (- n 1))))))
 ```
 
-## 15.2 Differentiating Polynomials
+## 15.2 多項式を微分する
 
-The differentiation routine is easy, mainly because there are only two operators (`+` and `*`) to deal with:
+微分のルーチンは簡単です。おもに、扱う演算子が2つ（`+` と `*`）しかないからです。
 
 ```lisp
 (defun deriv-poly (p x)
@@ -417,28 +417,28 @@ The differentiation routine is easy, mainly because there are only two operators
        (normalize-poly r)))))
 ```
 
-**Exercise  15.1 [h]** Integrating polynomials is not much harder than differentiating them.
-For example:
+**練習問題 15.1 [h]** 多項式の積分は、微分よりさほど難しくはない。
+たとえば次のようになる。
 
 <img src="images/chapter15/si2_e.svg"
 onerror="this.src='images/chapter15/si2_e.png'; this.onerror=null;"
 alt="\int ax^{2} + bx\, dx = \frac {ax^{3}}{3} + \frac {bx^{2}}{2} + c." />
 
-Write a function to integrate polynomials and install it in `prefix->canon`.
+多項式を積分する関数を書き、`prefix->canon` に据えつけよ。
 
-**Exercise  15.2 [m]** Add support for *definite* integrals, such as
+**練習問題 15.2 [m]** 次のような*定*積分への対応を加えよ。
 <img src="images/chapter15/si3_e.svg"
 onerror="this.src='images/chapter15/si3_e.png'; this.onerror=null;"
 alt="\int_{a}^{b} y\, dx" />.
-You will need to make up a suitable notation and properly install it in both `infix->prefix` and `prefix->canon`.
-A full implementation of this feature would have to consider infinity as a bound, as well as the problem of integrating over singularities.
-You need not address these problems.
+適当な記法をこしらえ、`infix->prefix` と `prefix->canon` の両方に正しく据えつける必要がある。
+この機能を完全に実装するなら、限界としての無限や、特異点をまたぐ積分の問題も考えねばならないだろう。
+それらの問題には取り組まなくてよい。
 
-## 15.3 Converting between Infix and Prefix
+## 15.3 中置記法と前置記法を相互に変換する
 
-All that remains is converting from canonical form back to prefix form, and from there back to infix form.
-This is a good point to extend the prefix form to allow expressions with more than two arguments.
-First we show an updated version of `prefix->infix` that handles multiple arguments:
+あとは、標準形から前置記法へ、そこからさらに中置記法へ戻す変換だけです。
+ここは、引数が3つ以上の式を許すよう前置記法を拡張するのに良い頃合いです。
+まず、複数の引数を扱う新しい版の `prefix->infix` を示します。
 
 ```lisp
 (defun prefix->infix (exp)
@@ -460,7 +460,7 @@ First we show an updated version of `prefix->infix` that handles multiple argume
                collect arg))))
 ```
 
-Now we need only convert from canonical form to prefix:
+あとは標準形から前置記法へ変換するだけです。
 
 ```lisp
 (defun canon->prefix (p)
@@ -497,7 +497,7 @@ Now we need only convert from canonical form to prefix:
                         useful-args))))))
 ```
 
-Finally, here's a top level to make use of all this:
+最後に、これらすべてを使うトップレベルを示します。
 
 ```lisp
 (defun canon (infix-exp)
@@ -511,7 +511,7 @@ Finally, here's a top level to make use of all this:
     (print (canon (read)))))
 ```
 
-and an example of it in use:
+そして、それを使う例です。
 
 ```lisp
 > (canon-simplifier)
@@ -546,16 +546,16 @@ CANON> (d(z + 3 * x + 3 * z * x ^ 2 + z ^ 2 * x ^ 3) / d z)
 CANON> [Abort]
 ```
 
-## 15.4 Benchmarking the Polynomial Simplifier
+## 15.4 多項式簡約器の性能を測る
 
-Unlike the rule-based program, this version gets all the answers right.
-Not only is the program correct (at least as far as these examples go), it is also fast.
-We can compare it to the canonical simplifier originally written for MACSYMA by William Martin (circa 1968), and modified by Richard Fateman.
-The modified version was used by Richard Gabriel in his suite of Common Lisp benchmarks (1985).
-The benchmark program is called `frpoly`, because it deals with polynomials and was originally written in the dialect Franz Lisp.
-The `frpoly` benchmark encodes polynomials as lists rather than vectors, and goes to great lengths to be efficient.
-Otherwise, it is similar to the algorithms used here (although the code itself is quite different, using progs and gos and other features that have fallen into disfavor in the intervening decades).
-The particular benchmark we will use here is raising 1 + *x* + *y* + *z* to the 15th power:
+規則にもとづくプログラムと違って、この版はすべての答えを正しく出します。
+このプログラムは（少なくともこれらの例のかぎりでは）正しいだけでなく、速くもあります。
+William MartinがもともとMACSYMAのために書き（1968年ごろ）、Richard Fatemanが手を入れた標準形の簡約器と比べられます。
+その手を入れた版は、Richard GabrielがCommon Lispの性能測定の一式（1985）で使いました。
+この測定プログラムは `frpoly` と呼ばれます。多項式（polynomial）を扱い、もとはFranz Lispという方言で書かれたからです。
+`frpoly` の測定プログラムは、多項式をベクタではなくリストとして符号化し、効率のために手を尽くしています。
+それ以外は、ここで使ったアルゴリズムと似ています（もっともコード自体はかなり違い、prog や go など、その後の数十年で好まれなくなった機能を使っています）。
+ここで使う測定は、1 + *x* + *y* + *z* を15乗するというものです。
 
 ```lisp
 (defun r15-test ()
@@ -564,23 +564,23 @@ The particular benchmark we will use here is raising 1 + *x* + *y* + *z* to the 
   nil))
 ```
 
-This takes .97 seconds on our system.
-The equivalent test with the original `frpoly` code takes about the same time: .98 seconds.
-Thus, our program is as fast as production-quality code.
-In terms of storage space, vectors use about half as much storage as lists, because half of each cons cell is a pointer, while vectors are all useful data.<a id="tfn15-2"></a><sup>[2](#fn15-2)</sup>
+私たちのシステムでは、これに.97秒かかります。
+もとの `frpoly` のコードでの同じ試験も、ほぼ同じ.98秒かかります。
+つまり私たちのプログラムは、実運用に耐える品質のコードと同じくらい速いのです。
+記憶の場所という点では、ベクタが使う記憶はリストのおよそ半分です。コンスセルは半分がポインタなのに対し、ベクタはすべてが役に立つデータだからです。<a id="tfn15-2"></a><sup>[2](#fn15-2)</sup>
 
-How much faster is the polynomial-based code than the rule-based version?
-Unfortunately, we can't answer that question directly.
-We can time `(simp ' ( (1 + x + y + z) ^ 15)))`.
-This takes only a tenth of a second, but that is because it is doing no work at all-the answer is the same as the input!
-Alternately, we can take the expression computed by `(poly^n r 15)`, convert it to prefix, and pass that to `simplify`.
-`simplify` takes 27.8 seconds on this, so the rule-based version is much slower.
-[Section 9.6](chapter9.md#s0035) describes ways to speed up the rule-based program, and a comparison of timing data appears on [page 525](#p525).
+多項式にもとづくコードは、規則にもとづく版よりどれだけ速いのでしょうか。
+あいにく、その問いに直に答えることはできません。
+`(simp ' ( (1 + x + y + z) ^ 15)))` の時間は測れます。
+これは10分の1秒しかかかりませんが、それはまったく仕事をしていないからです。答えが入力と同じなのですから。
+別のやり方として、`(poly^n r 15)` が計算した式を取り、前置記法に変換して `simplify` に渡すこともできます。
+`simplify` はこれに27.8秒かかるので、規則にもとづく版はずっと遅いということになります。
+[9.6節](chapter9.md#s0035)は規則にもとづくプログラムを速くするやり方を述べており、時間の比較は[525ページ](#p525)にあります。
 
-There are always surprises when it comes down to measuring timing data.
-For example, the alert reader may have noticed that the version of `poly^n` defined above requires *n* multiplications.
-Usually, exponentiation is done by squaring a value when the exponent is even.
-Such an algorithm takes only log *n* multiplications instead of *n.* We can add a line to the definition of `poly^n` to get an *O*(log *n*) algorithm:
+時間を実際に測ってみると、いつも意外なことが起こります。
+たとえば、目ざとい読者は、上で定義した `poly^n` の版が *n* 回の乗算を要することに気づいたかもしれません。
+ふつう冪乗は、指数が偶数のときに値を2乗することで行います。
+そのアルゴリズムなら、乗算は *n* 回ではなく log *n* 回で済みます。`poly^n` の定義に1行加えれば、*O*(log *n*) のアルゴリズムが得られます。
 
 ```lisp
 (defun poly^n (p n)
@@ -593,20 +593,20 @@ Such an algorithm takes only log *n* multiplications instead of *n.* We can add 
 (defun poly^2 (p) (poly*poly p p))
 ```
 
-The surprise is that this takes *longer* to raise `*r*` to the 15th power.
-Even though it does fewer `poly*poly` operations, it is doing them on more complex arguments, and there is more work altogether.
-If we use this version of `poly^n,` then `r15-test` takes 1.6 seconds instead of .98 seconds.
+意外なことに、これは `*r*` を15乗するのに*より長く*かかります。
+`poly*poly` の操作の回数は減っても、より込み入った引数に対して行っているので、全体としては仕事が増えているのです。
+この版の `poly^n` を使うと、`r15-test` は.98秒ではなく1.6秒かかります。
 
-By the way, this is a perfect example of the conceptual power of recursive functions.
-We took an existing function, poly^n, added a single cond clause, and changed it from an *O*(*n*) to *O*(log *n*) algorithm.
-(This turned out to be a bad idea, but that's beside the point.
-It would be a good idea for raising integers to powers.)
-The reasoning that allows the change is simple: First, *p<sup>n</sup>* is certainly equal to (*p*<sup>*n*/2</sup>)<sup>2</sup> when *n* is even, so the change can't introduce any wrong answers.
-Second, the change continues the policy of decrementing *n* on every recursive call, so the function must eventually terminate (when *n* = 0).
-If it gives no wrong answers, and it terminates, then it must give the right answer.
+ところで、これは再帰関数が概念のうえで持つ力の格好の例です。
+既存の関数 poly^n に cond の節を1つ加えるだけで、*O*(*n*) のアルゴリズムを *O*(log *n*) に変えてしまいました。
+（結果としてはまずい考えでしたが、それはここでの論点ではありません。
+整数を冪乗するのであれば良い考えです。）
+この変更を許す理屈は単純です。第一に、*n* が偶数のとき *p<sup>n</sup>* は確かに (*p*<sup>*n*/2</sup>)<sup>2</sup> に等しいので、この変更が誤った答えを持ち込むことはありません。
+第二に、この変更は再帰呼び出しのたびに *n* を減らすという方針を保っているので、関数はいずれ（*n* = 0 のときに）停止するはずです。
+誤った答えを出さず、しかも停止するのなら、正しい答えを出すに違いありません。
 
-In contrast, making the change for an iterative algorithm is more complex.
-The initial algorithm is simple:
+これに対して、繰り返しのアルゴリズムで同じ変更を行うのはもっと込み入っています。
+最初のアルゴリズムは単純です。
 
 ```lisp
 (defun poly^n (p n)
@@ -615,7 +615,7 @@ The initial algorithm is simple:
   result))
 ```
 
-But to change it, we have to change the repeat loop to a `while` loop, explicitly put in the decrement of *n*, and insert a test for the even case:
+しかしこれを変えるには、repeat のループを `while` のループに変え、*n* を減らす処理を明示的に入れ、偶数の場合の検査を差し込まねばなりません。
 
 ```lisp
 (defun poly^n (p n)
@@ -629,41 +629,41 @@ But to change it, we have to change the repeat loop to a `while` loop, explicitl
   result))
 ```
 
-For this problem, it is clear that thinking recursively leads to a simpler function that is easier to modify.
+この問題では、再帰的に考えるほうが、より単純で直しやすい関数につながることは明らかです。
 
-It turns out that this is not the final word.
-Exponentiation of polynomials can be done even faster, with a little more mathematical sophistication.
-[Richard Fateman's 1974](bibliography.md#bb0380) paper on Polynomial Multiplication analyzes the complexity of a variety of exponentiation algorithms.
-Instead of the usual asymptotic analysis (e.g.
-*O*(*n*) or *O*(*n*<sup>2</sup>)), he uses a fine-grained analysis that computes the constant factors (e.g.
-1000 x *n* or 2 x *n*<sup>2</sup>).
-Such analysis is crucial for small values of *n*.
-It turns out that for a variety of polynomials, an exponentiation algorithm based on the binomial theorem is best.
-The binomial theorem states that
+これで話が終わりというわけではありません。
+多項式の冪乗は、もう少し数学的に洗練させれば、さらに速くできます。
+[Richard Fatemanの1974年](bibliography.md#bb0380)の多項式の乗算についての論文は、さまざまな冪乗のアルゴリズムの計算量を分析しています。
+ふつうの漸近的な分析（たとえば
+*O*(*n*) や *O*(*n*<sup>2</sup>)）ではなく、定数倍を計算するきめ細かな分析を用いています（たとえば
+1000 x *n* や 2 x *n*<sup>2</sup>）。
+この種の分析は、*n* が小さいときに決定的に効いてきます。
+さまざまな多項式について、二項定理にもとづく冪乗のアルゴリズムが最良であることがわかっています。
+二項定理は次のように述べます。
 
 <img src="images/chapter15/si4_e.svg"
 onerror="this.src='images/chapter15/si4_e.png'; this.onerror=null;"
 alt="( a + b ) ^{n} = \sum_{i=0}^{n} \frac {n!}{i! (n-i)!)} a^{i} b^{n-i}" />
 
-for example,
+たとえば次のとおりです。
 
 <img src="images/chapter15/si5_e.svg"
 onerror="this.src='images/chapter15/si5_e.png'; this.onerror=null;"
 alt="(a+b)^{3} = b^{3} + 3ab^{2} + 3a^{2}b + a^{3}" />
 
-We can use this theorem to compute a power of a polynomial all at once, instead of computing it by repeated multiplication or squaring.
-Of course, a polynomial will in general be a sum of more than two components, so we have to decide how to split it into the *a* and *b* pieces.
-There are two obvious ways: either cut the polynomial in half, so that *a* and *b* will be of equal size, or split off one component at a time.
-Fateman shows that the latter method is more efficient in most cases.
-In other words, a polynomial
+この定理を使えば、多項式の冪を、乗算や2乗の繰り返しではなく一度に計算できます。
+もちろん多項式は一般に3つ以上の項の和なので、それを *a* と *b* の部分にどう分けるかを決めねばなりません。
+すぐ思いつくやり方が2つあります。多項式を半分に切って *a* と *b* を同じ大きさにするか、一度に1項ずつ切り離すかです。
+Fatemanは、たいていの場合は後者のほうが効率がよいことを示しています。
+言い換えれば、多項式
 *k*<sub>1</sub>*x<sup>n</sup>* + *k*<sub>2</sub>*x<sup>n-1</sup>* + *k*<sub>3</sub>*x<sup>n-2</sup>* + ...
-will be treated as the sum *a + b* where
+は和 *a + b* として扱われ、ここで
 *a* = *k*<sub>1</sub>*x<sup>n</sup>*
-and *b* is the rest of the polynomial.
+であり、*b* は多項式の残りの部分です。
 
-Following is the code for binomial exponentiation.
-It is somewhat messy, because the emphasis is on efficiency.
-This means reusing some data and using `p-add-into!` instead of the more general `poly+poly`.
+次に、二項定理による冪乗のコードを示します。
+効率に重きを置いているので、いささか雑然としています。
+つまり、一部のデータを使い回し、より一般的な `poly+poly` の代わりに `p-add-into!` を使うということです。
 
 ```lisp
 (defun poly^n (p n)
@@ -711,42 +711,42 @@ This means reusing some data and using `p-add-into!` instead of the more general
   result)
 ```
 
-Using this version of `poly^n, r15-test` takes only .23 seconds, four times faster than the previous version.
-The following table compares the times for `r15-test` with the three versions of `poly^n`, along with the times for applying `simply` to the `r15` polynomial, for various versions of `simplify`:
+この版の `poly^n` を使うと、`r15-test` は.23秒しかかからず、前の版より4倍速くなります。
+次の表は、3つの版の `poly^n` による `r15-test` の時間と、さまざまな版の `simplify` を `r15` の多項式に適用したときの時間を比べたものです。
 
 
-|      | program                 | secs | speed-up |
+|      | プログラム              | 秒   | 速度向上 |
 |------|-------------------------|------|----------|
-|      | **rule-based versions** |      |          |
-| 1    | original                | 27.8 | -        |
-| 2    | memoization             | 7.7  | 4        |
-| 3    | memo+index              | 4.0  | 7        |
-| 4    | compilation only        | 2.5  | 11       |
-| 5    | memo+compilation        | 1.9  | 15       |
-|      | **canonical versions**  |      |          |
-| 6    | squaring `poly^n`       | 1.6  | 17       |
-| 7    | iterative `poly^n`      | .98  | 28       |
-| 8    | binomial `poly^n`       | .23  | 120      |
+|      | **規則にもとづく版**    |      |          |
+| 1    | もとの版                | 27.8 | -        |
+| 2    | メモ化                  | 7.7  | 4        |
+| 3    | メモ化＋索引            | 4.0  | 7        |
+| 4    | コンパイルのみ          | 2.5  | 11       |
+| 5    | メモ化＋コンパイル      | 1.9  | 15       |
+|      | **標準形による版**      |      |          |
+| 6    | 2乗による `poly^n`      | 1.6  | 17       |
+| 7    | 繰り返しの `poly^n`     | .98  | 28       |
+| 8    | 二項定理の `poly^n`     | .23  | 120      |
 
-As we remarked earlier, the general techniques of memoization, indexing, and compilation provide for dramatic speed-ups.
-However, in the end, they do not lead to the fastest program.
-Instead, the fastest version was achieved by throwing out the original rule-based program, replacing it with a canonical-form-based program, and fine-tuning the algorithms within that program, using mathematical analysis.
+先に述べたとおり、メモ化・索引付け・コンパイルという一般的な技法は、劇的な速度向上をもたらします。
+しかし結局のところ、それらがもっとも速いプログラムにつながるわけではありません。
+もっとも速い版は、もとの規則にもとづくプログラムを捨て、標準形にもとづくプログラムに置き換え、数学的な分析を使ってそのプログラムのなかのアルゴリズムを細かく調整することで得られました。
 
-Now that we have achieved a sufficiently fast system, the next two sections concentrate on making it more powerful.
+十分に速いシステムができたので、続く2つの節では、それをより強力にすることに絞って話を進めます。
 
-## 15.5 A Canonical Form for Rational Expressions
+## 15.5 有理式の標準形
 
-A *rational* number is defined as a fraction: the quotient of two integers.
-A *rational expression* is hereby defined as the quotient of two polynomials.
-This section presents a canonical form for rational expressions.
+*有理*数は分数、すなわち2つの整数の商として定義されます。
+ここでは*有理式*を、2つの多項式の商として定義します。
+本節では有理式の標準形を示します。
 
-First, a number or polynomial will continue to be represented as before.
-The quotient of two polynomials will be represented as a cons cells of numerator and denominator pairs.
-However, just as Lisp automatically reduces rational numbers to simplest form (6/8 is represented as 3/4), we must reduce rational expressions.
-So, for example, (*x*<sup>2</sup> - 1)/(*x* - 1) must be reduced to *x* + 1, not left as a quotient of two polynomials.
+まず、数と多項式はこれまでどおりの表現のままです。
+2つの多項式の商は、分子と分母の対のコンスセルとして表します。
+ただし、Lispが有理数を自動的に最簡の形に約するように（6/8は3/4として表されます）、有理式も約さねばなりません。
+ですからたとえば (*x*<sup>2</sup> - 1)/(*x* - 1) は、2つの多項式の商のまま残すのではなく、*x* + 1 に約さねばなりません。
 
-The following functions build and access rational expressions but do not reduce to simplest form, except in the case where the denominator is a number.
-Building up the rest of the functionality for full rational expressions is left to a series of exercises:
+次の関数は有理式を組み立てたり参照したりしますが、分母が数である場合を除いて最簡の形には約しません。
+完全な有理式のための残りの機能を積み上げることは、一連の練習問題に委ねます。
 
 ```lisp
 (defun make-rat (numerator denominator)
@@ -770,25 +770,25 @@ Building up the rest of the functionality for full rational expressions is left 
     (t 1)))
 ```
 
-**Exercise  15.3 [s]** Modify `prefix->canon` to accept input of the form `x / y` and to return rational expressions instead of polynomials.
-Also allow for input of the form `x ^ - n`.
+**練習問題 15.3 [s]** `x / y` の形の入力を受け付け、多項式ではなく有理式を返すよう `prefix->canon` を変えよ。
+`x ^ - n` の形の入力も許すこと。
 
-**Exercise  15.4 [m]** Add arithmetic routines for multiplication, addition, and division of rational expressions.
-Call them `rat*rat, rat+rat`, and `rat/rat` respectively.
-They will call upon `poly*poly.
-poly+poly` and a new function, `poly/poly`, which is defined in the next exercise.
+**練習問題 15.4 [m]** 有理式の乗算・加算・除算の算術ルーチンを加えよ。
+それぞれ `rat*rat, rat+rat`、`rat/rat` と呼ぶこと。
+これらは `poly*poly.
+poly+poly` と、次の問で定義する新しい関数 `poly/poly` を呼ぶことになる。
 
-**Exercise  15.5 [h]** Define `poly-gcd`, which computes the greatest common divisor of two polynomials.
+**練習問題 15.5 [h]** 2つの多項式の最大公約数を計算する `poly-gcd` を定義せよ。
 
-**Exercise  15.6 [h]** Using `poly-gcd`, define the function `poly/poly`, which will implement division for polynomials.
-Polynomials are closed under addition and multiplication, so `poly+poly` and `poly*poly` both returned polynomials.
-Polynomials are not closed under division, so `poly/poly` will return a rational expression.
+**練習問題 15.6 [h]** `poly-gcd` を使って、多項式の除算を実装する関数 `poly/poly` を定義せよ。
+多項式は加算と乗算について閉じているので、`poly+poly` も `poly*poly` も多項式を返した。
+多項式は除算については閉じていないので、`poly/poly` は有理式を返すことになる。
 
-## 15.6 Extending Rational Expressions
+## 15.6 有理式を拡張する
 
-Now that we can divide polynomials, the final step is to reinstate the logarithmic, exponential, and trigonometric functions.
-The problem is that if we allow all these functions, we get into problems with canonical form again.
-For example, the following three expressions are all equivalent:
+多項式を割れるようになったので、最後の段は対数関数・指数関数・三角関数を復活させることです。
+厄介なのは、これらの関数をすべて許すと、また標準形の問題にぶつかることです。
+たとえば次の3つの式は、いずれも同じものです。
 
 <img src="images/chapter15/si7_e.svg"
 onerror="this.src='images/chapter15/si7_e.png'; this.onerror=null;"
@@ -796,41 +796,41 @@ alt="\sin{(x)},
 \cos{\left (x - \frac {\pi}{2} \right ) },
 \frac {e^{ix} - e^{-ix}} {2i}" />
 
-If we are interested in assuring we have a canonical form, the safest thing is to allow only *e<sup>x</sup>* and log(*x*).
-All the other functions can be defined in terms of these two.
-With this extension, the set of expressions we can form is closed under differentiation, and it is possible to canonicalize expressions.
-The `result` is a mathematically sound construction known as a *differentiable field.*
-This is precisely the construct that is assumed by the Risch integration algorithm ([Risch 1969](bibliography.md#bb0985), [1979](bibliography.md#bb0990)).
+標準形が確かにあることを保証したいなら、いちばん安全なのは *e<sup>x</sup>* と log(*x*) だけを許すことです。
+他の関数はすべて、この2つの言葉で定義できます。
+この拡張のもとでは、作れる式の集まりは微分について閉じており、式を標準形にすることができます。
+その `result` は、*微分体*として知られる数学的に健全な構成物です。
+これはまさに、Rischの積分アルゴリズム（[Risch 1969](bibliography.md#bb0985)、[1979](bibliography.md#bb0990)）が前提とする構成物です。
 
-The disadvantage of this minimal extension is that answers may be expressed in unfamiliar terms.
-The user asks for *d* sin(*x*<sup>2</sup>)*/dx,* expecting a simple answer in terms of cos, and is surprised to see a complex answer involving *e<sup>ix</sup>*.
-Because of this problem, most computer algebra systems have made more radical extensions, allowing sin, cos, and other functions.
-These systems are treading on thin mathematical ice.
-Algorithms that would be guaranteed to work over a simple differentiable field may fail when the domain is extended this way.
-In general, the result will not be a wrong answer but rather the failure to find an answer at all.
+この最小限の拡張の難点は、答えがなじみのない言葉で表されうることです。
+利用者は *d* sin(*x*<sup>2</sup>)*/dx* を求め、cos による単純な答えを期待しているのに、*e<sup>ix</sup>* を含む込み入った答えが出てきて驚くことになります。
+この問題があるため、たいていの計算機代数システムはもっと思い切った拡張をして、sin や cos などの関数を許しています。
+こうしたシステムは、数学的には薄氷を踏んでいます。
+単純な微分体の上でなら働くと保証されるアルゴリズムが、このように領域を広げると失敗しうるのです。
+たいていの場合、その結果は誤った答えではなく、そもそも答えが見つからないという形で現れます。
 
-## 15.7 History and References
+## 15.7 歴史と参考文献
 
-A brief history of symbolic algebra systems is given in [chapter 8](chapter8.md).
-[Fateman (1979)](bibliography.md#bb0385), [Martin and Fateman (1971)](bibliography.md#bb0775), and [Davenport et al.
-(1988)](bibliography.md#bb0270) give more details on the MACSYMA system, on which this chapter is loosely based.
-[Fateman (1991)](bibliography.md#bb0390) discusses the `frpoly` benchmark and introduces the vector implementation used in this chapter.
+記号代数システムの簡単な歴史は[第8章](chapter8.md)に述べています。
+[Fateman（1979）](bibliography.md#bb0385)、[Martin and Fateman（1971）](bibliography.md#bb0775)、[Davenport ほか
+（1988）](bibliography.md#bb0270)は、本章がゆるやかに下敷きにしているMACSYMAシステムについて、より詳しく述べています。
+[Fateman（1991）](bibliography.md#bb0390)は `frpoly` の性能測定を論じ、本章で使ったベクタによる実装を紹介しています。
 
-## 15.8 Exercises
+## 15.8 練習問題
 
-**Exercise 15.7 [h]** Implement an extension of the rationals to include logarithmic, exponential, and trigonometric functions.
+**練習問題 15.7 [h]** 対数関数・指数関数・三角関数を含むよう、有理式の拡張を実装せよ。
 
-**Exercise 15.8 [m]** Modify `deriv` to handle the extended rational expressions.
+**練習問題 15.8 [m]** 拡張した有理式を扱えるよう `deriv` を変えよ。
 
-**Exercise 15.9 [d]** Adapt the integration routine from [section 8.6](chapter8.md#s0035) ([page 252](chapter8.md#p252)) to the rational expression representation.
-[Davenport et al.
-1988](bibliography.md#bb0270) may be useful.
+**練習問題 15.9 [d]** [8.6節](chapter8.md#s0035)（[252ページ](chapter8.md#p252)）の積分のルーチンを、有理式の表現に合わせよ。
+[Davenport ほか
+1988](bibliography.md#bb0270)が役に立つかもしれない。
 
-**Exercise 15.10 [s]** Give several reasons why constant polynomials, like 3, are represented as integers rather than as vectors.
+**練習問題 15.10 [s]** 3のような定数の多項式が、ベクタではなく整数として表されている理由をいくつか挙げよ。
 
-## 15.9 Answers
+## 15.9 解答
 
-**Answer 15.4**
+**解答 15.4**
 
 ```lisp
 (defun rat*rat (x y)
@@ -855,7 +855,7 @@ A brief history of symbolic algebra systems is given in [chapter 8](chapter8.md)
   (rat*rat x (make-rat (rat-denominator y) (rat-numerator y))))
 ```
 
-**Answer 15.6**
+**解答 15.6**
 
 ```lisp
 (defun poly/poly (p q)
@@ -868,16 +868,16 @@ A brief history of symbolic algebra systems is given in [chapter 8](chapter8.md)
         (poly/poly q d)))))
 ```
 
-**Answer 15.10** (1) An integer takes less time and space to process.
-(2) Representing numbers as a polynomial would cause an infinite regress, because the coefficients would be numbers.
-(3) Unless a policy was decided upon, the representation would not be canonical, since `#(x 3)` and `#(y 3)` both represent 3.
+**解答 15.10** (1) 整数のほうが処理の時間も場所も少なくて済む。
+(2) 数を多項式として表すと、係数もまた数になるので無限に遡ってしまう。
+(3) 方針を決めておかないかぎり、その表現は標準的にならない。`#(x 3)` も `#(y 3)` もどちらも3を表すからである。
 
 ----------------------
 
 <a id="fn15-1"></a><sup>[1](#tfn15-1)</sup>
-In fact, the algebraic properties of polynomial arithmetic and its generalizations fit so well with ideas in data abstraction that an extended example (in Scheme) on this topic is provided in *Structure and Interpretation of Computer Programs* by Abelson and Sussman (see section 2.4.3, pages 153-166).
-We'll pursue a slightly different approach here.
+実のところ、多項式の算術とその一般化が持つ代数的な性質は、データ抽象の考えとあまりによく噛み合うので、この話題についての長い例が（Schemeで）AbelsonとSussmanの *Structure and Interpretation of Computer Programs* に載っています（2.4.3節、153-166ページを参照）。
+ここでは少し違う方式を追うことにします。
 
 <a id="fn15-2"></a><sup>[2](#tfn15-2)</sup>
-Note: systems that use `"`cdr-coding`"` take about the same space for lists that are allocated all at once as for vectors.
-But cdr-coding is losing favor as RISC chips replace microcoded processors.
+注: `"`cdr符号化`"` を使うシステムでは、一度にまとめて割り当てたリストは、ベクタとほぼ同じ場所で済みます。
+しかしRISCチップがマイクロコードのプロセッサに取って代わるにつれ、cdr符号化は好まれなくなりつつあります。

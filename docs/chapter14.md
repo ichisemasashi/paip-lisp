@@ -1,68 +1,68 @@
-# Chapter 14
-## Knowledge Representation and Reasoning
+# 第14章
+## 知識表現と推論
 
-> *Knowledge itself is power.* \
-> -Francis Bacon (1561-1626)
+> *知識それ自体が力である。* \
+> —Francis Bacon（1561-1626）
 
-> *The power resides in the knowledge.* \
-> -Edward Feigenbaum \
-> Stanford University Heuristic Programming Project
+> *力は知識に宿る。* \
+> —Edward Feigenbaum \
+> スタンフォード大学 ヒューリスティックプログラミング計画
 
-> *Knowledge is Knowledge, and vice versa.* \
-> -Tee shirt \
-> Stanford University Heuristic Programming Project
+> *知識は知識であり、その逆もまた然り。* \
+> —Tシャツ \
+> スタンフォード大学 ヒューリスティックプログラミング計画
 
-In the 1960s, much of AI concentrated on search techniques.
-In particular, a lot of work was concerned with *theorem proving:* stating a problem as a small set of axioms and searching for a proof of the problem.
-The implicit assumption was that the power resided in the inference mechanism-if we could just find the right search technique, then all our problems would be solved, and all our theorems would be proved.
+1960年代、AIの多くは探索の技法に力を注いでいました。
+とりわけ多くの仕事が*定理証明*、すなわち問題を少数の公理として述べ、その問題の証明を探すことに関わっていました。
+暗黙の前提は、力は推論の仕組みに宿るということでした。正しい探索の技法さえ見つかれば、あらゆる問題が解け、あらゆる定理が証明される、というわけです。
 
-Starting in the 1970s, this began to change.
-The theorem-proving approach failed to live up to its promise.
-AI workers slowly began to realize that they were not going to solve NP-hard problems by coming up with a clever inference algorithm.
-The general inferencing mechanisms that worked on toy examples just did not scale up when the problem size went into the thousands (or sometimes even into the dozens).
+1970年代に入って、これが変わり始めます。
+定理証明の方式は、その約束に応えられませんでした。
+AIの研究者たちは、気の利いた推論のアルゴリズムを思いついたところでNP困難な問題が解けるわけではないと、じわじわ気づき始めます。
+おもちゃのような例では働いた汎用の推論の仕組みが、問題の規模が数千（ときには数十）になるだけで、まるで通用しなかったのです。
 
-The *expert-system* approach offered an alternative.
-The key to solving hard problems was seen to be the acquisition of special-case rules to break the problem into easier problems.
-According to Feigenbaum, the lesson learned from expert systems like MYCIN (which we will see in [chapter 16](chapter16.md)) is that the choice of inferencing mechanism is not as important as having the right knowledge.
-In this view it doesn't matter very much if MYCIN uses forward- or backward-chaining, or if it uses certainty factors, probabilities, or fuzzy set theory.
-What matters crucially is that we know pseudomonas is a gram-negative, rod-shaped organism that can infect patients with compromised immune systems.
-In other words, the key problem is acquiring and representing knowledge.
+*エキスパートシステム*の方式が、それに代わる道を示しました。
+難しい問題を解く鍵は、問題をより易しい問題へ分解する、場合ごとの規則を手に入れることだと見られました。
+Feigenbaumによれば、（[第16章](chapter16.md)で見る）MYCINのようなエキスパートシステムから学んだ教訓は、推論の仕組みの選択は、正しい知識を持つことほど重要ではない、ということです。
+この見方では、MYCINが前向き連鎖を使うか後ろ向き連鎖を使うか、確信度を使うか確率を使うかファジィ集合論を使うかは、たいした問題ではありません。
+決定的に重要なのは、緑膿菌がグラム陰性の桿菌であり、免疫の弱った患者に感染しうると知っていることです。
+言い換えれば、鍵となる問題は知識を獲得し表現することなのです。
 
-While the expert system approach had some successes, it also had failures, and researchers were interested in learning the limits of this new technology and understanding exactly how it works.
-Many found it troublesome that the meaning of the knowledge used in some systems was never clearly defined.
-For example, does the assertion `(color apple red)` mean that a particular apple is red, that all apples are red, or that some/most apples are red?
-The field of *knowledge representation* concentrated on providing clear semantics for such representations, as well as providing algorithms for manipulating the knowledge.
-Much of the emphasis was on finding a good trade-off between *expressiveness* and *efficiency.* An efficient language is one for which all queries (or at least the average query) can be answered quickly.
-If we want to guarantee that queries will be answered quickly, then we have to limit what can be expressed in the language.
+エキスパートシステムの方式にはいくつかの成功もありましたが、失敗もあり、研究者たちはこの新しい技術の限界を知り、それが正確にはどう働くのかを理解することに関心を寄せました。
+システムによっては、使われている知識の意味がついにはっきり定義されないままであることを、多くの人が厄介に思いました。
+たとえば表明 `(color apple red)` は、ある特定のりんごが赤いという意味でしょうか、すべてのりんごが赤いという意味でしょうか、それとも一部の／たいていのりんごが赤いという意味でしょうか。
+*知識表現*の分野は、こうした表現にはっきりした意味論を与えること、そして知識を操作するアルゴリズムを与えることに力を注ぎました。
+力点の多くは、*表現力*と*効率*のあいだの良い折り合いを見つけることに置かれました。効率のよい言語とは、すべての問い合わせ（少なくとも平均的な問い合わせ）に素早く答えられる言語のことです。
+問い合わせに素早く答えられることを保証したいなら、その言語で表現できることを限らねばなりません。
 
-In the late 1980s, a series of results shed doubt on the hopes of finding an efficient language with any reasonable degree of expressiveness at all.
-Using mathematical techniques based on worst-case analysis, it was shown that even seemingly trivial languages were *intractable*—in the worst case, it would take an exponential amount of time to answer a simple query.
+1980年代の終わり、一連の結果が、まともな程度の表現力を備えた効率のよい言語が見つかるという望みに疑いを投げかけました。
+最悪の場合の分析にもとづく数学的な技法によって、一見ささやかに思える言語でさえ*手に負えない*ことが示されたのです。最悪の場合、簡単な問い合わせに答えるのに指数関数的な時間がかかるというわけです。
 
-Thus, in the 1990s the emphasis has shifted to *knowledge representation and reasoning,* a field that encompasses both the expressiveness and efficiency of languages but recognizes that the average case is more important than the worst case.
-No amount of knowledge can help solve an intractable problem in the worse case, but in practice the worst case rarely occurs.
+そこで1990年代には、力点は*知識表現と推論*へと移りました。これは言語の表現力と効率の両方を包みつつ、最悪の場合より平均的な場合のほうが重要だと認める分野です。
+最悪の場合に手に負えない問題は、どれほど知識があっても解けません。しかし実際には、最悪の場合はめったに起こらないのです。
 
-## 14.1 A Taxonomy of Representation Languages
+## 14.1 表現言語の分類
 
-AI researchers have investigated hundreds of knowledge representation languages, trying to find languages that are convenient, expressive, and efficient.
-The languages can be classified into four groups, depending on what the basic unit of representation is.
-Here are the four categories, with some examples:
+AIの研究者たちは、使い勝手がよく、表現力があり、効率のよい言語を求めて、何百もの知識表現言語を調べてきました。
+これらの言語は、表現の基本単位が何かによって4つの組に分類できます。
+次に4つの区分と、いくつかの例を挙げます。
 
-*   *Logical Formulae* (Prolog)
+*   *論理式*（Prolog）
 
-*   *Networks* (semantic nets, conceptual graphs)
+*   *ネットワーク*（意味ネットワーク、概念グラフ）
 
-*   *Objects* (scripts, frames)
+*   *オブジェクト*（スクリプト、フレーム）
 
-*   *Procedures* (Lisp, production systems)
+*   *手続き*（Lisp、プロダクションシステム）
 
-We have already dealt with *logic-based* languages like Prolog.
+Prologのような*論理にもとづく*言語は、すでに扱いました。
 
-*Network-based* languages can be seen as a syntactic variation on logical languages.
-A link *L* between nodes *A* and *B* is just another way of expressing the logical relation *L(A, B).* The difference is that network-based languages take their links more seriously: they are intended to be implemented directly by pointers in the computer, and inference is done by traversing these pointers.
-So placing a link *L* between *A* and *B* not only asserts that *L(A, B)* is true, but it also says something about how the knowledge base is to be searched.
+*ネットワークにもとづく*言語は、論理型言語の構文上の変種と見られます。
+節点 *A* と *B* のあいだのリンク *L* は、論理的な関係 *L(A, B)* を表すもう1つのやり方にすぎません。違いは、ネットワークにもとづく言語がリンクをより真剣に受け取るところです。リンクは計算機のなかのポインタとして直に実装されることを想定しており、推論はそのポインタをたどることで行われます。
+ですから *A* と *B* のあいだにリンク *L* を置くことは、*L(A, B)* が真だと表明するだけでなく、知識ベースをどう探索すべきかについても何かを述べているのです。
 
-*Object-oriented* languages can also be seen as syntactic variants of predicate calculus.
-Here is a statement in a typical slot-filler frame language:
+*オブジェクト指向*言語もまた、述語論理の構文上の変種と見られます。
+次に、典型的なスロット充填のフレーム言語での文を示します。
 
 ```lisp
 (a person
@@ -70,171 +70,171 @@ Here is a statement in a typical slot-filler frame language:
   (age = 32))
 ```
 
-This is equivalent to the logical formula:
+これは次の論理式と同じことです。
 
 &exist;p: person(p) &and; name(p,Jan) &and; age(p,32)
 
-The frame notation has the advantage of being easier to read, in some people's opinion.
-However, the frame notation is less expressive.
-There is no way to say that the person's name is either Jan or John, or that the person's age is not 34.
-In predicate calculus, of course, such statements can be easily made.
+フレームの記法には、人によっては読みやすいという利点があります。
+しかしフレームの記法は表現力が劣ります。
+その人の名前が Jan か John のどちらかだとか、その人の年齢が34ではないとかを言う手立てがありません。
+もちろん述語論理なら、そうした文は簡単に作れます。
 
-Finally, *procedural* languages are to be contrasted with representation languages: procedural languages compute answers without explicit representation of knowledge.
+最後に、*手続き型*の言語は表現言語と対置されるものです。手続き型の言語は、知識を明示的に表現することなく答えを計算します。
 
-There are also hybrid representation languages that use different methods to encode different kinds of knowledge.
-The KL-ONE family of languages uses both logical formulae and objects arranged into a network, for example.
-Many frame languages allow *procedural attachment,* a technique that uses arbitrary procedures to compute values for expressions that are inconvenient or impossible to express in the frame language itself.
+知識の種類ごとに違う方法で符号化する、混成の表現言語もあります。
+たとえばKL-ONE系の言語は、論理式と、ネットワークに配置されたオブジェクトの両方を使います。
+多くのフレーム言語は*手続き付加*を許します。これは、フレーム言語そのものでは表しにくい、あるいは表せない式の値を、任意の手続きを使って計算する技法です。
 
-## 14.2 Predicate Calculus and its Problems
+## 14.2 述語論理とその問題
 
-So far, many of our representations have been based on predicate calculus, a notation with a distinguished position in AI: it serves as the universal standard by which other representations are defined and evaluated.
-The previous section gave an example expression from a frame language.
-The frame language may have many merits in terms of the ease of use of its syntax or the efficiency of its internal representation of data.
-However, to understand what expressions in the language mean, there must be a clear definition.
-More often than not, that definition is given in terms of predicate calculus.
+ここまで、私たちの表現の多くは述語論理にもとづいてきました。述語論理はAIのなかで特別な位置を占める記法で、他の表現を定義し評価するための普遍的な物差しとして働きます。
+前節では、フレーム言語での式の例を挙げました。
+フレーム言語には、構文の使いやすさや、データの内部表現の効率という点で多くの利点があるかもしれません。
+しかし、その言語の式が何を意味するかを理解するには、はっきりした定義がなければなりません。
+そしてその定義は、たいてい述語論理の言葉で与えられます。
 
-A predicate calculus representation assumes a universe of individuals, with relations and functions on those individuals, and sentences formed by combining relations with the logical connectives `and`, `or`, and `not`.
-Philosophers and psychologists will argue the question of how appropriate predicate calculus is as a model of human thought, but one point stands clear: predicate calculus is sufficient to represent anything that can be represented in a digital computer.
-This is easy to show: assuming the computer's memory has *n* bits, and the equation *b<sub>i</sub>* = 1 means that bit *i* is on, then the entire state of the computer is represented by a conjunction such as:
+述語論理による表現は、個体の宇宙と、その個体の上の関係および関数、そして関係を論理結合子 `and`、`or`、`not` で組み合わせて作った文を前提とします。
+述語論理が人間の思考の模型としてどれほど適切かは、哲学者や心理学者が論じるでしょう。しかし1点だけははっきりしています。述語論理は、ディジタル計算機で表現できるものなら何でも表現するのに十分だということです。
+これは簡単に示せます。計算機の記憶が *n* ビットあるとし、等式 *b<sub>i</sub>* = 1 がビット *i* が立っていることを意味するとすれば、計算機の状態全体は次のような連言で表されます。
 
 <img src="images/chapter14/si1_e.svg"
 onerror="this.src='images/chapter14/si1_e.png'; this.onerror=null;"
 alt="b_{0}=0 \wedge b_{1}=0 \wedge b_{2}=1 ... \wedge b_{n}=0" />
 
-Once we can represent a state of the computer, it becomes possible to represent any computer program in predicate calculus as a set of axioms that map one state onto another.
-Thus, predicate calculus is shown to be a *sufficient* language for representing anything that goes on inside a computer-it can be used as a tool for analyzing any program from the outside.
+計算機の状態を表現できれば、どんな計算機プログラムも、ある状態を別の状態へ写す公理の集まりとして述語論理で表現できるようになります。
+こうして述語論理は、計算機のなかで起こることを何でも表現するのに*十分な*言語だと示されます。どんなプログラムも外側から分析する道具として使えるのです。
 
-This does not prove that predicate calculus is an *appropriate* tool for all applications.
-There are good reasons why we may want to represent knowledge in a form that is quite different from predicate calculus, and manipulate the knowledge with procedures that are quite different from logical inference.
-But we should still be able to describe our system in terms of predicate calculus axioms, and prove theorems about it.
-To do any less is to be sloppy.
-For example, we may want to manipulate numbers inside the computer by using the arithmetic instructions that are built into the CPU rather than by manipulating predicate calculus axioms, but when we write a square-root routine, it had better satisfy the axiom:
+このことは、述語論理があらゆる応用にとって*適切な*道具であることを証明するものではありません。
+述語論理とはまるで違う形で知識を表現し、論理的推論とはまるで違う手続きで知識を操作したくなる、もっともな理由はいくつもあります。
+それでもなお、自分たちのシステムを述語論理の公理の言葉で書き表し、それについて定理を証明できるべきです。
+それに満たないのは、ずさんというものです。
+たとえば、計算機のなかで数を扱うのに、述語論理の公理を操作するのではなくCPUに組み込まれた算術命令を使いたくなるでしょう。しかし平方根のルーチンを書くなら、それは次の公理を満たしていてしかるべきです。
 
 <img src="images/chapter14/si2_e.svg"
 onerror="this.src='images/chapter14/si2_e.png'; this.onerror=null;"
 alt="\sqrt{x} = y \Rightarrow y \times y = x" />
 
-Predicate calculus also serves another purpose: as a tool that can be used *by* a program rather than *on* a program.
-All programs need to manipulate data, and some programs will manipulate data that is considered to be in predicate calculus notation.
-It is this use that we will be concerned with.
+述語論理はもう1つの役目も果たします。プログラム*に対して*ではなく、プログラム*によって*使われる道具としての役目です。
+どんなプログラムもデータを操作する必要があり、なかには述語論理の記法によるものと見なされるデータを操作するプログラムもあります。
+私たちが関わるのは、この使い方のほうです。
 
-Predicate calculus makes it easy to start writing down facts about a domain.
-But the most straightforward version of predicate calculus suffers from a number of serious limitations:
+述語論理は、ある領域についての事実を書き下ろし始めるのを容易にします。
+しかし、もっとも素直な述語論理には、深刻な限界がいくつもあります。
 
-* *Decidability* - given a set of axioms and a goal, it may be that neither the goal nor its negation can be derived from the axioms.
+* *決定可能性* — 公理の集まりと目標が与えられても、目標もその否定も公理から導けないことがある。
 
-* *Tractability* - even when a goal is provable, it may take too long to find the proof using the available inferencing mechanisms.
+* *扱いやすさ* — 目標が証明可能なときでさえ、手持ちの推論の仕組みでその証明を見つけるのに時間がかかりすぎることがある。
 
-* *Uncertainty* - it can be inconvenient to deal with relations that are probable to a degree but not known to be definitely true or false.
+* *不確かさ* — ある程度ありそうではあるが、真とも偽とも確かにはわからない関係を扱うのは、面倒になりうる。
 
-* *Monotonicity* - in pure predicate calculus, once a theorem is proved, it is true forever.
-But we would like a way to derive tentative theorems that rely on assumptions, and be able to retract them when the assumptions prove false.
+* *単調性* — 純粋な述語論理では、いったん定理が証明されれば、それは永遠に真である。
+しかし、仮定に頼る暫定的な定理を導き、その仮定が偽とわかったときに取り下げられる手立てがほしいところである。
 
-* *Consistency* - pure predicate calculus admits no contradictions.
-If by accident both *P* and &not;*P* are derived, then *any* theorem can be proved.
-In effect, a single contradiction corrupts the entire data base.
+* *無矛盾性* — 純粋な述語論理は矛盾を許さない。
+もし偶然にも *P* と &not;*P* の両方が導かれてしまえば、*どんな*定理でも証明できてしまう。
+つまり、たった1つの矛盾がデータベース全体を腐らせる。
 
-* *Omniscience* - it can be difficult to distinguish what is provable from what should be proved.
-This can lead to the unfounded assumption that an agent believes all the consequences of the facts it knows.
+* *全知性* — 証明可能なことと、証明されるべきこととを区別するのは難しくなりうる。
+このことは、行為者が自分の知る事実の帰結をすべて信じている、という根拠のない前提につながりかねない。
 
-* *Expressiveness* - the first-order predicate calculus makes it awkward to talk about certain things, such as the relations and propositions of the language itself.
+* *表現力* — 一階述語論理では、その言語自身の関係や命題といった事柄について語るのがぎこちない。
 
-The view held predominantly today is that it is best to approach these problems with a dual attack that is both within and outside of predicate calculus.
-It is considered a good idea to invent new notations to address the problems-both for convenience and to facilitate special-purpose reasoners that are more efficient than a general-purpose theorem prover.
-However, it is also important to define scrupulously the meaning of the new notation in terms of familiar predicate-calculus notation.
-As Drew McDermott put it, "No notation without denotation!" (1978).
+今日おもに支持されている見方は、これらの問題には述語論理の内と外の両方から二正面で当たるのがよい、というものです。
+問題に取り組むために新しい記法を考え出すのは良い考えとされています。使い勝手のためでもあり、汎用の定理証明器より効率のよい専用の推論器を作りやすくするためでもあります。
+しかし同時に、その新しい記法の意味を、なじみのある述語論理の記法の言葉で几帳面に定義しておくことも重要です。
+Drew McDermottの言葉を借りれば、「表示なくして記法なし！」（1978）です。
 
-In this chapter we show how new notations (and their corresponding meanings) can be used to extend an existing representation and reasoning system.
-Prolog is chosen as the language to extend.
-This is not meant as an endorsement for Prolog as the ultimate knowledge representation language.
-Rather, it is meant solely to give us a clear and familiar foundation from which to build.
+本章では、新しい記法（とそれに対応する意味）を使って、既存の表現と推論のシステムをどう拡張できるかを示します。
+拡張する言語としてはPrologを選びます。
+これは、Prologが究極の知識表現言語だと推すつもりではありません。
+そうではなく、ひとえに、そこから積み上げていける明快でなじみのある土台を得るためです。
 
-## 14.3 A Logical Language: Prolog
+## 14.3 論理の言語: Prolog
 
-Prolog has been proposed as the answer to the problem of programming in logic.
-Why isn't it accepted as the universal representation language?
-Probably because Prolog is a compromise between a representation language and a programming language.
-Given two specifications that are logically equivalent, one can be an efficient Prolog program, while the other is not.
-Kowalski's famous equation "*algorithm = logic + control"* expresses the limits of logic alone: *logic = algorithm - control.* Many problems (especially in AI) have large or infinite search spaces, and if Prolog is not given some advice on how to search that space, it will not come up with the answer in any reasonable length of time.
+Prologは、論理でプログラムを書くという問題への答えとして提案されました。
+では、なぜそれが普遍的な表現言語として受け入れられていないのでしょうか。
+おそらく、Prologが表現言語とプログラミング言語のあいだの妥協だからです。
+論理的に同値な2つの仕様があっても、一方は効率のよいPrologプログラムになり、もう一方はそうならないことがあります。
+Kowalskiの有名な等式「*アルゴリズム = 論理 + 制御*」は、論理だけでできることの限界を表しています。すなわち*論理 = アルゴリズム - 制御*です。（とりわけAIの）多くの問題は大きな、あるいは無限の探索空間を持ち、その空間をどう探すかについての助言をPrologに与えなければ、まともな時間内に答えは出てきません。
 
-Prolog's problems fall into three classes.
-First, in order to make the language efficient, its expressiveness was restricted.
-It is not possible to assert that a person's name is either Jan or John in Prolog (although it is possible to *ask* if the person's name is one of those).
-Similarly, it is not possible to assert that a fact is false; Prolog does not distinguish between false and unknown.
-Second, Prolog's inference mechanism is neither sound nor complete.
-Because it does not check for circular unification, it can give incorrect answers, and because it searches depth-first it can miss correct answers.
-Third, Prolog has no good way of adding control information to the underlying logic, making it inefficient on certain problems.
+Prologの問題は3つに分かれます。
+第一に、言語を効率よくするために、その表現力が制限されました。
+Prologでは、ある人の名前が Jan か John のどちらかだと表明することはできません（その人の名前がそのどちらかかを*尋ねる*ことはできますが）。
+同様に、ある事実が偽だと表明することもできません。Prologは偽と未知を区別しないのです。
+第二に、Prologの推論の仕組みは健全でも完全でもありません。
+循環する単一化を検査しないので誤った答えを出しうるし、深さ優先で探索するので正しい答えを取り逃がしうるのです。
+第三に、Prologには土台となる論理に制御の情報を加えるうまい手立てがなく、そのため特定の問題では効率が悪くなります。
 
-## 14.4 Problems with Prolog's Expressiveness
+## 14.4 Prologの表現力の問題
 
-If Prolog is programming in logic, it is not the full predicate logic we are familiar with.
-The main problem is that Prolog can't express certain kinds of indefinite facts.
-It can represent definite facts: the capital of Rhode Island is Providence.
-It can represent conjunctions of facts: the capital of Rhode Island is Providence and the capital of California is Sacramento.
-But it can not represent disjunctions or negations: that the capital of California is *not* Los Angeles, or that the capital of New York is *either* New York City *or* Albany.
-We could try this:
+Prologが論理によるプログラミングだとしても、それは私たちのなじんでいる述語論理そのものではありません。
+おもな問題は、Prologがある種の不確定な事実を表現できないことです。
+確定した事実は表現できます。ロードアイランドの州都はプロビデンスである、といった具合です。
+事実の連言も表現できます。ロードアイランドの州都はプロビデンスであり、かつカリフォルニアの州都はサクラメントである、といった具合です。
+しかし選言や否定は表現できません。カリフォルニアの州都はロサンゼルス*ではない*、とか、ニューヨークの州都はニューヨーク市*か*オールバニの*どちらか*だ、といったことです。
+次のように書いてみることはできます。
 
 ```lisp
 (<- (not (capital LA CA)))
 (<- (or (capital Albany NY) (capital NYC NY)))
 ```
 
-but note that these last two facts concern the relation `not` and `or`, not the relation `capital`.
-Thus, they will not be considered when we ask a query about `capital`.
-Fortunately, the assertion "Either NYC or Albany is the capital of NY" can be rephrased as two assertions: "Albany is the capital of NY if NYC is not" and "NYC is the capital of NY if Albany is not:"
+しかしこの2つの事実が関わっているのは関係 `not` と `or` であって、関係 `capital` ではないことに注意してください。
+ですから、`capital` についての問い合わせをしても、これらは考慮されません。
+さいわい、「ニューヨーク市かオールバニのどちらかがNYの州都だ」という表明は、2つの表明に言い換えられます。「ニューヨーク市がそうでないなら、オールバニがNYの州都だ」と「オールバニがそうでないなら、ニューヨーク市がNYの州都だ」です。
 
 ```lisp
 (<- (capital Albany NY) (not (capital NYC NY)))
 (<- (capital NYC NY) (not (capital Albany NY)))
 ```
 
-Unfortunately, Prolog's `not` is different from logic's `not`.
-When Prolog answers "no" to a query, it means the query cannot be proven from the known facts.
-If everything is known, then the query must be false, but if there are facts that are not known, the query may in fact be true.
-This is hardly surprising; we can't expect a program to come up with answers using knowledge it doesn't have.
-But in this case, it causes problems.
-Given the previous two clauses and the query `(capital ?c NY)`, Prolog will go into an infinite loop.
-If we remove the first clause, Prolog would fail to prove that Albany is the capital, and hence conclude that NYC is.
-If we remove the second clause, the opposite conclusion would be drawn.
+あいにく、Prologの `not` は論理の `not` とは違います。
+Prologが問い合わせに「no」と答えるとき、それはその問い合わせが既知の事実からは証明できないという意味です。
+すべてが既知なら、その問い合わせは偽に違いありませんが、知られていない事実があるなら、実は真かもしれません。
+これは驚くにあたりません。持っていない知識を使って答えを出せとプログラムに求めることはできないのですから。
+しかしこの場合には、それが問題を引き起こします。
+先の2つの節と問い合わせ `(capital ?c NY)` が与えられると、Prologは無限ループに陥ります。
+最初の節を取り除けば、Prologはオールバニが州都だと証明できず、したがってニューヨーク市がそうだと結論します。
+2番目の節を取り除けば、逆の結論が導かれます。
 
-The problem is that Prolog equates "not proven" with "false." Prolog makes what is called the *closed world assumption*-it assumes that it knows everything that is true.
-The closed world assumption is reasonable for most programs, because the programmer does know all the relevant information.
-But for knowledge representation in general, we would like a system that does not make the closed world assumption and has three ways to answer a query: "yes," "no," or "unknown." In this example, we would not be able to conclude that the capital of NY is or is not NYC, hence we would not be able to conclude anything about Albany.
+厄介なのは、Prologが「証明されていない」を「偽」と同一視することです。Prologは*閉世界仮定*と呼ばれるものを置いています。真であることはすべて知っている、と仮定するのです。
+閉世界仮定は、たいていのプログラムでは妥当です。プログラマは関わりのある情報をすべて知っているからです。
+しかし知識表現一般では、閉世界仮定を置かず、問い合わせに「yes」「no」「unknown」の3通りで答えられるシステムがほしいところです。この例なら、NYの州都がニューヨーク市であるともないとも結論できず、したがってオールバニについても何も結論できないはずなのです。
 
-As another example, consider the clauses:
+もう1つの例として、次の節を考えてみましょう。
 
 ```lisp
 (<- (damned) (do))
 (<- (damned) (not (do)))
 ```
 
-With these rules, the query `(? (damned))` should logically be answered "yes."
-Furthermore, it should be possible to conclude `(damned)` without even investigating if `(do)` is provable or not.
-What Prolog does is first try to prove `(do)`.
-If this succeeds, then `(damned)` is proved.
-Either way, Prolog then tries again to prove `(do)`, and this time if the proof fails, then `(damned)` is proved.
-So Prolog is doing the same proof twice, when it is unnecessary to do the proof at all.
-Introducing negation wrecks havoc on the simple Prolog evaluation scheme.
-It is no longer sufficient to consider a single clause at a time.
-Rather, multiple clauses must be considered together if we want to derive all the right answers.
+これらの規則のもとでは、問い合わせ `(? (damned))` には論理的には「yes」と答えるべきです。
+しかも `(do)` が証明できるかどうかを調べもせずに `(damned)` と結論できるはずです。
+Prologがすることは、まず `(do)` を証明しようとすることです。
+これが成功すれば `(damned)` が証明されます。
+いずれにせよPrologは次にもう一度 `(do)` を証明しようとし、今度は証明が失敗すれば `(damned)` が証明されます。
+つまりPrologは同じ証明を2度行っているわけです。そもそもその証明はまったく必要ないというのに。
+否定を持ち込むと、Prologの単純な評価の枠組みは台無しになります。
+もはや一度に1つの節を考えるだけでは足りません。
+正しい答えをすべて導きたいなら、複数の節をまとめて考えねばならないのです。
 
-Robert [Moore 1982](bibliography.md#bb0865) gives a good example of the power of disjunctive reasoning.
-His problem concerned three colored blocks, but we will update it to deal with three countries.
-Suppose that a certain Eastern European country, *E*, has just decided if it will remain under communist rule or become a democracy, but we do not know the outcome of the decision.
-*E* is situated between the democracy *D* and the communist country *C*:
+Robert [Moore 1982](bibliography.md#bb0865)は、選言による推論の力のよい例を挙げています。
+その問題は色のついた3つの積み木についてのものでしたが、ここでは3つの国を扱うものに改めます。
+ある東欧の国 *E* が、共産主義の統治のもとに留まるか民主主義になるかをちょうど決めたところだが、その決定の結果を私たちは知らない、としましょう。
+*E* は、民主主義の国 *D* と共産主義の国 *C* のあいだに位置しています。
 
 <a id="diagram-14-02"></a>
 <img src="images/chapter14/diagram-14-02.svg"
   onerror="this.src='images/chapter4/diagram-14-02.png'; this.onerror=null;"
   alt="Diagram 14.2" />
 
-The question is: Is there a communist country next to a democracy?
-Moore points out that the answer is "yes," but discovering this requires reasoning by cases.
-If *E* is a democracy then it is next to *C* and the answer is yes.
-But if *E* is communist then it is next to *D* and the answer is still yes.
-Since those are the only two possibilities, the answer must be yes in any case.
-Logical reasoning gives us the right answer, but Prolog can not.
-We can describe the problem with the following seven assertions and one query, but Prolog can not deal with the or in the final assertion.
+問いはこうです。民主主義の国の隣に共産主義の国はあるか。
+Mooreは、答えは「yes」だが、それを見つけ出すには場合分けによる推論が要ると指摘しています。
+*E* が民主主義なら、それは *C* の隣にあり、答えはyesです。
+しかし *E* が共産主義なら、それは *D* の隣にあり、やはり答えはyesです。
+可能性はこの2つしかないので、いずれにせよ答えはyesに違いありません。
+論理的な推論は正しい答えを与えてくれますが、Prologにはそれができません。
+この問題は次の7つの表明と1つの問い合わせで書き表せますが、Prologは最後の表明にある or を扱えません。
 
 ```lisp
 (<- (next-to D E))    (<- (next-to E D))
@@ -244,11 +244,11 @@ We can describe the problem with the following seven assertions and one query, b
 (?- (next-to ?A ?B) (democracy ?A) (communist ?B))
 ```
 
-We have seen that Prolog is not very good at representing disjunctions and negations.
-It also has difficulty representing existentials.
-Consider the following statement in English, logic, and Prolog:
+Prologが選言と否定を表現するのがあまり得意でないことを見てきました。
+存在を表現するのも苦手です。
+次の文を、英語・論理・Prologで見比べてみましょう。
 
-Jan likes everyone.
+Jan はみんなが好きだ。
 
 &forall; *x* person(*x*) => likes(Jan,*x*)
 
@@ -256,10 +256,10 @@ Jan likes everyone.
 (<- (likes Jan ?x) (person ?x))
 ```
 
-The Prolog translation is faithful.
-But there is no good translation for "Jan likes someone." The closest we can get is:
+このPrologへの訳は忠実です。
+しかし「Jan は誰かが好きだ」にはうまい訳がありません。いちばん近づけるのは次のものです。
 
-Jan likes someone.
+Jan は誰かが好きだ。
 
 &exist; *x* person(x) => likes(Jan,x)
 
@@ -268,17 +268,17 @@ Jan likes someone.
 (<- (person pl))
 ```
 
-Here we have invented a new symbol, `p1`, to represent the unknown person that Jan likes, and have asserted that `p1` is a person.
-Notice that `p1` is a constant, not a variable.
-This use of a constant to represent a specific but unknown entity is called a *Skolem constant,* after the logician Thoralf Skolem (1887-1963).
-The intent is that `p1` may be equal to some other person that we know about.
-If we find out that Adrian is the person Jan likes, then in logic we can just add the assertion p1 = Adrian.
-But that does not work in Prolog, because Prolog implicitly uses the *unique name assumption-*all atoms represent distinct individuals.
+ここでは、Janが好きな未知の人を表す新しいシンボル `p1` をこしらえ、`p1` が人であると表明しています。
+`p1` が変数ではなく定数であることに注目してください。
+特定ではあるが未知の存在を表すのに定数を使うこのやり方を、論理学者Thoralf Skolem（1887-1963）にちなんで*スコーレム定数*と呼びます。
+意図としては、`p1` は私たちが知っている他の誰かと等しくてもかまいません。
+Janが好きな人がAdrianだとわかれば、論理なら p1 = Adrian という表明を加えるだけで済みます。
+しかしPrologではそうはいきません。Prologは暗黙のうちに*一意名仮定*、すなわちすべてのアトムは別々の個体を表すという前提を使っているからです。
 
-A Skolem constant is really just a special case of a *Skolem function-*an unknown entity that depends on one or more variable.
-For example, to represent "Everyone likes someone" we could use:
+スコーレム定数は、実のところ*スコーレム関数*の特別な場合にすぎません。スコーレム関数とは、1つ以上の変数に依存する未知の存在のことです。
+たとえば「みんなが誰かを好きだ」を表すには、次のように書けます。
 
-Everyone likes someone.
+みんなが誰かを好きだ。
 
 &forall;*y*&exist; *x* person (*x*) => likes (*y, x*)
 
@@ -287,16 +287,16 @@ Everyone likes someone.
 (<- (person (p2 ?y)))
 ```
 
-Here `p2` is a Skolem function that depends on the variable `?y`.
-In other words, everyone likes some person, but not necessarily the same person.
+ここで `p2` は、変数 `?y` に依存するスコーレム関数です。
+言い換えれば、誰もが誰かを好きだが、それが同じ人とはかぎらない、ということです。
 
-## 14.5 Problems with Predicate Calculus's Expressiveness
+## 14.5 述語論理の表現力の問題
 
-In the previous section we saw that Prolog has traded some expressiveness for efficiency.
-This section explores the limits of predicate calculus's expressiveness.
+前節では、Prologが表現力のいくらかを効率と引き換えにしていることを見ました。
+本節では、述語論理の表現力の限界を探ります。
 
-Suppose we want to assert that lions, tigers, and bears are kinds of animals.
-In predicate calculus or in Prolog we could write an implication for each case:
+ライオン、トラ、クマが動物の一種だと表明したいとしましょう。
+述語論理でもPrologでも、場合ごとに含意を書けます。
 
 ```lisp
 (<- (animal ?x) (lion ?x))
@@ -304,60 +304,60 @@ In predicate calculus or in Prolog we could write an implication for each case:
 (<- (animal ?x) (bear ?x))
 ```
 
-These implications allow us to prove that any known lion, tiger, or bear is in fact an animal.
-However, they do not allow us to answer the question "What kinds of animals are there?"
-It is not hard to imagine extending Prolog so that the query
+これらの含意によって、既知のライオン・トラ・クマが実際に動物であることを証明できます。
+しかし、「どんな種類の動物がいるか」という問いに答えることはできません。
+Prologを拡張して、次の問い合わせが
 
 ```lisp
 (?- (<- (animal ?x) ?proposition))
 ```
 
-would be legal.
-However, this happens not to be valid Prolog, and it is not even valid first-order predicate calculus (or FOPC).
-In FOPC the variables must range over constants in the language, not over relations or propositions.
-Higher-order predicate calculus removes this limitation, but it has a more complicated proof theory.
+通るようにすることは、想像に難くありません。
+しかし実のところ、これは正しいPrologではありませんし、一階述語論理（FOPC）としても正しくありません。
+一階述語論理では、変数はその言語の定数の上を動かねばならず、関係や命題の上を動くことはできません。
+高階述語論理はこの制限を取り払いますが、証明論はより込み入ったものになります。
 
-It is not even clear what the values of `?proposition` should be in the query above.
-Surely `(lion ?x)` would be a valid answer, but so would `(animal ?x), (or (tiger ?x) (bear ?x))`, and an infinite number of other propositions.
-Perhaps we should have two types of queries, one that asks about "kinds," and another that asks about propositions.
+そもそも、上の問い合わせで `?proposition` の値が何であるべきかもはっきりしません。
+`(lion ?x)` が正しい答えなのは確かですが、`(animal ?x)` や `(or (tiger ?x) (bear ?x))`、そして無限にある他の命題も同じく正しいことになります。
+おそらく問い合わせを2種類、「種類」を尋ねるものと命題を尋ねるものに分けるべきなのでしょう。
 
-There are other questions that we might want to ask about relations.
-Just as it is useful to declare the types of parameters to a Lisp function, it can be useful to declare the types of the parameters of a relation, and later query those types.
-For example, we might say that the `likes` relation holds between a person and an object.
+関係について尋ねたくなる問いは、ほかにもあります。
+Lisp関数の引数の型を宣言しておくのが役に立つのと同じで、関係の引数の型を宣言し、あとでその型を問い合わせられると役に立ちます。
+たとえば、`likes` の関係は人とものとのあいだに成り立つ、と述べられるでしょう。
 
-In general, a sentence in the predicate calculus that uses a relation or sentence as a term is called a higher-order sentence.
-There are some quite subtle problems that come into play when we start to allow higher-order expressions.
-Allowing sentences in the calculus to talk about the truth of other sentences can lead to a paradox: is the sentence "This sentence is false" true or false?
+一般に、関係や文を項として使う述語論理の文を、高階の文と呼びます。
+高階の式を許し始めると、なかなか微妙な問題がいくつも顔を出します。
+論理の文が他の文の真理について語ることを許すと、逆理につながりかねません。「この文は偽である」という文は真でしょうか、偽でしょうか。
 
-Predicate calculus is defined in terms of a universe of individuals and their properties and relations.
-Thus it is well suited for a model of the world that picks out individuals and categorizes them-a person here, a building there, a sidewalk between them.
-But how well does predicate calculus fare in a world of continuous substances?
-Consider a body of water consisting of an indefinite number of subconstituents that are all water, with some of the water evaporating into the air and rising to form clouds.
-It is not at all obvious how to define the individuals here.
-However, Patrick Hayes has shown that when the proper choices are made, predicate calculus can describe this kind of situation quite well.
-The details are in Hayes 1985.
+述語論理は、個体の宇宙と、その性質および関係の言葉で定義されています。
+ですから、個体を選び出して分類する世界の模型にはよく合っています。ここに人、あそこに建物、そのあいだに歩道、という具合です。
+しかし、連続した物質の世界では、述語論理はどれほどうまくやれるでしょうか。
+どれも水である不定数の下位構成要素からなる水のかたまりがあり、その一部が空気中へ蒸発して立ちのぼり雲になる、という場面を考えてみてください。
+ここで個体をどう定義すればよいかは、まるで自明ではありません。
+しかしPatrick Hayesは、適切な選択をすれば、述語論理でもこの種の状況をかなりうまく書き表せることを示しました。
+詳しくは Hayes 1985 にあります。
 
-The need to define categories is a more difficult problem.
-Predicate calculus works very well for crisp, mathematical categories: *x* is a triangle if and only if *x* is a polygon with three sides.
-Unfortunately, most categories that humans deal with in everyday life are not defined so rigorously.
-The category *friend* refers to someone you have mostly positive feelings for, whom you can usually trust, and so on.
-This "definition" is not a set of necessary and sufficient conditions but rather is an open-ended list of ill-defined qualities that are highly correlated with the category *friend.* We have a prototype for what an ideal friend should be, but no clear-cut boundaries that separate *friend* from, say, *acquaintance.* Furthermore, the boundaries seem to vary from one situation to another: a person you describe as a good friend in your work place might be only an acquaintance in the context of your home life.
+より難しいのは、区分を定義しなければならないという問題です。
+述語論理は、輪郭のはっきりした数学的な区分にはとてもよく働きます。*x* が三角形であるのは、*x* が3辺を持つ多角形であるとき、かつそのときにかぎる、といった具合です。
+あいにく、人間が日々の暮らしで扱う区分のほとんどは、そこまで厳密には定義されていません。
+*友人*という区分は、おおむね好ましい感情を抱いていて、たいてい信頼できる相手、といったものを指します。
+この「定義」は必要十分条件の集まりではなく、*友人*という区分と強く相関する、定義のあいまいな性質の、終わりのない並びです。理想の友人がどうあるべきかの原型は持っていても、*友人*をたとえば*知人*から切り分けるはっきりした境目はありません。しかも、その境目は場面によって動くようです。職場では良い友人だと言う相手が、家庭という文脈では知人にすぎないかもしれません。
 
-There are versions of predicate calculus that admit quantifiers like "most" in addition to "for all" and "there exists," and there have been attempts to define prototypes and measure distances from them.
-However, there is no consensus on the way to approach this problem.
+「すべての」「が存在する」に加えて「たいていの」のような量化子を許す述語論理の版もありますし、原型を定義してそこからの隔たりを測ろうという試みもありました。
+しかし、この問題への取り組み方について合意はありません。
 
-## 14.6 Problems with Completeness
+## 14.6 完全性の問題
 
-Because Prolog searches depth-first, it can get caught in one branch of the search space and never examine the other branches.
-This problem can show up, for example, in trying to define a commutative relation, like `sibling`:
+Prologは深さ優先で探索するので、探索空間の1つの枝にとらわれて、他の枝をまったく調べないことがあります。
+この問題はたとえば、`sibling` のような可換な関係を定義しようとするときに現れます。
 
 ```lisp
 (<- (sibling lee kim))
 (<- (sibling ?x ?y) (sibling ?y ?x))
 ```
 
-With these clauses, we expect to be able to conclude that Lee is Kim's sibling, and Kim is Lee's.
-Let's see what happens:
+これらの節があれば、LeeがKimのきょうだいであり、KimがLeeのきょうだいであると結論できるはずです。
+何が起こるか見てみましょう。
 
 ```lisp
 > (?- (sibling ?x ?y))
@@ -372,11 +372,11 @@ Let's see what happens:
 No.
 ```
 
-We get the expected conclusions, but they are deduced repeatedly, because the commutative clause for siblings is applied over and over again.
-This is annoying, but not critical.
-Far worse is when we ask `(?- (sibling fred ?x))`.
-This query loops forever.
-Happily, this particular type of example has an easy fix: just introduce two predicates, one for data-base level facts, and one at the level of axioms and queries:
+期待どおりの結論は得られますが、何度も繰り返し導かれてしまいます。きょうだいの可換な節が何度も何度も適用されるからです。
+これは煩わしくはありますが、致命的ではありません。
+はるかにまずいのは `(?- (sibling fred ?x))` と尋ねたときです。
+この問い合わせは永久にループします。
+さいわい、この種の例には簡単な手当てがあります。述語を2つ導入し、一方をデータベースの水準の事実に、もう一方を公理と問い合わせの水準に使えばよいのです。
 
 ```lisp
 (<- (sibling-fact lee kim))
@@ -384,21 +384,21 @@ Happily, this particular type of example has an easy fix: just introduce two pre
 (<- (sibling ?x ?y) (sibling-fact ?y ?x))
 ```
 
-Another fix would be to change the interpreter to fail when a repeated goal was detected.
-This was the approach taken in GPS.
-However, even if we eliminated repeated goals, Prolog can still get stuck in one branch of a depth-first search.
-Consider the example:
+もう1つの手当ては、同じ目標が繰り返し現れたら失敗するようインタプリタを変えることです。
+これはGPSで採った方式です。
+しかし繰り返しの目標を取り除いたとしても、Prologは深さ優先探索の1つの枝で立ち往生しかねません。
+次の例を考えてみましょう。
 
 ```lisp
 (<- (natural 0))
 (<- (natural (1+ ?n)) (natural ?n))
 ```
 
-These rules define the natural numbers (the non-negative integers).
-We can use the rules either to confirm queries like `(natural (1  + (1  + (1  + 0))))` or to generate the natural numbers, as in the query `(natural ?n)`.
-So far, everything is fine.
-But suppose we wanted to define all the integers.
-One approach would be this:
+これらの規則は自然数（非負の整数）を定義しています。
+この規則は、`(natural (1  + (1  + (1  + 0))))` のような問い合わせを確かめるのにも、問い合わせ `(natural ?n)` のように自然数を生成するのにも使えます。
+ここまでは何も問題ありません。
+しかし整数全体を定義したいとしましょう。
+1つのやり方は次のようなものです。
 
 ```lisp
 (<- (integer 0))
@@ -406,35 +406,35 @@ One approach would be this:
 (<- (integer (1+ ?n)) (integer ?n))
 ```
 
-These rules say that 0 is an integer, and any *n* is an integer if *n* + 1 is, and *n* + 1 is if *n* is.
-While these rules are correct in a logical sense, they don't work as a Prolog program.
-Asking `(integer` *x*`)` will result in an endless series of ever-increasing queries: `(integer (1+` *x*`))`, `(integer (1+ (1+` *x*`)))`, and so on.
-Each goal is different, so no check can stop the recursion.
+これらの規則は、0は整数であり、*n* + 1 が整数ならどんな *n* も整数であり、*n* が整数なら *n* + 1 も整数だ、と述べています。
+論理的な意味ではこれらの規則は正しいのですが、Prologのプログラムとしては働きません。
+`(integer` *x*`)` と尋ねると、`(integer (1+` *x*`))`、`(integer (1+ (1+` *x*`)))` というように、際限なくふくらむ問い合わせの連なりになります。
+どの目標も違うので、どんな検査でもこの再帰を止められません。
 
-The occurs check may or may not introduce problems into Prolog, depending on your interpretation of infinite trees.
-Most Prolog systems do not do the occurs check.
-The reasoning is that unifying a variable with some value is the Prolog equivalent of assigning a value to a variable, and programmers expect such a basic operation to be fast.
-With the occurs check turned off, it will in fact be fast.
-With checking on, it takes time proportional to the size of the value, which is deemed unacceptable.
+出現検査がPrologに問題を持ち込むかどうかは、無限の木をどう解釈するかによります。
+たいていのPrologシステムは出現検査をしません。
+その言い分は、変数を何らかの値と単一化することはPrologでの変数への代入にあたり、そんな基本の操作は速いものだとプログラマは期待している、というものです。
+出現検査を切っておけば、実際に速くなります。
+検査を入れると値の大きさに比例した時間がかかり、それは受け入れがたいと見なされています。
 
-With occurs checking off, the programmer gets the benefit of fast unification but can run into problems with circular structures.
-Consider the following clauses:
+出現検査を切ると、プログラマは速い単一化の恩恵にあずかれますが、循環した構造で困ることがあります。
+次の節を考えてみましょう。
 
 ```lisp
 (<- (parent ?x (mother-of ?x)))
 (<- (parent ?x (father-of ?x)))
 ```
 
-These clauses say that, for any person, the mother of that person and the father of that person are parents of that person.
-Now let us ask if there is a person who is his or her own parent:
+これらの節は、どんな人についても、その人の母とその人の父はその人の親である、と述べています。
+では、自分自身の親である人がいるかどうかを尋ねてみましょう。
 
 ```lisp
 > (? (parent ?y ?y))
 ?Y = [Abort]
 ```
 
-The system has found an answer, where `?y = (mother-of ?y).` The answer can't be printed, though, because `deref` (or `subst-bindings` in the interpreter) goes into an infinite loop trying to figure out what `?y` is.
-Without the printing, there would be no infinite loop:
+システムは `?y = (mother-of ?y)` という答えを見つけています。ただしその答えは表示できません。`deref`（インタプリタでは `subst-bindings`）が、`?y` が何かを突き止めようとして無限ループに陥るからです。
+表示しなければ、無限ループにはなりません。
 
 ```lisp
 (<- (self-parent) (parent ?y ?y))
@@ -444,68 +444,68 @@ Yes;
 No.
 ```
 
-The `self-parent` query succeeds twice, once with the mother clause and once with the father clause.
-Has Prolog done the right thing here?
-It depends on your interpretation of infinite circular trees.
-If you accept them as valid objects, then the answer is consistent.
-If you don't, then leaving out the occurs check makes Prolog *unsound:* it can come up with incorrect answers.
+`self-parent` の問い合わせは2度成功します。母の節で1度、父の節で1度です。
+ここでPrologは正しいことをしたのでしょうか。
+それは、無限に循環する木をどう解釈するかによります。
+それを正当な対象として受け入れるなら、この答えは筋が通っています。
+受け入れないなら、出現検査を省くことはPrologを*不健全*にします。誤った答えを出しうるのです。
 
-The same problem comes up if we ask if there are any sets that include themselves as members.
-The query `(member ?set ?set)` will succeed, but we will not be able to print the value of `?set`.
+同じ問題は、自分自身を要素として含む集合があるかを尋ねたときにも起こります。
+問い合わせ `(member ?set ?set)` は成功しますが、`?set` の値を表示することはできません。
 
-## 14.7 Problems with Efficiency: Indexing
+## 14.7 効率の問題: 索引付け
 
-Our Prolog compiler is designed to handle "programlike" predicates-predicates with a small number of rules, perhaps with complex bodies.
-The compiler does much worse on "tablelike" predicates-predicates with a large number of simple facts.
-Consider the predicate `pb`, which encodes phone-book facts in the form:
+私たちのPrologコンパイラは、「プログラムのような」述語、すなわち規則の数が少なく、本体は込み入っているかもしれない述語を扱うように作られています。
+「表のような」述語、すなわち単純な事実が大量にある述語では、このコンパイラの出来はずっと悪くなります。
+電話帳の事実を次の形で符号化する述語 `pb` を考えてみましょう。
 
 ```lisp
 (pb (name Jan Doe) (num 415 555 1212))
 ```
 
-Suppose we have a few thousand entries of this kind.
-A typical query for this data base would be:
+この種の項目が数千あるとします。
+このデータベースへの典型的な問い合わせは次のようなものです。
 
 ```lisp
 (pb (name Jan Doe) ?num)
 ```
 
-It would be inefficient to search through the facts linearly, matching each one against the query.
-It would also be inefficient to recompile the whole `pb/2` predicate every time a new entry is added.
-But that is just what our compiler does.
+事実を1つずつ順に照合していくのは効率が悪いでしょう。
+新しい項目が加わるたびに `pb/2` の述語全体を再コンパイルするのも効率が悪いでしょう。
+しかし私たちのコンパイラがしているのは、まさにそれです。
 
-The solutions to the three problems-expressiveness, completeness, and indexing-will be considered in reverse order, so that the most difficult one, expressiveness, will come last.
+表現力・完全性・索引付けという3つの問題への解は、逆の順に考えていきます。そうすればもっとも難しい表現力が最後に来ます。
 
-## 14.8 A Solution to the Indexing Problem
+## 14.8 索引付けの問題への解
 
-A better solution to the phone-book problem is to index each phone-book entry in some kind of table that makes it easy to add, delete, and retrieve entries.
-That is what we will do in this section.
-We will develop an extension of the trie or discrimination tree data structure built in [section 10.5](chapter10.md#s0030) ([page 344](chapter10.md#p344)).
+電話帳の問題へのよりよい解は、項目の追加・削除・取り出しがしやすい何らかの表に、電話帳の項目ごとに索引を付けることです。
+本節ではそれを行います。
+[10.5節](chapter10.md#s0030)（[344ページ](chapter10.md#p344)）で作ったトライ、すなわち判別木のデータ構造を拡張していきます。
 
-Making a discrimination tree for Prolog facts is complicated by the presence of variables in both the facts and the query.
-Either facts with variables in them will have to be indexed in several places, or queries with variables will have to look in several places, or both.
-We also have to decide if the discrimination tree itself will handle variable binding, or if it will just return candidate matches which are then checked by some other process.
-It is not clear what to store in the discrimination tree: copies of the fact, functions that can be passed continuations, or something else.
-More design choices will come up as we proceed.
+Prologの事実のための判別木を作るのは、事実にも問い合わせにも変数があるせいで込み入ったものになります。
+変数を含む事実を何か所にも索引付けするか、変数を含む問い合わせが何か所も見にいくか、あるいはその両方が必要になります。
+また、判別木そのものが変数の束縛を扱うのか、それとも候補となる一致を返すだけで、その検査は別の処理に任せるのかも決めねばなりません。
+判別木に何を格納するかもはっきりしません。事実の複製か、継続を渡せる関数か、それとも別の何かか。
+進めるにつれて、設計上の選択はさらに出てきます。
 
-It is difficult to make design choices when we don't know exactly how the system will be used.
-We don't know what typical facts will look like, nor typical queries.
-Therefore, we will design a fairly abstract tool, forgetting for the moment that it will be used to index Prolog facts.
+システムがどう使われるかが正確にわからないうちに設計を選ぶのは難しいことです。
+典型的な事実がどんな形か、典型的な問い合わせがどんな形かがわかりません。
+そこで、Prologの事実の索引付けに使うということはひとまず忘れて、かなり抽象的な道具を設計することにします。
 
-We will address the problem of a discrimination tree where both the keys and queries are predicate structures with wild cards.
-A wild card is a variable, but with the understanding that there is no variable binding; each instance of a variable can match anything.
-A predicate structure is a list whose first element is a nonvariable symbol.
-The discrimination tree supports three operations:
+キーも問い合わせも、ワイルドカードを含む述語の構造である、という判別木の問題に取り組みます。
+ワイルドカードは変数ですが、変数の束縛はないという約束のもとでのものです。変数のどの出現も、何にでも一致しえます。
+述語の構造とは、最初の要素が変数でないシンボルであるリストのことです。
+判別木は3つの操作を支えます。
 
-*   `index` - add a key/value pair to the tree
+*   `index` — キーと値の対を木に加える
 
-*   `fetch` - find all values that potentially match a given key
+*   `fetch` — 与えたキーに一致しうる値をすべて見つける
 
-*   `unindex` - remove all key/value pairs that match a given key
+*   `unindex` — 与えたキーに一致するキーと値の対をすべて取り除く
 
-To appreciate the problems, we need an example.
-Suppose we have the following six keys to index.
-For simplicity, the value of each key will be the key itself:
+問題を実感するには例が要ります。
+索引付けすべきキーが次の6つあるとしましょう。
+話を簡単にするため、各キーの値はキー自身とします。
 
 ```lisp
 1 (p a b)
@@ -516,82 +516,82 @@ For simplicity, the value of each key will be the key itself:
 6 (p a (f . ?x))
 ```
 
-Now assume the query `(p ?y c)`.
-This should match keys 2, 3, and 4.
-How could we efficiently arrive at this set?
-One idea is to list the key/value pairs under every atom that they contain.
-Thus, all six would be listed under the atom `p`, while 2, 4, and 5 would be listed under the atom c.
-A unification check could eliminate 5, but we still would be missing 3.
-Key 3 (and every key with a variable in it) could potentially contain the atom `c`.
-So to get the right answers under this approach, we will need to index every key that contains a variable under every atom-not an appealing situation.
+では、問い合わせ `(p ?y c)` を考えます。
+これはキー2、3、4に一致するはずです。
+この集合に効率よくたどり着くには、どうすればよいでしょうか。
+1つの考えは、キーと値の対を、それが含むすべてのアトムのもとに並べることです。
+そうすると6つすべてがアトム `p` のもとに並び、2、4、5がアトム c のもとに並びます。
+単一化の検査で5は除けますが、それでも3が取り逃がされます。
+キー3（そして変数を含むすべてのキー）は、アトム `c` を含みうるからです。
+ですからこの方式で正しい答えを得るには、変数を含むすべてのキーを、すべてのアトムのもとに索引付けせねばなりません。ありがたくない話です。
 
-An alternative is to create indices based on both atoms and their position.
-So now we would be retrieving all the keys that have a c in the second argument position: 2 and 4, plus the keys that have a variable as the second argument: 3.
-This approach seems to work much better, at least for the example shown.
-To create the index, we essentially superimpose the list structure of all the keys on top of each other, to arrive at one big discrimination tree.
-At each position in the tree, we create an index of the keys that have either an atom or a variable at that position.
-[Figure 14.1](#f0010) shows the discrimination tree for the six keys.
+もう1つの道は、アトムとその位置の両方にもとづいて索引を作ることです。
+こうすると、第2引数の位置に c を持つキー、すなわち2と4に加えて、第2引数が変数であるキー、すなわち3を取り出すことになります。
+少なくとも示した例については、この方式のほうがずっとうまくいきそうです。
+索引を作るには、要するにすべてのキーのリスト構造をたがいに重ね合わせて、1つの大きな判別木に至らせます。
+木の各位置には、その位置にアトムか変数を持つキーの索引を作ります。
+[図14.1](#f0010)に、6つのキーに対する判別木を示します。
 
 | <a id="fig-14-01"></a>[]() |
 |---|
 | <img src="images/chapter14/fig-14-01.svg" onerror="this.src='images/chapter14/fig-14-01.png'; this.onerror=null;" alt="Figure 14.1" /> |
-| **Figure 14.1: Discrimination Tree with Six Keys** |
+| **図14.1: 6つのキーを持つ判別木** |
 
-Consider the query `(p ?y c)`.
-Either the `p` or the `c` could be used as an index.
-The `p` in the predicate position retrieves all six keys.
-But the c in the second argument position retrieves only three keys: 2 and 4, which are indexed under c itself, and 3, which is indexed under the variable in that position.
+問い合わせ `(p ?y c)` を考えてみましょう。
+`p` も `c` も索引として使えます。
+述語の位置にある `p` は6つのキーすべてを取り出します。
+しかし第2引数の位置にある c が取り出すのは3つだけです。c そのものの下に索引付けされた2と4、そしてその位置の変数の下に索引付けされた3です。
 
-Now consider the query `(p ?y (f ?z))`.
-Again, the `p` serves as an index to all six keys.
-The `f` serves as an index to only three keys: the 5 and 6, which are indexed directly under f in that position, and 3, which is indexed under the variable in a position along the path that lead to f.
-In general, all the keys indexed under variables along the path must be considered.
+次に問い合わせ `(p ?y (f ?z))` を考えます。
+ここでも `p` は6つのキーすべてへの索引になります。
+`f` が索引となるのは3つだけです。その位置の f の下に直に索引付けされた5と6、そして f に至る経路の途中の位置で変数の下に索引付けされた3です。
+一般に、経路に沿って変数の下に索引付けされたキーは、すべて考えに入れねばなりません。
 
-The retrieval mechanism can overretrieve.
-Given the query `(p a (f ?x))`, the atom `p` will again retrieve all six keys, the atom a retrieves 1, 2, 3, and 6, and f again retrieves 5, 6, and 3.
-So `f` retrieves the shortest list, and hence it will be used to determine the final result.
-But key 5 is `(p b (f c))`, which does not match the query `(pa (f?x))`.
+取り出しの仕組みは、取りすぎることがあります。
+問い合わせ `(p a (f ?x))` では、アトム `p` はまた6つすべてを取り出し、アトム a は1、2、3、6を取り出し、f はまた5、6、3を取り出します。
+つまり `f` がもっとも短い並びを取り出すので、最終の結果を決めるのにはこれが使われます。
+しかしキー5は `(p b (f c))` であり、問い合わせ `(pa (f?x))` には一致しません。
 
-We could eliminate this problem by intersecting all the lists instead of just taking the shortest list.
-It is perhaps feasible to do the intersection using bit vectors, but probably too slow and wasteful of space to do it using lists.
-Even if we did intersect keys, we would still overretrieve, for two reasons.
-First, we don't use nil as an index, so we are ignoring the difference between `(f ?x)` and `(f . ?x)`.
-Second, we are using wild-card semantics, so the query `(p ?x ?x)` would retrieve all six keys, when it should only retrieve three.
-Because of these problems, we make a design choice: we will first build a data base retrieval function that retrieves potential matches, and later worry about the unification process that will eliminate mismatches.
+もっとも短い並びを取るのではなく、すべての並びの共通部分を取れば、この問題はなくせます。
+ビットベクタを使って共通部分を取るのは現実的かもしれませんが、リストで行うのはおそらく遅すぎ、場所も無駄にしすぎます。
+かりに共通部分を取ったとしても、2つの理由でやはり取りすぎます。
+第一に、nilを索引として使っていないので、`(f ?x)` と `(f . ?x)` の違いを無視しています。
+第二に、ワイルドカードの意味論を使っているので、問い合わせ `(p ?x ?x)` は3つだけ取り出すべきところ、6つすべてを取り出してしまいます。
+こうした問題があるので、設計を1つ選びます。まず一致しうるものを取り出すデータベースの取り出し関数を作り、一致しないものを取り除く単一化の過程はあとで考えることにします。
 
-We are ready for a more complete specification of the indexing strategy:
+これで、索引付けの方策をより完全に述べる用意ができました。
 
-*   The value will be indexed under each non-nil nonvariable atom in the key, with a separate index for each position.
-For example, given the preceding data base, the atom `a` in the first argument position would index values 1, 2, 3, and 6, while the atom `b` in the second argument position would index value 4 and 5.
-The atom `p` in the predicate position would index all six values.
+*   値は、キーのなかのnilでも変数でもない各アトムの下に、位置ごとに別々の索引として索引付けされる。
+たとえば先のデータベースなら、第1引数の位置のアトム `a` は値1、2、3、6を索引付けし、第2引数の位置のアトム `b` は値4と5を索引付けする。
+述語の位置のアトム `p` は6つの値すべてを索引付けする。
 
-*   In addition, we will maintain a separate index for variables at each position.
-For example, value 3 would be stored under the index "variable in second argument position."
+*   加えて、各位置の変数のために別の索引を保つ。
+たとえば値3は「第2引数の位置の変数」という索引の下に格納される。
 
-*   "Position" does not refer solely to the linear position in the top-level list.
-For example, value 5 would be indexed under atom f in the caaddr position.
+*   「位置」は、最上位のリストのなかの並び順だけを指すのではない。
+たとえば値5は、caaddr の位置のアトム f の下に索引付けされる。
 
-*   It follows that a key with *n* atoms will be indexed in *n* different ways.
+*   したがって、*n* 個のアトムを持つキーは *n* 通りに索引付けされることになる。
 
-For retrieval, the strategy is:
+取り出しの方策は次のとおりです。
 
-*   For each non-nil nonvariable atom in the retrieval key, generate a list of possible matches.
-Choose the shortest such list.
+*   取り出しのキーのなかの、nilでも変数でもない各アトムについて、一致しうるものの並びを作る。
+そのうちもっとも短い並びを選ぶ。
 
-*   Each list of possible matches will have to be augmented with the values indexed under a variable at every position "above." For example, `f` in the `caaddr` position retrieves value 5, but it also must retrieve value 3, because the third key has a variable in the `caddr` position, and `caddr` is "above" `caaddr.`
+*   一致しうるものの各並びは、「上位の」すべての位置で変数の下に索引付けされた値で補わねばならない。たとえば `caaddr` の位置の `f` は値5を取り出すが、値3も取り出さねばならない。3番目のキーが `caddr` の位置に変数を持ち、`caddr` は `caaddr` の「上位」だからである。
 
-*   The discrimination tree may return values that are not valid matches.
-The purpose of the discrimination tree is to reduce the number of values we will have to unify against, not to determine the exact set of matches.
+*   判別木は、正しい一致ではない値を返すことがある。
+判別木の目的は、単一化を試す値の数を減らすことであって、一致するものの集合を正確に決めることではない。
 
-It is important that the retrieval function execute quickly.
-If it is slow, we might just as well match against every key in the table linearly.
-Therefore, we will take care to implement each part efficiently.
-Note that we will have to compare the length of lists to choose the shortest possibility.
-Of course, it is trivial to compare lengths using `length,` but `length` requires traversing the whole list.
-We can do better if we store the length of the list explicitly.
-A list with its length will be called an `nlist`.
-It will be implemented as a cons cell containing the number of elements and a list of the elements themselves.
-An alternative would be to use extensible vectors with fill pointers.
+取り出しの関数が素早く動くことは重要です。
+遅いのなら、表のすべてのキーと順に照合するのと変わりありません。
+ですから、各部分を効率よく実装するよう気を配ります。
+もっとも短い候補を選ぶのに、リストの長さを比べねばならないことに注意してください。
+もちろん `length` を使って長さを比べるのは造作もないことですが、`length` はリスト全体をたどる必要があります。
+リストの長さを明示的に格納しておけば、もっとうまくやれます。
+長さを添えたリストを `nlist` と呼ぶことにします。
+これは、要素の個数と要素そのものの並びを収めたコンスセルとして実装します。
+代わりに、フィルポインタつきの伸長可能なベクタを使う手もあります。
 
 ```lisp
 ;; An nlist is implemented as a (count . elements) pair:
@@ -609,19 +609,19 @@ An alternative would be to use extensible vectors with fill pointers.
   nlist)
 ```
 
-Now we need a place to store these nlists.
-We will build the data base out of discrimination tree nodes called dtree nodes.
-Each dtree node has a field to hold the variable index, the atom indices, and pointers to two subnodes, one for the `first` and one for the `rest`.
-We implement dtrees as vectors for efficiency, and because we will never need a `dtree-p` predicate.
+次に、これらのnlistを格納する場所が要ります。
+データベースは、dtree節点と呼ぶ判別木の節点から組み立てます。
+各dtree節点は、変数の索引、アトムの索引、そして2つの下位節点（`first` 用と `rest` 用）へのポインタを保つ欄を持ちます。
+dtreeはベクタとして実装します。効率のためでもあり、`dtree-p` という述語が必要になることは決してないからでもあります。
 
 ```lisp
 (defstruct (dtree (:type vector))
   (first nil) (rest nil) (atoms nil) (var (make-empty-nlist)))
 ```
 
-A separate dtree will be stored for each predicate.
-Since the predicates must be symbols, it is possible to store the dtrees on the predicate's property list.
-In most implementations, this will be faster than alternatives such as hash tables.
+dtreeは述語ごとに別々に格納します。
+述語はシンボルでなければならないので、dtreeは述語の属性リストに格納できます。
+たいていの実装では、これはハッシュ表などの代案より速いでしょう。
 
 ```lisp
 ;; Not all Lisps handle the closure properly, so change the local PREDICATES
@@ -641,15 +641,15 @@ In most implementations, this will be faster than alternatives such as hash tabl
   (setf *predicates* nil))
 ```
 
-The function `index` takes a relation as key and stores it in the dtree for the predicate of the relation.
-It calls `dtree-index` to do all the work of storing a value under the proper indices for the key in the proper dtree node.
+関数 `index` は関係をキーとして取り、その関係の述語のdtreeに格納します。
+実際の作業、すなわち適切なdtree節点で、キーに対する適切な索引の下に値を格納する仕事は、`dtree-index` を呼んで行わせます。
 
-The atom indices are stored in an association list.
-Property lists would not work, because they are searched using eq and atoms can be numbers, which are not necessarily `eq`.
-Association lists are searched using `eql` by default.
-An alternative would be to use hash tables for the index, or even to use a scheme that starts with association lists and switches to a hash table when the number of entries gets large.
-I use `lookup` to look up the value of a key in a property list.
-This function, and its `setf` method, are defined on [page 896](chapter25.md#p896).
+アトムの索引は連想リストに格納します。
+属性リストではうまくいきません。属性リストは eq で探されますが、アトムは数でもありえ、数は必ずしも `eq` ではないからです。
+連想リストは既定で `eql` を使って探されます。
+代わりに索引にハッシュ表を使う手もありますし、連想リストから始めて項目数が多くなったらハッシュ表に切り替える仕掛けにする手もあります。
+属性リストのなかでキーの値を引くのには `lookup` を使います。
+この関数と、その `setf` メソッドは[896ページ](chapter25.md#p896)で定義しています。
 
 ```lisp
 (defun index (key)
@@ -681,8 +681,8 @@ This function, and its `setf` method, are defined on [page 896](chapter25.md#p89
         new)))
 ```
 
-Now we define a function to test the indexing routine.
-Compare the output with [figure 14.1](#f0010).
+では、索引付けのルーチンを試す関数を定義しましょう。
+出力を[図14.1](#f0010)と見比べてください。
 
 ```lisp
 (defun test-index ()
@@ -714,9 +714,9 @@ Compare the output with [figure 14.1](#f0010).
   NIL (0)))
 ```
 
-The next step is to fetch matches from the dtree data base.
-The function `fetch` takes a query, which must be a valid relation, as its argument, and returns a list of possible matches.
-It calls `dtree-fetch` to do the work:
+次の段は、dtreeのデータベースから一致するものを取ってくることです。
+関数 `fetch` は、正しい関係でなければならない問い合わせを引数に取り、一致しうるものの並びを返します。
+実際の作業は `dtree-fetch` を呼んで行わせます。
 
 ```lisp
 (defun fetch (query)
@@ -726,23 +726,23 @@ It calls `dtree-fetch` to do the work:
                nil 0 nil most-positive-fixnum))
 ```
 
-`dtree-fetch` must be passed the query and the dtree, of course, but it is also passed four additional arguments.
-First, we have to accumulate matches indexed under variables as we are searching through the dtree.
-So two arguments are used to pass the actual matches and a count of their total number.
-Second, we want `dtree-fetch` to return the shortest possible index, so we pass it the shortest answer found so far, and the size of the shortest answer.
-That way, as it is making its way down the tree, accumulating values indexed under variables, it can be continually comparing the size of the evolving answer with the best answer found so far.
+`dtree-fetch` にはもちろん問い合わせとdtreeを渡しますが、さらに4つの引数も渡します。
+第一に、dtreeを探していくあいだ、変数の下に索引付けされた一致するものを溜めていかねばなりません。
+そのため、実際に一致したものと、その総数を渡すのに2つの引数を使います。
+第二に、`dtree-fetch` にはできるだけ短い索引を返してほしいので、ここまでに見つかったもっとも短い答えと、その大きさを渡します。
+そうすれば、木を下りながら変数の下に索引付けされた値を溜めていくあいだ、育ちつつある答えの大きさを、ここまでの最良の答えと絶えず比べられます。
 
-We could use nlists to pass around count/values pairs, but nlists only support a push operation, where one new item is added.
-We need to append together lists of values coming from the variable indices with values indexed under an atom.
-Append is expensive, so instead we make a list-of-lists and keep the count in a separate variable.
-When we are done, `dtree-fetch` and hence `fetch` does a multiple-value return, yielding the list-of-lists and the total count.
+個数と値の対を引き回すのにnlistを使ってもよいのですが、nlistは新しい項目を1つ加えるpushの操作しか支えていません。
+私たちは、変数の索引から来る値の並びと、アトムの下に索引付けされた値とをつなぎ合わせる必要があります。
+appendは高くつくので、代わりにリストのリストを作り、個数は別の変数に保ちます。
+終わったら、`dtree-fetch` と、したがって `fetch` は多値を返し、リストのリストと総数を渡します。
 
-There are four cases to consider in `dtree-fetch.` If the dtree is null or the query pattern is either null or a variable, then nothing will be indexed, so we should just return the best answer found so far.
-Otherwise, we bind `var-n` and `var-list` to the count and list-of-lists of variable matches found so far, including at the current node.
-If the count `var-n` is greater than the best count so far, then there is no sense continuing, and we return the best answer found.
-Otherwise we look at the query pattern.
-If it is an atom, we use `dtree-atom-fetch` to return either the current index (along with the accumulated variable index) or the accumulated best answer, whichever is shorter.
-If the query is a cons, then we use `dtree-fetch` on the first part of the cons, yielding a new best answer, which is passed along to the call of `dtree-fetch` on the rest of the cons.
+`dtree-fetch` では考えるべき場合が4つあります。dtreeがnullであるか、問い合わせのパターンがnullか変数であれば、何も索引付けされていないので、ここまでの最良の答えをそのまま返せばよい。
+そうでなければ、`var-n` と `var-list` を、現在の節点も含めてここまでに見つかった変数一致の個数とリストのリストに束縛します。
+個数 `var-n` がここまでの最良の個数より大きければ、続ける意味はないので、見つかった最良の答えを返します。
+そうでなければ問い合わせのパターンを見ます。
+それがアトムなら、`dtree-atom-fetch` を使って、現在の索引（溜めてきた変数の索引を添えたもの）か、溜めてきた最良の答えかの、短いほうを返します。
+問い合わせがコンスなら、そのfirstの部分に `dtree-fetch` を使い、新しい最良の答えを得て、それをrestの部分への `dtree-fetch` の呼び出しへ引き継ぎます。
 
 ```lisp
 (defun dtree-fetch (pat dtree var-list-in var-n-in best-list best-n)
@@ -778,8 +778,8 @@ If the query is a cons, then we use `dtree-fetch` on the first part of the cons,
       (t (values best-list best-n)))))
 ```
 
-Here we see a call to `fetch` on the data base created by `test-index`.
-It returns two values: a list-of-lists of facts, and the total number of facts, three.
+次に、`test-index` が作ったデータベースに `fetch` を呼ぶようすを示します。
+返るのは2つの値、事実のリストのリストと、事実の総数である3です。
 
 ```lisp
 (fetch '(p ? c))
@@ -788,15 +788,15 @@ It returns two values: a list-of-lists of facts, and the total number of facts, 
 3
 ```
 
-Now let's stop and see what we have accomplished.
-The functions `fetch and dtree-fetch` fulfill their contract of returning potential matches.
-However, we still need to integrate the dtree facility with Prolog.
-We need to go through the potential matches and determine which candidates are actual matches.
-For simplicity we will use the version of `unify` with binding lists defined in [section 11.2](chapter11.md#s0020).
-(It is also possible to construct a more efficient version that uses the compiler and the destructive function `unify!`.)
+ここでいったん立ち止まり、何を成し遂げたかを見てみましょう。
+関数 `fetch and dtree-fetch` は、一致しうるものを返すという約束を果たしています。
+しかし、dtreeの仕掛けをPrologと統合する作業がまだ残っています。
+一致しうるものを順に見て、どの候補が実際に一致するのかを見定めねばなりません。
+話を簡単にするため、[11.2節](chapter11.md#s0020)で定義した、束縛の並びを使う `unify` の版を用います。
+（コンパイラと破壊的な関数 `unify!` を使う、より効率のよい版を組み立てることもできます。）
 
-The function `mapc-retrieve` calls `fetch` to get a list-of-lists of potential matches and then calls `unify` to see if the match is a true one.
-If the match is true, it calls the supplied function with the binding list that represents the unification as the argument, `mapc-retrieve` is proclaimed `inline` so that functions passed to it can also be compiled in place.
+関数 `mapc-retrieve` は `fetch` を呼んで一致しうるもののリストのリストを得てから、`unify` を呼んでその一致が本物かどうかを調べます。
+一致が本物なら、その単一化を表す束縛の並びを引数として、与えられた関数を呼びます。`mapc-retrieve` は `inline` と宣言してあり、これに渡された関数もその場でコンパイルされるようにしています。
 
 ```lisp
 (proclaim '(inline mapc-retrieve))
@@ -811,8 +811,8 @@ If the match is true, it calls the supplied function with the binding list that 
           (funcall fn bindings))))))
 ```
 
-There are many ways to use this retriever.
-The function `retrieve` returns a list of the matching binding lists, and `retrieve-matches` substitutes each binding list into the original query so that the result is a list of expressions that unify with the query.
+この取り出し器の使い道はいくつもあります。
+関数 `retrieve` は一致した束縛の並びの並びを返し、`retrieve-matches` は各束縛の並びを元の問い合わせに代入して、問い合わせと単一化する式の並びを結果とします。
 
 ```lisp
 (defun retrieve (query)
@@ -829,12 +829,12 @@ The function `retrieve` returns a list of the matching binding lists, and `retri
           (retrieve query)))
 ```
 
-There is one further complication to consider.
-Recall that in our original Prolog interpreter, the function prove had to rename the variables in each clause as it retrieved it from the data base.
-This was to insure that there was no conflict between the variables in the query and the variables in the clause.
-We could do that in `retrieve`.
-However, if we assume that the expressions indexed in discrimination trees are tablelike rather than rulelike and thus are not recursive, then we can get away with renaming the variables only once, when they are entered into the data base.
-This is done by changing `index`:
+もう1つ考えておくべき込み入った点があります。
+もとのPrologインタプリタでは、関数 prove がデータベースから節を取り出すたびに、その節の変数を改名しなければならなかったことを思い出してください。
+問い合わせの変数と節の変数が衝突しないようにするためでした。
+それを `retrieve` で行うこともできます。
+しかし、判別木に索引付けされる式は規則のようなものではなく表のようなものであり、したがって再帰的ではないと仮定するなら、変数の改名はデータベースに入れるときの一度きりで済ませられます。
+これは `index` を変えることで行います。
 
 ```lisp
 (defun index (key)
@@ -844,7 +844,7 @@ This is done by changing `index`:
      (get-dtree (predicate key))))
 ```
 
-With the new `index` in place, and after calling `test-index` to rebuild the data base, we are now ready to test the retrieval mechanism:
+新しい `index` を置き、`test-index` を呼んでデータベースを組み立てなおせば、取り出しの仕組みを試す準備が整います。
 
 ```lisp
 > (fetch '(p ?x c))
@@ -861,12 +861,12 @@ With the new `index` in place, and after calling `test-index` to rebuild the dat
 ((P A (?FN C)) (P A (F C)) (P B (F C)))
 ```
 
-Actually, it is better to use `mapc-retrieve` when possible, since it doesn't cons up answers the way `retrieve` and `retrieve-matches` do.
-The macro `query-bind` is provided as a nice interface to `mapc-retrieve`.
-The macro takes as arguments a list of variables to bind, a query, and one or more forms to apply to each retrieved answer.
-Within this list of forms, the variables will be bound to the values that satisfy the query.
-The syntax was chosen to be the same as `multiple-value-bind`.
-Here we see a typical use of `query-bind`, its result, and its macro-expansion:
+実のところ、できるときは `mapc-retrieve` を使うほうがよいでしょう。`retrieve` や `retrieve-matches` と違って、答えをコンスで組み立てないからです。
+`mapc-retrieve` への具合のよい窓口として、マクロ `query-bind` を用意します。
+このマクロは、束縛する変数の並び、問い合わせ、そして取り出された各答えに適用する1つ以上の形式を引数に取ります。
+その形式の並びのなかでは、変数は問い合わせを満たす値に束縛されます。
+構文は `multiple-value-bind` と同じになるよう選びました。
+次に `query-bind` の典型的な使い方と、その結果、そしてマクロ展開を示します。
 
 ```lisp
 > (query-bind (?x ?fn) '(p ?x (?fn c))
@@ -883,7 +883,7 @@ NIL
   '(p ?x (?fn c)))
 ```
 
-Here is the implementation:
+実装は次のとおりです。
 
 ```lisp
 (defmacro query-bind (variables query &body body)
@@ -902,17 +902,17 @@ Here is the implementation:
        ,query)))
 ```
 
-## 14.9 A Solution to the Completeness Problem
+## 14.9 完全性の問題への解
 
-We saw in [chapter 6](chapter6.md) that iterative deepening is an efficient way to cover a search space without falling into an infinite loop.
-Iterative deepening can also be used to guide the search in Prolog.
-It will insure that all valid answers are found eventually, but it won't turn an infinite search space into a finite one.
+[第6章](chapter6.md)で、反復深化が無限ループに陥ることなく探索空間を覆う効率のよいやり方だと見ました。
+反復深化は、Prologでの探索を導くのにも使えます。
+これによって、正しい答えはいずれすべて見つかることが保証されます。ただし、無限の探索空間が有限になるわけではありません。
 
-In the interpreter, iterative deepening is implemented by passing an extra argument to `prove` and `prove-all` to indicate the depth remaining to be searched.
-When that argument is zero, the search is cut off, and the proof fails.
-On the next iteration the bounds will be increased and the proof may succeed.
-If the search is never cut off by a depth bound, then there is no reason to go on to the next iteration, because all proofs have already been found.
-The special variable `*search-cut-off*` keeps track of this.
+インタプリタでは、反復深化は `prove` と `prove-all` に、あと探せる深さを示す引数を1つ余分に渡すことで実装します。
+その引数が0になると探索は打ち切られ、証明は失敗します。
+次の繰り返しでは限度が引き上げられ、証明が成功するかもしれません。
+深さの限度によって探索が一度も打ち切られなかったなら、次の繰り返しへ進む理由はありません。証明はすでにすべて見つかっているからです。
+特殊変数 `*search-cut-off*` がこれを記録します。
 
 ```lisp
 (defvar *search-cut-off* nil "Has the search been stopped?")
@@ -946,9 +946,9 @@ The special variable `*search-cut-off*` keeps track of this.
                      other-goals depth)))))   ;***
 ```
 
-`prove` and `prove-all` now implement search cutoff, but we need something to control the iterative deepening of the search.
-First we define parameters to control the iteration: one for the initial depth, one for the maximum depth, and one for the increment between iterations.
-Setting the initial and increment values to one will make the results come out in strict breadth-first order, but will duplicate more effort than a slightly larger value.
+これで `prove` と `prove-all` は探索の打ち切りを実装しましたが、探索の反復深化を制御する何かが必要です。
+まず繰り返しを制御する引数を定義します。最初の深さ、最大の深さ、そして繰り返しごとの増分の3つです。
+最初の値と増分を1にすれば結果は厳密に幅優先の順で出てきますが、少し大きな値にした場合より無駄な手間が増えます。
 
 ```lisp
 (defparameter *depth-start* 5
@@ -959,9 +959,9 @@ Setting the initial and increment values to one will make the results come out i
   "The deepest we will ever search.")
 ```
 
-A new version of `top-level-prove` will be used to control the iteration.
-It calls `prove-all` for all depths from the starting depth to the maximum depth, increasing by the increment.
-However, it only proceeds to the next iteration if the search was cut off at some point in the previous iteration.
+繰り返しの制御には、新しい版の `top-level-prove` を使います。
+これは、始めの深さから最大の深さまで、増分ずつ増やしながら `prove-all` を呼びます。
+ただし次の繰り返しへ進むのは、前の繰り返しのどこかで探索が打ち切られた場合だけです。
 
 ```lisp
 (defun top-level-prove (goals)
@@ -975,9 +975,9 @@ However, it only proceeds to the next iteration if the search was cut off at som
   (values))
 ```
 
-There is one final complication.
-When we increase the depth of search, we may find some new proofs, but we will also find all the old proofs that were found on the previous iteration.
-We can modify `show-prolog-vars` to only print proofs that are found with a depth less than the increment-that is, those that were not found on the previous iteration.
+最後にもう1つ込み入った点があります。
+探索の深さを増やすと新しい証明が見つかるかもしれませんが、前の繰り返しで見つかった古い証明もすべて見つかってしまいます。
+`show-prolog-vars` を変えて、増分より小さい深さで見つかった証明、つまり前の繰り返しでは見つからなかった証明だけを表示するようにできます。
 
 ```lisp
 (defun show-prolog-vars (vars bindings other-goals depth)
@@ -996,8 +996,8 @@ We can modify `show-prolog-vars` to only print proofs that are found with a dept
             (prove-all other-goals bindings depth)))))
 ```
 
-To test that this works, try setting `*depth-max*` to 5 and running the following assertions and query.
-The infinite loop is avoided, and the first four solutions are found.
+これがうまく働くかを試すには、`*depth-max*` を5にして次の表明と問い合わせを走らせてみてください。
+無限ループは避けられ、最初の4つの解が見つかります。
 
 ```lisp
 (<- (natural 0))
@@ -1011,50 +1011,50 @@ The infinite loop is avoided, and the first four solutions are found.
 No.
 ```
 
-## 14.10 Solutions to the Expressiveness Problems
+## 14.10 表現力の問題への解
 
-In this section we present solutions to three of the limitations described above:
+本節では、先に述べた限界のうち3つへの解を示します。
 
-*   Treatment of (limited) higher-order predications.
+*   （限定的な）高階の述語の扱い。
 
-*   Introduction of a frame-based syntax.
+*   フレームにもとづく構文の導入。
 
-*   Support for possible worlds, negation, and disjunction.
+*   可能世界・否定・選言への対応。
 
-We also introduce a way to attach functions to predicates to do forward-chaining and error detection, and we discuss ways to extend unification to handle Skolem constants and other problems.
+また、前向き連鎖と誤りの検出を行うために述語へ関数を付ける方法を導入し、スコーレム定数などの問題を扱えるよう単一化を拡張するやり方についても論じます。
 
-### Higher-Order Predications
+### 高階の述語
 
-First we will tackle the problem of answering questions like "What kinds of animals are there?"
-Paradoxically, the key to allowing more expressiveness in this case is to invent a new, more limited language and insist that all assertions and queries are made in that language.
-That way, queries that would have been higher-order in the original language become first-order in the restricted language.
+まず「どんな種類の動物がいるか」といった問いに答える問題に取りかかります。
+逆説的ですが、この場合により大きな表現力を許す鍵は、新しく、より制限された言語をこしらえ、すべての表明と問い合わせをその言語で行うよう求めることです。
+そうすれば、もとの言語では高階だった問い合わせが、制限された言語では一階になります。
 
-The language admits three types of objects: *categories, relations*, and *individuals.* A category corresponds to a one-place predicate, a relation to a two-place predicate, and an individual to constant, or zero-place predicate.
-Statements in the language must have one of five primitive operators: `sub, rel, ind, val`, and `and.` They have the following form:
+この言語は3種類の対象を認めます。*区分*、*関係*、*個体*です。区分は1引数の述語に、関係は2引数の述語に、個体は定数すなわち0引数の述語に対応します。
+この言語の文は、5つの基本演算子 `sub, rel, ind, val`、`and` のいずれかを持たねばなりません。形は次のとおりです。
 
-`(sub` *subcategory super category*)
+`(sub` *下位区分 上位区分*)
 
-`(rel` *relation domain-category range-category*)
+`(rel` *関係 定義域の区分 値域の区分*)
 
-`(ind` *individual category*)
+`(ind` *個体 区分*)
 
-`(val` *relation individual value*)
+`(val` *関係 個体 値*)
 
-`(and` *assertion...*)
+`(and` *表明...*)
 
-The following table gives some examples, along with English translations:
+次の表に、日本語の言い換えを添えた例をいくつか挙げます。
 
 | []()                         |                                                                |
 |------------------------------|----------------------------------------------------------------|
-| `(sub dog animal)`           | Dog is a kind of animal.                                       |
-| `(rel birthday animal date)` | The birthday relation holds between each animal and some date. |
-| `(ind fido dog)`             | The individual Fido is categorized as a dog.                   |
-| `(val birthday fido july-1)` | The birthday of Fido is July-1.                                |
-| `(and` *A B*`)`              | Both *A* and *B* are true.                                     |
+| `(sub dog animal)`           | 犬は動物の一種である。                                         |
+| `(rel birthday animal date)` | birthdayの関係は、各動物とある日付とのあいだに成り立つ。       |
+| `(ind fido dog)`             | 個体Fidoは犬に区分される。                                     |
+| `(val birthday fido july-1)` | Fidoの誕生日は7月1日である。                                   |
+| `(and` *A B*`)`              | *A* と *B* の両方が真である。                                  |
 
-For those who feel more comfortable with predicate calculus, the following table gives the formal definition of each primitive.
-The most complicated definition is for rel.
-The form (rel *R A B*) means that every *R* holds between an individual of *A* and an individual of *B,* and furthermore that every individual of *A* participates in at least one *R* relation.
+述語論理のほうがしっくりくる方のために、次の表に各基本要素の形式的な定義を挙げます。
+もっとも込み入っているのは rel の定義です。
+形式 (rel *R A B*) は、どの *R* も *A* の個体と *B* の個体のあいだに成り立ち、さらに *A* のどの個体も少なくとも1つの *R* の関係に加わっている、ということを意味します。
 
 | []()             |                                                                                                                    |
 |------------------|--------------------------------------------------------------------------------------------------------------------|
@@ -1064,18 +1064,18 @@ The form (rel *R A B*) means that every *R* holds between an individual of *A* a
 | `(val` *RIV*)    | *R*(*I, V*)                                                                                                        |
 | `(and` *P Q...*) | *P ^ Q...*                                                                                                         |
 
-Queries in the language, not surprisingly, have the same form as assertions, except that they may contain variables as well as constants.
-Thus, to find out what kinds of animals there are, use the query `(sub ?kind animal)`.
-To find out what individual animals there are, use the query `(ind ?x animal)`.
-To find out what individual animals of what kinds there are, use:
+この言語での問い合わせは、驚くにはあたりませんが、定数だけでなく変数も含みうる点を除けば表明と同じ形です。
+ですから、どんな種類の動物がいるかを知るには問い合わせ `(sub ?kind animal)` を使います。
+どんな個々の動物がいるかを知るには問い合わせ `(ind ?x animal)` を使います。
+どんな種類のどんな個々の動物がいるかを知るには、次を使います。
 
 ```lisp
 (and (sub ?kind animal) (ind ?x ?kind))
 ```
 
-The implementation of this new language can be based directly on the previous implementation of dtrees.
-Each assertion is stored as a fact in a dtree, except that the components of an `and` assertion are stored separately.
-The function `add-fact` does this:
+この新しい言語の実装は、先のdtreeの実装をそのまま土台にできます。
+各表明はdtreeのなかに事実として格納されます。ただし `and` の表明の構成要素は別々に格納されます。
+関数 `add-fact` がこれを行います。
 
 ```lisp
 (defun add-fact (fact)
@@ -1085,8 +1085,8 @@ The function `add-fact` does this:
       (index fact)))
 ```
 
-Querying this new data base consists of querying the dtree just as before, but with a special case for conjunctive (and) queries.
-Conceptually, the function to do this, `retrieve-fact`, should be as simple as the following:
+この新しいデータベースへの問い合わせは、これまでどおりdtreeへ問い合わせることに尽きますが、連言（and）の問い合わせだけは別扱いです。
+考え方のうえでは、これを行う関数 `retrieve-fact` は次のように簡単なはずです。
 
 ```lisp
 (defun retrieve-fact (query)
@@ -1097,21 +1097,21 @@ Conceptually, the function to do this, `retrieve-fact`, should be as simple as t
   (retrieve query bindings)))
 ```
 
-Unfortunately, there are some complications.
-Think about what must be done in `retrieve-conjunction`.
-It is passed a list of conjuncts and must return a list of binding lists, where each binding list satisfies the query.
-For example, to find out what people were born on July 1st, we could use the query:
+あいにく、込み入った点がいくつかあります。
+`retrieve-conjunction` で何をせねばならないかを考えてみてください。
+これには連言の項の並びが渡され、束縛の並びの並びを返さねばなりません。各束縛の並びは問い合わせを満たすものです。
+たとえば7月1日生まれの人を知るには、次の問い合わせが使えます。
 
 ```lisp
 (and (val birthday ?p july-1) (ind ?p person))
 ```
 
-`retrieve-conjunction` could solve this problem by first calling `retrieve-fact` on `(val birthday ?p july-1)`.
-Once that is done, there is only one conjunct remaining, but in general there could be several, so we need to call `retrieve-conjunction` recursively with two arguments: the remaining conjuncts, and the result that `retrieve-fact` gave for the first solution.
-Since `retrieve-fact` returns a list of binding lists, it will be easiest if `retrieve-conjunction` accepts such a list as its second argument.
-Furthermore, when it comes time to call `retrieve-fact` on the second conjunct, we will want to respect the bindings set up by the first conjunct.
-So `retrieve-fact` must accept a binding list as its second argument.
-Thus we have:
+`retrieve-conjunction` は、まず `(val birthday ?p july-1)` に `retrieve-fact` を呼ぶことでこの問題を解けます。
+それが済めば残る項は1つだけですが、一般には複数ありえます。ですから `retrieve-conjunction` を、残りの項と、最初の解について `retrieve-fact` が返した結果という2つの引数で再帰的に呼ぶ必要があります。
+`retrieve-fact` は束縛の並びの並びを返すので、`retrieve-conjunction` がそうした並びを第2引数として受け取るのがいちばん楽でしょう。
+さらに、2つ目の項に `retrieve-fact` を呼ぶ段になったら、1つ目の項が作った束縛を尊重したいところです。
+ですから `retrieve-fact` も束縛の並びを第2引数として受け取らねばなりません。
+そこで次のようになります。
 
 ```lisp
 (defun retrieve-fact (query &optional (bindings no-bindings))
@@ -1134,9 +1134,9 @@ Thus we have:
     bindings-lists))
 ```
 
-Notice that `retrieve` and therefore `mapc-retrieve` now also must accept a binding list.
-The changes to them are shown in the following.
-In each case the extra argument is made optional so that previously written functions that call these functions without passing in the extra argument will still work.
+`retrieve` も、したがって `mapc-retrieve` も、束縛の並びを受け取らねばならなくなることに注目してください。
+それらへの変更を次に示します。
+いずれの場合も、余分な引数は省略可能にしてあります。そうすれば、その引数を渡さずにこれらを呼ぶ、これまでに書いた関数もそのまま働きます。
 
 ```lisp
 (defun mapc-retrieve (fn query &optional (bindings no-bindings))
@@ -1156,8 +1156,8 @@ In each case the extra argument is made optional so that previously written func
     answers))
 ```
 
-Now `add-fact` and `retrieve-fact` comprise all we need to implement the language.
-Here is a short example where `add-fact` is used to add facts about bears and dogs, both as individuals and as species:
+これで `add-fact` と `retrieve-fact` が、この言語を実装するのに必要なすべてになります。
+次に、`add-fact` を使ってクマと犬について、個体としても種としても事実を加える短い例を示します。
 
 ```lisp
 > (add-fact '(sub dog animal)) => T
@@ -1170,9 +1170,9 @@ Here is a short example where `add-fact` is used to add facts about bears and do
 > (add-fact '(val latin-name dog canis-familiaris)) => T
 ```
 
-Now `retrieve-fact` is used to answer three questions: What kinds of animals are there?
-What are the Latin names of each kind of animal?
-and What are the colors of each individual bear?
+次に `retrieve-fact` を使って3つの問いに答えます。どんな種類の動物がいるか。
+それぞれの種類の動物のラテン名は何か。
+そして、個々のクマの色は何か。
 
 ```lisp
 > (retrieve-fact '(sub ?kind animal))
@@ -1186,11 +1186,11 @@ and What are the colors of each individual bear?
 (((?C . BROWN) (?X . YOGI)))
 ```
 
-### Improvements
+### 改良
 
-There are quite a few improvements that can be made to this system.
-One direction is to provide different kinds of answers to queries.
-The following two functions are similar to `retrieve-matches` in that they return lists of solutions that match the query, rather than lists of possible bindings:
+このシステムには、施せる改良がかなりあります。
+1つの方向は、問い合わせに対して違う種類の答えを用意することです。
+次の2つの関数は、束縛の候補の並びではなく問い合わせに一致する解の並びを返すという点で、`retrieve-matches` に似ています。
 
 ```lisp
 (defun retrieve-bagof (query)
@@ -1205,22 +1205,22 @@ The following two functions are similar to `retrieve-matches` in that they retur
   (remove-duplicates (retrieve-bagof query) :test #'equal))
 ```
 
-Another direction to take is to provide better error checking.
-The current system does not complain if a fact or query is ill-formed.
-It also relies on the user to input all facts, even those that could be derived automatically from the semantics of existing facts.
-For example, the semantics of `sub` imply that if `(sub bear animal)` and `(sub polar-bear bear)` are true, then `(sub polar-bear animal)` must also be true.
-This kind of implication can be handled in two ways.
-The typical Prolog approach would be to write rules that derive the additional `sub` facts by backward-chaining.
-Then every query would have to check if there were rules to run.
-The alternative is to use a *forward-chaining* approach, which caches each new `sub` fact by adding it to the data base.
-This latter alternative takes more storage, but because it avoids rederiving the same facts over and over again, it tends to be faster.
+もう1つの方向は、誤りの検査を手厚くすることです。
+いまのシステムは、事実や問い合わせの形が崩れていても文句を言いません。
+また、既存の事実の意味論から自動的に導けるものまで含め、すべての事実を利用者が入力することを当てにしています。
+たとえば `sub` の意味論からすれば、`(sub bear animal)` と `(sub polar-bear bear)` が真なら、`(sub polar-bear animal)` も真でなければなりません。
+この種の含意は2通りに扱えます。
+典型的なPrologの方式は、後ろ向き連鎖によって追加の `sub` の事実を導く規則を書くことです。
+そうすると、どの問い合わせも走らせるべき規則があるかを調べねばなりません。
+もう一方は*前向き連鎖*の方式で、新しい `sub` の事実をデータベースに加えて覚えておきます。
+後者のほうが記憶を多く使いますが、同じ事実を何度も導きなおさずに済むぶん、速くなりがちです。
 
-The following version of `add-fact` does error checking, and it automatically caches facts that can be derived from existing facts.
-Both of these things are done by a set of functions that are attached to the primitive operators.
-It is done in a data-driven style to make it easier to add new primitives, should that become necessary.
+次に示す `add-fact` の版は誤りの検査を行い、既存の事実から導ける事実を自動的に覚えておきます。
+どちらも、基本演算子に付けた一連の関数によって行われます。
+新しい基本要素を加える必要が出たときに楽になるよう、データ駆動の様式で書いてあります。
 
-The function `add-fact` checks that each argument to a primitive relation is a nonvariable atom, and it also calls `fact-present-p` to check if the fact is already present in the data base.
-If not, it indexes the fact and calls `run-attached-fn` to do additional checking and caching:
+関数 `add-fact` は、基本の関係への各引数が変数でないアトムかを調べ、さらに `fact-present-p` を呼んで、その事実がすでにデータベースにあるかを調べます。
+なければ、その事実を索引付けし、追加の検査と記憶のために `run-attached-fn` を呼びます。
 
 ```lisp
 (defparameter *primitives* '(and sub ind rel val))
@@ -1241,7 +1241,7 @@ If not, it indexes the fact and calls `run-attached-fn` to do additional checkin
   (retrieve fact))
 ```
 
-The attached functions are stored on the operator's property list under the indicator `attached-fn`:
+付けた関数は、演算子の属性リストに指標 `attached-fn` の下で格納します。
 
 ```lisp
 (defun run-attached-fn (fact)
@@ -1254,10 +1254,10 @@ The attached functions are stored on the operator's property list under the indi
          #'(lambda ,args .,body)))
 ```
 
-The attached functions for `ind` and `val` are fairly simple.
-If we know `(sub bear animal)`, then when `(ind Yogi bear)` is asserted, we have to also assert `(ind Yogi animal)`.
-Similarly, the values in a `val` assertion must be individuals of the categories in the relation's `rel` assertion.
-That is, if `(rel birthday animal date)` is a fact and `(val birthday Lee july-1)` is added, then we can conclude `(ind Lee animal)` and `(ind july-1 date).` The following functions add the appropriate facts:
+`ind` と `val` に付ける関数は、かなり単純です。
+`(sub bear animal)` を知っているなら、`(ind Yogi bear)` が表明されたときに `(ind Yogi animal)` も表明せねばなりません。
+同じく、`val` の表明に現れる値は、その関係の `rel` の表明にある区分の個体でなければなりません。
+つまり `(rel birthday animal date)` が事実で `(val birthday Lee july-1)` が加えられたなら、`(ind Lee animal)` と `(ind july-1 date)` を結論できます。次の関数が、しかるべき事実を加えます。
 
 ```lisp
 (def-attached-fn ind (individual category)
@@ -1272,9 +1272,9 @@ That is, if `(rel birthday animal date)` is a fact and `(val birthday Lee july-1
     (add-fact `(ind ,ind2 ,?cat2))))
 ```
 
-The attached function for rel simply runs the attached function for any individual of the given relation.
-Normally one would make all `rel` assertions before `ind` assertions, so this will have no effect at all.
-But we want to be sure the data base stays consistent even if facts are asserted in an unusual order.
+rel に付ける関数は、与えられた関係の個体があれば、それに付いた関数を走らせるだけです。
+ふつうは `rel` の表明をすべて `ind` の表明より先に行うので、これはまったく効きません。
+しかし、事実がふつうでない順に表明されても、データベースが筋の通った状態に保たれるようにしておきたいのです。
 
 ```lisp
 (def-attached-fn rel (relation cat1 cat2)
@@ -1283,20 +1283,20 @@ But we want to be sure the data base stays consistent even if facts are asserted
     (run-attached-fn `(ind ,relation ,?a ,?b))))
 ```
 
-The most complicated attached function is for `sub`.
-Adding a fact such as `(sub bear animal)` causes the following to happen:
+もっとも込み入っているのは `sub` に付ける関数です。
+`(sub bear animal)` のような事実を加えると、次のことが起こります。
 
-*   All of `animal`'s supercategories (such as `living-thing)` become supercategories of all of `bear`'s subcategories (such as `polar-bear`).
+*   `animal` の上位区分（`living-thing` など）がすべて、`bear` の下位区分（`polar-bear` など）すべての上位区分になる。
 
-*   `animal` itself becomes a supercategory all of `bear`'s subcategories.
+*   `animal` そのものが、`bear` の下位区分すべての上位区分になる。
 
-*   `bear` itself becomes a subcategory of all of `animal`'s supercategories.
+*   `bear` そのものが、`animal` の上位区分すべての下位区分になる。
 
-*   All of the individuals of `bear` become individuals of `animal` and its supercategories.
+*   `bear` の個体はすべて、`animal` とその上位区分の個体になる。
 
-The following accomplishes these four tasks.
-It does it with four calls to `index-new-fact`, which is used instead of `add-fact` because we don't need to run the attached function on the new facts.
-We do, however, need to make sure that we aren't indexing the same fact twice.
+次のものが、この4つの仕事をこなします。
+`index-new-fact` を4回呼ぶことで行います。`add-fact` ではなくこちらを使うのは、新しい事実に対して付けた関数を走らせる必要がないからです。
+ただし、同じ事実を2度索引付けしないようにする必要はあります。
 
 ```lisp
 (def-attached-fn sub (subcat supercat)
@@ -1319,8 +1319,8 @@ We do, however, need to make sure that we aren't indexing the same fact twice.
     (index fact)))
 ```
 
-The following function tests the attached functions.
-It shows that adding the single fact `(sub bear animal)` to the given data base causes 18 new facts to be added.
+次の関数は、付けた関数を試すものです。
+与えたデータベースに `(sub bear animal)` という事実を1つ加えるだけで、18の新しい事実が加わることがわかります。
 
 ```lisp
 (defun test-bears ()
@@ -1373,15 +1373,15 @@ It shows that adding the single fact `(sub bear animal)` to the given data base 
 (INDEX)
 ```
 
-### A Frame Language
+### フレーム言語
 
-Another direction we can take is to provide an alternative syntax that will be easier to read and write.
-Many representation languages are based on the idea of *frames,* and their syntax reflects this.
-A frame is an object with slots.
-We will continue to use the same data base in the same format, but we will provide an alternative syntax that considers the individuals and categories as frames, and the relations as slots.
+もう1つ取れる方向は、読み書きしやすい別の構文を用意することです。
+多くの表現言語は*フレーム*という考えにもとづいており、その構文にもそれが表れています。
+フレームとは、スロットを持つオブジェクトのことです。
+データベースは同じ形式のまま使い続けますが、個体と区分をフレームと見なし、関係をスロットと見なす別の構文を用意します。
 
-Here is an example of the frame syntax for individuals, which uses the operator `a`.
-Note that it is more compact than the equivalent notation using the primitives.
+次に、演算子 `a` を使う、個体のためのフレーム構文の例を示します。
+基本要素を使う同等の記法より簡潔であることに注目してください。
 
 ```lisp
 (a person (name Joe) (age 27)) =
@@ -1390,9 +1390,9 @@ Note that it is more compact than the equivalent notation using the primitives.
   (val age person1 27))
 ```
 
-The syntax also allows for nested expressions to appear as the values of slots.
-Notice that the Skolem constant `person1` was generated automatically; an alternative is to supply a constant for the individual after the category name.
-For example, the following says that Joe is a person of age 27 whose best friend is a person named Fran who is 28 and whose best friend is Joe:
+この構文では、入れ子になった式をスロットの値として書くこともできます。
+スコーレム定数 `person1` が自動的に作られていることに注目してください。区分の名前のあとに個体の定数を自分で与えることもできます。
+たとえば次は、Joeが27歳の人で、その親友はFranという名の28歳の人であり、その親友はJoeである、と述べています。
 
 ```lisp
 (a person p1 (name Joe) (age 27)
@@ -1404,8 +1404,8 @@ For example, the following says that Joe is a person of age 27 whose best friend
   (val best-friend p1 person2))
 ```
 
-The frame syntax for categories uses the operator `each`.
-For example:
+区分のためのフレーム構文は、演算子 `each` を使います。
+たとえば次のとおりです。
 
 ```lisp
 (each person (isa animal) (name person-name) (age integer)) =
@@ -1414,14 +1414,14 @@ For example:
   (rel age person integer))
 ```
 
-The syntax for queries is the same as for assertions, except that variables are used instead of the Skolem constants.
-This is true even when the Skolem constants are automatically generated, as in the following query:
+問い合わせの構文は表明と同じですが、スコーレム定数の代わりに変数を使います。
+これは、次の問い合わせのようにスコーレム定数が自動的に作られる場合にも当てはまります。
 
 ```lisp
 (a person (age 27)) = (AND (IND ?3 PERSON) (VAL AGE ?3 27))
 ```
 
-To support the frame notation, we define the macros `a` and `each` to make assertions and `??` to make queries.
+フレームの記法を支えるために、表明を作るマクロ `a` と `each`、そして問い合わせを作る `??` を定義します。
 
 ```lisp
 (defmacro a (&rest args)
@@ -1437,14 +1437,14 @@ To support the frame notation, we define the macros `a` and `each` to make asser
      :query)))
 ```
 
-All three of these macros call on `translate-exp` to translate from the frame syntax to the primitive syntax.
-Note that an `a` or `each` expression is computing a conjunction of primitive relations, but it is also computing a *term* when it is used as the nested value of a slot.
-It would be possible to do this by returning multiple values, but it is easier to build `translate-exp` as a set of local functions that construct facts and push them on the local variable `conjuncts`.
-At the end, the list of `conjuncts` is returned as the value of the translation.
-The local functions `translate-a` and `translate-each` return the atom that represents the term they are translating.
-The local function `translate` translates any kind of expression, `translate-slot` handles a slot, and `collect-fact` is responsible for pushing a fact onto the list of conjuncts.
-The optional argument `query-mode-p` tells what to do if the individual is not provided in an `a` expression.
-If `query-mode-p` is true, the individual will be represented by a variable; otherwise it will be a Skolem constant.
+この3つのマクロはいずれも `translate-exp` を呼んで、フレームの構文から基本要素の構文へ変換します。
+`a` や `each` の式は基本の関係の連言を計算していますが、スロットの入れ子の値として使われるときには*項*も計算していることに注意してください。
+これは多値を返すことでもできますが、事実を組み立てて局所変数 `conjuncts` に積んでいく局所関数の集まりとして `translate-exp` を作るほうが楽です。
+最後に、`conjuncts` の並びが変換の値として返されます。
+局所関数 `translate-a` と `translate-each` は、変換している項を表すアトムを返します。
+局所関数 `translate` はどんな種類の式も変換し、`translate-slot` はスロットを扱い、`collect-fact` は事実を連言の並びに積む役目を負います。
+省略可能な引数 `query-mode-p` は、`a` の式で個体が与えられなかったときにどうするかを指示します。
+`query-mode-p` が真なら個体は変数で表され、そうでなければスコーレム定数になります。
 
 ```lisp
 (defun translate-exp (exp &optional query-mode-p)
@@ -1489,7 +1489,7 @@ If `query-mode-p` is true, the individual will be represented by a variable; oth
       (maybe-add 'and (nreverse conjuncts)))))
 ```
 
-The auxiliary functions `maybe-add` and `replace-?-vars` are shown in the following:
+補助的な関数 `maybe-add` と `replace-?-vars` を次に示します。
 
 ```lisp
 (defun maybe-add (op exps &optional if-nil)
@@ -1511,73 +1511,73 @@ The auxiliary functions `maybe-add` and `replace-?-vars` are shown in the follow
           exp))))
 ```
 
-### Possible Worlds: Truth, Negation, and Disjunction
+### 可能世界: 真理、否定、選言
 
-In this section we address four problems: distinguishing `unknown` from `false`, representing negations, representing disjunctions, and representing multiple possible states of affairs.
-It turns out that all four problems can be solved by introducing two new techniques: possible worlds and negated predicates.
-The solution is not completely general, but it is practical in a wide variety of applications.
+本節では4つの問題に取り組みます。`unknown` を `false` と区別すること、否定を表現すること、選言を表現すること、そして複数のありうる事態を表現することです。
+この4つはいずれも、2つの新しい技法、すなわち可能世界と否定された述語を導入することで解けることがわかります。
+この解は完全に一般的とは言えませんが、幅広い応用で実用になります。
 
-There are two basic ways to distinguish unknown from false.
-The first possibility is to store a truth value-`true` or `false`-along with each proposition.
-The second possibility is to include the truth value as part of the proposition.
-There are several syntactic variations on this theme.
-The following table shows the possibilities for the propositions "Jan likes Dean is true" and "Jan likes Ian is false:"
+未知を偽と区別するやり方は、大きく2つあります。
+1つ目は、各命題に真理値、すなわち `true` か `false` を添えて格納することです。
+2つ目は、真理値を命題の一部として含めることです。
+この筋には構文上の変種がいくつかあります。
+次の表は、「JanはDeanが好きだ、は真」と「JanはIanが好きだ、は偽」という命題についての選択肢を示しています。
 
-| Approach | True Prop.                 | False Prop.                |
+| 方式     | 真の命題                   | 偽の命題                   |
 |----------|----------------------------|----------------------------|
 | (1)      | `(likes Jan Dean) -- true` | `(likes Jan Ian) -- false` |
 | (2a)     | `(likes true Jan Dean)`    | `(likes false Jan Ian)`    |
 | (2b)     | `(likes Jan Dean)`         | `(not (likes Jan Dean))`   |
 | (2c)     | `(likes Jan Dean)`         | `(~likes Jan Dean)`        |
 
-The difference between (1) and (2) shows up when we want to make a query.
-With (1), we make the single query `(likes Jan Dean)` (or perhaps `(likes Jan ?x))`, and the answers will tell us who Jan does and does not like.
-With (2), we make one query to find out what liking relationships are true, and another to find out which ones are false.
-In either approach, if there are no responses then the answer is truly unknown.
+(1)と(2)の違いは、問い合わせをしようとするときに現れます。
+(1)では、`(likes Jan Dean)`（あるいは `(likes Jan ?x)`）という1つの問い合わせをすれば、Janが誰を好きで誰を好きでないかが答えからわかります。
+(2)では、どの好意の関係が真かを知るのに1つ、どれが偽かを知るのにもう1つ問い合わせをします。
+どちらの方式でも、応答がなければ答えは本当に未知だということです。
 
-Approach (1) is better for applications where most queries are of the form "Is this sentence true or false?" But applications that include backward-chaining rules are not like this.
-The typical backward-chaining rule says "Conclude X is true if Y is true." Thus, most queries will be of the type "Is Y true?" Therefore, some version of approach (2) is preferred.
+方式(1)は、問い合わせのほとんどが「この文は真か偽か」という形をとる応用に向いています。しかし後ろ向き連鎖の規則を含む応用はそうではありません。
+典型的な後ろ向き連鎖の規則は「Yが真ならXが真だと結論せよ」と述べます。ですから問い合わせのほとんどは「Yは真か」という型になります。したがって方式(2)の何らかの版が好まれます。
 
-Representing true and false opens the door to a host of possible extensions.
-First, we could add multiple truth values beyond the simple "true" and "false." These could be symbolic values like "probably-true" or "false-by-default" or they could be numeric values representing probabilities or certainty factors.
+真と偽を表現できるようにすると、ありうる拡張への扉がいくつも開きます。
+第一に、単なる「真」「偽」を超えて複数の真理値を加えられます。「たぶん真」「既定では偽」といった記号的な値でもよいし、確率や確信度を表す数値でもよいでしょう。
 
-Second, we could introduce the idea of *possible worlds.*
-That is, the truth of a proposition could be unknown in the current world, but true if we assume *p*, and false if we assume *q.*
-In the possible world approach, this is handled by calling the current world *W*, and then creating a new world *W*<sub>1</sub>, which is just like *W* except that *p* is true, and *W*<sub>2</sub>, which is just like *W* except that *q* is true.
-By doing reasoning in different worlds we can make predictions about the future, resolve ambiguities about the current state, and do reasoning by cases.
+第二に、*可能世界*という考えを持ち込めます。
+つまり、ある命題の真偽は現在の世界では未知でも、*p* を仮定すれば真、*q* を仮定すれば偽になりうる、ということです。
+可能世界の方式では、現在の世界を *W* と呼び、*p* が真であること以外は *W* とまったく同じ新しい世界 *W*<sub>1</sub> と、*q* が真であること以外は *W* とまったく同じ *W*<sub>2</sub> を作ることでこれを扱います。
+違う世界のなかで推論を行うことで、未来を予測したり、現在の状態のあいまいさを解いたり、場合分けの推論をしたりできます。
 
-For example, possible worlds allow us to solve Moore's communism/democracy problem ([page 466](#p466)).
-We create two new possible worlds, one where *E* is a democracy and one where it is communist.
-In each world it is easy to derive that there is a democracy next to a communist country.
-The trick is to realize then that the two worlds form a partition, and that therefore the assertion holds in the original "real" world as well.
-This requires an interaction between the Prolog-based tactical reasoning going on within a world and the planning-based strategic reasoning that decides which worlds to consider.
+たとえば可能世界を使えば、Mooreの共産主義／民主主義の問題（[466ページ](#p466)）が解けます。
+新しい可能世界を2つ作ります。*E* が民主主義である世界と、共産主義である世界です。
+どちらの世界でも、共産主義の国の隣に民主主義の国があると導くのは簡単です。
+肝心なのは、その2つの世界が全体を過不足なく分けていること、したがってその表明はもとの「現実の」世界でも成り立つこと、に気づくところです。
+これには、1つの世界のなかで進むPrologにもとづく戦術的な推論と、どの世界を考えるかを決めるプランニングにもとづく戦略的な推論とのやりとりが要ります。
 
-We could also add a *truth maintenance system* (or TMS) to keep track of the assumptions or justifications that lead to each fact being considered true.
-A truth maintenance system can lessen the need to backtrack in a search for a global solution.
-Although truth maintenance systems are an important part of AI programming, they will not be covered in this book.
+さらに*真理維持システム*（TMS）を加えて、各事実が真と見なされるに至った仮定や正当化を記録させることもできます。
+真理維持システムは、全体の解を探すときにバックトラックする必要を減らせます。
+真理維持システムはAIプログラミングの重要な一部ですが、本書では扱いません。
 
-In this section we extend the dtree facility ([section 14.8](#s0045)) to handle truth values and possible worlds.
-With so many options, it is difficult to make design choices.
-We will choose a fairly simple system, one that remains close to the simplicity and speed of Prolog but offers additional functionality when needed.
-We will adopt approach (2c) to truth values, using negated predicates.
-For example, the negated predicate of `likes` is `~likes`, which is pronounced "not likes."
+本節では、真理値と可能世界を扱えるようにdtreeの仕掛け（[14.8節](#s0045)）を拡張します。
+選択肢がこれほど多いと、設計を選ぶのは難しいことです。
+ここではかなり単純なもの、Prologの単純さと速さに近いままで、必要なときには追加の機能を提供するものを選びます。
+真理値については方式(2c)、すなわち否定された述語を使うやり方を採ります。
+たとえば `likes` を否定した述語は `~likes` で、「not likes」と読みます。
 
-We will also provide minimal support for possible worlds.
-Assume that there is always a current world, *W,* and that there is a way to create alternative worlds and change the current world to an alternative one.
-Assertions and queries will always be made with respect to the current world.
-Each fact is indexed by the atoms it contains, just as before.
-The difference is that the facts are also indexed by the current world.
-To support this, we need to modify the notion of the numbered list, or `nlist`, to include a numbered association list, or `nalist`.
-The following is an `nalist` showing six facts indexed under three different worlds: `W0, Wl`, and `W2`:
+可能世界についても、最小限の支えを用意します。
+常に現在の世界 *W* があり、別の世界を作って現在の世界をそちらに変える手立てがあると仮定します。
+表明も問い合わせも、常に現在の世界に関して行われます。
+各事実は、これまでどおり、それが含むアトムによって索引付けされます。
+違うのは、事実が現在の世界によっても索引付けされることです。
+これを支えるには、番号つきのリスト、すなわち `nlist` という考えを、番号つきの連想リスト、すなわち `nalist` を含むように変える必要があります。
+次に示すのは、3つの異なる世界 `W0, Wl`、`W2` の下に索引付けされた6つの事実を示す `nalist` です。
 
 ```lisp
 (6 (W0 #1# #2# #3#) (Wl #4#) (W2 #5# #6#))
 ```
 
-The fetching routine will remain unchanged, but the postfetch processing will have to sort through the nalists to find only the facts in the current world.
-It would also be possible for `fetch` to do this work, but the reasoning is that most facts will be indexed under the "real world," and only a few facts will exist in alternative, hypothetical worlds.
-Therefore, we should delay the effort of sorting through the answers to eliminate those answers in the wrong world-it may be that the first answer fetched will suffice, and then it would have been a waste to go through and eliminate other answers.
-The following changes to `index` and `dtree-index` add support for worlds:
+取ってくるルーチンはそのままですが、取得後の処理では、現在の世界にある事実だけを見つけるためにnalistをふるいにかけねばなりません。
+この仕事を `fetch` にさせることもできますが、考え方としては、事実のほとんどは「現実の世界」の下に索引付けされ、別の仮想的な世界にある事実はごくわずかだろう、ということです。
+ですから、違う世界にある答えを取り除くためにふるいにかける手間は、後回しにすべきです。最初に取ってきた答えで足りるかもしれず、そうなら他の答えを見て回って取り除いたのは無駄になります。
+`index` と `dtree-index` への次の変更が、世界への対応を加えます。
 
 ```lisp
 (defvar *world* 'W0 "The current world used by index and fetch.")
@@ -1602,7 +1602,7 @@ The following changes to `index` and `dtree-index` add support for worlds:
    (nalist-push world value (lookup-atom key dtree)))))
 ```
 
-The new function `nalist-push` adds a value to an nalist, either by inserting the value in an existing key's list or by adding a new key/value list:
+新しい関数 `nalist-push` は、既存のキーの並びに値を差し込むか、新しいキーと値の並びを加えるかして、nalistに値を加えます。
 
 ```lisp
 (defun nalist-push (key val nalist)
@@ -1616,9 +1616,9 @@ The new function `nalist-push` adds a value to an nalist, either by inserting th
       (push (list key val) (cdr nalist)))))
 ```
 
-In the following, `fetch` is used on the same data base created by `test-index`, indexed under the world `W0`.
-This time the result is a list-of-lists of world/values a-lists.
-The count, 3, is the same as before.
+次では、`test-index` が作ったのと同じデータベース、ただし世界 `W0` の下に索引付けされたものに `fetch` を使います。
+今度の結果は、世界と値の連想リストのリストのリストです。
+個数の3は前と同じです。
 
 ```lisp
 >(fetch '(p ?x c))
@@ -1627,28 +1627,28 @@ The count, 3, is the same as before.
 3
 ```
 
-So far, worlds have been represented as symbols, with the implication that different symbols represent completely distinct worlds.
-That doesn't make worlds very easy to use.
-We would like to be able to use worlds to explore alternatives-create a new hypothetical world, make some assumptions (by asserting them as facts in the hypothetical world), and see what can be derived in that world.
-It would be tedious to have to copy all the facts from the real world into each hypothetical world.
+ここまで世界はシンボルとして表されており、違うシンボルはまったく別の世界を表すという含みがありました。
+それでは世界はあまり使いやすくありません。
+世界を使って別の道筋を探れるようにしたいところです。新しい仮想の世界を作り、いくつかの仮定を（その仮想の世界での事実として表明することで）置き、その世界で何が導けるかを見る、というふうにです。
+仮想の世界ごとに、現実の世界のすべての事実を写さねばならないのでは、うんざりします。
 
-An alternative is to establish an inheritance hierarchy among worlds.
-Then a fact is considered true if it is indexed in the current world or in any world that the current world inherits from.
+もう1つの道は、世界のあいだに継承の階層を作ることです。
+そうすれば、ある事実は、現在の世界か、現在の世界が継承しているどれかの世界に索引付けされていれば真と見なせます。
 
-To support inheritance, we will implement worlds as structures with a name field and a field for the list of parents the world inherits from.
-Searching through the inheritance lattice could become costly, so we will do it only once each time the user changes worlds, and mark all the current worlds by setting the `current` field on or off.
-Here is the definition for the world structure:
+継承を支えるため、世界は名前の欄と、継承元の親の並びの欄を持つ構造体として実装します。
+継承の束をたどるのは高くつきかねないので、利用者が世界を切り替えるたびに一度だけ行い、`current` の欄を入／切することで現在の世界すべてに印をつけます。
+世界の構造体の定義は次のとおりです。
 
 ```lisp
 (defstruct (world (:print-function print-world))
   name parents current)
 ```
 
-We will need a way to get from the name of a world to the world structure.
-Assuming names are symbols, we can store the structure on the name's property list.
-The function `get-world` gets the structure for a name, or builds a new one and stores it.
-`get-world` can also be passed a world instead of a name, in which case it just returns the world.
-We also include a definition of the default initial world.
+世界の名前から世界の構造体へたどり着く手立てが要ります。
+名前がシンボルだとすれば、構造体はその名前の属性リストに格納できます。
+関数 `get-world` は名前に対応する構造体を取ってくるか、新しく組み立てて格納します。
+`get-world` には名前の代わりに世界そのものを渡すこともでき、その場合はその世界をそのまま返します。
+既定の初期の世界の定義も添えておきます。
 
 ```lisp
 (defun get-world (name &optional current (parents (list *world*)))
@@ -1663,10 +1663,10 @@ We also include a definition of the default initial world.
   "The current world used by index and fetch.")
 ```
 
-The function `use-world` is used to switch to a new world.
-It first makes the current world and all its parents no longer current, and then makes the new chosen world and all its parents current.
-The function `use-new-world` is more efficient in the common case where you want to create a new world that inherits from the current world.
-It doesn't have to turn any worlds off; it just creates the new world and makes it current.
+関数 `use-world` は新しい世界に切り替えるのに使います。
+まず現在の世界とその親すべてを現在でなくし、次に新しく選んだ世界とその親すべてを現在にします。
+関数 `use-new-world` は、現在の世界から継承する新しい世界を作りたいという、よくある場合により効率よく働きます。
+どの世界も切る必要がなく、新しい世界を作ってそれを現在にするだけです。
 
 ```lisp
 (defun use-world (world)
@@ -1693,7 +1693,7 @@ It doesn't have to turn any worlds off; it just creates the new world and makes 
     (set-world-current parent on/off)))
 ```
 
-We also add a print function for worlds, which just prints the world's name.
+世界のための表示関数も加えます。これは世界の名前を表示するだけです。
 
 ```lisp
 (defun print-world (world &optional (stream t) depth)
@@ -1701,9 +1701,9 @@ We also add a print function for worlds, which just prints the world's name.
   (prin1 (world-name world) stream))
 ```
 
-The format of the dtree data base has changed to include worlds, so we need new retrieval functions to search through this new format.
-Here the functions `mapc-retrieve, retrieve`, and `retrieve-bagof` are modified to give new versions that treat worlds.
-To reflect this change, the new functions all have names ending in -`in-world`:
+dtreeのデータベースの形式は世界を含むように変わったので、この新しい形式をたどる新しい取り出し関数が要ります。
+ここでは関数 `mapc-retrieve, retrieve`、`retrieve-bagof` を変えて、世界を扱う新しい版にします。
+この変更を表すため、新しい関数の名前はいずれも -`in-world` で終わらせます。
 
 ```lisp
 (defun mapc-retrieve-in-world (fn query)
@@ -1730,8 +1730,8 @@ To reflect this change, the new functions all have names ending in -`in-world`:
      (retrieve-in-world query)))
 ```
 
-Now let's see how these worlds work.
-First, in `W0` we see that the facts from `test-index` are still in the data base:
+では、この世界がどう働くかを見てみましょう。
+まず `W0` では、`test-index` の事実がまだデータベースにあることがわかります。
 
 ```lisp
 > *world* => W0
@@ -1740,8 +1740,8 @@ First, in `W0` we see that the facts from `test-index` are still in the data bas
 ((P A C) (P A C) (P B C))
 ```
 
-Now we create and use a new world that inherits from `W0`.
-Two new facts are added to this new world:
+次に `W0` から継承する新しい世界を作って使います。
+この新しい世界に2つの新しい事実を加えます。
 
 ```lisp
 > (use-new-world) => W7031
@@ -1749,7 +1749,7 @@ Two new facts are added to this new world:
 > (index '(~p b b)) => T
 ```
 
-We see that the two new facts are accessible in this world:
+この世界では、その2つの新しい事実に手が届くことがわかります。
 
 ```lisp
 > (retrieve-bagof-in-world '(p ?z c)) =>
@@ -1759,7 +1759,7 @@ We see that the two new facts are accessible in this world:
 ((~P B B))
 ```
 
-Now we create another world as an alternative to the current one by first switching back to the original `W0`, then creating the new world, and then adding some facts:
+次に、現在の世界とは別の道筋としてもう1つ世界を作ります。まずもとの `W0` に戻り、新しい世界を作り、いくつか事実を加えます。
 
 ```lisp
 > (use-world 'W0) => W0
@@ -1768,7 +1768,7 @@ Now we create another world as an alternative to the current one by first switch
 > (index '(~p c newest)) => T
 ```
 
-Here we see that the facts entered in `W7031` are not accessible, but the facts in the new world and in `W0` are:
+ここでは、`W7031` で入れた事実には手が届かないが、新しい世界と `W0` の事実には届くことがわかります。
 
 ```lisp
 > (retrieve-bagof-in-world '(p ?z c)) =>
@@ -1778,104 +1778,104 @@ Here we see that the facts entered in `W7031` are not accessible, but the facts 
 ((~P C NEWEST))
 ```
 
-### Unification, Equality, Types, and Skolem Constants
+### 単一化、等価性、型、スコーレム定数
 
-The lesson of the zebra puzzle in [section 11.4](chapter11.md#s0040) was that unification can be used to lessen the need for backtracking, because an uninstantiated logic variable or partially instantiated term can stand for a whole range of possible solutions.
-However, this advantage can quickly disappear when the representation forces the problem solver to enumerate possible solutions rather than treating a whole range of solutions as one.
-For example, consider the following query in the frame language and its expansion into primitives:
+[11.4節](chapter11.md#s0040)のシマウマのパズルの教訓は、単一化を使えばバックトラックの必要を減らせるということでした。具体化されていない論理変数や、部分的にしか具体化されていない項が、ありうる解のひとまとまりを代表できるからです。
+しかしこの利点は、表現のせいで、解のひとまとまりを1つとして扱うのではなく、ありうる解を1つずつ数え上げることを問題解決器に強いるとき、たちまち消えてしまいます。
+たとえば、フレーム言語での次の問い合わせと、その基本要素への展開を考えてみてください。
 
 ```lisp
 (a person (name Fran))
 = (and (ind ?p person) (val name ?p fran))
 ```
 
-The way to answer this query is to enumerate all individuals `?p` of type `person` and then check the `name` slot of each such person.
-It would be more efficient if `(ind ?p person)` did not act as an enumeration, but rather as a constraint on the possible values of `?p`.
-This would be possible if we changed the definition of variables (and of the unification function) so that each variable had a type associated with it.
-In fact, there are at least three sources of information that have been implemented as constraints on variables terms:
+この問い合わせに答えるには、型が `person` である個体 `?p` をすべて数え上げ、そのそれぞれについて `name` スロットを調べることになります。
+`(ind ?p person)` が数え上げとしてではなく、`?p` がとりうる値への制約として働けば、もっと効率がよいでしょう。
+これは、変数（と単一化の関数）の定義を変えて、各変数に型を結びつければできます。
+実のところ、変数の項への制約として実装されてきた情報の源が、少なくとも3つあります。
 
-*   The type or category of the term.
+*   その項の型あるいは区分。
 
-*   The members or size of a term considered as a set or list.
+*   その項を集合やリストと見たときの要素、あるいは大きさ。
 
-*   Other terms this term is equal or not equal to.
+*   その項が等しい、あるいは等しくない他の項。
 
-Note that with a good solution to the problem of equality, we can solve the problem of Skolem constants.
-The idea is that a regular constant unifies with itself but no other regular constant.
-On the other hand, a Skolem constant can potentially unify with any other constant (regular or Skolem).
-The equality mechanism is used to keep track of each Skolem variable's possible bindings.
+等価性の問題にうまい解が得られれば、スコーレム定数の問題も解けることに注意してください。
+考え方はこうです。ふつうの定数は自分自身とは単一化するが、他のふつうの定数とは単一化しない。
+一方、スコーレム定数は他のどんな定数（ふつうのものでもスコーレムのものでも）とも単一化しうる。
+等価性の仕組みは、各スコーレム変数がとりうる束縛を記録するのに使われます。
 
-## 14.11 History and References
+## 14.11 歴史と参考文献
 
-[Brachman and Levesque (1985)](bibliography.md#bb0115) collect thirty of the key papers in knowledge representation.
-Included are some early approaches to semantic network based ([Quillian 1967](bibliography.md#bb0965)) and logic-based ([McCarthy 1968](bibliography.md#bb0805)) representation.
-Two thoughtful critiques of the ad hoc use of representations without defining their meaning are by [Woods (1975)](bibliography.md#bb1430) and [McDermott (1978)](bibliography.md#bb0820).
-It is interesting to contrast the latter with [McDermott 1987](bibliography.md#bb0825), which argues that logic by itself is not sufficient to solve the problems of AI.
-This argument should not be surprising to those who remember the slogan *logic = algorithm - control.*
+[Brachman and Levesque（1985）](bibliography.md#bb0115)は、知識表現の鍵となる論文を30本集めています。
+そこには意味ネットワークにもとづく表現（[Quillian 1967](bibliography.md#bb0965)）と論理にもとづく表現（[McCarthy 1968](bibliography.md#bb0805)）の初期の方式も含まれています。
+意味を定義しないまま表現をその場しのぎに使うことへの、思慮深い批判が2つあります。[Woods（1975）](bibliography.md#bb1430)と[McDermott（1978）](bibliography.md#bb0820)です。
+後者を[McDermott 1987](bibliography.md#bb0825)と対比してみると興味深いでしょう。こちらは、論理だけではAIの問題を解くのに十分ではないと論じています。
+*論理 = アルゴリズム - 制御*という標語を覚えている方には、この主張は驚きではないはずです。
 
-[Genesereth and Nilsson's textbook (1987)](bibliography.md#bb0455) cover the predicate-calculus-based approach to knowledge representation and AI in general.
-[Ernest Davis (1990)](bibliography.md#bb0275) presents a good overview of the field that includes specialized representations for time, space, qualitative physics, propositional attitudes, and the interaction between agents.
+[Genesereth and Nilssonの教科書（1987）](bibliography.md#bb0455)は、述語論理にもとづく知識表現の方式と、AI全般を扱っています。
+[Ernest Davis（1990）](bibliography.md#bb0275)は、時間・空間・定性物理・命題的態度・行為者どうしのやりとりのための専用の表現を含む、この分野のよい概観を示しています。
 
-Many representation languages focus on the problem of defining descriptions for categories of objects.
-These have come to be known as *term-subsumption languages.*
-Examples include KL-ONE ([Schmolze and Lipkis 1983](bibliography.md#bb1060)) and KRYPTON ([Brachman, Fikes, and Levesque 1983](bibliography.md#bb0120)).
-See [Lakoff 1987](bibliography.md#bb0685) for much more on the problem of categories and prototypes.
+多くの表現言語は、対象の区分についての記述を定義する問題に焦点を当てています。
+これらは*項包摂言語*として知られるようになりました。
+例としてはKL-ONE（[Schmolze and Lipkis 1983](bibliography.md#bb1060)）やKRYPTON（[Brachman, Fikes, and Levesque 1983](bibliography.md#bb0120)）があります。
+区分と原型の問題についてさらに詳しくは[Lakoff 1987](bibliography.md#bb0685)を参照してください。
 
-Hector [Levesque (1986)](bibliography.md#bb0720) points out that the areas Prolog has difficulty with-disjunction, negation, and existentials-all involve a degree of vagueness.
-In his term, they lack *vividness.* A vivid proposition is one that could be represented directly in a picture: the car is blue; she has a martini in her left hand; Albany is the capital of New York.
-Nonvivid propositions cannot be so represented: the car is not blue; she has a martini in one hand; either Albany or New York City is the capital of New York.
-There is interest in separating vivid from nonvivid reasoning, but no current systems are actually built this way.
+Hector [Levesque（1986）](bibliography.md#bb0720)は、Prologが苦手とする領域、すなわち選言・否定・存在が、いずれもある程度のあいまいさを伴うことを指摘しています。
+その言葉で言えば、これらは*鮮明さ*を欠いています。鮮明な命題とは、絵に直に描けるもののことです。その車は青い、その人は左手にマティーニを持っている、オールバニはニューヨークの州都である、といったものです。
+鮮明でない命題はそう描けません。その車は青くない、その人は片手にマティーニを持っている、オールバニかニューヨーク市のどちらかがニューヨークの州都である、といったものです。
+鮮明な推論と鮮明でない推論を分けることには関心が寄せられていますが、実際にそう作られたシステムは現在のところありません。
 
-The possible world approach of [section 14.10](#s0055) was used in the MRS system ([Russell 1985](bibliography.md#bb1020)).
-More recent knowledge representation systems tend to use truth maintenance systems instead of possible worlds.
-This approach was pioneered by [Doyle (1979)](bibliography.md#bb0340) and [McAllester (1982)](bibliography.md#bb0785).
-Doyle tried to change the name to "reason maintenance,' in (1983), but it was too late.
-The version in widest used today is the assumption-based truth maintenance system, or ATMS, developed by de Kleer (1986a,b,c).
-[Charniak et al.
-(1987)](bibliography.md#bb0180) present a complete Common Lisp implementation of a McAllester-style TMS.
+[14.10節](#s0055)の可能世界の方式は、MRSシステム（[Russell 1985](bibliography.md#bb1020)）で使われました。
+より新しい知識表現システムは、可能世界の代わりに真理維持システムを使うことが多くなっています。
+この方式は[Doyle（1979）](bibliography.md#bb0340)と[McAllester（1982）](bibliography.md#bb0785)が切り開きました。
+Doyleは（1983）で名前を「理由維持」に変えようとしましたが、遅すぎました。
+今日もっとも広く使われているのは、de Kleer（1986a,b,c）が開発した仮定にもとづく真理維持システム、すなわちATMSです。
+[Charniak ほか
+（1987）](bibliography.md#bb0180)は、McAllester流のTMSの完全なCommon Lisp実装を示しています。
 
-There is little communication between the logic programming and knowledge representation communities, even though they cover overlapping territory.
-[Colmerauer (1990)](bibliography.md#bb0250) and [Cohen (1990)](bibliography.md#bb0230) describe Logic Programming languages that address some of the issues covered in this chapter.
-Key papers in equality reasoning include Galler and Fisher 1974, [Kornfeld 1983](bibliography.md#bb0645),<a id="tfn14-1"></a><sup>[1](#fn14-1)</sup>
-Jaffar, Lassez, and Maher 1984, and [van Emden and Yukawa 1987](bibliography.md#bb1265).
-[H&ouml;lldobler's book (1987)](bibliography.md#bb0550) includes an overview of the area.
-Papers on extending unification in ways other than equality include [A&iuml;t-Kaci et al.
-1987](bibliography.md#bb0025) and [Staples and Robinson 1988](bibliography.md#bb1125).
-Finally, papers on extending Prolog to cover disjunction and negation (i.e., non-Horn clauses) include [Loveland 1987](bibliography.md#bb0755), [Plaisted 1988](bibliography.md#bb0960), and [Stickel 1988](bibliography.md#bb1200).
+論理プログラミングの世界と知識表現の世界は、重なり合う領域を扱っているにもかかわらず、ほとんど行き来がありません。
+[Colmerauer（1990）](bibliography.md#bb0250)と[Cohen（1990）](bibliography.md#bb0230)は、本章で扱った問題のいくつかに取り組む論理プログラミング言語を述べています。
+等価性の推論の鍵となる論文には、Galler and Fisher 1974、[Kornfeld 1983](bibliography.md#bb0645)、<a id="tfn14-1"></a><sup>[1](#fn14-1)</sup>
+Jaffar, Lassez, and Maher 1984、[van Emden and Yukawa 1987](bibliography.md#bb1265)があります。
+[H&ouml;lldobler の本（1987）](bibliography.md#bb0550)には、この領域の概観が含まれています。
+等価性以外のやり方で単一化を拡張する論文には、[A&iuml;t-Kaci ほか
+1987](bibliography.md#bb0025)と[Staples and Robinson 1988](bibliography.md#bb1125)があります。
+最後に、選言と否定（すなわち非ホーン節）を扱えるようPrologを拡張する論文には、[Loveland 1987](bibliography.md#bb0755)、[Plaisted 1988](bibliography.md#bb0960)、[Stickel 1988](bibliography.md#bb1200)があります。
 
-## 14.12 Exercises
+## 14.12 練習問題
 
-**Exercise  14.1 [m]** Arrange to store dtrees in a hash table rather than on the property list of predicates.
+**練習問題 14.1 [m]** dtreeを述語の属性リストではなくハッシュ表に格納するようにせよ。
 
-**Exercise  14.2 [m]** Arrange to store the `dtree-atoms` in a hash table rather than in an association list.
+**練習問題 14.2 [m]** `dtree-atoms` を連想リストではなくハッシュ表に格納するようにせよ。
 
-**Exercise  14.3 [m]** Change the `dtree` code so that `nil` is used as an atom index.
-Time the performance on an application and see if the change helps or hurts.
+**練習問題 14.3 [m]** `nil` をアトムの索引として使うよう `dtree` のコードを変えよ。
+ある応用で時間を測り、この変更が助けになるか害になるかを見よ。
 
-**Exercise  14.4 [m]** Consider the query `(p a b c d e f g)`.
-If the index under a returns only one or two keys, then it is probably a waste of time for `dtree-fetch` to consider the other keys in the hope of finding a smaller bucket.
-It is certainly a waste if there are no keys at all indexed under `a`.
-Make appropriate changes to `dtree-fetch`.
+**練習問題 14.4 [m]** 問い合わせ `(p a b c d e f g)` を考えよ。
+a の下の索引がキーを1つか2つしか返さないなら、より小さなバケットを見つけようとして `dtree-fetch` が他のキーを調べるのは、おそらく時間の無駄である。
+`a` の下にキーが1つも索引付けされていないなら、間違いなく無駄である。
+`dtree-fetch` にしかるべき変更を加えよ。
 
-**Exercise  14.5 [h]** Arrange to delete elements from a `dtree`.
+**練習問題 14.5 [h]** `dtree` から要素を削除できるようにせよ。
 
-**Exercise  14.6 [h]** Implement iterative-deepening search in the Prolog compiler.
-You will have to change each function to accept the depth as an extra argument, and compile in checks for reaching the maximum depth.
+**練習問題 14.6 [h]** Prologコンパイラに反復深化の探索を実装せよ。
+各関数が深さを余分な引数として受け取るように変え、最大の深さに達したかの検査を組み込む必要がある。
 
-**Exercise  14.7 [d]** Integrate the Prolog compiler with the dtree data base.
-Use the dtrees for predicates with a large number of clauses, and make sure that each predicate that is implemented as a dtree has a Prolog primitive accessing the dtree.
+**練習問題 14.7 [d]** Prologコンパイラをdtreeのデータベースと統合せよ。
+節の数が多い述語にはdtreeを使い、dtreeとして実装した各述語には、そのdtreeにアクセスするPrologの基本手続きを必ず持たせよ。
 
-**Exercise  14.8 [d]** Add support for possible worlds to the Prolog compiler with dtrees.
-This support has already been provided for dtrees, but you will have to provide it for ordinary Prolog rules.
+**練習問題 14.8 [d]** dtreeつきのPrologコンパイラに可能世界への対応を加えよ。
+dtreeについてはすでに用意したが、ふつうのPrologの規則についても用意する必要がある。
 
-**Exercise  14.9 [h]** Integrate the language described in [section 14.10](#s0055) and the frame syntax from [section 14.10](#s0055) with the extended Prolog compiler from the previous exercise.
+**練習問題 14.9 [h]** [14.10節](#s0055)で述べた言語と、[14.10節](#s0055)のフレーム構文を、前問で拡張したPrologコンパイラと統合せよ。
 
-**Exercise  14.10 [d]** Build a strategic reasoner that decides when to create a possible world and does reasoning by cases over these worlds.
-Use it to solve Moore's problem ([page 466](#p466)).
+**練習問題 14.10 [d]** いつ可能世界を作るかを決め、それらの世界にわたって場合分けの推論を行う戦略的な推論器を作れ。
+それを使ってMooreの問題（[466ページ](#p466)）を解け。
 
-## 14.13 Answers
+## 14.13 解答
 
-**Answer 14.1**
+**解答 14.1**
 
 ```lisp
 (let ((dtrees (make-hash-table :test #'eq)))
@@ -1889,8 +1889,8 @@ Use it to solve Moore's problem ([page 466](#p466)).
   (clrhash dtrees)))
 ```
 
-**Answer 14.5** Hint: here is the code for `nlist-delete`.
-Now figure out how to find all the nlists that an item is indexed under.
+**解答 14.5** ヒント。`nlist-delete` のコードを示す。
+ある項目が索引付けされているnlistをすべて見つける方法を考えよ。
 
 ```lisp
 (defun nlist-delete (item nlist)
@@ -1904,4 +1904,4 @@ Now figure out how to find all the nlists that an item is indexed under.
 ----------------------
 
 <a id="fn14-1"></a><sup>[1](#tfn14-1)</sup>
-A commentary on this paper appears in [Elcock and Hoddinott 1986](bibliography.md#bb0360).
+この論文への論評が[Elcock and Hoddinott 1986](bibliography.md#bb0360)にあります。

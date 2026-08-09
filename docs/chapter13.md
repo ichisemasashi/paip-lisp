@@ -1,99 +1,99 @@
-# Chapter 13
-## Object-Oriented Programming
+# 第13章
+## オブジェクト指向プログラミング
 
-The programs in this book cover a wide range of problems.
-It is only natural that a wide range of programming styles have been introduced to attack these problems.
-One style not yet covered that has gained popularity in recent years is called *object-oriented programming*.
-To understand what object-oriented programming entails, we need to place it in the context of other styles.
+本書のプログラムは、広い範囲の問題を扱ってきました。
+それらの問題に立ち向かうために、広い範囲のプログラミングの様式を持ち出してきたのも当然のことです。
+まだ扱っていない様式のうち、近年になって人気を集めているものが*オブジェクト指向プログラミング*と呼ばれるものです。
+オブジェクト指向プログラミングが何を伴うのかを理解するには、それを他の様式との関わりのなかに置いてみる必要があります。
 
-Historically, the first computer programs were written in an *imperative programming* style.
-A program was construed as a series of instructions, where each instruction performs some action: changing the value of a memory location, printing a result, and so forth.
-Assembly language is an example of an imperative language.
+歴史をたどれば、最初の計算機プログラムは*命令型プログラミング*の様式で書かれました。
+プログラムは一連の命令と解され、各命令は何らかの動作を行います。記憶場所の値を変える、結果を表示する、といった具合です。
+アセンブリ言語は命令型言語の例です。
 
-As experience (and ambition) grew, programmers looked for ways of controlling the complexity of programs.
-The invention of subroutines marked the *algorithmic* or *procedural programming* style, a subclass of the imperative style.
-Subroutines are helpful for two reasons: breaking up the problem into small pieces makes each piece easier to understand, and it also makes it possible to reuse pieces.
-Examples of procedural languages are FORTRAN, C, Pascal, and Lisp with `setf`.
+経験（と野心）が増すにつれ、プログラマはプログラムの複雑さを抑える方法を探しました。
+サブルーチンの発明が、命令型の様式の一種である*アルゴリズム的*あるいは*手続き型プログラミング*の様式を画しました。
+サブルーチンが役に立つ理由は2つあります。問題を小さな部品に分ければ各部品が理解しやすくなり、しかも部品を再利用できるようになるからです。
+手続き型言語の例は、FORTRAN、C、Pascal、そして `setf` つきのLispです。
 
-Subroutines are still dependent on global state, so they are not completely separate pieces.
-The use of a large number of global variables has been criticized as a factor that makes it difficult to develop and maintain large programs.
-To eliminate this problem, the *functional programming* style insists that functions access only the parameters that are passed to them, and always return the same result for the same inputs.
-Functional programs have the advantage of being mathematically clean-it is easy to prove properties about them.
-However, some applications are more naturally seen as taking action rather than calculating functional values, and are therefore unnatural to program in a functional style.
-Examples of functional languages are FP and Lisp without `setf`.
+サブルーチンはなお大域的な状態に依存しているので、完全に独立した部品ではありません。
+大量の大域変数を使うことは、大きなプログラムの開発と保守を難しくする要因だと批判されてきました。
+この問題をなくすために、*関数型プログラミング*の様式は、関数が渡された引数だけにアクセスし、同じ入力に対して常に同じ結果を返すことを求めます。
+関数型のプログラムには、数学的にきれいであるという利点があります。その性質を証明するのが簡単なのです。
+しかし応用によっては、関数の値を計算するというより動作を行うものと見るほうが自然で、そのため関数型の様式でプログラムを書くのは不自然になります。
+関数型言語の例は、FPと `setf` なしのLispです。
 
-In contrast to imperative languages are *declarative* languages, which attempt to express "what to do" rather than "how to do it." One type of declarative programming is *rule-based* programming, where a set of rules states how to transform a problem into a solution.
-Examples of rule-based systems are ELIZA and STUDENT.
+命令型言語と対をなすのが*宣言的*言語で、こちらは「どうやるか」ではなく「何をするか」を表そうとします。宣言的プログラミングの一種が*規則にもとづく*プログラミングで、問題を解へと変える方法を規則の集まりが述べます。
+規則にもとづくシステムの例は、ELIZAとSTUDENTです。
 
-An important kind of declarative programming is *logic programming*, where axioms are used to describe constraints, and computation is done by a constructive proof of a goal.
-An example of logic language is Prolog.
+宣言的プログラミングの重要な一種が*論理プログラミング*で、公理を使って制約を書き表し、計算は目標の構成的な証明によって行われます。
+論理型言語の例はPrologです。
 
-*Object-oriented programming* is another way to tame the problem of global state.
-Instead of prohibiting global state (as functional programming does), object-oriented programming breaks up the unruly mass of global state and encapsulates it into small, manageable pieces, or objects.
-This chapter covers the object-oriented approach.
+*オブジェクト指向プログラミング*は、大域的な状態の問題を手なずけるもう1つのやり方です。
+オブジェクト指向プログラミングは、（関数型プログラミングのように）大域的な状態を禁じるのではなく、手に負えない大域的状態のかたまりを分割し、小さくて扱いやすい部品、すなわちオブジェクトのなかに包み込みます。
+本章ではオブジェクト指向の方式を扱います。
 
-## 13.1 Object-Oriented Programming
+## 13.1 オブジェクト指向プログラミング
 
-Object-oriented programming turns the world of computing on its side: instead of viewing a program primarily as a set of actions which manipulate objects, it is viewed as a set of objects that are manipulated by actions.
-The state of each object and the actions that manipulate that state are defined once and for all when the object is created.
-This can lead to modular, robust systems that are easy to use and extend.
-It also can make systems correspond more closely to the "real world," which we humans perceive more easily as being made up of objects rather than actions.
-Examples of object-oriented languages are Simula, C++, and CLOS, the Common Lisp Object System.
-This chapter will first introduce object-oriented programming in general, and then concentrate on the Common Lisp Object System.
+オブジェクト指向プログラミングは、計算の世界を横倒しにします。プログラムを、まずオブジェクトを操作する動作の集まりと見るのではなく、動作によって操作されるオブジェクトの集まりと見るのです。
+各オブジェクトの状態と、その状態を操作する動作は、オブジェクトが作られるときに一度きり定められます。
+これは、使いやすく拡張しやすい、部品化された頑健なシステムにつながりえます。
+また、システムを「現実の世界」により近づけることもできます。私たち人間には、世界は動作ではなくオブジェクトから成っていると捉えるほうがたやすいからです。
+オブジェクト指向言語の例は、Simula、C++、そしてCommon Lisp Object SystemであるCLOSです。
+本章ではまずオブジェクト指向プログラミング全般を紹介し、そのあとCommon Lisp Object Systemに絞って話を進めます。
 
-Many people are promoting object-oriented programming as the solution to the software development problem, but it is hard to get people to agree on just what object-orientation means.
-[Peter Wegner 1987](bibliography.md#bb1355) proposes the following formula as a definition:
+多くの人がオブジェクト指向プログラミングをソフトウェア開発の問題の解決策として推していますが、オブジェクト指向がいったい何を意味するのかで意見をそろえるのは難しいことです。
+[Peter Wegner 1987](bibliography.md#bb1355)は、定義として次の式を提案しています。
 
-*Object-orientation = Objects + Classes + Inheritance*
+*オブジェクト指向 = オブジェクト + クラス + 継承*
 
-Briefly, *objects* are modules that encapsulate some data and operations on that data.
-The idea of *information hiding*-insulating the representation of that data from operations outside of the object-is an important part of this concept.
-*Classes* are groups of similar objects with identical behavior.
-Objects are said to be instances of classes.
-*Inheritance* is a means of defining new classes as variants of existing classes.
-The new class inherits the behavior of the parent class, and the programmer need only specify how the new class is different.
+かいつまんで言えば、*オブジェクト*とは、あるデータとそのデータへの操作を包み込んだ部品です。
+*情報隠蔽*、すなわちそのデータの表現をオブジェクトの外側の操作から隔てるという考えが、この概念の重要な一部です。
+*クラス*とは、同一の振る舞いを持つ、よく似たオブジェクトの集まりです。
+オブジェクトはクラスのインスタンスであると言います。
+*継承*とは、既存のクラスの変種として新しいクラスを定義する手立てです。
+新しいクラスは親クラスの振る舞いを受け継ぎ、プログラマは新しいクラスがどこが違うかを指定するだけで済みます。
 
-The object-oriented style brings with it a new vocabulary, which is summarized in the following glossary.
-Each term will be explained in more detail when it comes up.
+オブジェクト指向の様式は新しい語彙を伴います。それを次の用語集にまとめます。
+各用語は、出てきたときにより詳しく説明します。
 
-*class:* A group of similar objects with identical behavior.
+*クラス（class）:* 同一の振る舞いを持つ、よく似たオブジェクトの集まり。
 
-*class variable:* A variable shared by all members of a class.
+*クラス変数（class variable）:* クラスのすべての成員が共有する変数。
 
-*delegation:* Passing a message from an object to one of its components.
+*委譲（delegation）:* あるオブジェクトから、その構成要素の1つへメッセージを渡すこと。
 
-*generic function:* A function that accepts different types or classes of arguments.
+*総称関数（generic function）:* 異なる型やクラスの引数を受け付ける関数。
 
-*inheritance:* A means of defining new classes as variants of existing classes.
+*継承（inheritance）:* 既存のクラスの変種として新しいクラスを定義する手立て。
 
-*instance:* An instance of a class is an object.
+*インスタンス（instance）:* クラスのインスタンスとはオブジェクトのこと。
 
-*instance variable:* A variable encapsulated within an object.
+*インスタンス変数（instance variable）:* オブジェクトのなかに包み込まれた変数。
 
-*message:* A name for an action.
-Equivalent to generic function.
+*メッセージ（message）:* 動作につけた名前。
+総称関数と同じもの。
 
-*method:* A means of handling a message for a particular class.
+*メソッド（method）:* 特定のクラスについて、メッセージを処理する手立て。
 
-*multimethod:* A method that depends on more than one argument.
+*多重メソッド（multimethod）:* 2つ以上の引数に依存するメソッド。
 
-*multiple inheritance:* Inheritance from more than one parent class.
+*多重継承（multiple inheritance）:* 2つ以上の親クラスからの継承。
 
-*object:* An encapsulation of local state and behavior.
+*オブジェクト（object）:* 局所的な状態と振る舞いを包み込んだもの。
 
-## 13.2 Objects
+## 13.2 オブジェクト
 
-Object-oriented programming, by definition, is concerned with *objects*.
-Any datum that can be stored in computer memory can be thought of as an object.
-Thus, the number 3, the atom `x`, and the string `"hello"` are all objects.
-Usually, however, the term *object* is used to denote a more complex object, as we shall see.
+オブジェクト指向プログラミングは、定義からして*オブジェクト*に関わるものです。
+計算機の記憶に収められるデータであれば、何であれオブジェクトと考えられます。
+したがって、数の3、アトム `x`、文字列 `"hello"` は、いずれもオブジェクトです。
+とはいえ、これから見るように、*オブジェクト*という語はふつう、もっと込み入ったものを指すのに使われます。
 
-Of course, all programming is concerned with objects, and with procedures operating on those objects.
-Writing a program to solve a particular problem will necessarily involve writing definitions for both objects and procedures.
-What distinguishes object-oriented programming is that the primary way of decomposing the problem into modules is based on the objects rather than on the procedures.
-The difference can best be seen with an example.
-Here is a simple program to create bank accounts and keep track of withdrawals, deposits, and accumulation of interest.
-First, the program is written in traditional procedural style:
+もちろん、あらゆるプログラミングがオブジェクトと、そのオブジェクトに働きかける手続きに関わっています。
+ある問題を解くプログラムを書けば、必ずオブジェクトと手続きの両方の定義を書くことになります。
+オブジェクト指向プログラミングを際立たせているのは、問題を部品へと分けるおもな道筋が、手続きではなくオブジェクトにもとづいていることです。
+この違いは、例を見るのがいちばんよくわかります。
+次に示すのは、銀行口座を作り、引き出し・預け入れ・利息の積み立てを記録していく簡単なプログラムです。
+まずは、伝統的な手続き型の様式で書いたものです。
 
 ```lisp
 (defstruct account
@@ -116,17 +116,17 @@ First, the program is written in traditional procedural style:
            (account-balance account))))
 ```
 
-We can create new bank accounts with `make-account` and modify them with `account-withdraw`, `account-deposit`, and `account-interest`.
-This is a simple problem, and this simple solution suffices.
-Problems appear when we change the specification of the problem, or when we envision ways that this implementation could be inadvertently used in error.
-For example, suppose a programmer looks at the `account` structure and decides to use `(decf (account-balance account)`) directly instead of going through the `account-withdraw` function.
-This could lead to negative account balances, which were not intended.
-Or suppose that we want to create a new kind of account, where only a certain maximum amount can be withdrawn at one time.
-There would be no way to ensure that `account-withdraw` would not be applied to this new, limited account.
+`make-account` で新しい銀行口座を作り、`account-withdraw`、`account-deposit`、`account-interest` でそれを変更できます。
+これは単純な問題であり、この単純な解決で足ります。
+厄介が現れるのは、問題の仕様を変えたときや、この実装がうっかり誤って使われる道筋を思い描いたときです。
+たとえば、あるプログラマが `account` 構造体を見て、`account-withdraw` 関数を通さずに `(decf (account-balance account)`) を直に使うことにしたとしましょう。
+これは、意図していなかった負の残高を生みかねません。
+あるいは、一度に決まった上限までしか引き出せない、新しい種類の口座を作りたくなったとしましょう。
+この新しい、限度つきの口座に `account-withdraw` が適用されないことを保証する手立てはありません。
 
-The problem is that once we have created an account, we have no control over what actions are applied to it.
-The object-oriented style is designed to provide that control.
-Here is the same program written in object-oriented style (using plain Lisp):
+厄介なのは、いったん口座を作ってしまうと、それにどんな動作が適用されるかを制御できないことです。
+オブジェクト指向の様式は、その制御を与えるように作られています。
+次に示すのは、同じプログラムをオブジェクト指向の様式で（素のLispを使って）書いたものです。
 
 ```lisp
 (defun new-account (name &optional (balance 0.00)
@@ -146,17 +146,17 @@ Here is the same program written in object-oriented style (using plain Lisp):
                             (* interest-rate balance)))))))
 ```
 
-The function `new-account` creates account objects, which are implemented as closures that encapsulate three variables: the name, balance, and interest rate of the account.
-An account object also encapsulates functions to handle the five messages to which the object can respond.
-An account object can do only one thing: receive a message and return the appropriate function to execute that message.
-For example, if you pass the message `withdraw` to an account object, it will return a function that, when applied to a single argument (the amount to withdraw), will perform the withdrawal action.
-This function is called the *method* that implements the message.
-The advantage of this approach is that account objects are completely encapsulated; the information corresponding to the name, balance, and interest rate is only accessible through the five messages.
-We have a guarantee that no other code can manipulate the information in the account in any other way.<a id="tfn13-1"></a><sup>[1](#fn13-1)</sup>
+関数 `new-account` は口座オブジェクトを作ります。これはクロージャとして実装されており、口座の名義・残高・利率という3つの変数を包み込んでいます。
+口座オブジェクトは、そのオブジェクトが応答できる5つのメッセージを処理する関数も包み込んでいます。
+口座オブジェクトができるのは1つだけ、メッセージを受け取り、そのメッセージを実行する適切な関数を返すことです。
+たとえば口座オブジェクトにメッセージ `withdraw` を渡すと、引数1つ（引き出す額）に適用すると引き出しの動作を行う関数が返ってきます。
+この関数を、そのメッセージを実装する*メソッド*と呼びます。
+この方式の利点は、口座オブジェクトが完全に包み込まれていることです。名義・残高・利率にあたる情報には、5つのメッセージを通してしか手が届きません。
+他のどんなコードも、口座のなかの情報をこれ以外のやり方で操作できないことが保証されています。<a id="tfn13-1"></a><sup>[1](#fn13-1)</sup>
 
-The function `get-method` finds the method that implements a message for a given object.
-The function `send` gets the method and applies it to a list of arguments.
-The name send comes from the Flavors object-oriented system, which is discussed in the history section ([page 456](#p456)).
+関数 `get-method` は、与えられたオブジェクトについて、メッセージを実装するメソッドを見つけます。
+関数 `send` はメソッドを取ってきて、それを引数の並びに適用します。
+send という名前は、オブジェクト指向システムのFlavorsに由来します。これについては歴史の節（[456ページ](#p456)）で述べます。
 
 ```lisp
 (defun get-method (object message)
@@ -169,7 +169,7 @@ The name send comes from the Flavors object-oriented system, which is discussed 
   (apply (get-method object message) args))
 ```
 
-Here is an example of the use of `new-account` and `send`:
+次に `new-account` と `send` を使う例を示します。
 
 ```lisp
 > (setf acct (new-account "J. Random Customer" 1000.00)) =>
@@ -184,17 +184,17 @@ Here is an example of the use of `new-account` and `send`:
 > (send acct 'balance) => 623.45
 ```
 
-## 13.3 Generic Functions
+## 13.3 総称関数
 
-The `send` syntax is awkward, as it is different from the normal Lisp function-calling syntax, and it doesn't fit in with the other Lisp tools.
-For example, we might like to say `(mapcar 'balance accounts)`, but with messages we would have to write that as:
+`send` の構文はぎこちないものです。Lispのふつうの関数呼び出しの構文と違っていて、他のLispの道具となじみません。
+たとえば `(mapcar 'balance accounts)` と書きたいところですが、メッセージを使うと次のように書かねばなりません。
 
 ```lisp
 (mapcar #'(lambda (acct) (send acct 'balance)) accounts)
 ```
 
-We can fix this problem by defining *generic* functions that find the right method to execute a message.
-For example, we could define:
+この問題は、メッセージを実行する正しいメソッドを見つける*総称*関数を定義することで直せます。
+たとえば次のように定義できます。
 
 ```lisp
 (defun withdraw (object &rest args)
@@ -202,24 +202,24 @@ For example, we could define:
   (apply (get-method object 'withdraw) args))
 ```
 
-and then write `(withdraw acct x)` instead of `(send acct 'withdraw x)`.
-The function `withdraw` is generic because it not only works on account objects but also works on any other class of object that handles the `withdraw` message.
-For example, we might have a totally unrelated class, `army,` which also implements a `withdraw` method.
-Then we could say `(send 5th-army 'withdraw)` or `(withdraw 5th-army)` and have the correct method executed.
-So object-oriented programming eliminates many problems with name clashes that arise in conventional programs.
+そうすれば `(send acct 'withdraw x)` の代わりに `(withdraw acct x)` と書けます。
+関数 `withdraw` が総称的であるのは、口座オブジェクトに働くだけでなく、`withdraw` メッセージを処理する他のどんなクラスのオブジェクトにも働くからです。
+たとえば、まったく無関係なクラス `army` があって、これも `withdraw` メソッドを実装しているかもしれません。
+そのときも `(send 5th-army 'withdraw)` あるいは `(withdraw 5th-army)` と書けば、正しいメソッドが実行されます。
+このようにオブジェクト指向プログラミングは、従来のプログラムで生じる名前の衝突の問題の多くを取り除きます。
 
-Many of the built-in Common Lisp functions can be considered generic functions, in that they operate on different types of data.
-For example, `sqrt` does one thing when passed an integer and quite another when passed an imaginary number.
-The sequence functions (like `find` or `delete`) operate on lists, vectors, or strings.
-These functions are not implemented like `withdraw,` but they still act like generic functions.<a id="tfn13-2"></a><sup>[2](#fn13-2)</sup>
+Common Lispの組み込み関数の多くは、異なる型のデータに働くという点で、総称関数と見なせます。
+たとえば `sqrt` は、整数を渡されたときと虚数を渡されたときとでまったく違うことをします。
+（`find` や `delete` のような）並びの関数は、リストにもベクタにも文字列にも働きます。
+これらの関数は `withdraw` のようには実装されていませんが、それでも総称関数のように振る舞います。<a id="tfn13-2"></a><sup>[2](#fn13-2)</sup>
 
-## 13.4 Classes
+## 13.4 クラス
 
-It is possible to write macros to make the object-oriented style easier to read and write.
-The macro `define-class` defines a class with its associated message-handling methods.
-It also defines a generic function for each message.
-Finally, it allows the programmer to make a distinction between variables that are associated with each object and those that are associated with a class and are shared by all member s of the class.
-For example, you might want to have all instances of the class `account` share the same interest rate, but you wouldn't want them to share the same balance.
+オブジェクト指向の様式を読み書きしやすくするマクロを書くことができます。
+マクロ `define-class` は、クラスと、それに結びついたメッセージ処理のメソッドを定義します。
+また、各メッセージについて総称関数も定義します。
+さらに、各オブジェクトに結びついた変数と、クラスに結びついてクラスのすべての成員に共有される変数とを、プログラマが区別できるようにします。
+たとえば、クラス `account` のすべてのインスタンスに同じ利率を共有させたいことはあっても、同じ残高を共有させたくはないでしょう。
 
 ```lisp
 (defmacro define-class (class inst-vars class-vars &body methods)
@@ -251,8 +251,8 @@ For example, you might want to have all instances of the class `account` share t
        (eq (get fn-name 'generic-fn) (symbol-function fn-name))))
 ```
 
-Now we define the class account with this macro.
-We make `interest-rate` a class variable, one that is shared by all accounts:
+では、このマクロを使ってクラス account を定義しましょう。
+`interest-rate` はクラス変数、つまりすべての口座に共有される変数とします。
 
 ```lisp
 (define-class account (name &optional (balance 0.00))
@@ -266,7 +266,7 @@ We make `interest-rate` a class variable, one that is shared by all accounts:
  (interest () (incf balance (* interest-rate balance))))
 ```
 
-Here we use the generic functions defined by this macro:
+次に、このマクロが定義した総称関数を使ってみます。
 
 ```lisp
 > (setf acct2 (account "A. User" 2000.00)) => #<CLOSURE 24003064>
@@ -276,16 +276,16 @@ Here we use the generic functions defined by this macro:
 > (balance acct) => 623.45
 ```
 
-In this last line, the generic function `balance` is applied to `acct,` an object that was created before we even defined the account class and the function `balance.` But `balance` still works properly on this object, because it obeys the message-passing protocol.
+最後の行では、総称関数 `balance` が `acct` に適用されています。これは、accountクラスも関数 `balance` も定義する前に作られたオブジェクトです。それでも `balance` はこのオブジェクトに対して正しく働きます。メッセージ受け渡しの取り決めに従っているからです。
 
-## 13.5 Delegation
+## 13.5 委譲
 
-Suppose we want to create a new kind of account, one that requires a password for each action.
-We can define a new class, `password-account,` that has two message clauses.
-The first clause allows for changing the password (if you have the original password), and the second is an `otherwise` clause, which checks the password given and, if it is correct, passes the rest of the arguments on to the account that is being protected by the password.
+動作ごとに合言葉を必要とする、新しい種類の口座を作りたくなったとしましょう。
+メッセージの節を2つ持つ新しいクラス `password-account` を定義できます。
+1つ目の節は（元の合言葉を知っていれば）合言葉を変えられるようにするもの、2つ目は `otherwise` の節で、与えられた合言葉を調べ、正しければ残りの引数を、合言葉で守られている口座へと渡します。
 
-The definition of `password-account` takes advantage of the internal details of `define-class` in two ways: it makes use of the fact that `otherwise` can be used as a catch-all clause in a `case` form, and it makes use of the fact that the dispatch variable is called `message.` Usually, it is not a good idea to rely on details about the implementation of a macro, and soon we will see cleaner ways of defining classes.
-But for now, this simple approach works:
+`password-account` の定義は、`define-class` の内部の細部を2つの点で当てにしています。`case` 形式で `otherwise` を受け皿の節として使えることと、振り分けの変数が `message` という名前であることです。ふつう、マクロの実装の細部に頼るのは良い考えではありませんし、もっときれいなクラスの定義のしかたをこのあと見ていきます。
+とはいえ今のところは、この素朴なやり方でうまくいきます。
 
 ```lisp
 (define-class password-account (password acct) ()
@@ -299,7 +299,7 @@ But for now, this simple approach works:
         'wrong-password)))
 ```
 
-Now we see how the class `password-account` can be used to provide protection for an existing account:
+では、既存の口座を守るのにクラス `password-account` をどう使えるかを見てみましょう。
 
 ```lisp
 (setf acct3 (password-account "secret" acct2)) => #<CLOSURE 33427277>
@@ -308,9 +308,9 @@ Now we see how the class `password-account` can be used to provide protection fo
 > (withdraw acct3 "secret" 2000.00) => 164.52
 ```
 
-Now let's try one more example.
-Suppose we want to have a new class of account where only a limited amount of money can be withdrawn at any time.
-We could define the class `limited-account`:
+もう1つ例を試してみましょう。
+いつでも限られた額しか引き出せない、新しいクラスの口座がほしくなったとしましょう。
+クラス `limited-account` を次のように定義できます。
 
 ```lisp
 (define-class limited-account (limit acct) ()
@@ -322,8 +322,8 @@ We could define the class `limited-account`:
        (apply message acct args)))
 ```
 
-This definition redefines the `withdraw` message to check if the limit is exceeded before passing on the message, and it uses the `otherwise` clause simply to pass on all other messages unchanged.
-In the following example, we set up an account with both a password and a limit:
+この定義は `withdraw` メッセージを定義しなおし、メッセージを渡す前に上限を超えていないかを調べます。そして `otherwise` の節は、他のすべてのメッセージをそのまま渡すためだけに使っています。
+次の例では、合言葉と上限の両方を備えた口座を組み立てます。
 
 ```lisp
 > (setf acct4 (password-account "pass"
@@ -335,16 +335,16 @@ In the following example, we set up an account with both a password and a limit:
 > (withdraw acct4 "guess" 20.00) => WRONG-PASSWORD
 ```
 
-Note that functions like `withdraw` are still simple generic functions that just find the right method and apply it to the arguments.
-The trick is that each class defines a different way to handle the withdraw message.
-Calling `withdraw` with `acct4` as argument results in the following flow of control.
-First, the method in the `password-account` class checks that the password is correct.
-If it is, it calls the method from the `limited-account` class.
-If the limit is not exceeded, we finally call the method from the `account` class, which decrements the balance.
-Passing control to the method of a component is called *delegation*.
+`withdraw` のような関数が、正しいメソッドを見つけて引数に適用するだけの、素朴な総称関数のままであることに注意してください。
+仕掛けは、各クラスが withdraw メッセージの処理のしかたをそれぞれ違うように定義しているところにあります。
+`acct4` を引数として `withdraw` を呼ぶと、制御は次のように流れます。
+まず `password-account` クラスのメソッドが、合言葉が正しいかを調べます。
+正しければ、`limited-account` クラスのメソッドを呼びます。
+上限を超えていなければ、最後に `account` クラスのメソッドを呼び、これが残高を減らします。
+構成要素のメソッドへ制御を渡すことを*委譲*と呼びます。
 
-The advantage of the object-oriented style is that we can introduce a new class by writing one definition that is localized and does not require changing any existing code.
-If we had written this in traditional procedural style, we would end up with functions like the following:
+オブジェクト指向の様式の利点は、一箇所にまとまった定義を1つ書くだけで新しいクラスを導入でき、既存のコードをまったく変えずに済むことです。
+これを伝統的な手続き型の様式で書いていたなら、次のような関数になっていたでしょう。
 
 ```lisp
 (defun withdraw (acct amt &optional pass)
@@ -359,45 +359,45 @@ If we had written this in traditional procedural style, we would end up with fun
       (t (decf balance amt))))
 ```
 
-There is nothing wrong with this, as an individual function.
-The problem is that when the bank decides to offer a new kind of account, we will have to change this function, along with all the other functions that implement actions.
-The "definition" of the new account is scattered rather than localized, and altering a bunch of existing functions is usually more error prone than writing a new class definition.
+1つの関数として見るなら、これに悪いところはありません。
+厄介なのは、銀行が新しい種類の口座を出すと決めたとき、この関数と、動作を実装する他のすべての関数を変えなければならないことです。
+新しい口座の「定義」は一箇所にまとまらず散らばってしまい、既存の関数をあれこれ書き換えるのは、たいてい新しいクラス定義を書くより誤りを招きやすいのです。
 
-## 13.6 Inheritance
+## 13.6 継承
 
-In the following table, data types (classes) are listed across the horizontal axis, and functions (messages) are listed up and down the vertical axis.
-A complete program needs to fill in all the boxes, but the question is how to organize the process of filling them in.
-In the traditional procedural style, we write function definitions that fill in a row at a time.
-In the object-oriented style, we write class definitions that fill in a column at a time.
-A third style, the *data-driven* or *generic* style, fills in only one box at a time.
+次の表では、データ型（クラス）が横軸に、関数（メッセージ）が縦軸に並んでいます。
+完全なプログラムはすべてのマス目を埋める必要がありますが、問題はその埋めていく過程をどう組み立てるかです。
+伝統的な手続き型の様式では、一度に1行を埋める関数定義を書きます。
+オブジェクト指向の様式では、一度に1列を埋めるクラス定義を書きます。
+第三の様式である*データ駆動*あるいは*総称的*な様式は、一度に1マスだけを埋めます。
 
 |            | `account limited-account` | `password-account` | `...` |
 | ---        | ---                       | ---                | ---   |
-| `name`     |                           | *object*           |       |
-| `deposit`  |                           | *oriented*         |       |
-| `withdraw` | *function oriented*       |                    |       |
+| `name`     |                           | *オブジェクト*     |       |
+| `deposit`  |                           | *指向*             |       |
+| `withdraw` | *関数指向*                |                    |       |
 | `balance`  |                           |                    |       |
-| `interest` | *generic*                 |                    |       |
+| `interest` | *総称的*                  |                    |       |
 | `...`      |                           |                    |       |
 
-In this table there is no particular organization to either axis; both messages and classes are listed in random order.
-This ignores the fact that classes are organized hierarchically: both limited-account and password-account are subclasses of account.
-This was implicit in the definition of the classes, because both `limited-account` and `password-account` contain accounts as components and delegate messages to those components.
-But it would be cleaner to make this relationship explicit.
+この表では、どちらの軸にも決まった並べ方はありません。メッセージもクラスも順不同に並んでいます。
+これは、クラスが階層をなしているという事実を無視しています。limited-account も password-account も account の下位クラスです。
+このことはクラスの定義に暗に含まれていました。`limited-account` も `password-account` も口座を構成要素として抱え、その構成要素へメッセージを委譲しているからです。
+しかし、この関係は明示するほうがきれいでしょう。
 
-The `defstruct` mechanism does allow for just this kind of explicit inheritance.
-If we had defined `account` as a structure, then we could define `limited-account` with:
+`defstruct` の仕組みは、まさにこの種の明示的な継承を許しています。
+`account` を構造体として定義していたなら、`limited-account` は次のように定義できたでしょう。
 
 ```lisp
 (defstruct (limited-account (:include account)) limit)
 ```
 
-Two things are needed to provide an inheritance facility for classes.
-First, we should modify `define-class` so that it takes the name of the class to inherit from as the second argument.
-This will signal that the new class will inherit all the instance variables, class variables, and methods from the parent class.
-The new class can, of course, define new variables and methods, or it can shadow the parent's variables and methods.
-In the form below, we define `limited-account` to be a subclass of `account` that adds a new instance variable, `limit`, and redefines the `withdraw` method so that it checks for amounts that are over the limit.
-If the amount is acceptable, then it uses the function `call-next-method` (not yet defined) to get at the `withdraw` method for the parent class, `account`.
+クラスに継承の機能を与えるには、2つのことが必要です。
+第一に、継承元のクラスの名前を第2引数として取るよう `define-class` を変えるべきです。
+これは、新しいクラスが親クラスからすべてのインスタンス変数・クラス変数・メソッドを受け継ぐことを示します。
+もちろん新しいクラスは、新しい変数やメソッドを定義することも、親の変数やメソッドを覆い隠すこともできます。
+下の形式では、`limited-account` を `account` の下位クラスとして定義し、新しいインスタンス変数 `limit` を加え、上限を超える額を調べるよう `withdraw` メソッドを定義しなおしています。
+額が受け入れられるものなら、（まだ定義していない）関数 `call-next-method` を使って、親クラス `account` の `withdraw` メソッドに手を伸ばします。
 
 ```lisp
 (define-class limited-account account (limit) ()
@@ -407,29 +407,29 @@ If the amount is acceptable, then it uses the function `call-next-method` (not y
           (call-next-method))))
 ```
 
-If inheritance is a good thing, then multiple inheritance is an even better thing.
-For example, assuming we have defined the classes `limited-account` and `password-account`, it is very convenient to define the following class, which inherits from both of them:
+継承が良いものなら、多重継承はさらに良いものです。
+たとえば、クラス `limited-account` と `password-account` を定義済みとすると、その両方から継承する次のクラスを定義できるのはとても便利です。
 
 ```lisp
 (define-class limited-account-with-password
            (password-account limited-account))
 ```
 
-Notice that this new class adds no new variables or methods.
-All it does is combine the functionality of two parent classes into one.
+この新しいクラスが、新しい変数もメソッドも加えていないことに注目してください。
+していることは、2つの親クラスの機能を1つに組み合わせることだけです。
 
-**Exercise  13.1 [d]** Define a version of `define-class` that handles inheritance and `call-next-method`.
+**練習問題 13.1 [d]** 継承と `call-next-method` を扱える `define-class` の版を定義せよ。
 
-**Exercise  13.2 [d]** Define a version of `define-class` that handles multiple inheritance.
+**練習問題 13.2 [d]** 多重継承を扱える `define-class` の版を定義せよ。
 
-## 13.7 CLOS: The Common Lisp Object System
+## 13.7 CLOS: Common Lisp Object System
 
-So far, we have developed an object-oriented programming system using a macro, `define-class`, and a protocol for implementing objects as closures.
-There have been many proposals for adding object-oriented features to Lisp, some similar to our approach, some quite different.
-Recently, one approach has been approved to become an official part of Common Lisp, so we will abandon our ad hoc approach and devote the rest of this chapter to CLOS, the Common Lisp Object System.
-The correspondence between our system and CLOS is summarized here:
+ここまで、マクロ `define-class` と、オブジェクトをクロージャとして実装する取り決めを使って、オブジェクト指向プログラミングのシステムを組み立ててきました。
+Lispにオブジェクト指向の機能を加える提案はこれまで数多くあり、私たちの方式に似たものもあれば、まるで違うものもあります。
+最近、そのうちの1つがCommon Lispの公式な一部となることが認められました。そこで私たちの間に合わせの方式は捨てて、本章の残りをCommon Lisp Object SystemであるCLOSに充てることにします。
+私たちのシステムとCLOSの対応を次にまとめます。
 
-| our system                   | CLOS                      |
+| 私たちのシステム             | CLOS                      |
 |------------------------------|---------------------------|
 | `define-class`               | `defclass`                |
 | *`methods defined in class`* | `defmethod`               |
@@ -437,14 +437,14 @@ The correspondence between our system and CLOS is summarized here:
 | `call-next-method`           | `call-next-method`        |
 | `ensure-generic-fn`          | `ensure-generic-function` |
 
-Like most object-oriented systems, CLOS is primarily concerned with defining classes and methods for them, and in creating instances of the classes.
-In CLOS the macro `defclass` defines a class, `defmethod` defines a method, and `make-instance` creates an instance of a class-an object.
-The general form of the macro `defclass` is:
+たいていのオブジェクト指向システムと同じく、CLOSがおもに関わるのは、クラスとそのメソッドを定義すること、そしてクラスのインスタンスを作ることです。
+CLOSでは、マクロ `defclass` がクラスを定義し、`defmethod` がメソッドを定義し、`make-instance` がクラスのインスタンス、すなわちオブジェクトを作ります。
+マクロ `defclass` の一般の形は次のとおりです。
 
-(`defclass` *class-name* (*superclass...*) (*slot-specifier...*) *optional-class-option...*)
+(`defclass` *クラス名* (*上位クラス...*) (*スロット指定...*) *省略可能なクラスオプション...*)
 
-The class-options are rarely used.
-`defclass` can be used to define the class `account`:
+クラスオプションはめったに使われません。
+`defclass` を使ってクラス `account` を定義できます。
 
 ```lisp
 (defclass account ()
@@ -454,17 +454,17 @@ The class-options are rarely used.
         :reader interest-rate)))
 ```
 
-In the definition of `account`, we see that the list of superclasses is empty, because `account` does not inherit from any classes.
-There are three slot specifiers, for the `name`, `balance`, and `interest-rate` slots.
-Each slot name can be followed by optional keyword/value pairs defining how the slot is used.
-The `name` slot has an `:initarg` option, which says that the name can be specified when a new account is created with `make-instance`.
-The `:reader` slot creates a method called `name` to get at the current value of the slot.
+`account` の定義では、上位クラスの並びが空になっています。`account` はどのクラスからも継承していないからです。
+スロット指定は3つあり、`name`、`balance`、`interest-rate` の各スロットのものです。
+各スロット名のあとには、そのスロットの使われ方を定めるキーワードと値の対を、必要に応じて続けられます。
+`name` スロットには `:initarg` オプションがあり、`make-instance` で新しい口座を作るときに名義を指定できることを表しています。
+`:reader` は、スロットの現在の値に手を伸ばすための `name` というメソッドを作ります。
 
-The balance slot has three options: another `:initarg`, saying that the balance can be specified when a new account is made; an `:initform`, which says that if the balance is not specified, it defaults to `0.00`, and an `:accessor`, which creates a method for getting at the slot's value just as `:reader` does, and also creates a method for updating the slot with `setf`.
+balanceスロットにはオプションが3つあります。もう1つの `:initarg` は、新しい口座を作るときに残高を指定できることを表します。`:initform` は、残高が指定されなかったときの既定値が `0.00` であることを表します。そして `:accessor` は、`:reader` と同じくスロットの値に手を伸ばすメソッドを作り、加えて `setf` でスロットを更新するメソッドも作ります。
 
-The `interest-rate` slot has an `:initform` option to give it a default value and an `:allocation` option to say that this slot is part of the class, not of each instance of the class.
+`interest-rate` スロットには、既定値を与える `:initform` オプションと、このスロットがクラスの各インスタンスではなくクラスそのものに属することを表す `:allocation` オプションがあります。
 
-Here we see the creation of an object, and the application of the automatically defined methods to it.
+次に、オブジェクトを作り、自動的に定義されたメソッドをそれに適用するようすを示します。
 
 ```lisp
 > (setf al (make-instance 'account :balance 5000.00
@@ -474,16 +474,16 @@ Here we see the creation of an object, and the application of the automatically 
 > (interest-rate al) => 0.06
 ```
 
-CLOS differs from most object-oriented systems in that methods are defined separately from classes.
-To define a method (besides the ones defined automatically by `:reader`, `:writer`, or `:accessor` options) we use the `defmethod` macro.
-It is similar to `defun` in form:
+CLOSがたいていのオブジェクト指向システムと違うのは、メソッドがクラスとは別に定義されるところです。
+（`:reader`、`:writer`、`:accessor` の各オプションによって自動的に定義されるもの以外の）メソッドを定義するには、`defmethod` マクロを使います。
+形は `defun` に似ています。
 
-`(defmethod` *method-name* (*parameter...*) *body...*)
+`(defmethod` *メソッド名* (*引数...*) *本体...*)
 
-Required parameters to a `defmethod` can be of the form (*var class*), meaning that this is a method that applies only to arguments of that class.
-Here is the method for withdrawing from an account.
-Note that CLOS does not have a notion of instance variable, only instance slot.
-So we have to use the method (`balance acct`) rather than the instance variable `balance`:
+`defmethod` の必須引数は (*var class*) の形にでき、これはそのクラスの引数にのみ適用されるメソッドであることを意味します。
+次に、口座から引き出すためのメソッドを示します。
+CLOSにはインスタンス変数という考えがなく、あるのはインスタンスのスロットだけであることに注意してください。
+そのため、インスタンス変数 `balance` ではなくメソッド (`balance acct`) を使わねばなりません。
 
 ```lisp
 (defmethod withdraw ((acct account) amt)
@@ -492,7 +492,7 @@ So we have to use the method (`balance acct`) rather than the instance variable 
   'insufficient-funds))
 ```
 
-With CLOS it is easy to define a `limited-account` as a subclass of `account`, and to define the `withdraw` method for `limited-accounts`:
+CLOSなら、`account` の下位クラスとして `limited-account` を定義し、`limited-accounts` 用の `withdraw` メソッドを定義するのは簡単です。
 
 ```lisp
 (defclass limited-account (account)
@@ -503,9 +503,9 @@ With CLOS it is easy to define a `limited-account` as a subclass of `account`, a
      (call-next-method)))
 ```
 
-Note the use of `call-next-method` to invoke the `withdraw` method for the `account` class.
-Also note that all the other methods for accounts automatically work on instances of the class limited-account, because it is defined to inherit from `account`.
-In the following example, we show that the `name` method is inherited, that the `withdraw` method for `limited-account` is invoked first, and that the `withdraw` method for `account` is invoked by the `call-next-method` function:
+`account` クラスの `withdraw` メソッドを呼び出すのに `call-next-method` を使っていることに注意してください。
+また、口座に対する他のすべてのメソッドが、limited-accountクラスのインスタンスにも自動的に働くことにも注意してください。このクラスは `account` から継承するよう定義されているからです。
+次の例では、`name` メソッドが継承されること、`limited-account` 用の `withdraw` メソッドが先に呼ばれること、そして `account` 用の `withdraw` メソッドが `call-next-method` 関数によって呼ばれることを示します。
 
 ```lisp
 > (setf a2 (make-instance 'limited-account
@@ -517,15 +517,15 @@ In the following example, we show that the `name` method is inherited, that the 
 > (withdraw a2 20.00) => 480.0
 ```
 
-In general, there may be several methods appropriate to a given message.
-In that case, all the appropriate methods are gathered together and sorted, most specific first.
-The most specific method is then called.
-That is why the method for `limited-account` is called first rather than the method for `account`.
-The function `call-next-method` can be used within the body of a method to call the next most specific method.
+一般に、あるメッセージに適したメソッドは複数ありえます。
+その場合、適したメソッドがすべて集められ、より特殊なものが先に来るよう並べ替えられます。
+そして、もっとも特殊なメソッドが呼ばれます。
+`account` のメソッドではなく `limited-account` のメソッドが先に呼ばれるのは、そのためです。
+メソッドの本体では、関数 `call-next-method` を使って次に特殊なメソッドを呼べます。
 
-The complete story is actually even more complicated than this.
-As one example of the complication, consider the class `audited-account`, which prints and keeps a trail of all deposits and withdrawals.
-It could be defined as follows using a new feature of CLOS, `:before` and `:after` methods:
+実のところ、話の全体はこれよりさらに込み入っています。
+その込み入りようの一例として、すべての預け入れと引き出しを表示し、その記録を残すクラス `audited-account` を考えてみましょう。
+CLOSの新しい機能である `:before` メソッドと `:after` メソッドを使えば、次のように定義できます。
 
 ```lisp
 (defclass audited-account (account)
@@ -538,16 +538,16 @@ It could be defined as follows using a new feature of CLOS, `:before` and `:afte
   (audit-trail acct)))
 ```
 
-Now a call to `withdraw` with a `audited-account` as the first argument yields three applicable methods: the primary method from `account` and the `:before` and `:after` methods.
-In general, there might be several of each kind of method.
-In that case, all the `:before` methods are called in order, most specific first.
-Then the most specific primary method is called.
-It may choose to invoke `call-next-method` to get at the other methods.
-(It is an error for a `:before` or `:after` method to use `call-next-method`.)
-Finally, all the `:after` methods are called, least specific first.
+`audited-account` を第1引数として `withdraw` を呼ぶと、適用できるメソッドが3つ出てきます。`account` の主メソッドと、`:before` メソッドと `:after` メソッドです。
+一般には、それぞれの種類のメソッドが複数あるかもしれません。
+その場合、すべての `:before` メソッドが、より特殊なものから順に呼ばれます。
+次に、もっとも特殊な主メソッドが呼ばれます。
+そのメソッドは、他のメソッドに手を伸ばすために `call-next-method` を呼ぶこともできます。
+（`:before` や `:after` のメソッドが `call-next-method` を使うのは誤りです。）
+最後に、すべての `:after` メソッドが、特殊でないものから順に呼ばれます。
 
-The values from the `:before` and `:after` methods are ignored, and the value from the primary method is returned.
-Here is an example:
+`:before` と `:after` のメソッドの値は無視され、主メソッドの値が返されます。
+例を示します。
 
 ```lisp
 > (setf a3 (make-instance 'audited-account :balance 1000.00))
@@ -562,35 +562,35 @@ Here is an example:
 NIL
 ```
 
-The last interaction shows the biggest flaw in CLOS: it fails to encapsulate information.
-In order to make the `audit-trail` accessible to the `withdraw` methods, we had to give it accessor methods.
-We would like to encapsulate the writer function for `audit-trail` so that it can only be used with deposit and `withdraw`.
-But once the writer function is defined it can be used anywhere, so an unscrupulous outsider can destroy the audit trail, setting it to nil or anything else.
+最後のやりとりは、CLOSの最大の欠点を示しています。情報を包み込みそこねているのです。
+`audit-trail` に `withdraw` メソッドから手が届くようにするために、アクセサのメソッドを与えざるをえませんでした。
+`audit-trail` の書き込み関数は、depositと `withdraw` からしか使えないよう包み込みたいところです。
+しかし書き込み関数はいったん定義されればどこからでも使えるので、心ない部外者が監査の記録をnilか何かにして壊してしまえます。
 
-## 13.8 A CLOS Example: Searching Tools
+## 13.8 CLOSの例: 探索の道具
 
-CLOS is most appropriate whenever there are several types that share related behavior.
-A good example of an application that fits this description is the set of searching tools defined in [section 6.4](chapter6.md#s0025).
-There we defined functions for breadth-first, depth-first, and best-first search, as well as tree- and graph-based search.
-We also defined functions to search in particular domains, such as planning a route between cities.
+CLOSがもっとも似合うのは、関連する振る舞いを共有する型がいくつもある場面です。
+この説明に当てはまる応用の良い例が、[6.4節](chapter6.md#s0025)で定義した探索の道具一式です。
+そこでは、幅優先・深さ優先・最良優先の探索と、木にもとづく探索・グラフにもとづく探索の関数を定義しました。
+また、都市間の経路を立てるといった、特定の領域で探索する関数も定義しました。
 
-If we had written the tools in a straightforward procedural style, we would have ended up with dozens of similar functions.
-Instead, we used higher-order functions to control the complexity.
-In this section, we see how CLOS can be used to break up the complexity in a slightly different fashion.
+この道具立てをそのまま手続き型の様式で書いていたら、よく似た関数が何十個もできあがっていたでしょう。
+そうはせず、高階関数を使って複雑さを抑えました。
+本節では、CLOSを使って、これとは少し違うやり方で複雑さを分解できることを見ます。
 
-We begin by defining the class of search problems.
-Problems will be classified according to their domain (route planning, etc.), their topology (tree or graph) and their search strategy (breadth-first or depth-first, etc.).
-Each combination of these features results in a new class of problem.
-This makes it easy for the user to add a new class to represent a new domain, or a new search strategy.
-The basic class, `problem`, contains a single-instance variable to hold the unexplored states of the problem.
+まず、探索問題のクラスを定義することから始めます。
+問題は、その領域（経路の立案など）、その位相（木かグラフか）、そしてその探索の方策（幅優先か深さ優先かなど）によって分類されます。
+これらの特徴の組み合わせのそれぞれが、新しい問題のクラスになります。
+こうしておくと、新しい領域や新しい探索の方策を表す新しいクラスを、利用者が簡単に加えられます。
+基本となるクラス `problem` は、問題の未探索の状態を保つインスタンス変数を1つだけ持ちます。
 
 ```lisp
 (defclass problem ()
  ((states :initarg :states :accessor problem-states)))
 ```
 
-The function searcher is similar to the function `tree-search` of [section 6.4](chapter6.md#s0025).
-The main difference is that searcher uses generic functions instead of passing around functional arguments.
+関数 searcher は、[6.4節](chapter6.md#s0025)の関数 `tree-search` に似ています。
+おもな違いは、searcher が関数を引数として引き回すのではなく、総称関数を使うところです。
 
 ```lisp
 (defmethod searcher ((prob problem))
@@ -606,8 +606,8 @@ The main difference is that searcher uses generic functions instead of passing a
       (searcher prob))))
 ```
 
-`searcher` does not assume that the problem states are organized in a list; rather, it uses the generic function `no-states-p` to test if there are any states, `pop-state` to remove and return the first state, and `current-state` to access the first state.
-For the basic `problem` class, we will in fact implement the states as a list, but another class of problem is free to use another representation.
+`searcher` は、問題の状態がリストにまとめられていると決めてかかりません。そうではなく、状態が残っているかを調べるのに総称関数 `no-states-p` を、最初の状態を取り除いて返すのに `pop-state` を、最初の状態を見るのに `current-state` を使います。
+基本の `problem` クラスでは、実際に状態をリストとして実装しますが、別のクラスの問題は別の表現を使ってかまいません。
 
 ```lisp
 (defmethod current-state ((prob problem))
@@ -621,19 +621,19 @@ For the basic `problem` class, we will in fact implement the states as a list, b
  (null (problem-states prob)))
 ```
 
-In `tree-search`, we included a statement to print debugging information.
-We can do that here, too, but we can hide it in a separate method so as not to clutter up the main definition of `searcher`.
-It is a `:before` method because we want to see the output before carrying out the operation.
+`tree-search` では、デバッグ用の情報を表示する文を入れていました。
+ここでも同じことができますが、`searcher` の中心の定義をごちゃごちゃさせないよう、別のメソッドに隠しておけます。
+操作を実行する前に出力を見たいので、`:before` メソッドにします。
 
 ```lisp
 (defmethod searcher :before ((prob problem))
  (dbg 'search ";; Search: ~a" (problem-states prob)))
 ```
 
-The generic functions that remain to be defined are `goal-p`, `problem-combiner`, and `problem-successors`.
-We will address `goal-p` first, by recognizing that for many problems we will be searching for a state that is `eql` to a specified goal state.
-We define the class `eql-problem` to refer to such problems, and specify `goal-p` for that class.
-Note that we make it possible to specify the goal when a problem is created, but not to change the goal:
+あと定義すべき総称関数は、`goal-p`、`problem-combiner`、`problem-successors` です。
+まず `goal-p` に取りかかりましょう。多くの問題では、指定した目標状態と `eql` な状態を探すことになる、と見て取るのです。
+そうした問題を指すクラス `eql-problem` を定義し、そのクラスについて `goal-p` を定めます。
+問題を作るときに目標を指定できるようにはしますが、目標を変えられるようにはしないことに注意してください。
 
 ```lisp
 (defclass eql-problem (problem)
@@ -642,8 +642,8 @@ Note that we make it possible to specify the goal when a problem is created, but
  (eql (current-state prob) (problem-goal prob)))
 ```
 
-Now we are ready to specify two search strategies: depth-first search and breadth-first search.
-We define problem classes for each strategy and specify the `problem-combiner` function:
+これで、2つの探索の方策、深さ優先探索と幅優先探索を定める準備が整いました。
+方策ごとに問題のクラスを定義し、`problem-combiner` 関数を定めます。
 
 ```lisp
 (defclass dfs-problem (problem) ()
@@ -658,16 +658,16 @@ We define problem classes for each strategy and specify the `problem-combiner` f
  (append old new))
 ```
 
-While this code will be sufficient for our purposes, it is less than ideal, because it breaks an information-hiding barrier.
-It treats the set of old states as a list, which is the default for the `problem` class but is not necessarily the implementation that every class will use.
-It would have been cleaner to define generic functions `add-states-to-end` and `add-states-to-front` and then define them with `append` in the default class.
-But Lisp provides such nice list-manipulation primitives that it is difficult to avoid the temptation of using them directly.
+このコードは私たちの目的には足りますが、情報隠蔽の壁を破っているので理想的とは言えません。
+古い状態の集まりをリストとして扱っていますが、これは `problem` クラスでの既定であって、どのクラスもそう実装するとはかぎりません。
+総称関数 `add-states-to-end` と `add-states-to-front` を定義し、既定のクラスでそれらを `append` で定義するほうがきれいだったでしょう。
+とはいえ、Lispのリスト操作の基本要素はあまりに具合が良いので、それを直に使いたい誘惑を退けるのは難しいのです。
 
-Of course, the user who defines a new implementation for `problem-states` could just redefine `problem-combiner` for the offending classes, but this is precisely what object-oriented programming is designed to avoid: specializing one abstraction (states) should not force us to change anything in another abstraction (search strategy).
+もちろん、`problem-states` の新しい実装を定義する利用者が、差し障りのあるクラスについて `problem-combiner` を定義しなおせば済む話ではあります。しかしこれこそ、オブジェクト指向プログラミングが避けようとしているものです。一方の抽象（状態）を特殊化したせいで、もう一方の抽象（探索の方策）に手を入れる羽目になってはいけません。
 
-The last step is to define a class that represents a particular domain, and define `problem-successors` for that domain.
-As the first example, consider the simple binary tree search from [section 6.4](chapter6.md#s0025).
-Naturally, this gets represented as a class:
+最後の段は、特定の領域を表すクラスを定義し、その領域について `problem-successors` を定義することです。
+最初の例として、[6.4節](chapter6.md#s0025)の単純な二分木の探索を考えます。
+当然ながら、これはクラスとして表されます。
 
 ```lisp
 (defclass binary-tree-problem (problem) ())
@@ -676,8 +676,8 @@ Naturally, this gets represented as a class:
    (list n (+ n 1))))
 ```
 
-Now suppose we want to solve a binary-tree problem with breadth-first search, searching for a particular goal.
-Simply create a class that mixes in `binary-tree-problem`, `eql-problem` and `bfs-problem,` create an instance of that class, and call `searcher` on that instance:
+では、二分木の問題を幅優先探索で、特定の目標を探して解きたいとしましょう。
+`binary-tree-problem`、`eql-problem`、`bfs-problem` を混ぜ合わせたクラスを作り、そのクラスのインスタンスを作って、そのインスタンスに `searcher` を呼ぶだけです。
 
 ```lisp
 (defclass binary-tree-eql-bfs-problem
@@ -701,10 +701,10 @@ Simply create a class that mixes in `binary-tree-problem`, `eql-problem` and `bf
 12
 ```
 
-### Best-First Search
+### 最良優先探索
 
-It should be clear how to proceed to define best-first search: define a class to represent best-first search problems, and then define the necessary methods for that class.
-Since the search strategy only affects the order in which states are explored, the only method necessary will be for `problem-combiner`.
+最良優先探索をどう定義していけばよいかは、もう明らかでしょう。最良優先探索の問題を表すクラスを定義し、そのクラスについて必要なメソッドを定義するのです。
+探索の方策が影響するのは状態を調べる順序だけなので、必要なメソッドは `problem-combiner` のものだけです。
 
 ```lisp
 (defclass best-problem (problem) ()
@@ -715,19 +715,19 @@ Since the search strategy only affects the order in which states are explored, t
       :key #'(lambda (state) (cost-fn prob state))))
 ```
 
-This introduces the new function `cost-fn`; naturally it will be a generic function.
-The following is a `cost-fn` that is reasonable for any `eql-problem` dealing with numbers, but it is expected that most domains will specialize this function.
+ここで新しい関数 `cost-fn` が出てきます。当然これも総称関数になります。
+次に示す `cost-fn` は、数を扱うどんな `eql-problem` にも妥当なものですが、たいていの領域ではこの関数を特殊化することになるでしょう。
 
 ```lisp
 (defmethod cost-fn ((prob eql-problem) state)
  (abs (- state (problem-goal prob))))
 ```
 
-Beam search is a modification of best-first search where all but the best *b* states are thrown away on each iteration.
-A beam search problem is represented by a class where the instance variable `beam-width` holds the parameter *b*.
-If this is nil, then full best-first search is done.
-Beam search is implemented by an `:around` method on `problem-combiner`.
-It calls the next method to get the list of states produced by best-first search, and then extracts the first *b* elements.
+ビーム探索は最良優先探索を変えたもので、繰り返しのたびに、上位 *b* 個を除くすべての状態を捨てます。
+ビーム探索の問題は、インスタンス変数 `beam-width` が引数 *b* を保つクラスによって表されます。
+これがnilなら、まるごとの最良優先探索が行われます。
+ビーム探索は、`problem-combiner` の `:around` メソッドとして実装されます。
+次のメソッドを呼んで最良優先探索が生む状態の並びを得てから、最初の *b* 個の要素を取り出します。
 
 ```lisp
 (defclass beam-problem (problem)
@@ -739,8 +739,8 @@ It calls the next method to get the list of states produced by best-first search
              (length combined)))))
 ```
 
-Now we apply beam search to the binary-tree problem.
-As usual, we have to make up another class to represent this type of problem:
+では、二分木の問題にビーム探索を適用してみましょう。
+いつものように、この型の問題を表す別のクラスをこしらえる必要があります。
 
 ```lisp
 (defclass binary-tree-eql-best-beam-problem
@@ -760,16 +760,16 @@ As usual, we have to make up another class to represent this type of problem:
 12
 ```
 
-So far the case for CLOS has not been compelling.
-The code in this section duplicates the functionality of code in [section 6.4](chapter6.md#s0025), but the CLOS code tends to be more verbose, and it is somewhat disturbing that we had to make up so many long class names.
-However, this verbosity leads to flexibility, and it is easier to extend the CLOS code by adding new specialized classes.
-It is useful to make a distinction between the systems programmer and the applications programmer.
-The systems programmer would supply a library of classes like `dfs-problem` and generic functions like `searcher`.
-The applications programmer then just picks what is needed from the library.
-From the following we see that it is not too difficult to pick out the right code to define a trip-planning searcher.
-Compare this with the definition of `trip` on page 198 to see if you prefer CLOS in this case.
-The main difference is that here we say that the cost function is `air-distance` and the successors are the `neighbors` by defining methods; in `trip` we did it by passing parameters.
-The latter is a little more succinct, but the former may be more clear, especially as the number of parameters grows.
+ここまでのところ、CLOSを推す理由は説得力のあるものではありませんでした。
+本節のコードは[6.4節](chapter6.md#s0025)のコードと同じ機能を果たしますが、CLOSのコードは冗長になりがちですし、長いクラス名をこれほど多くこしらえねばならなかったのは、いささか落ち着かないところです。
+とはいえ、この冗長さは柔軟さにつながっており、新しい特殊化されたクラスを加えてCLOSのコードを拡張するほうが簡単です。
+ここで、システムのプログラマと応用のプログラマを区別しておくと役に立ちます。
+システムのプログラマは、`dfs-problem` のようなクラスと `searcher` のような総称関数のライブラリを供給します。
+応用のプログラマは、そのライブラリから必要なものを選ぶだけです。
+次を見れば、旅程を立てる探索器を定義するのに正しいコードを選び出すのが、さほど難しくないことがわかります。
+198ページの `trip` の定義と比べて、この場合にCLOSのほうが好みかどうかを確かめてください。
+おもな違いは、ここでは費用の関数が `air-distance` であり後続が `neighbors` であることをメソッドの定義によって述べているのに対し、`trip` では引数を渡すことでそうしていた点です。
+後者のほうが少し簡潔ですが、前者のほうが明快かもしれません。とりわけ引数の数が増えてくればなおさらです。
 
 ```lisp
 (defclass trip-problem (binary-tree-eql-best-beam-problem)
@@ -780,7 +780,7 @@ The latter is a little more succinct, but the former may be more clear, especial
  (neighbors city))
 ```
 
-With the definitions in place, it is easy to use the searching tool:
+定義がそろえば、探索の道具を使うのは簡単です。
 
 ```lisp
 > (setf p4 (make-instance 'trip-problem
@@ -799,28 +799,28 @@ With the definitions in place, it is easy to use the searching tool:
 (SAN-FRANCISCO 122.26 37.47)
 ```
 
-## 13.9 Is CLOS Object-Oriented?
+## 13.9 CLOSはオブジェクト指向か
 
-There is some argument whether CLOS is really object-oriented at all.
-The arguments are:
+CLOSがそもそも本当にオブジェクト指向なのかについては、いくらか議論があります。
+その言い分は次のようなものです。
 
-CLOS *is* an object-oriented system because it provides all three of the main criteria for object-orientation: objects with internal state, classes of objects with specialized behavior for each class, and inheritance between classes.
+CLOSはオブジェクト指向システム*である*。オブジェクト指向のおもな判定基準3つ、すなわち内部状態を持つオブジェクト、クラスごとに特殊化された振る舞いを持つオブジェクトのクラス、そしてクラス間の継承を、すべて備えているからだ。
 
-CLOS is *not* an object-oriented system because it does not provide modular objects with information-hiding.
-In the `audited-account` example, we would like to encapsulate the `audit-trail` instance variable so that only the `withdraw` methods can change it.
-But because methods are written separately from class definitions, we could not do that.
-Instead, we had to define an accessor for `audit-trail`.
-That enabled us to write the `withdraw` methods, but it also made it possible for anyone else to alter the audit trail as well.
+CLOSはオブジェクト指向システム*ではない*。情報隠蔽を備えた部品としてのオブジェクトを提供していないからだ。
+`audited-account` の例では、`withdraw` メソッドだけが変えられるよう、インスタンス変数 `audit-trail` を包み込みたかった。
+しかしメソッドはクラス定義とは別に書かれるので、それはできなかった。
+代わりに `audit-trail` のアクセサを定義せざるをえなかった。
+おかげで `withdraw` メソッドは書けたが、同時に、ほかの誰もが監査の記録を書き換えられるようにもなってしまった。
 
-CLOS is *more general than* an object-oriented system because it allows for methods that specialize on more than one argument.
-In true object-oriented systems, methods are associated with objects of a particular class.
-This association is lexically obvious (and the message-passing metaphor is clear) when we write the methods inside the definition of the class, as in our `define-class` macro.
-The message-passing metaphor is still apparent when we write generic functions that dispatch on the class of their first argument, which is how we've been using CLOS so far.
+CLOSはオブジェクト指向システム*より一般的*である。2つ以上の引数について特殊化するメソッドを許しているからだ。
+真のオブジェクト指向システムでは、メソッドは特定のクラスのオブジェクトに結びついています。
+私たちの `define-class` マクロのように、クラスの定義のなかにメソッドを書けば、この結びつきは字面のうえで明らかです（そしてメッセージ受け渡しの比喩もはっきりします）。
+第1引数のクラスによって振り分ける総称関数を書くときにも、メッセージ受け渡しの比喩はまだ見て取れます。ここまでCLOSを使ってきたのは、このやり方でした。
 
-But CLOS methods can dispatch on the class of any required argument, or any combination of them.
-Consider the following definition of `conc,` which is like `append` except that it works for vectors as well as lists.
-Rather than writing `conc` using conditional statements, we can use the multimethod dispatch capabilities of CLOS to define the four cases: (1) the first argument is nil, (2) the second argument is nil, (3) both arguments are lists, and (4) both arguments are vectors.
-Notice that if one of the arguments is nil there will be two applicable methods, but the method for `null` will be used because the class `null` is more specific than the class `list.`
+しかしCLOSのメソッドは、どの必須引数のクラスによっても、またその任意の組み合わせによっても振り分けられます。
+次に示す `conc` の定義を見てください。これは `append` に似ていますが、リストだけでなくベクタにも働きます。
+`conc` を条件分岐の文で書くのではなく、CLOSの多重メソッドによる振り分けの機能を使って4つの場合を定義できます。(1) 第1引数がnil、(2) 第2引数がnil、(3) 両方の引数がリスト、(4) 両方の引数がベクタ、の4つです。
+引数の一方がnilなら適用できるメソッドが2つあることになりますが、クラス `null` はクラス `list` より特殊なので、`null` のメソッドが使われることに注目してください。
 
 ```lisp
 (defmethod conc ((x null) y) y)
@@ -833,7 +833,7 @@ Notice that if one of the arguments is nil there will be two applicable methods,
    (replace vect y :startl (length x))))
 ```
 
-Here we see that this definition works:
+この定義がうまく働くことを見てみましょう。
 
 ```lisp
 > (conc nil '(a b c)) => (A B C)
@@ -842,11 +842,11 @@ Here we see that this definition works:
 > (conc '#(a b c) '#(d e f)) => #(A B C D E F)
 ```
 
-It works, but one might well ask: where are the objects?
-The metaphor of passing a message to an object does not apply here, unless we consider the object to be the list of arguments, rather than a single privileged argument.
+うまく働きはしますが、こう問いたくもなるでしょう。オブジェクトはどこにあるのか、と。
+オブジェクトにメッセージを渡すという比喩は、ここには当てはまりません。特別扱いされた1つの引数ではなく、引数の並び全体をオブジェクトと見なすのでなければ。
 
-It is striking that this style of method definition is very similar to the style used in Prolog.
-As another example, compare the following two definitions of `len`, a relation/function to compute the length of a list:
+このメソッド定義の様式が、Prologで使われる様式にとてもよく似ているのは印象的です。
+もう1つの例として、リストの長さを計算する関係／関数 `len` の、次の2つの定義を比べてみてください。
 
 ```
 ;; CLOS
@@ -862,170 +862,170 @@ len(CXIL].N1) :-
 len(L.N). NI is N+1.
 ```
 
-## 13.10 Advantages of Object-Oriented Programming
+## 13.10 オブジェクト指向プログラミングの利点
 
-Bertrand Meyer, in his book on the object-oriented language Eiffel (1988), lists five qualities that contribute to software quality:
+Bertrand Meyerは、オブジェクト指向言語Eiffelについての著書（1988）のなかで、ソフトウェアの品質に寄与する5つの性質を挙げています。
 
-*   *Correctness*.
-Clearly, a correct program is of the utmost importance.
+*   *正しさ*。
+言うまでもなく、プログラムが正しいことは何より重要です。
 
-*   *Robustness*.
-Programs should continue to function in a reasonable manner even for input that is beyond the original specifications.
+*   *頑健さ*。
+プログラムは、元の仕様の外にある入力に対しても、それなりの形で働き続けるべきです。
 
-*   *Extendability*.
-Programs should be easy to modify when the specifications change.
+*   *拡張しやすさ*。
+プログラムは、仕様が変わったときに直しやすくあるべきです。
 
-*   *Reusability*.
-Program components should be easy to transport to new programs, thus amortizing the cost of software development over several projects.
+*   *再利用しやすさ*。
+プログラムの部品は新しいプログラムへ移しやすくあるべきです。そうすればソフトウェア開発の費用を複数の企てにならせます。
 
-*   *Compatibility*.
-Programs should interface well with other programs.
-For example, a spreadsheet program should not only manipulate numbers correctly but also be compatible with word processing programs, so that spreadsheets can easily be included in documents.
+*   *つながりやすさ*。
+プログラムは、他のプログラムとうまくつながるべきです。
+たとえば表計算のプログラムは、数を正しく扱うだけでなく、文書作成のプログラムともつながるべきです。そうすれば表計算の結果を文書に簡単に取り込めます。
 
-Here we list how the object-oriented approach in general and CLOS in particular can effect these measures of quality:
+ここでは、オブジェクト指向の方式一般が、そしてとりわけCLOSが、これらの品質の尺度にどう働きかけられるかを挙げます。
 
-*   *Correctness*.
-Correctness is usually achieved in two stages: correctness of individual modules and correctness of the whole system.
-The object-oriented approach makes it easier to prove correctness for modules, since they are clearly defined, and it may make it easier to analyze interactions between modules, since the interface is strictly limited.
-CLOS does not provide for information-hiding the way other systems do.
+*   *正しさ*。
+正しさはふつう2つの段階で達成されます。個々の部品の正しさと、システム全体の正しさです。
+オブジェクト指向の方式では部品がはっきり定義されるので、部品の正しさを証明するのが容易になります。また境界面が厳しく限られているので、部品どうしのやりとりを分析するのも容易になるかもしれません。
+ただしCLOSは、他のシステムのようには情報隠蔽を用意していません。
 
-*   *Robustness*.
-Generic functions make it possible for a function to accept, at run time, a class of argument that the programmer did not anticipate at compile time.
-This is particularly true in CLOS, because multiple inheritance makes it feasible to write default methods that can be used by a wide range of classes.
+*   *頑健さ*。
+総称関数のおかげで、プログラマがコンパイル時に想定していなかったクラスの引数を、関数が実行時に受け付けられるようになります。
+これはCLOSでとりわけよく当てはまります。多重継承があるおかげで、広い範囲のクラスから使える既定のメソッドを書くことが現実的になるからです。
 
-*   *Extendability*.
-Object-oriented systems with inheritance make it easy to define new classes that are slight variants on existing ones.
-Again, CLOS's multiple inheritance makes extensions even easier than in single-inheritance systems.
+*   *拡張しやすさ*。
+継承を備えたオブジェクト指向システムでは、既存のクラスを少しだけ変えた新しいクラスを簡単に定義できます。
+ここでもCLOSの多重継承は、単一継承のシステムより拡張をいっそう容易にします。
 
-*   *Reusability*.
-This is the area where the object-oriented style makes the biggest contribution.
-Instead of writing each new program from scratch, object-oriented programmers can look over a library of classes, and either reuse existing classes as is, or specialize an existing class through inheritance.
-Large libraries of CLOS classes have not emerged yet.
-Perhaps they will when the language is more established.
+*   *再利用しやすさ*。
+ここはオブジェクト指向の様式がもっとも大きく貢献する領域です。
+新しいプログラムを毎回いちから書くのではなく、オブジェクト指向のプログラマはクラスのライブラリを見渡して、既存のクラスをそのまま再利用するか、継承によって既存のクラスを特殊化できます。
+CLOSのクラスの大きなライブラリは、まだ現れていません。
+この言語がもっと定着すれば、おそらく現れるでしょう。
 
-*   *Compatibility*.
-The more programs use standard components, the more they will be able to communicate with each other.
-Thus, an object-oriented program will probably be compatible with other programs developed from the same library of classes.
+*   *つながりやすさ*。
+プログラムが標準の部品を使えば使うほど、たがいにやりとりできるようになります。
+したがってオブジェクト指向のプログラムは、同じクラスのライブラリから作られた他のプログラムと、おそらくつながるでしょう。
 
-## 13.11 History and References
+## 13.11 歴史と参考文献
 
-The first object-oriented language was Simula, which was designed by Ole-Johan Dahl and Krysten Nygaard ([1966](bibliography.md#bb0265), [Nygaard and Dahl 1981](bibliography.md#bb0920)) as an extension of Algol 60.
-It is still in use today, mostly in Norway and Sweden.
-Simula provides the ability to define classes with single inheritance.
-Methods can be inherited from a superclass or overridden by a subclass.
-It also provides *coroutines*, class instances that execute continuously, saving local state in instance variables but periodically pausing to let other coroutines run.
-Although Simula is a general-purpose language, it provides special support for simulation, as the name implies.
-The built-in class `simulation` allows a programmer to keep track of simulated time while running a set of processes as coroutines.
+最初のオブジェクト指向言語はSimulaで、Ole-Johan DahlとKrysten Nygaardが（[1966](bibliography.md#bb0265)、[Nygaard and Dahl 1981](bibliography.md#bb0920)）Algol 60の拡張として設計しました。
+今日でも、おもにノルウェーとスウェーデンで使われています。
+Simulaは、単一継承でクラスを定義する能力を備えています。
+メソッドは上位クラスから継承することも、下位クラスで上書きすることもできます。
+また*コルーチン*も備えています。これは連続して実行されるクラスのインスタンスで、局所的な状態をインスタンス変数に保ちつつ、ときおり休止して他のコルーチンを走らせます。
+Simulaは汎用の言語ですが、その名が示すとおりシミュレーションのための特別な支えを備えています。
+組み込みのクラス `simulation` によって、プログラマは一連の処理をコルーチンとして走らせながら、模擬された時間を追いかけられます。
 
-In 1969 Alan Kay was a graduate student at the University of Utah.
-He became aware of Simula and realized that the object-oriented style was well suited to his research in graphics ([Kay 1969](bibliography.md#bb0600)).
-A few years later, at Xerox, he joined with Adele Goldberg and Daniel Ingalls to develop the Smalltalk language (see [Goldberg and Robinson 1983](bibliography.md#bb0475)).
-While Simula can be viewed as an attempt to add object-oriented features to strongly typed Algol 60, Smalltalk can be seen as an attempt to use the dynamic, loosely typed features of Lisp, but with methods and objects replacing functions and s-expressions.
-In Simula, objects existed alongside traditional data types like numbers and strings; in Smalltalk, every datum is an object.
-This gave Smalltalk the feel of an integrated Lisp environment, where the user can inspect, copy, or edit any part of the environment.
-In fact, it was not the object-oriented features of Smalltalk per se that have made a lasting impression but rather the then-innovative idea that every user would have a large graphical display and could interact with the system using a mouse and menus rather than by typing commands.
+1969年、Alan Kayはユタ大学の大学院生でした。
+Simulaを知り、オブジェクト指向の様式が自身のグラフィックスの研究によく合うと気づきます（[Kay 1969](bibliography.md#bb0600)）。
+数年後、Xeroxで、Adele Goldberg、Daniel IngallsとともにSmalltalk言語を開発しました（[Goldberg and Robinson 1983](bibliography.md#bb0475)を参照）。
+Simulaが、強く型づけされたAlgol 60にオブジェクト指向の機能を加える試みと見られるのに対し、Smalltalkは、Lispの動的でゆるく型づけされた性質を使いながら、関数とS式をメソッドとオブジェクトで置き換える試みと見られます。
+Simulaでは、オブジェクトは数や文字列といった伝統的なデータ型と並んで存在していましたが、Smalltalkではあらゆるデータがオブジェクトです。
+これがSmalltalkに、統合されたLisp環境の手触りを与えました。利用者は環境のどの部分でも、覗き、写し、書き換えられるのです。
+実のところ、末永く印象を残したのはSmalltalkのオブジェクト指向の機能そのものではなく、むしろ当時としては斬新な考え、すなわち利用者は誰もが大きな画像表示装置を持ち、命令を打ち込むのではなくマウスとメニューでシステムとやりとりする、という考えでした。
 
-Guy Steele's *LAMBDA: The Ultimate Declarative* (1976a and b) was perhaps the first paper to demonstrate how object-oriented programming can be done in Lisp.
-As the title suggests, it was all done using `lambda,` in a similar way to our `define-class` example.
-Steele summarized the approach with the equation "Actors = Closures (mod Syntax)," refering to Carl Hewitt's "Actors" object-oriented formalism.
+Guy Steeleの *LAMBDA: The Ultimate Declarative*（1976aおよびb）は、おそらくLispでオブジェクト指向プログラミングをどう行えるかを示した最初の論文です。
+表題が示すとおり、私たちの `define-class` の例と似たやり方で、すべてが `lambda` を使って行われていました。
+Steeleはこの方式を「Actors = Closures (mod Syntax)」という式にまとめました。Carl Hewittのオブジェクト指向の形式化「Actors」を踏まえたものです。
 
-In 1979, the MIT Lisp Machine group developed the Flavors system based on this approach but offering considerable extensions ([Cannon 1980](bibliography.md#bb0155), [Weinreb 1980](bibliography.md#bb1360), [Moon et al.
+1979年、MITのLispマシンのグループが、この方式にもとづきつつ相当な拡張を加えたFlavorsシステムを開発しました（[Cannon 1980](bibliography.md#bb0155)、[Weinreb 1980](bibliography.md#bb1360)、[Moon ほか
 1983](bibliography.md#bb0860)).
-"Flavor" was a popular jargon word for "type" or "kind" at MIT, so it was natural that it became the term for what we call classes.
+「Flavor（フレーバー）」はMITで「型」や「種類」を指す流行りの隠語だったので、これが私たちの言うクラスにあたる語になったのは自然なことでした。
 
-The Flavor system was the first to support multiple inheritance.
-Other languages shunned multiple inheritance because it was too dynamic.
-With single inheritance, each instance variable and method could be assigned a unique offset number, and looking up a variable or method was therefore trivial.
-But with multiple inheritance, these computations had to be done at run time.
-The Lisp tradition enabled programmers to accept this dynamic computation, when other languages would not.
-Once it was accepted, the MIT group soon came to embrace it.
-They developed complex protocols for combining different flavors into new ones.
-The concept of *mix-ins* was developed by programmers who frequented Steve's Ice Cream parlor in nearby Davis Square.
-Steve's offered a list of ice cream flavors every day but also offered to create new flavors-dynamically-by mixing in various cookies, candies, or fruit, at the request of the individual customer.
-For example, Steve's did not have chocolate-chip ice cream on the menu, but you could always order vanilla ice cream with chocolate chips mixed in.<a id="tfn13-3"></a><sup>[3](#fn13-3)</sup>
+Flavorシステムは、多重継承を支えた最初のものでした。
+他の言語は、動的すぎるという理由で多重継承を避けていました。
+単一継承なら、各インスタンス変数とメソッドに一意なずれ番号を割り当てられるので、変数やメソッドを引くのは造作もないことでした。
+しかし多重継承では、この計算を実行時に行わねばなりませんでした。
+Lispの伝統は、他の言語なら受け入れなかったであろうこの動的な計算を、プログラマが受け入れられるようにしました。
+いったん受け入れられると、MITのグループはほどなくそれを歓迎するようになりました。
+彼らは、異なるフレーバーを組み合わせて新しいものを作る、込み入った取り決めを作り上げました。
+*ミックスイン*という概念は、近くのデイヴィス・スクエアにあるアイスクリーム店 Steve's に通いつめたプログラマたちが編み出したものです。
+Steve's は毎日アイスクリームの味の一覧を出していましたが、それに加えて、客ひとりひとりの求めに応じて、いろいろなクッキーや菓子や果物を混ぜ込むことで、新しい味をその場で作ってもくれました。
+たとえば Steve's のお品書きにチョコチップのアイスクリームはありませんでしたが、バニラのアイスクリームにチョコチップを混ぜ込んでもらうことはいつでもできたのです。<a id="tfn13-3"></a><sup>[3](#fn13-3)</sup>
 
-This kind of "flavor hacking" appealed to the MIT Lisp Machine group, who adopted the metaphor for their object-oriented programming system.
-All flavors inherited from the top-most flavor in the hierarchy: vanilla.
-In the window system, for example, the flavor `basic-window` was defined to support the minimal functionality of all windows, and then new flavors of window were defined by combining mix-in flavors such as `scroll-bar-mixin`, `label-mixin`, and `border-mixin`.
-These mix-in flavors were used only to define other flavors.
-Just as you couldn't go into Steve's and order "crushed Heath bars, hold the ice cream," there was a mechanism to prohibit instantiation of mix-ins.
+この手の「フレーバーいじり」はMITのLispマシンのグループの心をとらえ、彼らは自分たちのオブジェクト指向プログラミングのシステムにこの比喩を採り入れました。
+すべてのフレーバーは、階層の最上位にあるフレーバー、すなわち vanilla から継承しました。
+たとえばウィンドウシステムでは、すべてのウィンドウに最小限の機能を与えるフレーバー `basic-window` が定義され、そこに `scroll-bar-mixin`、`label-mixin`、`border-mixin` といったミックスインのフレーバーを組み合わせて、新しいウィンドウのフレーバーが定義されました。
+これらのミックスインのフレーバーは、他のフレーバーを定義するためだけに使われました。
+Steve's に入って「砕いたヒースバーだけ、アイスクリームは抜きで」と注文できないのと同じで、ミックスインをインスタンス化することを禁じる仕組みがありました。
 
-A complicated repetoire of *method combinations* was developed.
-The default method combination on Flavors was similar to CLOS: first do all the `:before` methods, then the most specific primary method, then the `:after` methods.
-But it was possible to combine methods in other ways as well.
-For example, consider the `inside-width` method, which returns the width in pixels of the usable portion of a window.
-A programmer could specify that the combined method for `inside-width` was to be computed by calling all applicable methods and summing them.
-Then an `inside-width` method for the `basic-window` flavor would be defined to return the width of the full window, and each mix-in would have a simple method to say how much of the width it consumed.
-For example, if borders are 8 pixels wide and scroll bars are 12 pixels wide, then the `inside-width` method for `border-mixin` returns `-8` and `scroll-bar-mixin` returns `-12`.
-Then any window, no matter how many mix-ins it is composed of, automatically computes the proper inside width.
+*メソッド結合*の込み入った持ち札が作り出されました。
+Flavorsでの既定のメソッド結合はCLOSに似ていました。まずすべての `:before` メソッドを実行し、次にもっとも特殊な主メソッド、そして `:after` メソッドという順です。
+しかし、メソッドを他のやり方で組み合わせることもできました。
+たとえば、ウィンドウの使える部分の幅を画素数で返す `inside-width` メソッドを考えてみましょう。
+プログラマは、`inside-width` の結合されたメソッドを、適用できるすべてのメソッドを呼んでその合計を取ることで計算する、と指定できました。
+そのうえで、`basic-window` フレーバーの `inside-width` メソッドはウィンドウ全体の幅を返すよう定義し、各ミックスインには自分が幅をどれだけ消費するかを述べる簡単なメソッドを持たせます。
+たとえば枠が8画素、スクロールバーが12画素の幅なら、`border-mixin` の `inside-width` メソッドは `-8` を返し、`scroll-bar-mixin` は `-12` を返します。
+こうすればどんなウィンドウも、いくつのミックスインから成っていようと、正しい内側の幅を自動的に計算します。
 
-In 1981, Symbolics came out with a more efficient implementation of Flavors.
-Objects were no longer just closures.
-They were still funcallable, but there was additional hardware support that distinguished them from other functions.
-After a few years Symbolics abandoned the (send *object message*) syntax in favor of a new syntax based on generic functions.
-This system was known as New Flavors.
-It had a strong influence on the eventual CLOS design.
+1981年、SymbolicsがFlavorsのより効率のよい実装を出しました。
+オブジェクトはもはや単なるクロージャではありませんでした。
+funcall はできましたが、それを他の関数と区別する追加のハードウェアの支えがありました。
+数年後、Symbolicsは (send *object message*) の構文を捨て、総称関数にもとづく新しい構文を採りました。
+このシステムはNew Flavorsとして知られています。
+これが、のちのCLOSの設計に強い影響を与えました。
 
-The other strong influence on CLOS was the CommonLoops system developed at Xerox PARC.
-(See [Bobrow 1982](bibliography.md#bb0095), [Bobrow et al.
-1986](bibliography.md#bb0105), [Stefik and Bobrow 1986](bibliography.md#bb1185).) CommonLoops continued the New Flavors trend away from message passing by introducing *multimethods*: methods that specialize on more than one argument.
+CLOSに強い影響を与えたもう1つが、Xerox PARCで開発されたCommonLoopsシステムです。
+（[Bobrow 1982](bibliography.md#bb0095)、[Bobrow ほか
+1986](bibliography.md#bb0105)、[Stefik and Bobrow 1986](bibliography.md#bb1185)を参照。）CommonLoopsは、*多重メソッド*、すなわち2つ以上の引数について特殊化するメソッドを導入することで、メッセージ受け渡しから離れるNew Flavorsの流れを推し進めました。
 
-As of summer 1991, CLOS itself is in a state of limbo.
-It was legitimized by its appearance in *Common Lisp the Language*, 2d edition, but it is not yet official, and an important part, the metaobject protocol, is not yet complete.
-A tutorial on CLOS is [Keene 1989](bibliography.md#bb0620).
+1991年の夏の時点で、CLOS自体は宙ぶらりんの状態にあります。
+*Common Lisp the Language* 第2版に載ったことで正統なものとされましたが、まだ公式ではなく、重要な部分であるメタオブジェクトプロトコルもまだ完成していません。
+CLOSの入門書としては[Keene 1989](bibliography.md#bb0620)があります。
 
-We have seen how easy it is to build an object-oriented system on top of Lisp, using `lambda` as the primary tool.
-An interesting alternative is to build Lisp on top of an object-oriented system.
-That is the approach taken in the Oaklisp system of [Lang and Perlmutter (1988)](bibliography.md#bb0695).
-Instead of defining methods using `lambda` as the primitive, Oaklisp has `add-method` as a primitive and defines `lambda` as a macro that adds a method to an anonymous, empty operation.
+`lambda` をおもな道具として、Lispの上にオブジェクト指向システムを築くのがいかに簡単かを見てきました。
+これと逆に、オブジェクト指向システムの上にLispを築くという興味深い道もあります。
+それが[Lang and Perlmutter（1988）](bibliography.md#bb0695)のOaklispシステムが採った方式です。
+`lambda` を基本要素としてメソッドを定義するのではなく、Oaklispは `add-method` を基本要素とし、`lambda` を、無名で空の操作にメソッドを加えるマクロとして定義しています。
 
-Of course, object-oriented systems are thriving outside the Lisp world.
-With the success of UNIX-based workstations, C has become one of the most widely available programming languages.
-C is a fairly low-level language, so there have been several attempts to use it as a kind of portable assembly language.
-The most successful of these attempts is C++, a language developed by Bjarne Stroustrup of AT&T Bell Labs ([Stroustrup 1986](bibliography.md#bb1210)).
-C++ provides a number of extensions, including the ability to define classes.
-However, as an add-on to an existing language, it does not provide as many features as the other languages discussed here.
-Crucially, it does not provide garbage collection, nor does it support fully generic functions.
+もちろん、オブジェクト指向システムはLispの世界の外でも栄えています。
+UNIXにもとづくワークステーションの成功によって、Cはもっとも広く手に入るプログラミング言語の1つになりました。
+Cはかなり低水準の言語なので、これを一種の可搬なアセンブリ言語として使おうという試みがいくつかありました。
+その試みのなかでもっとも成功したのがC++で、AT&Tベル研究所のBjarne Stroustrupが開発した言語です（[Stroustrup 1986](bibliography.md#bb1210)）。
+C++は、クラスを定義する能力をはじめ、数多くの拡張を備えています。
+しかし既存の言語への付け足しであるため、ここで論じた他の言語ほど多くの機能は備えていません。
+決定的なことに、ごみ集めを備えておらず、完全な総称関数も支えていません。
 
-Eiffel ([Meyer 1988](bibliography.md#bb0830)) is an attempt to define an object-oriented system from the ground up rather than tacking it on to an existing language.
-Eiffel supports multiple inheritance and garbage collection and a limited amount of dynamic dispatching.
+Eiffel（[Meyer 1988](bibliography.md#bb0830)）は、既存の言語に付け足すのではなく、オブジェクト指向システムを土台から定義しようという試みです。
+Eiffelは多重継承とごみ集め、そして限られた範囲の動的な振り分けを支えています。
 
-So-called modern languages like Ada and Modula support information-hiding through generic functions and classes, but they do not provide inheritance, and thus can not be classified as true object-oriented languages.
+AdaやModulaのようないわゆる現代的な言語は、総称関数とクラスによる情報隠蔽を支えていますが、継承を備えていないので、真のオブジェクト指向言語には分類できません。
 
-Despite these other languages, the Lisp-based object-oriented systems are the only ones since Smalltalk to introduce important new concepts: multiple inheritance and method combination from Flavors, and multimethods from CommonLoops.
+これら他の言語があってなお、Smalltalk以降に重要な新しい概念を持ち込んだのはLispにもとづくオブジェクト指向システムだけです。Flavorsからの多重継承とメソッド結合、そしてCommonLoopsからの多重メソッドです。
 
-## 13.12 Exercises
+## 13.12 練習問題
 
-**Exercise  13.3 [m]** Implement `deposit` and `interest` methods for the `account` class using CLOS.
+**練習問題 13.3 [m]** CLOSを使って、`account` クラスの `deposit` メソッドと `interest` メソッドを実装せよ。
 
-**Exercise  13.4 [m]** Implement the `password-account` class using CLOS.
-Can it be done as cleanly with inheritance as it was done with delegation?
-Or should you use delegation within CLOS?
+**練習問題 13.4 [m]** CLOSを使って `password-account` クラスを実装せよ。
+委譲で行ったときと同じくらいきれいに、継承で行えるか。
+それともCLOSのなかでも委譲を使うべきか。
 
-**Exercise  13.5 [h]** Implement graph searching, search paths, and A* searching as classes in CLOS.
+**練習問題 13.5 [h]** グラフの探索、探索経路、A*探索を、CLOSのクラスとして実装せよ。
 
-**Exercise  13.6 [h]** Implement a priority queue to hold the states of a problem.
-Instead of a list, the `problem-states` will be a vector of lists, each initially null.
-Each new state will have a priority (determined by the generic function `priority`) which must be an integer between zero and the length of the vector, where zero indicates the highest priority.
-A new state with priority *p* is pushed onto element *p* of the vector, and the state to be explored next is the first state in the first nonempty position.
-As stated in the text, some of the previously defined methods made the unwarranted assumption that `problem-states` would always hold a list.
-Change these methods.
+**練習問題 13.6 [h]** 問題の状態を保つ優先度つき待ち行列を実装せよ。
+`problem-states` はリストではなく、リストのベクタとし、各要素は最初はnullとする。
+新しい状態はそれぞれ（総称関数 `priority` が定める）優先度を持ち、これは0からベクタの長さまでの整数でなければならない。0がもっとも高い優先度を表す。
+優先度 *p* の新しい状態はベクタの要素 *p* に積まれ、次に調べる状態は、空でない最初の位置にある最初の状態とする。
+本文で述べたとおり、これまでに定義したメソッドのいくつかは、`problem-states` が常にリストを保つという保証のない前提を置いていた。
+これらのメソッドを変えよ。
 
 ----------------------
 
 <a id="fn13-1"></a><sup>[1](#tfn13-1)</sup>
-More accurately, we have a guarantee that there is no way to get at the inside of a closure using portable Common Lisp code.
-Particular implementations may provide debugging tools for getting at this hidden information, such as `inspect`.
-So closures are not perfect at hiding information from these tools.
-Of course, no information-hiding method will be guaranteed against such covert channels-even with the most sophisticated software security measures, it is always possible to, say, wipe a magnet over the computer's disks and alter sensitive data.
+より正確に言えば、可搬なCommon Lispのコードではクロージャの内側に手を伸ばす方法がない、ということが保証されています。
+個別の実装は、`inspect` のように、この隠された情報に手を伸ばすデバッグの道具を備えているかもしれません。
+ですからクロージャは、この種の道具から情報を隠すことにかけては完璧ではありません。
+もっとも、どんな情報隠蔽の手法もこの種の抜け道に対して安全を保証できはしません。どれほど洗練されたソフトウェアの安全対策をとっても、たとえば計算機のディスクに磁石をあてて大事なデータを書き換えることは、いつでもできてしまうのですから。
 
 <a id="fn13-2"></a><sup>[2](#tfn13-2)</sup>
-There is a technical sense of "generic function" that is used within CLOS.
-These functions are not generic according to this technical sense.
+CLOSのなかでは、「総称関数」という語が専門的な意味で使われています。
+ここで挙げた関数は、その専門的な意味では総称的ではありません。
 
 <a id="fn13-3"></a><sup>[3](#tfn13-3)</sup>
-Flavor fans will be happy to know that Steve's Ice Cream is now sold nationally in the United States.
-Alas, it is not possible to create flavors dynamically.
-Also, be warned that Steve's was bought out by his Teal Square rival, Joey's.
-The original Steve retired from the business for years, then came back with a new line of stores under his last name, Harrell.
+フレーバー好きには朗報でしょうが、Steve's Ice Cream は今では合衆国の全国で売られています。
+あいにく、その場で味を作ってもらうことはできませんが。
+また、Steve's はティール・スクエアの商売敵 Joey's に買収されたので、その点はご承知おきを。
+元祖のSteveは何年か商売から退いたのち、自分の姓であるHarrellを冠した新しい店を出して戻ってきました。
 
