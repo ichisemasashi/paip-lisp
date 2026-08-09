@@ -446,6 +446,30 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | vivid / vividness | 鮮明な／鮮明さ | Levesqueの用語。絵に直に描ける命題 |
 | prototype | 原型 | 区分の典型例。「試作」ではない |
 
+### 第15章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| canonical form | 標準形 | 等しい式なら同一の形になる内部表現 |
+| canonical simplification | 標準的な簡約 | |
+| canonicalize | 標準形にする | 関数名 `canon` はそのまま |
+| polynomial | 多項式 | 数学の概念とLispの型の両方を指す |
+| main variable / coefficient / degree | 主変数／係数／次数 | |
+| dense / sparse | 密／疎 | 多項式の係数の埋まり方 |
+| rational expression | 有理式 | 2つの多項式の商 |
+| numerator / denominator | 分子／分母 | |
+| differentiate / integrate | 微分する／積分する | 定積分は「定積分」 |
+| derivative | 導関数 | |
+| exponentiation | 冪乗 | `poly^n` |
+| binomial theorem | 二項定理 | |
+| closed under | 〜について閉じている | 加算・乗算について閉じている |
+| halting problem | 停止問題 | |
+| differentiable field | 微分体 | Rischの積分アルゴリズムの前提 |
+| benchmark | 性能測定 | 動詞は「性能を測る」 |
+| speed-up | 速度向上 | 性能比較の表の見出し |
+| normalize | 正規化する | `normalize-poly`。標準形（canonical）とは別語 |
+| cdr-coding | cdr符号化 | 脚注。リストの記憶を詰める古い技法 |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -527,8 +551,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter14.md` | 完了 |
-| `chapter15.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter15.md` | 完了 |
+| `chapter16.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
