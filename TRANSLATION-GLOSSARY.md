@@ -527,6 +527,37 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | texture | 肌理 | 低水準の視覚が検出するもの |
 | pixel | 画素 | |
 
+### 第18章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| Othello / Reversi | オセロ／リバーシ | |
+| board / square / piece | 盤／マス／石 | |
+| move | 手 | 動詞は「打つ」 |
+| valid / legal move | 正しい手／合法な手 | 18.2節で原著が明確に区別している |
+| flip / bracket | 裏返す／挟む | |
+| pass / forfeit / resign | パス／失格／投了 | |
+| edge / corner | 辺／隅 | X・A・B・Cのマス名は原文のまま |
+| ply | プライ | 探索の深さ1段。「手」だと move と紛れる |
+| minimax | ミニマックス | |
+| alpha-beta cutoff / pruning | アルファベータの打ち切り／枝刈り | |
+| evaluation function | 評価関数 | static evaluation は「静的な評価」 |
+| backed-up value | 遡らせた値 | 葉から上へ伝えた値 |
+| branching factor | 分岐数 | |
+| weighted squares | 重み付きマス | |
+| mobility | 着手可能性 | current / potential は「現在の／潜在的な」 |
+| edge stability | 辺の安定性 | stable / semistable / unstable = 安定／半安定／不安定 |
+| killer move / killer heuristic | キラー手／キラーのヒューリスティック | |
+| static ordering / sorted ordering | 静的順序／並べ替え順 | random ordering は「でたらめ順」 |
+| iterative deepening | 反復深化 | 第6章・第14章と同じ |
+| forward pruning | 前向き枝刈り | nonspeculative は「当て推量によらない」 |
+| aspiration search / zero-window search | アスピレーション探索／ゼロ窓探索 | |
+| think-ahead | 先読み思考 | 相手の手番中に計算すること |
+| opening book / book moves | 定石書／定石 | |
+| metareasoning | メタ推論 | |
+| genetic algorithm / neural net | 遺伝的アルゴリズム／ニューラルネット | |
+| precycling | プリサイクル | 18.10節。ごみを出さない工夫の比喩 |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -608,8 +639,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter17.md` | 完了 |
-| `chapter18.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter18.md` | 完了 |
+| `chapter19.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
