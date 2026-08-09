@@ -1,82 +1,82 @@
-# Chapter 23
-## Compiling Lisp
+# 第23章
+## Lispのコンパイル
 
-Many textbooks show simple interpreters for Lisp, because they are simple to write, and because it is useful to know how an interpreter works.
-Unfortunately, not as many textbooks show how to write a compiler, even though the same two reasons hold.
-The simplest compiler need not be much more complex than an interpreter.
+多くの教科書がLispの単純なインタプリタを示します。書くのが簡単だからであり、インタプリタの働きを知るのが役に立つからでもあります。
+あいにく、コンパイラの書き方を示す教科書はそれほど多くありません。同じ2つの理由が当てはまるというのにです。
+もっとも単純なコンパイラは、インタプリタよりさほど込み入っている必要はありません。
 
-One thing that makes a compiler more complex is that we have to describe the output of the compiler: the instruction set of the machine we are compiling for.
-For the moment let's assume a stack-based machine.
-The calling sequence on this machine for a function call with *n* arguments is to push the *n* arguments onto the stack and then push the function to be called.
-A "`CALL` *n*" instruction saves the return point on the stack and goes to the first instruction of the called function.
-By convention, the first instruction of a function will always be "`ARGS` *n*", which pops *n* arguments off the stack, putting them in the new function's environment, where they can be accessed by `LVAR` and `LSET` instructions.
-The function should return with a `RETURN` instruction, which resets the program counter and the environment to the point of the original `CALL` instruction.
+コンパイラをより込み入ったものにする点の1つは、その出力、すなわちコンパイル先の機械の命令セットを記述せねばならないことです。
+当面はスタックにもとづく機械を仮定しましょう。
+この機械で *n* 個の引数を持つ関数を呼ぶ手順は、*n* 個の引数をスタックに積み、それから呼ぶ関数を積むというものです。
+「`CALL` *n*」の命令は、戻り先をスタックに保存し、呼ばれた関数の最初の命令へ進みます。
+約束として、関数の最初の命令は常に「`ARGS` *n*」です。これはスタックから *n* 個の引数を降ろし、新しい関数の環境に置きます。そこでは `LVAR` と `LSET` の命令でアクセスできます。
+関数は `RETURN` 命令で戻るべきです。これはプログラムカウンタと環境を、もとの `CALL` 命令の地点へ戻します。
 
-In addition, our machine has three `JUMP` instructions; one that branches unconditionally, and two that branch depending on if the top of the stack is nil or non-nil.
-There is also an instruction for popping unneeded values off the stack, and for accessing and altering global variables.
-The instruction set is shown in figure 23.1.
-A glossary for the compiler program is given in figure 23.2.
-A summary of a more complex version of the compiler appears in [figure 23.3](#figure-23-3).
+さらにこの機械には `JUMP` の命令が3つあります。無条件に分岐するものと、スタックの先頭がnilかnilでないかに応じて分岐するものが2つです。
+不要な値をスタックから降ろす命令と、大域変数にアクセスして書き換える命令もあります。
+命令セットを図23.1に示します。
+コンパイラのプログラムの用語一覧を図23.2に挙げます。
+より込み入った版のコンパイラのまとめは[図23.3](#figure-23-3)にあります。
 
 
-| opcode | args  | description                                             |
+| 命令   | 引数  | 説明                                                    |
 |--------|-------|---------------------------------------------------------|
-| CONST  | x     | Push a constant on the stack.                           |
-| LVAR   | i,j   | Push a local variable's value.                          |
-| GVAR   | sym   | Push a global variable's value.                         |
-| LSET   | i,j   | Store top-of-stack in a local variable.                 |
-| GSET   | sym   | Store top-of-stack in a global variable.                |
-| POP    |       | Pop the stack.                                          |
-| TJUMP  | label | Go to label if top-of-stack is non-nil; pop stack.      |
-| FJUMP  | label | Go to label if top-of-stack is nil; pop stack.          |
-| JUMP   | label | Go to label (don't pop stack).                          |
-| RETURN |       | Go to last return point.                                |
-| ARGS   | n     | Move *n* arguments from stack to environment.           |
-| CALL   | n     | Go to start of function, saving return point,           |
-|        |       | [where] *n* is the number of arguments passed.          |
-| FN     | fn    | Create  a closure from argument and current environment |
-|        |       | and push it on the stack.                               |
+| CONST  | x     | 定数をスタックに積む。                                  |
+| LVAR   | i,j   | 局所変数の値を積む。                                    |
+| GVAR   | sym   | 大域変数の値を積む。                                    |
+| LSET   | i,j   | スタックの先頭を局所変数に格納する。                    |
+| GSET   | sym   | スタックの先頭を大域変数に格納する。                    |
+| POP    |       | スタックから降ろす。                                    |
+| TJUMP  | label | 先頭がnilでなければラベルへ進む。スタックから降ろす。   |
+| FJUMP  | label | 先頭がnilならラベルへ進む。スタックから降ろす。         |
+| JUMP   | label | ラベルへ進む（スタックからは降ろさない）。              |
+| RETURN |       | 直近の戻り先へ進む。                                    |
+| ARGS   | n     | 引数 *n* 個をスタックから環境へ移す。                   |
+| CALL   | n     | 戻り先を保存して関数の先頭へ進む。                      |
+|        |       | *n* は渡された引数の個数。                              |
+| FN     | fn    | 引数と現在の環境からクロージャを作り、                  |
+|        |       | それをスタックに積む。                                  |
 
-Figure 23.1: Instruction Set for Hypothetical Stack Machine
+図23.1: 仮想のスタック機械の命令セット
 
 
-| Function          | Description                                        |
+| 関数              | 説明                                               |
 |-------------------|----------------------------------------------------|
 |                   | **Top-Level Functions**                            |
-| `comp-show`       | Compile an expression and show the resulting code. |
-| `compiler`        | Compile an expression as a parameterless function. |
+| `comp-show`       | 式をコンパイルし、できたコードを表示する。         |
+| `compiler`        | 式を引数なしの関数としてコンパイルする。           |
 |                   | **Special Variables**                              |
-| `*label-num*`     | Number for the next assembly language label.       |
-| `*primitive-fns*` | List of built-in Scheme functions.                 |
+| `*label-num*`     | 次のアセンブリ言語のラベルの番号。                 |
+| `*primitive-fns*` | Schemeの組み込み関数の並び。                       |
 |                   | **Data Types**                                     |
-| `fn`              | A Scheme function.                                 |
+| `fn`              | Schemeの関数。                                     |
 |                   | **Major Functions**                                |
-| `comp`            | Compile an expression into a list of instructions. |
-| `comp-begin`      | Compile a sequence of expressions.                 |
-| `comp-if`         | Compile a conditional (`if`) expression.           |
-| `comp-lambda`     | Compile a lambda expression.                       |
+| `comp`            | 式を命令の並びへコンパイルする。                   |
+| `comp-begin`      | 式の連なりをコンパイルする。                       |
+| `comp-if`         | 条件（`if`）の式をコンパイルする。                 |
+| `comp-lambda`     | ラムダ式をコンパイルする。                         |
 |                   | **Auxiliary Functions**                            |
-| `gen`             | Generate a single instruction.                     |
-| `seq`             | Generate a sequence of instructions.               |
-| `gen-label`       | Generate an assembly language label.               |
-| `gen-var`         | Generate an instruction to reference a variable.   |
-| `gen-set`         | Generate an instruction to set a variable.         |
-| `name!`           | Set the name of a function to a given value.       |
-| `print-fn`        | Print a Scheme function (just the name).           |
-| `show-fn`         | Print the instructions in a Scheme function.       |
-| `label-p`         | Is the argument a label?                           |
-| `in-env-p`        | Is the symbol in the environment?  If so, where?   |
+| `gen`             | 命令を1つ生成する。                                |
+| `seq`             | 命令の連なりを生成する。                           |
+| `gen-label`       | アセンブリ言語のラベルを生成する。                 |
+| `gen-var`         | 変数を参照する命令を生成する。                     |
+| `gen-set`         | 変数を設定する命令を生成する。                     |
+| `name!`           | 関数の名前を与えた値に設定する。                   |
+| `print-fn`        | Schemeの関数を表示する（名前だけ）。               |
+| `show-fn`         | Schemeの関数のなかの命令を表示する。               |
+| `label-p`         | 引数はラベルか。                                   |
+| `in-env-p`        | そのシンボルは環境にあるか。あるならどこか。       |
 
-Figure 23.2: Glossary for the Scheme Compiler
+図23.2: Schemeコンパイラの用語一覧
 
 
-As an example, the procedure
+例として、次の手続きは
 
 ```lisp
 (lambda () (if (= x y) (f (g x)) (h x y (h 1 2))))
 ```
 
-should compile into the following instructions:
+次の命令列にコンパイルされるはずです。
 
 ```
       ARGS    0
@@ -102,9 +102,9 @@ L1:   GVAR    X
 L2:   RETURN
 ```
 
-The first version of the Scheme compiler is quite simple.
-It mimics the structure of the Scheme evaluator.
-The difference is that each case generates code rather than evaluating a subexpression:
+Schemeコンパイラの最初の版は、ごく単純です。
+Schemeの評価器の構造をまねています。
+違いは、各場合が部分式を評価するのではなくコードを生成することです。
 
 ```lisp
 (defun comp (x env)
@@ -127,10 +127,10 @@ The difference is that each case generates code rather than evaluating a subexpr
 
 ```
 
-The compiler `comp` has the same nine cases-in fact the exact same structure-as the interpreter `interp` from [chapter 22](chapter22.md).
-Each case is slightly more complex, so the three main cases have been made into separate functions: `comp-begin`, `comp-if`, and `comp-lambda.` A `begin` expression is compiled by compiling each argument in turn but making sure to pop each value but the last off the stack after it is computed.
-The last element in the `begin` stays on the stack as the value of the whole expression.
-Note that the function `gen` generates a single instruction (actually a list of one instruction), and `seq` makes a sequence of instructions out of two or more subsequences.
+コンパイラ `comp` は、[第22章](chapter22.md)のインタプリタ `interp` と同じ9つの場合、実のところまったく同じ構造を持ちます。
+各場合が少しずつ込み入っているので、おもな3つは別々の関数 `comp-begin`、`comp-if`、`comp-lambda` にしてあります。`begin` の式は、各引数を順にコンパイルし、最後のもの以外は計算後に必ずスタックから降ろすようにしてコンパイルします。
+`begin` の最後の要素は、式全体の値としてスタックに残ります。
+関数 `gen` は命令を1つ（実際には命令1つの並びを）生成し、`seq` は2つ以上の部分列から命令の連なりを作ることに注意してください。
 
 ```lisp
 (defun comp-begin (exps env)
@@ -142,7 +142,7 @@ Note that the function `gen` generates a single instruction (actually a list of 
                 (comp-begin (rest exps) env)))))
 ```
 
-An `if` expression is compiled by compiling the predicate, then part, and else part, and by inserting appropriate branch instructions.
+`if` の式は、述語・thenの部分・elseの部分をコンパイルし、適切な分岐命令を差し込むことでコンパイルします。
 
 ```lisp
 (defun comp-if (pred then else env)
@@ -155,8 +155,8 @@ An `if` expression is compiled by compiling the predicate, then part, and else p
          (list L2))))
 ```
 
-Finally, a `lambda` expression is compiled by compiling the body, surrounding it with one instruction to set up the arguments and another to return from the function, and then storing away the resulting compiled code, along with the environment.
-The data type `fn` is implemented as a structure with slots for the body of the code, the argument list, and the name of the function (for printing purposes only).
+最後に `lambda` の式は、本体をコンパイルし、引数を用意する命令と関数から戻る命令で挟み、できたコードを環境とともにしまい込むことでコンパイルします。
+データ型 `fn` は、コードの本体・引数の並び・関数の名前（表示のためだけのもの）のスロットを持つ構造体として実装します。
 
 ```lisp
 (defstruct (fn (:print-function print-fn))
@@ -175,17 +175,17 @@ The data type `fn` is implemented as a structure with slots for the body of the 
                (gen 'RETURN))))
 ```
 
-The advantage of compiling over interpreting is that much can be decided at compile time.
-For example, the compiler can determine if a variable reference is to a global or lexical variable, and if it is to a lexical variable, exactly where that lexical variable is stored.
-This computation is done only once by the compiler, but it has to be done each time the expression is encountered by the interpreter.
-Similarly, the compiler can count up the number of arguments once and for all, while the interpreter must go through a loop, counting up the number of arguments, and testing for the end of the arguments after each one is interpreted.
-So it is clear that the compiler can be more efficient than the interpreter.
+解釈よりコンパイルが優れているのは、多くのことをコンパイル時に決められる点です。
+たとえばコンパイラは、変数の参照が大域変数へのものかレキシカル変数へのものかを見定められますし、レキシカル変数なら、それがどこに格納されているかも正確にわかります。
+この計算はコンパイラなら一度きりですが、インタプリタではその式に出くわすたびに行わねばなりません。
+同じく、コンパイラは引数の個数を一度数えれば済みますが、インタプリタはループを回して引数を数え、1つ解釈するごとに引数の終わりかを調べねばなりません。
+ですからコンパイラのほうがインタプリタより効率的でありうるのは明らかです。
 
-Another advantage is that the compiler can be more robust.
-For example, in `comp-lambda,` we check that the parameter list of a lambda expression is a list containing only symbols.
-It would be too expensive to make such checks in an interpreter, but in a compiler it is a worthwhile trade-off to check once at compile time for error conditions rather than checking repeatedly at run time.
+もう1つの利点は、コンパイラのほうが頑健でありうることです。
+たとえば `comp-lambda` では、ラムダ式の引数の並びがシンボルだけを含む並びであることを調べています。
+インタプリタでそうした検査をするのは高くつきすぎますが、コンパイラなら、実行時に繰り返し調べるより、コンパイル時に一度だけ誤りの条件を調べるほうが、割に合う折り合いです。
 
-Before we show the rest of the compiler, here's a useful top-level interface to `comp`:
+コンパイラの残りを示す前に、`comp` への便利な最上位の窓口を示します。
 
 ```lisp
 (defvar *label-num* 0)
@@ -201,9 +201,9 @@ Before we show the rest of the compiler, here's a useful top-level interface to 
   (values))
 ```
 
-Now here's the code to generate individual instructions and sequences of instructions.
-A sequence of instructions is just a list, but we provide the function `seq` rather than using `append` directly for purposes of data abstraction.
-A label is just an atom.
+次に、個々の命令と命令の連なりを生成するコードを示します。
+命令の連なりは単なる並びですが、データ抽象のために `append` を直に使うのではなく関数 `seq` を用意します。
+ラベルは単なるアトムです。
 
 ```lisp
 (defun gen (opcode &rest args)
@@ -219,10 +219,10 @@ A label is just an atom.
   (intern (format nil "~a~d" label (incf *label-num*))))
 ```
 
-Environments are now represented as lists of frames, where each frame is a sequence of variables.
-Local variables are referred to not by their name but by two integers: the index into the list of frames and the index into the individual frame.
-As usual, the indexes are zero-based.
-For example, given the code:
+環境はフレームの並びとして表され、各フレームは変数の連なりです。
+局所変数は名前ではなく2つの整数、すなわちフレームの並びへの添字と、個々のフレームへの添字で参照されます。
+いつもどおり、添字は0から始まります。
+たとえば次のコードがあるとします。
 
 ```lisp
 (let ((a 2.0)
@@ -234,9 +234,9 @@ For example, given the code:
       (+ a b c d e f))))
 ```
 
-the innermost environment is `((e f) (c d) (a b))`.
-The function `in-env-p` tests if a variable appears in an environment.
-If this environment were called `env`, then `(in-env-p 'f env)` would return `(0 1)` and `(in-env-p 'x env)` would return `nil`.
+もっとも内側の環境は `((e f) (c d) (a b))` です。
+関数 `in-env-p` は、変数が環境に現れるかを調べます。
+この環境を `env` と呼ぶなら、`(in-env-p 'f env)` は `(0 1)` を、`(in-env-p 'x env)` は `nil` を返します。
 
 ```lisp
 (defun gen-var (var env)
@@ -259,10 +259,10 @@ If this environment were called `env`, then `(in-env-p 'f env)` would return `(0
             (lambda ,(rest name) . ,body)))))
 ```
 
-Finally, we have some auxiliary functions to print out the results, to distinguish between labels and instructions, and to determine the index of a variable in an environment.
-Scheme functions now are implemented as structures, which must have a field for the code, and one for the environment.
-In addition, we provide a field for the name of the function and for the argument list; these are used only for debugging purposes.
-We'll adopt the convention that the `define` macro sets the function's name field, by calling `name!` (which is not part of standard Scheme).
+最後に、結果を表示する関数、ラベルと命令を見分ける関数、環境のなかの変数の添字を求める関数がいくつかあります。
+Schemeの関数は構造体として実装され、コードの欄と環境の欄を持たねばなりません。
+加えて、関数の名前の欄と引数の並びの欄も設けます。これらはデバッグのためだけに使います。
+マクロ `define` が `name!`（これは標準のSchemeの一部ではありません）を呼んで関数の名前の欄を設定する、という約束を採ります。
 
 ```lisp
 (defun name! (fn name)
@@ -304,7 +304,7 @@ We'll adopt the convention that the `define` macro sets the function's name fiel
     (if frame (list (position frame env) (position symbol frame)))))
 ```
 
-Now we are ready to show the compiler at work:
+これでコンパイラが働くようすを示す用意ができました。
 
 ```
 > (comp-show '(if (= x y) (f (g x)) (h x y (h 1 2))))
@@ -334,10 +334,10 @@ Now we are ready to show the compiler at work:
 |       | `CALL`   | `3`  |
 | `L2:` | `RETURN` |      |
 
-This example should give the reader a feeling for the code generated by the compiler.
+この例で、コンパイラが生成するコードの感じがつかめるでしょう。
 
-Another reason a compiler has an advantage over an interpreter is that the compiler can afford to spend some time trying to find a more efficient encoding of an expression, while for the interpreter, the overhead of searching for a more efficient interpretation usually offsets any advantage gained.
-Here are some places where a compiler could do better than an interpreter (although our compiler currently does not):
+コンパイラがインタプリタより有利なもう1つの理由は、式のより効率のよい表し方を探すのに時間をかける余裕があることです。インタプリタでは、より効率のよい解釈を探す手間が、得られる利点をたいてい打ち消してしまいます。
+コンパイラがインタプリタより良くやれる箇所をいくつか挙げます（もっとも、私たちのコンパイラはいまのところそうしていません）。
 
 ```
 > (comp-show '(begin "doc" (write x) y))
@@ -355,9 +355,9 @@ Here are some places where a compiler could do better than an interpreter (altho
 |      | `GVAR`   | `Y`     |
 |      | `RETURN` |         |
 
-In this example, code is generated to push the constant "`doc`" on the stack and then immediately pop it off.
-If we have the compiler keep track of what expressions are compiled "for value"-as y is the value of the expression above-and which are only compiled "for effect," then we can avoid generating any code at all for a reference to a constant or variable for effect.
-Here's another example:
+この例では、定数「`doc`」をスタックに積み、すぐに降ろすコードが生成されています。
+どの式が「値のために」コンパイルされ（上の式では y がその値です）、どれが「効果のためだけに」コンパイルされるかをコンパイラに記録させれば、効果のための定数や変数の参照には、コードをまったく生成せずに済みます。
+もう1つ例を示します。
 
 ```
 > (comp-show '(begin (+ (* a x) (f x)) x))
@@ -379,12 +379,12 @@ Here's another example:
 | `GVAR`   | `X` |
 | `RETURN` |     |
 
-In this expression, if we can be assured that `+` and `*` refer to the normal arithmetic functions, then we can compile this as if it were `(begin (f x) x)`.
-Furthermore, it is reasonable to assume that `+` and `*` will be instructions in our machine that can be invoked inline, rather than having to call out to a function.
-Many compilers spend a significant portion of their time optimizing arithmetic operations, by taking into account associativity, commutativity, distributivity, and other properties.
+この式では、`+` と `*` がふつうの算術関数を指すと保証できるなら、これを `(begin (f x) x)` であるかのようにコンパイルできます。
+さらに、`+` と `*` は関数を呼び出さずにその場で実行できる、この機械の命令になると考えるのが妥当です。
+多くのコンパイラは、結合法則・交換法則・分配法則などの性質を考えに入れて算術演算を最適化することに、かなりの時間を費やします。
 
-Besides arithmetic, compilers often have expertise in conditional expressions.
-Consider the following:
+算術のほかに、コンパイラは条件式についての心得を持つこともよくあります。
+次を考えてみましょう。
 
 ```
 > (comp-show '(if (and p q) x y))
@@ -404,16 +404,16 @@ Consider the following:
 | `L1:` | `GVAR`   | `Y`   |
 | `L2:` | `RETURN` |       |
 
-Note that `(and p q)` macro-expands to `(if p q nil)`.
-The resulting compiled code is correct, but inefficient.
-First, there is an unconditional jump to `L4`, which labels a conditional jump to `L1`.
-This could be replaced with a conditional jump to `L1`.
-Second, at `L3` we load `NIL` and then jump on nil to `L1`.
-These two instructions could be replaced by an unconditional jump to `L1`.
-Third, the `FJUMP` to `L3` could be replaced by an `FJUMP` to `L1`, since we now know that the code at `L3` unconditionally goes to `L1`.
+`(and p q)` が `(if p q nil)` にマクロ展開されることに注意してください。
+できあがったコードは正しいものの、効率が悪いのです。
+第一に、`L4` への無条件の分岐がありますが、`L4` は `L1` への条件分岐に付いたラベルです。
+これは `L1` への条件分岐で置き換えられます。
+第二に、`L3` では `NIL` を読み込んでから、nilなら `L1` へ分岐しています。
+この2つの命令は、`L1` への無条件の分岐で置き換えられます。
+第三に、`L3` への `FJUMP` は `L1` への `FJUMP` で置き換えられます。`L3` のコードが無条件に `L1` へ進むとわかったからです。
 
-Finally, some compilers, particularly Lisp compilers, have expertise in function calling.
-Consider the following:
+最後に、一部のコンパイラ、とりわけLispのコンパイラは、関数呼び出しについての心得を持ちます。
+次を考えてみましょう。
 
 ```
 > (comp-show '(f (g x y)))
@@ -430,17 +430,17 @@ Consider the following:
 |      | `CALL`   | `1` |
 |      | `RETURN` |     |
 
-Here we call `g` and when `g` returns we call `f`, and when `f` returns we return from this function.
-But this last return is wasteful; we push a return address on the stack, and then pop it off, and return to the next return address.
-An alternative function-calling protocol involves pushing the return address before calling `g,` but then not pushing a return address before calling `f;` when `f` returns, it returns directly to the calling function, whatever that is.
+ここでは `g` を呼び、`g` が戻ったら `f` を呼び、`f` が戻ったらこの関数から戻ります。
+しかしこの最後の戻りは無駄です。戻り先のアドレスをスタックに積み、それを降ろし、次の戻り先へ戻っているのですから。
+別の関数呼び出しの取り決めでは、`g` を呼ぶ前には戻り先を積みますが、`f` を呼ぶ前には積みません。`f` が戻るとき、それが何であれ呼び手の関数へ直に戻ります。
 
-Such an optimization looks like a small gain; we basically eliminate a single instruction.
-In fact, the implications of this new protocol are enormous: we can now invoke a recursive function to an arbitrary depth without growing the stack at all-as long as the recursive call is the last statement in the function (or in a branch of the function when there are conditionals).
-A function that obeys this constraint on its recursive calls is known as a *properly tail-recursive* function.
-This subject was discussed in [section 22.3.](chapter22.md#s0020)
+この最適化は小さな得に見えます。要するに命令を1つ省いただけなのですから。
+しかし実のところ、この新しい取り決めの意味するところは絶大です。再帰の呼び出しが関数の最後の文であるかぎり（条件分岐があるなら、関数のその枝の最後であるかぎり）、スタックをまったく伸ばさずに再帰関数を任意の深さまで呼べるようになるのです。
+再帰の呼び出しについてこの制約を守る関数を、*末尾再帰を正しく扱う*関数と呼びます。
+この主題は[22.3節](chapter22.md#s0020)で論じました。
 
-All the examples so far have only dealt with global variables.
-Here's an example using local variables:
+ここまでの例は、どれも大域変数しか扱っていませんでした。
+局所変数を使う例を示します。
 
 ```
 > (comp-show '((lambda (x) ((lambda (y z) (f x y z)) 3 x)) 4))
@@ -467,22 +467,22 @@ Here's an example using local variables:
 | `CALL`   | `1`      |          |     |     |     |     |
 | `RETURN` |          |          |     |     |     |     |
 
-The code is indented to show nested functions.
-The top-level function loads the constant 4 and an anonymous function, and calls the function.
-This function loads the constant 3 and the local variable `x`, which is the first (0th) element in the top (0th) frame.
-It then calls the double-nested function on these two arguments.
-This function loads `x`, `y`, and `z`: `x` is now the 0th element in the next-to-top (1st) frame, and `y` and `z` are the 0th and 1st elements of the top frame.
-With all the arguments in place, the function `f` is finally called.
-Note that no continuations are stored-`f` can return directly to the caller of this function.
+入れ子の関数を示すために、コードを字下げしてあります。
+最上位の関数は定数4と無名関数を読み込み、その関数を呼びます。
+この関数は定数3と局所変数 `x` を読み込みます。`x` は最上位（0番目）のフレームの最初（0番目）の要素です。
+それから、この2つの引数に二重に入れ子になった関数を呼びます。
+この関数は `x`、`y`、`z` を読み込みます。`x` はいまや最上位の1つ下（1番目）のフレームの0番目の要素で、`y` と `z` は最上位のフレームの0番目と1番目の要素です。
+引数がすべて揃ったところで、ようやく関数 `f` が呼ばれます。
+継続が1つも保存されていないことに注意してください。`f` はこの関数の呼び手へ直に戻れます。
 
-However, all this explicit manipulation of environments is inefficient; in this case we could have compiled the whole thing by simply pushing 4, 3, and 4 on the stack and calling `f`.
+とはいえ、この環境の明示的な操作は効率が悪いのです。この場合、4と3と4をスタックに積んで `f` を呼ぶだけで全体をコンパイルできたはずです。
 
-## 23.1 A Properly Tail-Recursive Lisp Compiler
+## 23.1 末尾再帰を正しく扱うLispコンパイラ
 
-In this section we describe a new version of the compiler, first by showing examples of its output, and then by examining the compiler itself, which is summarized in figure 23.3.
-The new version of the compiler also makes use of a different function calling sequence, using two new instructions, `CALLJ` and `SAVE`.
-As the name implies, `SAVE` saves a return address on the stack.
-The `CALLJ` instruction no longer saves anything; it can be seen as an unconditional jump-hence the `J` in its name.
+本節では新しい版のコンパイラを述べます。まずその出力の例を示し、それからコンパイラそのものを見ていきます。まとめは図23.3にあります。
+新しい版のコンパイラは、関数を呼ぶ手順も変えており、新しい命令 `CALLJ` と `SAVE` を2つ使います。
+名前が示すとおり、`SAVE` は戻り先のアドレスをスタックに保存します。
+`CALLJ` 命令はもう何も保存しません。無条件の分岐と見なせるので、名前に `J` が入っています。
 
 | Function           | Description <a id="figure-23-3"></a>                       |
 |--------------------|------------------------------------------------------------|
@@ -518,9 +518,9 @@ The `CALLJ` instruction no longer saves anything; it can be seen as an unconditi
 | `args`             | The arguments of an instruction.                           |
 | `argi`             | For *i* = 1,2,3 -- select ith argument of instruction.     |
 
-Figure 23.3: Glossary of the Scheme Compiler, Second Version
+図23.3: Schemeコンパイラ第2版の用語一覧
 
-First, we see how nested function calls work:
+まず、入れ子の関数呼び出しがどう働くかを見ます。
 
 ```
 > (comp-show '(f (g x)))
@@ -536,11 +536,11 @@ First, we see how nested function calls work:
 | `K1:` | `GVAR`  | `F`  |
 |       | `CALLJ` | `1`  |
 
-The continuation point `K1` is saved so that g can return to it, but then no continuation is saved for f, so f returns to whatever continuation is on the stack.
-Thus, there is no need for an explicit `RETURN` instruction.
-The final `CALL` is like an unconditional branch.
+継続の地点 `K1` は g がそこへ戻れるように保存されますが、f のためには継続が保存されないので、f はスタックにある継続へ戻ります。
+ですから明示的な `RETURN` 命令は要りません。
+最後の `CALL` は無条件の分岐のようなものです。
 
-The following example shows that all functions but the last `(f)` need a continuation point:
+次の例は、最後の `(f)` を除くすべての関数が継続の地点を必要とすることを示しています。
 
 ```
 > (comp-show '(f (g (h x) (h y))))
@@ -563,12 +563,12 @@ The following example shows that all functions but the last `(f)` need a continu
 | `K1:` | `GVAR`  | `F`  |
 |       | `CALLJ` | `1`  |
 
-This code first computes `(h x)` and returns to `K2`.
-Then it computes `(h y)` and returns to `K3`.
-Next it calls `g` on these two values, and returns to `K1` before transferring to `f`.
-Since whatever `f` returns will also be the final value of the function we are compiling, there is no need to save a continuation point for `f` to return to.
+このコードはまず `(h x)` を計算して `K2` へ戻ります。
+次に `(h y)` を計算して `K3` へ戻ります。
+続いてこの2つの値に `g` を呼び、`f` へ移る前に `K1` へ戻ります。
+`f` が返すものは、いまコンパイルしている関数の最終的な値でもあるので、`f` が戻るための継続の地点を保存する必要はありません。
 
-In the next example we see that unneeded constants and variables in `begin` expressions are ignored:
+次の例では、`begin` の式のなかの不要な定数と変数が無視されることがわかります。
 
 ```
 > (comp-show '(begin "doc" x (f x) y))
@@ -585,10 +585,10 @@ In the next example we see that unneeded constants and variables in `begin` expr
 |       | `GVAR`   | `Y`  |
 |       | `RETURN` |      |
 
-One major flaw with the first version of the compiler is that it could pass data around, but it couldn't actually *do* anything to the data objects.
-We fix that problem by augmenting the machine with instructions to do arithmetic and other primitive operations.
-Unneeded primitive operations, like variables constants, and arithmetic operations are ignored when they are in the nonfinal position within `begins`.
-Contrast the following two expressions:
+最初の版のコンパイラの大きな欠点の1つは、データを引き回せはしても、データそのものに対して実際には何も*できない*ことでした。
+この問題は、算術やその他の基本の操作を行う命令を機械に加えることで直します。
+変数・定数・算術演算といった不要な基本の操作は、`begin` のなかで最後でない位置にあるときには無視されます。
+次の2つの式を対比してみてください。
 
 ```
 > (comp-show '(begin (+ (* a x) (f x)) x))
@@ -620,17 +620,17 @@ Contrast the following two expressions:
 | `K1:` | `+`      |      |
 |       | `RETURN` |      |
 
-The first version of the compiler was context-free, in that it compiled all equivalent expressions equivalently, regardless of where they appeared.
-A properly tail-recursive compiler needs to be context-sensitive: it must compile a call that is the final value of a function differently than a call that is used as an intermediate value, or one whose value is ignored.
-In the first version of the compiler, `comp-lambda` was responsible for generating the `RETURN` instruction, and all code eventually reached that instruction.
-To make sure the `RETURN` was reached, the code for the two branches of `if` expressions had to rejoin at the end.
+最初の版のコンパイラは文脈自由でした。同等の式は、どこに現れようと同じようにコンパイルされたのです。
+末尾再帰を正しく扱うコンパイラは文脈依存でなければなりません。関数の最終的な値となる呼び出しは、途中の値として使われる呼び出しや、値が無視される呼び出しとは違うようにコンパイルせねばならないのです。
+最初の版のコンパイラでは、`RETURN` 命令を生成するのは `comp-lambda` の役目で、すべてのコードがいずれその命令に至りました。
+`RETURN` に確実に至るよう、`if` の式の2つの枝のコードは最後に合流せねばなりませんでした。
 
-In the tail-recursive compiler, each piece of code is responsible for inserting its own `RETURN` instruction or implicitly returning by calling another function without saving a continuation point.
+末尾再帰のコンパイラでは、コードの断片それぞれが、自分の `RETURN` 命令を差し込むか、継続の地点を保存せずに別の関数を呼ぶことで暗に戻るかの役目を負います。
 
-We keep track of these possibilities with two flags.
-The parameter `val?` is true when the expression we are compiling returns a value that is used elsewhere.
-The parameter `more?` is false when the expression represents the final value, and it is true when there is more to compute.
-In summary, there are three possibilities:
+この可能性は2つのフラグで記録します。
+引数 `val?` は、コンパイル中の式が他で使われる値を返すときに真になります。
+引数 `more?` は、その式が最終的な値を表すときに偽、まだ計算が続くときに真になります。
+まとめると、3つの可能性があります。
 
 | `val?` | `more?` | example: the `X` in:            |
 |--------|---------|---------------------------------|
@@ -639,7 +639,7 @@ In summary, there are three possibilities:
 | false  | true    | `(begin X y)`                   |
 | false  | false   | *impossible*                    |
 
-The code for the compiler employing these conventions follows:
+この約束を使うコンパイラのコードを次に示します。
 
 ```lisp
 (defun comp (x env)
@@ -661,12 +661,12 @@ The code for the compiler employing these conventions follows:
                               (gen 'call (length (rest x)))))))))
 ```
 
-Here we've added one more case: `t` and `nil` compile directly into primitive instructions, rather than relying on them being bound as global variables.
-(In real Scheme, the Boolean values are `#t` and `#f`, which need not be quoted, the empty list is `()`, which must be quoted, and `t` and `nil` are ordinary symbols with no special significance.)
+ここでは場合を1つ加えました。`t` と `nil` は、大域変数として束縛されていることに頼るのではなく、直に基本命令へコンパイルされます。
+（本物のSchemeでは、真偽の値はクォートの要らない `#t` と `#f`、空の並びはクォートの要る `()` であり、`t` と `nil` は特別な意味を持たないふつうのシンボルです。）
 
-I've also added some error checking for the number of arguments supplied to quote, `set!` and `if`.
-Note that it is reasonable to do more error checking in a compiler than in an interpreter, since the checking need be done only once, not each time through.
-The function to check arguments is as follows:
+また、quote、`set!`、`if` に与えられた引数の個数について、誤りの検査も加えました。
+インタプリタよりコンパイラで誤りの検査を多めに行うのが妥当なことに注意してください。検査は毎回ではなく一度きりで済むからです。
+引数を調べる関数は次のとおりです。
 
 ```lisp
 (defun arg-count (form min &optional (max min))
@@ -678,17 +678,17 @@ The function to check arguments is as follows:
       (first form) form n-args min (if (/= min max) max))))
 ```
 
-**Exercise  23.1 [m]** Modify the compiler to check for additional compile-time errors suggested by the following erroneous expression:
+**練習問題 23.1 [m]** 次の誤った式が示唆する、コンパイル時の誤りをさらに調べるようコンパイラを変えよ。
 
 ```lisp
 (cdr (+ (list x y) 'y (3 x) (car 3 x)))
 ```
 
-The tail-recursive compiler still has the familiar nine cases, but I have introduced `comp-var, comp-const, comp-if,` and `comp-funcall` to handle the increased complexity introduced by the `var?` and `more?` parameters.
+末尾再帰のコンパイラにも、おなじみの9つの場合がありますが、`var?` と `more?` の引数がもたらす複雑さを扱うために `comp-var, comp-const, comp-if`、`comp-funcall` を導入しました。
 
-Let's go through the `comp-` functions one at a time.
-First, `comp-begin` and `comp-list` just handle and pass on the additional parameters.
-`comp-list` will be used in `comp-funcall`, a new function that will be introduced to compile a procedure application.
+`comp-` の関数を1つずつ見ていきましょう。
+まず `comp-begin` と `comp-list` は、追加の引数を扱って渡すだけです。
+`comp-list` は、手続きの適用をコンパイルするために導入する新しい関数 `comp-funcall` で使います。
 
 ```lisp
 (defun comp-begin (exps env val? more?)
@@ -706,11 +706,11 @@ First, `comp-begin` and `comp-list` just handle and pass on the additional param
            (comp-list (rest exps) env))))
 ```
 
-Then there are two trivial functions to compile variable access and constants.
-If the value is not needed, these produce no instructions at all.
-If there is no more to be done, then these functions have to generate the return instruction.
-This is a change from the previous version of `comp`, where the caller generated the return instruction.
-Note I have extended the machine to include instructions for the most common constants: t, nil, and some small integers.
+次に、変数のアクセスと定数をコンパイルする、ごく簡単な関数が2つあります。
+値が必要なければ、これらは命令をまったく生みません。
+もう続きがなければ、これらの関数は戻りの命令を生成せねばなりません。
+これは前の版の `comp` からの変更です。前の版では呼び手が戻りの命令を生成していました。
+もっともよく使う定数、すなわち t、nil、いくつかの小さな整数のための命令を含むよう、機械を拡張したことに注意してください。
 
 ```lisp
 (defun comp-const (x val? more?)
@@ -725,13 +725,13 @@ Note I have extended the machine to include instructions for the most common con
   (if val? (seq (gen-var x env) (unless more? (gen 'RETURN)))))
 ```
 
-The remaining two functions are more complex.
-First consider `comp-if`.
-Rather than blindly generating code for the predicate and both branches, we will consider some special cases.
-First, it is clear that `(if t x y)` can reduce to `x` and `(if nil x y)` can reduce to `y`.
-It is perhaps not as obvious that `(if p x x)` can reduce to `(begin p x)`, or that the comparison of equality between the two branches should be done on the object code, not the source code.
-Once these trivial special cases have been considered, we're left with three more cases: `(if p x nil), (if p nil y),` and `(if p x y)`.
-The pattern of labels and jumps is different for each.
+残りの2つの関数は、もっと込み入っています。
+まず `comp-if` を考えます。
+述語と両方の枝のコードをやみくもに生成するのではなく、いくつかの特別な場合を考えます。
+まず `(if t x y)` が `x` に、`(if nil x y)` が `y` に簡約できるのは明らかです。
+`(if p x x)` が `(begin p x)` に簡約できることや、2つの枝の等価性の比較をソースコードではなく目的コードで行うべきことは、それほど自明ではないかもしれません。
+この自明な特別扱いを済ませると、あと3つの場合が残ります。`(if p x nil)`、`(if p nil y)`、`(if p x y)` です。
+ラベルと分岐の型は、それぞれ異なります。
 
 ```lisp
 (defun comp-if (pred then else env val? more?)
@@ -769,8 +769,8 @@ The pattern of labels and jumps is different for each.
                    (list L1) ecode (if more? (list L2))))))))))
 ```
 
-Here are some examples of `if` expressions.
-First, a very simple example:
+`if` の式の例をいくつか示します。
+まず、ごく単純な例です。
 
 ```
 > (comp-show '(if p (+ x y) (* x y)))
@@ -787,9 +787,9 @@ L1 :    GVAR    X
         RETURN
 ```
 
-Each branch has its own `RETURN` instruction.
-But note that the code generated is sensitive to its context.
-For example, if we put the same expression inside a `begin` expression, we get something quite different:
+どちらの枝も自分の `RETURN` 命令を持っています。
+しかし、生成されるコードが文脈に左右されることに注意してください。
+たとえば同じ式を `begin` の式のなかに置くと、まるで違うものが得られます。
 
 ```
 > (comp-show '(begin (if p (+ x y) (* x y)) z))
@@ -798,10 +798,10 @@ For example, if we put the same expression inside a `begin` expression, we get s
         RETURN
 ```
 
-What happens here is that `(+ x y)` and `(* x y)`, when compiled in a context where the value is ignored, both result in no generated code.
-Thus, the `if` expression reduces to `(if p nil nil)`, which is compiled like `(begin p nil)`, which also generates no code when not evaluated for value, so the final code just references `z`.
-The compiler can only do this optimization because it knows that `+` and `*` are side-effect-free operations.
-Consider what happens when we replace `+` with `f`:
+ここで起きているのは、`(+ x y)` と `(* x y)` が、値の無視される文脈でコンパイルされると、どちらもコードを生まないということです。
+ですから `if` の式は `(if p nil nil)` に簡約され、それは `(begin p nil)` のようにコンパイルされます。これも値のために評価されなければコードを生まないので、最終的なコードは `z` を参照するだけになります。
+コンパイラがこの最適化をできるのは、`+` と `*` が副作用のない操作だと知っているからにほかなりません。
+`+` を `f` に置き換えると何が起こるかを考えてみてください。
 
 ```
 > (comp-show '(begin (if p (f x) (* x x)) z))
@@ -817,18 +817,18 @@ L2:     GVAR    Z
         RETURN
 ```
 
-Here we have to call `(f x)` if `p` is true (and then throw away the value returned), but we don't have to compute `(* x x)` when `p` is false.
+ここでは `p` が真なら `(f x)` を呼ばねばなりません（そして返った値は捨てます）が、`p` が偽のときに `(* x x)` を計算する必要はありません。
 
-These examples have inadvertently revealed some of the structure of `comp-funcall`, which handles five cases.
-First, it knows some primitive functions that have corresponding instructions and compiles these instructions inline when their values are needed.
-If the values are not needed, then the function can be ignored, and just the arguments can be compiled.
-This assumes true functions with no side effects.
-If there are primitive operations with side effects, they too can be compiled inline, but the operation can never be ignored.
-The next case is when the function is a lambda expression of no arguments.
-We can just compile the body of the lambda expression as if it were a `begin` expression.
-Nonprimitive functions require a function call.
-There are two cases: when there is more to compile we have to save a continuation point, and when we are compiling the final value of a function, we can just branch to the called function.
-The whole thing looks like this:
+この例は、はからずも `comp-funcall` の構造の一端を明かしました。この関数は5つの場合を扱います。
+第一に、対応する命令を持つ基本関数をいくつか知っており、その値が必要なときにはその命令をその場に埋め込んでコンパイルします。
+値が必要なければ、関数は無視して引数だけをコンパイルできます。
+これは副作用のない真の関数であることを前提にしています。
+副作用のある基本操作があれば、それもその場に埋め込んでコンパイルできますが、その操作を無視することは決してできません。
+次の場合は、関数が引数なしのラムダ式であるときです。
+ラムダ式の本体を、`begin` の式であるかのようにコンパイルすればよいのです。
+基本要素でない関数には、関数呼び出しが要ります。
+場合は2つあります。まだコンパイルすべきものが残っていれば継続の地点を保存せねばならず、関数の最終的な値をコンパイルしているなら、呼ぶ関数へ分岐するだけで済みます。
+全体は次のようになります。
 
 ```lisp
 (defun comp-funcall (f args env val? more?)
@@ -862,16 +862,16 @@ The whole thing looks like this:
             (gen 'CALLJ (length args)))))))
 ```
 
-The support for primitives is straightforward.
-The `prim` data type has five slots.
-The first holds the name of a symbol that is globally bound to a primitive operation.
-The second, `n-args`, is the number of arguments that the primitive requires.
-We have to take into account the number of arguments to each function because we want `(+ x y)` to compile into a primitive addition instruction, while `(+ x y z)` should not.
-It will compile into a call to the `+` function instead.
-The `opcode` slot gives the opcode that is used to implement the primitive.
-The `always` field is true if the primitive always returns non-nil, `false` if it always returns nil, and nil otherwise.
-It is used in exercise 23.6.
-Finally, the `side-effects` field says if the function has any side effects, like doing I/O or changing the value of an object.
+基本要素への対応は素直です。
+データ型 `prim` は5つのスロットを持ちます。
+1つ目は、基本操作に大域的に束縛されたシンボルの名前を保ちます。
+2つ目の `n-args` は、その基本要素が必要とする引数の個数です。
+各関数の引数の個数を考えに入れねばなりません。`(+ x y)` は基本の加算命令へコンパイルしたいが、`(+ x y z)` はそうすべきでないからです。
+後者は代わりに `+` 関数の呼び出しへコンパイルされます。
+`opcode` のスロットは、その基本要素の実装に使う命令コードを与えます。
+`always` の欄は、その基本要素が常にnil以外を返すなら真、常にnilを返すなら `false`、そうでなければnilです。
+これは練習問題23.6で使います。
+最後に `side-effects` の欄は、その関数が入出力や対象の値の変更といった副作用を持つかどうかを表します。
 
 ```lisp
 (defstruct (prim (:type list))
@@ -905,8 +905,8 @@ Finally, the `side-effects` field says if the function has any side effects, lik
 (defun newline () (terpri))
 ```
 
-These optimizations only work if the symbols are permanently bound to the global values given here.
-We can enforce that by altering `gen-set` to preserve them as constants:
+この最適化が働くのは、シンボルがここで与えた大域的な値に恒久的に束縛されている場合だけです。
+それを定数として保つよう `gen-set` を変えることで、これを徹底できます。
 
 ```lisp
 (defun gen-set (var env)
@@ -919,10 +919,10 @@ We can enforce that by altering `gen-set` to preserve them as constants:
             (gen 'GSET var)))))
 ```
 
-Now an expression like `(+ x 1)` will be properly compiled using the `+` instruction rather than a subroutine call, and an expression like `(set ! + *)` will be flagged as an error when `+` is a global variable, but allowed when it has been locally bound.
-However, we still need to be able to handle expressions like `(set ! add +)` and then `(add x y)`.
-Thus, we need some function object that `+` will be globally bound to, even if the compiler normally optimizes away references to that function.
-The function `init-scheme-comp` takes care of this requirement:
+これで `(+ x 1)` のような式は、サブルーチンの呼び出しではなく `+` の命令を使って正しくコンパイルされ、`(set ! + *)` のような式は、`+` が大域変数のときには誤りとされ、局所的に束縛されているときには許されます。
+とはいえ、`(set ! add +)` としてから `(add x y)` とするような式も扱えねばなりません。
+ですから、コンパイラがふだんはその関数への参照を最適化で消してしまうとしても、`+` が大域的に束縛される関数の対象が要ります。
+関数 `init-scheme-comp` がこの求めに応えます。
 
 ```lisp
 (defun init-scheme-comp ()
@@ -934,15 +934,15 @@ The function `init-scheme-comp` takes care of this requirement:
                               (gen 'RETURN))))))
 ```
 
-There is one more change to make-rewriting `comp-lambda`.
-We still need to get the arguments off the stack, but we no longer generate a `RETURN` instruction, since that is done by `comp-begin`, if necessary.
-At this point we'll provide a hook for a peephole optimizer, which will be introduced in [section 23.4](#s0025), and for an assembler to convert the assembly language to machine code, `new-fn` provides this interface, but for now, `new-fn` acts just like `make-fn`.
+あと1つ変更があります。`comp-lambda` の書き直しです。
+引数をスタックから取る必要はまだありますが、`RETURN` 命令はもう生成しません。必要なら `comp-begin` が行うからです。
+ここで、[23.4節](#s0025)で導入するのぞき穴最適化器のための仕掛けと、アセンブリ言語を機械語へ変換するアセンブラのための仕掛けを設けます。`new-fn` がこの窓口になりますが、いまのところ `new-fn` は `make-fn` とまったく同じに振る舞います。
 
-We also need to account for the possibility of rest arguments in a lambda list.
-A new function, `gen-rgs`, generates the single instruction to load the arguments of the stack.
-It introduces a new instruction, `ARGS`., into the abstract machine.
-This instruction works just like `ARGS`, except it also conses any remaining arguments on the stack into a list and stores that list as the value of the rest argument.
-With this innovation, the new version of `comp-lambda` looks like this:
+ラムダの引数の並びに残余引数がありうることも織り込む必要があります。
+新しい関数 `gen-rgs` が、スタックの引数を読み込む命令を1つ生成します。
+これは抽象機械に新しい命令 `ARGS`. を持ち込みます。
+この命令は `ARGS` とほぼ同じに働きますが、スタックに残った引数をコンスで並びにまとめ、その並びを残余引数の値として格納する点が違います。
+この工夫を入れると、新しい版の `comp-lambda` は次のようになります。
 
 ```lisp
 (defun comp-lambda (args body env)
@@ -974,15 +974,15 @@ With this innovation, the new version of `comp-lambda` looks like this:
                      :code (optimize code))))
 ```
 
-`new-fn` includes calls to an assembler and an optimizer to generate actual machine code.
-For the moment, both will be identity functions:
+`new-fn` には、実際の機械語を生成するアセンブラと最適化器の呼び出しが含まれます。
+当面はどちらも恒等関数にしておきます。
 
 ```lisp
 (defun optimize (code) code)
 (defun assemble (fn) fn)
 ```
 
-Here are some more examples of the compiler at work:
+コンパイラが働く例をもういくつか示します。
 
 ```
 > (comp-show '(if (null? (car l)) (f (+ (* a x) b)) (g (/ x 2))))
@@ -1004,7 +1004,7 @@ L1:     GVAR    A
         CALLJ   1
 ```
 
-There is no need to save any continuation points in this code, because the only calls to nonprimitive functions occur as the final values of the two branches of the function.
+このコードでは継続の地点を保存する必要がありません。基本要素でない関数の呼び出しが、関数の2つの枝の最終的な値としてしか現れないからです。
 
 ```lisp
 > (comp-show '(define (lastl l)
@@ -1030,11 +1030,11 @@ L1:             LVAR    0       0       ;       L
         RETURN
 ```
 
-The top-level function just assigns the nested function to the global variable `last1`.
-Since `last1` is tail-recursive, it has only one return point, for the termination case, and just calls itself without saving continuations until that case is executed.
+最上位の関数は、入れ子の関数を大域変数 `last1` に代入するだけです。
+`last1` は末尾再帰なので、戻り先は終了の場合のための1つだけで、その場合に至るまでは継続を保存せずに自分自身を呼ぶだけです。
 
-Contrast that to the non-tail-recursive definition of `length` below.
-It is not tail-recursive because before it calls `length` recursively, it must save a continuation point, `K1`, so that it will know where to return to to add 1.
+これを、下の末尾再帰でない `length` の定義と対比してみてください。
+これが末尾再帰でないのは、`length` を再帰的に呼ぶ前に、1を足すためにどこへ戻るかがわかるよう継続の地点 `K1` を保存せねばならないからです。
 
 ```lisp
 > (comp-show '(define (length l)
@@ -1060,7 +1060,7 @@ L2:             0
         RETURN
 ```
 
-Of course, it is possible to write `length` in tail-recursive fashion:
+もちろん `length` を末尾再帰の形で書くこともできます。
 
 ```lisp
 > (comp-show '(define (length l)
@@ -1102,7 +1102,7 @@ L2:                             LVAR    0       1       ;       N
         RETURN
 ```
 
-Let's look once again at an example with nested conditionals:
+入れ子の条件分岐の例を、もう一度見てみましょう。
 
 ```
 > (comp-show '(if (not (and p q (not r))) x y))
@@ -1124,11 +1124,11 @@ L5:     GVAR    X
         RETURN
 ```
 
-Here the problem is with multiple `JUMP`s and with not recognizing negation.
-If `p` is false, then the and expression is false, and the whole predicate is true, so we should return `x`.
-The code does in fact return `x`, but it first jumps to `L3`, loads `NIL`, and then does an `FJUMP` that will always jump to `L5`.
-Other branches have similar inefficiencies.
-A sufficiently clever compiler should be able to generate the following code:
+ここでの厄介は、`JUMP` が重なっていることと、否定を見抜けていないことです。
+`p` が偽ならandの式は偽で、述語全体は真になるので、`x` を返すべきです。
+このコードは実際に `x` を返しますが、その前にまず `L3` へ分岐し、`NIL` を読み込み、それから必ず `L5` へ飛ぶ `FJUMP` を行っています。
+他の枝にも同じような無駄があります。
+十分に賢いコンパイラなら、次のコードを生成できるはずです。
 
 ```
         ARGS    0
@@ -1144,70 +1144,70 @@ L1:     GVAR X
         RETURN
 ```
 
-## 23.2 Introducing Call/cc
+## 23.2 call/ccを導入する
 
-Now that the basic compiler works, we can think about how to implement `call/cc` in our compiler.
-First, remember that `call/cc` is a normal function, not a special form.
-So we could define it as a primitive, in the manner of `car` and `cons`.
-However, primitives as they have been defined only get to see their arguments, and `call/cc` will need to see the run-time stack, in order to save away the current continuation.
-One choice is to install `call/cc` as a normal Scheme nonprimitive function but to write its body in assembly code ourselves.
-We need to introduce one new instruction, `CC`, which places on the stack a function (to which we also have to write the assembly code by hand) that saves the current continuation (the stack) in its environment, and, when called, fetches that continuation and installs it, by setting the stack back to that value.
-This requires one more instruction, `SET-CC`.
-The details of this, and of all the other instructions, are revealed in the next section.
+基本のコンパイラが動くようになったので、`call/cc` をどう実装するかを考えられます。
+まず、`call/cc` は特殊形式ではなくふつうの関数だったことを思い出してください。
+ですから `car` や `cons` と同じように、基本要素として定義することもできます。
+しかしこれまで定義してきた基本要素は自分の引数しか見られませんし、`call/cc` は現在の継続をしまい込むために実行時のスタックを見る必要があります。
+1つの選択は、`call/cc` を基本要素でないふつうのSchemeの関数として据えつつ、その本体を自分たちでアセンブリコードで書くことです。
+新しい命令 `CC` を1つ導入する必要があります。これは、現在の継続（スタック）を自分の環境に保存し、呼ばれるとその継続を取り出してスタックをその値に戻すことで据えつける関数を、スタックに置きます（この関数のアセンブリコードも手で書かねばなりません）。
+これにはもう1つ命令 `SET-CC` が要ります。
+この命令と、他のすべての命令の細部は、次節で明らかにします。
 
-## 23.3 The Abstract Machine
+## 23.3 抽象機械
 
-So far we have defined the instruction set of a mythical abstract machine and generated assembly code for that instruction set.
-It's now time to actually execute the assembly code and hence have a useful compiler.
-There are several paths we could pursue: we could implement the machine in hardware, software, or microcode, or we could translate the assembly code for our abstract machine into the assembly code of some existing machine.
-Each of these approaches has been taken in the past.
+ここまで、架空の抽象機械の命令セットを定義し、その命令セット向けのアセンブリコードを生成してきました。
+いよいよそのアセンブリコードを実際に実行し、役に立つコンパイラにするときです。
+進める道はいくつかあります。機械をハードウェア・ソフトウェア・マイクロコードで実装することも、抽象機械のアセンブリコードを既存の機械のアセンブリコードへ訳すこともできます。
+この方式はどれも、過去に取られてきました。
 
-**Hardware.** If the abstract machine is simple enough, it can be implemented directly in hardware.
-The Scheme-79 and Scheme-81 Chips ([Steele and Sussman 1980](bibliography.md#bb1180); [Batali et al.
-1982](bibliography.md#bb0070)) were VLSI implementations of a machine designed specifically to run Scheme.
+**ハードウェア。** 抽象機械が十分に単純なら、ハードウェアで直に実装できます。
+Scheme-79とScheme-81のチップ（[Steele and Sussman 1980](bibliography.md#bb1180)、[Batali ほか
+1982](bibliography.md#bb0070)）は、Schemeを走らせるために特別に設計された機械のVLSI実装でした。
 
-**Macro-Assembler.** In the translation or macro-assembler approach, each instruction in the abstract machine language is translated into one or more instructions in the host computer's instruction set.
-This can be done either directly or by generating assembly code and passing it to the host computer's assembler.
-In general this will lead to code expansion, because the host computer probably will not provide direct support for Scheme's data types.
-Thus, whereas in our abstract machine we could write a single instruction for addition, with native code we might have to execute a series of instructions to check the type of the arguments, do an integer add if they are both integers, a floating-point add if they are both floating-point numbers, and so on.
-We might also have to check the result for overflow, and perhaps convert to bignum representation.
-Compilers that generate native code often include more sophisticated data-flow analysis to know when such checks are required and when they can be omitted.
+**マクロアセンブラ。** 翻訳あるいはマクロアセンブラの方式では、抽象機械の言語の各命令を、土台の計算機の命令セットの1つ以上の命令へ訳します。
+これは直に行うことも、アセンブリコードを生成して土台の計算機のアセンブラへ渡すことでもできます。
+一般にこれはコードの膨張につながります。土台の計算機は、おそらくSchemeのデータ型を直には支えていないからです。
+ですから抽象機械なら加算を1つの命令で書けたところ、その計算機本来のコードでは、引数の型を調べ、どちらも整数なら整数の加算を、どちらも浮動小数点数なら浮動小数点の加算を、というふうに一連の命令を実行せねばならないかもしれません。
+結果があふれていないかを調べ、必要なら多倍長整数の表現へ変換せねばならないこともあるでしょう。
+その計算機本来のコードを生成するコンパイラは、そうした検査がいつ必要でいつ省けるかを知るために、もっと洗練されたデータフロー分析を含むことがよくあります。
 
-**Microcode.** The MIT Lisp Machine project, unlike the Scheme Chip, actually resulted in working machines.
-One important decision was to go with microcode instead of a single chip.
-This made it easy to change the system as experienced was gained, and as the host language was changed from ZetaLisp to Common Lisp.
-The most important architectural feature of the Lisp Machine was the inclusion of tag bits on each word to specify data types.
-Also important was microcode to implement certain frequently used generic operations.
-For example, in the Symbolics 3600 Lisp Machine, the microcode for addition simultaneously did an integer add, a floating-point add, and a check of the tag bits.
-If both arguments turned out to be either integers or floating-point numbers, then the appropriate result was taken.
-Otherwise, a trap was signaled, and a conversion routine was entered.
-This approach makes the compiler relatively simple, but the trend in architecture is away from highly microcoded processors toward simpler (RISC) processors.
+**マイクロコード。** MITのLispマシンの計画は、Schemeチップと違って実際に動く機械を生みました。
+重要な決めごとの1つが、1つのチップではなくマイクロコードで行くことでした。
+おかげで、経験を積むにつれて、また土台の言語がZetaLispからCommon Lispへ変わるにつれて、システムを変えやすくなりました。
+Lispマシンのもっとも重要な設計上の特徴は、データ型を指定するタグのビットを各語に含めたことでした。
+よく使われる総称的な操作を実装するマイクロコードも重要でした。
+たとえばSymbolics 3600のLispマシンでは、加算のマイクロコードが整数の加算・浮動小数点の加算・タグのビットの検査を同時に行いました。
+両方の引数が整数か、あるいは両方が浮動小数点数だとわかれば、しかるべき結果が採られます。
+そうでなければトラップが起き、変換のルーチンに入ります。
+この方式ならコンパイラは比較的単純になりますが、設計の流れはマイクロコードを多用する処理装置から、より単純な（RISCの）処理装置へと向かっています。
 
-**Software.** We can remove many of these problems with a technique known as *byte-code assembly.* Here we translate the instructions into a vector of bytes and then interpret the bytes with a byte-code interpreter.
-This gives us (almost) the machine we want; it solves the code expansion problem, but it may be slower than native code compilation, because the byte-code interpreter is written in software, not hardware or microcode.
+**ソフトウェア。** *バイトコードのアセンブル*として知られる技法を使えば、この問題の多くを取り除けます。命令をバイトのベクタへ訳し、そのバイトをバイトコードのインタプリタで解釈するのです。
+これで（ほぼ）望みの機械が得られます。コードの膨張の問題は解けますが、バイトコードのインタプリタはハードウェアやマイクロコードではなくソフトウェアで書かれているので、本来のコードへのコンパイルより遅いかもしれません。
 
-Each opcode is a single byte (we have less than 256 opcodes, so this will work).
-The instructions with arguments take their arguments in the following bytes of the instruction stream.
-So, for example, a `CALL` instruction occupies two bytes; one for the opcode and one for the argument count.
-This means we have imposed a limit of 256 arguments to a function call.
-An `LVAR` instruction would take three bytes; one for the opcode, one for the frame offset, and one for the offset within the frame.
-Again, we have imposed 256 as the limit on nesting level and variables per frame.
-These limits seem high enough for any code written by a human, but remember, not only humans write code.
-It is possible that some complex macro may expand into something with more than 256 variables, so a full implementation would have some way of accounting for this.
-The `GVAR` and `CONST` instructions have to refer to an arbitrary object; either we can allocate enough bytes to fit a pointer to this object, or we can add a `constants` field to the `fn` structure, and follow the instructions with a single-byte index into this vector of constants.
-This latter approach is more common.
+各命令コードは1バイトです（命令コードは256未満なので、これで足ります）。
+引数を持つ命令は、命令の流れの続くバイトから引数を取ります。
+ですからたとえば `CALL` 命令は2バイトを占めます。1つは命令コード、もう1つは引数の個数です。
+つまり関数呼び出しの引数に256という上限を課したことになります。
+`LVAR` 命令は3バイトを取ります。命令コード、フレームのずれ、フレーム内のずれです。
+ここでも、入れ子の深さとフレームあたりの変数の数に256という上限を課しています。
+この上限は人間が書くどんなコードにも十分に思えますが、コードを書くのは人間だけではないことを忘れないでください。
+込み入ったマクロが256を超える変数を持つものへ展開されることもありうるので、完全な実装ならこれに対処する手立てを持つでしょう。
+`GVAR` と `CONST` の命令は任意の対象を参照せねばなりません。その対象へのポインタが収まるだけのバイトを割り当てるか、`fn` の構造体に `constants` の欄を加え、命令のあとにこの定数のベクタへの1バイトの添字を続けるかです。
+後者の方式のほうが一般的です。
 
-We can now handle branches by changing the program counter to an index into the code vector.
-(It seems severe to limit functions to 256 bytes of code; a two-byte label allows for 65536 bytes of code per function.) In summary, the code is more compact, branching is efficient, and dispatching can be fast because the opcode is a small integer, and we can use a branch table to go to the right piece of code for each instruction.
+これで分岐は、プログラムカウンタをコードのベクタへの添字に変えることで扱えます。
+（関数を256バイトのコードに限るのは厳しすぎるようです。2バイトのラベルなら関数あたり65536バイトまで許せます。）まとめると、コードはより詰まっており、分岐は効率がよく、振り分けも速くできます。命令コードが小さな整数なので、分岐の表を使って各命令の正しいコードへ進めるからです。
 
-Another source of inefficiency is implementing the stack as a list, and consing up new cells every time something is added to the stack.
-The alternative is to implement the stack as a vector with a fill-pointer.
-That way a push requires no consing, only a change to the pointer (and a check for overflow).
-The check is worthwhile, however, because it allows us to detect infinite loops in the user's code.
+もう1つの非効率の元は、スタックを並びとして実装し、何かを積むたびに新しいセルをコンスで作ることです。
+代わりに、フィルポインタつきのベクタとしてスタックを実装できます。
+そうすれば積む操作にコンスは要らず、ポインタの変更（とあふれの検査）だけで済みます。
+もっともこの検査には値打ちがあります。利用者のコードの無限ループを検出できるからです。
 
-Here follows an assembler that generates a sequence of instructions (as a vector).
-This is a compromise between byte codes and the assembly language format.
-First, we need some accessor functions to get at parts of an instruction:
+次に、命令の連なりを（ベクタとして）生成するアセンブラを示します。
+これはバイトコードとアセンブリ言語の形式のあいだの妥協です。
+まず、命令の部分に手を伸ばすアクセサ関数がいくつか要ります。
 
 ```lisp
 (defun opcode (instr) (if (label-p instr) :label (first instr)))
@@ -1219,7 +1219,7 @@ First, we need some accessor functions to get at parts of an instruction:
 (defsetf arg1 (instr) (val) `(setf (second ,instr) ,val))
 ```
 
-Now we write the assembler, which already is integrated into the compiler with a hook in `new-fn`.
+次にアセンブラを書きます。これは `new-fn` のなかの仕掛けによって、すでにコンパイラに組み込まれています。
 
 ```lisp
 (defun assemble (fn)
@@ -1255,7 +1255,7 @@ Now we write the assembler, which already is integrated into the compiler with a
     code-vector))
 ```
 
-If we want to be able to look at assembled code, we need a new printing function:
+アセンブルしたコードを眺められるようにしたいなら、新しい表示関数が要ります。
 
 ```lisp
 (defun show-fn (fn &optional (stream *standard-output*) (indent 2))
@@ -1407,9 +1407,9 @@ If we want to be able to look at assembled code, we need a new printing function
                               (gen 'RETURN))))))
 ```
 
-Here's the Scheme top level.
-Note that it is written in Scheme itself; we compile the definition of the read-eval-print loop,<a id="tfn23-1"></a><sup>[1](#fn23-1)</sup> load it into the machine, and then start executing it.
-There's also an interface to compile and execute a single expression, `comp-go`.
+Schemeの最上位を示します。
+これがScheme自身で書かれていることに注意してください。読み込み・評価・表示のループの定義をコンパイルし<a id="tfn23-1"></a><sup>[1](#fn23-1)</sup>、機械に読み込ませ、それから実行を始めます。
+式を1つコンパイルして実行する窓口 `comp-go` もあります。
 
 ```lisp
 (defconstant scheme-top-level
@@ -1430,20 +1430,20 @@ There's also an interface to compile and execute a single expression, `comp-go`.
   (machine (compiler `(exit ,exp))))
 ```
 
-**Exercise  23.2 [m]** This implementation of the machine is wasteful in its representation of environments.
-For example, consider what happens in a tail-recursive function.
-Each `ARG` instruction builds a new frame and pushes it on the environment.
-Then each `CALL` pops the latest frame off the environment.
-So, while the stack does not grow with tail-recursive calls, the heap certainly does.
-Eventually, we will have to garbage-collect all those unused frames (and the cons cells used to make lists out of them).
-How could we avoid or limit this garbage collection?
+**練習問題 23.2 [m]** この機械の実装は、環境の表現に無駄が多い。
+たとえば、末尾再帰の関数で何が起こるかを考えよ。
+`ARG` の命令はそれぞれ新しいフレームを組み立て、それを環境に積みます。
+そして `CALL` はそれぞれ、いちばん新しいフレームを環境から降ろします。
+ですから末尾再帰の呼び出しでスタックは伸びないものの、ヒープは確実に伸びます。
+いずれ、その使われないフレーム（と、それを並びにするのに使ったコンスセル）をすべてごみとして集めねばなりません。
+このごみ集めをどう避けるか、あるいはどう抑えられるでしょうか。
 
-## 23.4 A Peephole Optimizer
+## 23.4 のぞき穴最適化器
 
-In this section we investigate a simple technique that will generate slightly better code in cases where the compiler gives inefficient sequences of instructions.
-The idea is to look at short sequences of instructions for prespecified patterns and replace them with equivalent but more efficient instructions.
+本節では、コンパイラが効率の悪い命令の連なりを出す場合に、少し良いコードを生成する単純な技法を調べます。
+考え方は、短い命令の連なりのなかにあらかじめ定めた型を探し、それを同等でより効率のよい命令に置き換えることです。
 
-In the following example, `comp-if` has already done some source-level optimization, such as eliminating the `(f x)` call.
+次の例では、`comp-if` が `(f x)` の呼び出しを消すなど、ソースの水準での最適化をすでに行っています。
 
 ```
 > (comp-show '(begin (if (if t 1 (f x)) (set! x 2)) x))
@@ -1457,11 +1457,11 @@ In the following example, `comp-if` has already done some source-level optimizat
    7: RETURN
 ```
 
-But the generated code could be made much better.
-This could be done with more source-level optimizations to transform the expression into `(set!
-x 2)`.
-Alternatively, it could also be done by looking at the preceding instruction sequence and transforming local inefficiencies.
-The optimizer presented in this section is capable of generating the following code:
+しかし生成されたコードは、もっとずっと良くできます。
+式を `(set!
+x 2)` へ変形する、さらなるソース水準の最適化でもできるでしょう。
+あるいは、直前の命令の連なりを見て局所的な非効率を変形することでもできます。
+本節で示す最適化器は、次のコードを生成できます。
 
 ```
 > (comp-show '(begin (if (if t 1 (f x)) (set! x 2)) x))
@@ -1471,9 +1471,9 @@ The optimizer presented in this section is capable of generating the following c
    3: RETURN
 ```
 
-The function `optimize` is implemented as a data-driven function that looks at the opcode of each instruction and makes optimizations based on the following instructions.
-To be more specific, `optimize` takes a list of assembly language instructions and looks at each instruction in order, trying to apply an optimization.
-If any changes at all are made, then `optimize` will be called again on the whole instruction list, because further changes might be triggered by the first round of changes.
+関数 `optimize` は、各命令の命令コードを見て、続く命令にもとづいて最適化するデータ駆動の関数として実装します。
+もっと具体的に言えば、`optimize` はアセンブリ言語の命令の並びを取り、各命令を順に見て最適化を当てはめようとします。
+何か1つでも変更が加われば、`optimize` は命令の並び全体に対してもう一度呼ばれます。最初の変更がさらなる変更を呼ぶかもしれないからです。
 
 ```lisp
 (defun optimize (code)
@@ -1489,12 +1489,12 @@ If any changes at all are made, then `optimize` will be called again on the whol
         code)))
 ```
 
-The function `optimize-1` is responsible for each individual attempt to optimize.
-It is passed two arguments: a list of instructions starting at the current one and going to the end of the list, and a list of all the instructions.
-The second argument is rarely used.
-The whole idea of a peephole optimizer is that it should look at only a few instructions following the current one.
-`optimize-1` is data-driven, based on the opcode of the first instruction.
-Note that the optimizer functions do their work by destructively modifying the instruction sequence, *not* by consing up and returning a new sequence.
+関数 `optimize-1` が、個々の最適化の試みを受け持ちます。
+引数は2つ渡されます。現在の命令から並びの末尾までの命令の並びと、すべての命令の並びです。
+2つ目の引数はめったに使いません。
+のぞき穴最適化器の考え方全体は、現在の命令に続く数命令だけを見るべきだ、というものです。
+`optimize-1` は、最初の命令の命令コードにもとづくデータ駆動の関数です。
+最適化の関数は、新しい連なりをコンスで作って返すのでは*なく*、命令の連なりを破壊的に書き換えることで仕事をする点に注意してください。
 
 ```lisp
 (defun optimize-1 (code all-code)
@@ -1507,8 +1507,8 @@ Note that the optimizer functions do their work by destructively modifying the i
       (funcall optimizer instr code all-code))))
 ```
 
-We need a table to associate the individual optimizer functions with the opcodes.
-Since opcodes include numbers as well as symbols, an `eql` hash table is an appropriate choice:
+個々の最適化の関数を命令コードに結びつける表が要ります。
+命令コードにはシンボルだけでなく数も含まれるので、`eql` のハッシュ表が適切な選択です。
 
 ```lisp
 (let ((optimizers (make-hash-table :test #'eql)))
@@ -1522,7 +1522,7 @@ Since opcodes include numbers as well as symbols, an `eql` hash table is an appr
     (setf (gethash opcode optimizers) fn)))
 ```
 
-We could now build a table with `put-optimizer`, but it is worth defining a macro to make this a little neater:
+これで `put-optimizer` で表を作れますが、もう少しきれいにするマクロを定義しておく値打ちがあります。
 
 ```lisp
 (defmacro def-optimizer (opcodes args &body body)
@@ -1532,8 +1532,8 @@ We could now build a table with `put-optimizer`, but it is worth defining a macr
      (put-optimizer op #'(lambda ,args .,body))))
 ```
 
-Before showing example optimizer functions, we will introduce three auxiliary functions.
-`gen1` generates a single instruction, `target` finds the code sequence that a jump instruction branches to, and `next-instr` finds the next actual instruction in a sequence, skipping labels.
+最適化の関数の例を示す前に、補助関数を3つ導入します。
+`gen1` は命令を1つ生成し、`target` は分岐命令の飛び先のコードの連なりを見つけ、`next-instr` はラベルを飛ばして連なりのなかの次の実際の命令を見つけます。
 
 ```lisp
 (defun gen1 (&rest args) "Generate a single instruction" args)
@@ -1541,7 +1541,7 @@ Before showing example optimizer functions, we will introduce three auxiliary fu
 (defun next-instr (code) (find-if (complement #'label-p) code))
 ```
 
-Here are six optimizer functions that implement a few important peephole optimizations.
+重要なのぞき穴最適化をいくつか実装する、6つの最適化の関数を示します。
 
 ```lisp
 (def-optimizer (:LABEL) (instr code all-code)
@@ -1604,23 +1604,23 @@ Here are six optimizer functions that implement a few important peephole optimiz
      t)))
 ```
 
-## 23.5 Languages with Different Lexical Conventions
+## 23.5 字句の作法が異なる言語
 
-This chapter has shown how to evaluate a language with Lisp-like syntax, by writing a read-eval-print loop where only the `eval` needs to be replaced.
-In this section we see how to make the `read` part slightly more general.
-We still read Lisp-like syntax, but the lexical conventions can be slightly different.
+本章では、Lispに似た構文の言語を評価する方法を示してきました。読み込み・評価・表示のループを書き、`eval` だけを取り替えればよいというやり方です。
+本節では、`read` の部分をもう少し一般的にする方法を見ます。
+読むのはやはりLispに似た構文ですが、字句の作法は少し違ってかまいません。
 
-The Lisp function `read` is driven by an object called the *readtable,* which is stored in the special variable `*readtable*`.
-This table associates some action to take with each of the possible characters that can be read.
-The entry in the readtable for the character `#\(`, for example, would be directions to read a list.
-The entry for `#\;` would be directions to ignore every character up to the end of the line.
+Lispの関数 `read` は*読み取り表*と呼ばれる対象に駆動されます。これは特殊変数 `*readtable*` に格納されています。
+この表は、読みうる各文字に、取るべき動作を結びつけます。
+たとえば文字 `#\(` に対する読み取り表の項目は、並びを読めという指示になるでしょう。
+`#\;` の項目は、行末までの文字をすべて無視せよという指示になるでしょう。
 
-Because the readtable is stored in a special variable, it is possible to alter completely the way `read` works just by dynamically rebinding this variable.
+読み取り表は特殊変数に格納されているので、この変数を動的に束縛しなおすだけで、`read` の働き方をまるごと変えられます。
 
-The new function `scheme-read` temporarily changes the readtable to a new one, the Scheme readtable.
-It also accepts an optional argument, the stream to read from, and it returns a special marker on end of file.
-This can be tested for with the predicate `eof-object?`.
-Note that once `scheme-read` is installed as the value of the Scheme `symbol-read` we need do no more-`scheme-read` will always be called when appropriate (by the top level of Scheme, and by any user Scheme program).
+新しい関数 `scheme-read` は、読み取り表を一時的に新しいもの、すなわちSchemeの読み取り表に変えます。
+読み込む先のストリームという省略可能な引数も受け取り、ファイルの終わりでは特別な印を返します。
+これは述語 `eof-object?` で調べられます。
+`scheme-read` をSchemeの `symbol-read` の値として据えつけてしまえば、あとは何もする必要がないことに注意してください。しかるべきときには常に（Schemeの最上位からも、利用者のSchemeのプログラムからも）`scheme-read` が呼ばれます。
 
 ```lisp
 (defconstant eof "EoF")
@@ -1632,16 +1632,16 @@ Note that once `scheme-read` is installed as the value of the Scheme `symbol-rea
     (read stream nil eof)))
 ```
 
-The point of having a special `eof` constant is that it is unforgeable.
-The user cannot type in a sequence of characters that will be read as something `eq` to `eof`.
-In Common Lisp, but not Scheme, there is an escape mechanism that makes `eof` forgable.
-The user can type `#.eof` to get the effect of an end of file.
-This is similar to the `^D` convention in UNIX systems, and it can be quite handy.
+特別な `eof` の定数を持つ意味は、それが偽造できないことにあります。
+利用者は、`eof` と `eq` なものとして読まれる文字の並びを打ち込めません。
+Schemeにはありませんが、Common Lispには `eof` を偽造できる抜け道の仕組みがあります。
+利用者は `#.eof` と打てば、ファイルの終わりと同じ効果を得られます。
+これはUNIXのシステムでの `^D` の約束に似ていて、なかなか重宝します。
 
-So far the Scheme readtable is just a copy of the standard readtable.
-The next step in implementing `scheme-read` is to alter `*scheme-readtable*`, adding read macros for whatever characters are necessary.
-Here we define macros for `#t` and `#f` (the true and false values), for `#d` (decimal numbers) and for the backquote read macro (called quasiquote in Scheme).
-Note that the backquote and comma characters are defined as read macros, but the `@` in `,@` is processed by reading the next character, not by a read macro on `@`.
+ここまでのところ、Schemeの読み取り表は標準の読み取り表の複製にすぎません。
+`scheme-read` を実装する次の段は、`*scheme-readtable*` を変え、必要な文字に読み取りマクロを加えることです。
+ここでは `#t` と `#f`（真と偽の値）、`#d`（10進の数）、そして逆クォートの読み取りマクロ（Schemeではquasiquoteと呼びます）のマクロを定義します。
+逆クォートとカンマの文字は読み取りマクロとして定義されますが、`,@` の `@` は `@` への読み取りマクロではなく、次の文字を読むことで処理される点に注意してください。
 
 ```lisp
 (set-dispatch-macro-character #\# #\t
@@ -1675,7 +1675,7 @@ Note that the backquote and comma characters are defined as read macros, but the
    nil *scheme-readtable*)
 ```
 
-Finally, we install `scheme-read` and `eof-object?` as primitives:
+最後に、`scheme-read` と `eof-object?` を基本要素として据えつけます。
 
 ```lisp
 (defparameter *primitive-fns*
@@ -1691,8 +1691,8 @@ Finally, we install `scheme-read` and `eof-object?` as primitives:
     (name! 2 name! true t) (random 1 random true nil)))
 ```
 
-Here we test `scheme-read`.
-The characters in italics were typed as a response to the `scheme-read`.
+ここで `scheme-read` を試します。
+斜体の文字は、`scheme-read` への応答として打ち込んだものです。
 
 ```lisp
 > (scheme-read) #*t*
@@ -1703,9 +1703,9 @@ NIL
 (QUASIQUOTE (A (UNQUOTE B) (UNQUOTE-SPLICING C) D))
 ```
 
-The final step is to make `quasiquote` a macro that expands into the proper sequence of calls to `cons`, `list`, and `append`.
-The careful reader will keep track of the difference between the form returned by `scheme-read` (something starting with `quasiquote`), the expansion of this form with the Scheme macro `quasiquote` (which is implemented with the Common Lisp function `quasi-q`), and the eventual evaluation of the expansion.
-In an environment where `b` is bound to the number 2 and `c` is bound to the list `(c1 c2)`, we might have:
+最後の段は、`quasiquote` を、`cons`・`list`・`append` の適切な呼び出しの連なりへ展開されるマクロにすることです。
+注意深い読者なら、`scheme-read` が返す形式（`quasiquote` で始まるもの）、Schemeのマクロ `quasiquote`（これはCommon Lispの関数 `quasi-q` で実装されています）によるその形式の展開、そしてその展開の最終的な評価という3つの違いを見失わないでしょう。
+`b` が数の2に、`c` が並び `(c1 c2)` に束縛された環境なら、次のようになるでしょう。
 
 | []()       |                                                       |
 |------------|-------------------------------------------------------|
@@ -1714,9 +1714,9 @@ In an environment where `b` is bound to the number 2 and `c` is bound to the lis
 | Expanded:  | `(cons 'a (cons b (append c '(d))))`                  |
 | Evaluated: | `(a 2 c1 c2 d)`                                       |
 
-The implementation of the `quasiquote` macro is modeled closely on the one given in Charniak et al.'s *Artificial Intelligence Programming.* I added support for vectors.
-In `combine-quasiquote` I add the trick of reusing the old cons cell `x` rather than consing together `left` and `right` when that is possible.
-However, the implementation still wastes cons cells-a more efficient version would pass back multiple values rather than consing `quote` onto a list, only to strip it off again.
+`quasiquote` マクロの実装は、Charniakらの *Artificial Intelligence Programming* にあるものを忠実に手本にしています。ベクタへの対応は私が加えました。
+`combine-quasiquote` では、できるときには `left` と `right` をコンスでつなぐのではなく、古いコンスセル `x` を使い回すという工夫を加えています。
+とはいえこの実装もコンスセルを無駄にしています。より効率のよい版なら、`quote` を並びにコンスして後で剥がすのではなく、多値を返すでしょう。
 
 ```lisp
 (setf (scheme-macro 'quasiquote) 'quasi-q)
@@ -1755,15 +1755,15 @@ However, the implementation still wastes cons cells-a more efficient version wou
         (t (list 'cons left right))))
 ```
 
-Actually, there is a major problem with the `quasiquote` macro, or more accurately, in the entire approach to macro-expansion based on textual substitution.
-Suppose we wanted a function that acted like this:
+実のところ、`quasiquote` マクロには大きな問題があります。より正確に言えば、字面の置き換えにもとづくマクロ展開の方式全体に、です。
+次のように働く関数がほしいとしましょう。
 
 ```lisp
 (extrema '(3 1 10 5 20 2))
 ((max 20) (min 1))
 ```
 
-We could write the Scheme function:
+Schemeの関数を次のように書けます。
 
 ```lisp
 (define (extrema list)
@@ -1772,7 +1772,7 @@ We could write the Scheme function:
    '((max ,(apply max list)) (min ,(apply min list))))
 ```
 
-After expansion of the quasiquote, the definition of `extrema` will be:
+quasiquoteを展開したあと、`extrema` の定義は次のようになります。
 
 ```lisp
 (define extrema
@@ -1781,45 +1781,45 @@ After expansion of the quasiquote, the definition of `extrema` will be:
            (list 'min (apply min list)))))
 ```
 
-The problem is that `list` is an argument to the function `extrema`, and the argument shadows the global definition of `list` as a function.
-Thus, the function will fail.
-One way around this dilemma is to have the macro-expansion use the global value of `list` rather than the symbol `list` itself.
-In other words, replace the `'list` in `quasi-q` with (`get-global-var 'list`).
-Then the expansion can be used even in an environment where `list` is locally bound.
-One has to be careful, though: if this tack is taken, then `comp-funcall` should be changed to recognize function constants, and to do the right thing with respect to primitives.
+厄介なのは、`list` が関数 `extrema` の引数であり、その引数が関数としての `list` の大域的な定義を覆い隠してしまうことです。
+ですからこの関数は失敗します。
+この板挟みを避ける1つの道は、マクロ展開がシンボル `list` そのものではなく `list` の大域的な値を使うようにすることです。
+言い換えれば、`quasi-q` のなかの `'list` を (`get-global-var 'list`) に置き換えるのです。
+そうすれば、`list` が局所的に束縛された環境でも展開を使えます。
+ただし気をつけねばなりません。この道を採るなら、`comp-funcall` を、関数の定数を見分け、基本要素について正しく振る舞うように変えるべきです。
 
-It is problems like these that made the designers of Scheme admit that they don't know the best way to specify macros, so there is no standard macro definition mechanism in Scheme.
-Such problems rarely come up in Common Lisp because functions and variables have different name spaces, and because local function definitions (with `flet` or `labels`) are not widely used.
-Those who do define local functions tend not to use already established names like `list` and `append.`
+こうした問題があるからこそ、Schemeの設計者たちはマクロを定めるいちばん良い方法がわからないと認め、Schemeには標準のマクロ定義の仕組みがないのです。
+Common Lispでこの種の問題がめったに起きないのは、関数と変数の名前空間が別だからであり、また（`flet` や `labels` による）局所的な関数定義があまり広く使われていないからです。
+局所的な関数を定義する人も、`list` や `append` のような定着した名前は使わない傾向にあります。
 
-## 23.6 History and References
+## 23.6 歴史と参考文献
 
-Guy Steele's 1978 MIT master's thesis on the language Scheme, rewritten as Steele 1983, describes an innovative and influential compiler for Scheme, called RABBIT.<a id="tfn23-2"></a><sup>[2](#fn23-2)</sup>
-A good article on an "industrial-strength" Scheme compiler based on this approach is described in [Kranz et al.'s 1986](bibliography.md#bb0675) paper on ORBIT, the compiler for the T dialect of Scheme.
+Guy Steeleの1978年のMITの修士論文はScheme言語についてのもので、Steele 1983として書き直されました。そこではRABBITという、革新的で影響力のあるSchemeのコンパイラが述べられています。<a id="tfn23-2"></a><sup>[2](#fn23-2)</sup>
+この方式にもとづく「実用強度の」Schemeコンパイラについての良い論文が、[Kranzらの1986年](bibliography.md#bb0675)の、Schemeの方言TのコンパイラORBITについての論文です。
 
-Abelson and Sussman's *Structure and Interpretation of Computer Programs* (1985) contains an excellent chapter on compilation, using slightly different techniques and compiling into a somewhat more confusing machine language.
-Another good text is [John Allen's *Anatomy of Lisp* (1978)](bibliography.md#bb0040).
-It presents a very clear, simple compiler, although it is for an older, dynamically scoped dialect of Lisp and it does not address tail-recursion or `call/cc`.
+AbelsonとSussmanの *Structure and Interpretation of Computer Programs*（1985）には、コンパイルについての優れた章があります。少し違う技法を使い、いくらか分かりにくい機械語へコンパイルしています。
+もう1つの良い教科書が[John Allenの *Anatomy of Lisp*（1978）](bibliography.md#bb0040)です。
+きわめて明快で単純なコンパイラを示していますが、対象は古い動的スコープのLispの方言で、末尾再帰や `call/cc` は扱っていません。
 
-The peephole optimizer described here is based on the one in [Masinter and Deutsch 1980](bibliography.md#bb0780).
+ここで述べたのぞき穴最適化器は、[Masinter and Deutsch 1980](bibliography.md#bb0780)のものにもとづいています。
 
-## 23.7 Exercises
+## 23.7 練習問題
 
-**Exercise  23.3 [h]** Scheme's syntax for numbers is slightly different from Common Lisp's.
-In particular, complex numbers are written like `3+4i` rather than `#c(3 4)`.
-How could you make `scheme-read` account for this?
+**練習問題 23.3 [h]** Schemeの数の構文は、Common Lispのものと少し違う。
+とりわけ複素数は `#c(3 4)` ではなく `3+4i` のように書く。
+`scheme-read` にこれを扱わせるにはどうするか。
 
-**Exercise  23.4 [m]** Is it possible to make the core Scheme language even smaller, by eliminating any of the five special forms `(quote, begin, set!, if, lambda)` and replacing them with macros?
+**練習問題 23.4 [m]** 5つの特殊形式 `(quote, begin, set!, if, lambda)` のいずれかを取り除いてマクロで置き換え、Schemeの中核の言語をさらに小さくできるか。
 
-**Exercise  23.5 [m]** Add the ability to recognize internal defines (see [page 779](chapter22.md#p779)).
+**練習問題 23.5 [m]** 内部のdefineを認識する能力を加えよ（[779ページ](chapter22.md#p779)を参照）。
 
-**Exercise  23.6 [h]** In `comp-if` we included a special case for `(if t x y)` and `(if nil x y)`.
-But there are other cases where we know the value of the predicate.
-For example, `(if (* a b) x y)` can also reduce to `x`.
-Arrange for these optimizations to be made.
-Note the `prim-always` field of the `prim` structure has been provided for this purpose.
+**練習問題 23.6 [h]** `comp-if` では `(if t x y)` と `(if nil x y)` を特別扱いした。
+しかし述語の値がわかる場合は他にもある。
+たとえば `(if (* a b) x y)` も `x` に簡約できる。
+この最適化が行われるようにせよ。
+`prim` 構造体の `prim-always` の欄が、この目的のために用意してあることに注意せよ。
 
-**Exercise  23.7 [m]** Consider the following version of the quicksort algorithm for sorting a vector:
+**練習問題 23.7 [m]** ベクタを整列するクイックソートの、次の版を考えよ。
 
 ```lisp
 (define (sort-vector vector test)
@@ -1832,17 +1832,17 @@ Note the `prim-always` field of the `prim` structure has been provided for this 
       (sort 0 (- (vector-length vector 1))))
 ```
 
-Here the function `partition` takes a vector, two indices into the vector, and a comparison function, `test`.
-It modifies the vector and returns an index, `pivot`, such that all elements of the vector below `pivot` are less than all elements at `pivot` or above.
+ここで関数 `partition` は、ベクタ、そのベクタへの2つの添字、そして比較の関数 `test` を取る。
+ベクタを書き換え、`pivot` より下のすべての要素が `pivot` 以上のすべての要素より小さくなるような添字 `pivot` を返す。
 
-It is well known that quicksort takes time proportional to *n* log *n* to sort a vector of *n* elements, if the pivots are chosen well.
-With poor pivot choices, it can take time proportional to *n*<sup>2</sup>.
+軸の選び方がよければ、クイックソートが *n* 要素のベクタを整列するのに *n* log *n* に比例する時間を要することはよく知られている。
+軸の選び方が悪いと、*n*<sup>2</sup> に比例する時間がかかりうる。
 
-The question is, what is the space required by quicksort?
-Besides the vector itself, how much additional storage must be temporarily allocated to sort a vector?
+問いは、クイックソートが必要とする場所はどれだけか、である。
+ベクタそのもののほかに、ベクタを整列するのに一時的に割り当てねばならない記憶はどれだけか。
 
-Now consider the following modified version of quicksort.
-What time and space complexity does it have?
+では、次のように変えた版のクイックソートを考えよ。
+時間と場所の計算量はどうなるか。
 
 ```lisp
 (define (sort-vector vector test)
@@ -1858,21 +1858,21 @@ What time and space complexity does it have?
    (sort 0 (- (vector-length vector 1))))
 ```
 
-The next three exercises describe extensions that are not part of the Scheme standard.
+次の3つの練習問題は、Schemeの標準の一部ではない拡張を扱います。
 
-**Exercise  23.8 [h]** The `set!` special form is defined only when its first argument is a symbol.
-Extend `set!` to work like `setf` when the first argument is a list.
-That is, `(set! (car x) y)` should expand into something like `((setter car) y x)`, where `(setter car)` evaluates to the primitive procedure `set-car!`.
-You will need to add some new primitive functions, and you should also provide a way for the user to define new `set!` procedures.
-One way to do that would be with a `setter` function for `set!`, for example:
+**練習問題 23.8 [h]** 特殊形式 `set!` は、第1引数がシンボルのときにしか定義されていない。
+第1引数が並びのときに `setf` のように働くよう `set!` を拡張せよ。
+つまり `(set! (car x) y)` は `((setter car) y x)` のようなものへ展開されるべきで、`(setter car)` は基本手続き `set-car!` に評価される。
+新しい基本関数をいくつか加える必要があるし、利用者が新しい `set!` の手続きを定義する手立ても用意すべきである。
+その1つのやり方は、`set!` のための `setter` 関数を使うことだろう。たとえば次のように。
 
 ```lisp
 (set! (setter third)
       (lambda (val list) (set-car! (cdr (cdr list)) val)))
 ```
 
-**Exercise  23.9 [m]** It is a curious asymmetry of Scheme that there is a special notation for lambda expressions within `define` expressions, but not within `let`.
-Thus, we see the following:
+**練習問題 23.9 [m]** `define` の式のなかにはラムダ式の特別な記法があるのに `let` のなかにはない、というのはSchemeの妙な非対称である。
+そのため次のようになる。
 
 ```lisp
 (define square (lambda (x) (* x x)))      ; is the same as
@@ -1881,35 +1881,35 @@ Thus, we see the following:
 (let (((square x) (* x x))) ...)          ; <= illegal!
 ```
 
-Do you think this last expression should be legal?
-If so, modify the macros for `let, let*`, and `letrec` to allow the new syntax.
-If not, explain why it should not be included in the language.
+この最後の式は通るべきだと思うか。
+そう思うなら、新しい構文を許すよう `let, let*`、`letrec` のマクロを変えよ。
+そう思わないなら、なぜそれを言語に含めるべきでないかを説明せよ。
 
-**Exercise  23.10 [m]** Scheme does not define `funcall`, because the normal function-call syntax does the work of funcall.
-This suggests two problems.
-(1) Is it possible to define `funcall` in Scheme?
-Show a definition or explain why there can't be one.
-Would you ever have reason to use `funcall` in a Scheme program?
-(2) Scheme does define `apply`, as there is no syntax for an application.
-One might want to extend the syntax to make `(+ . numbers)` equivalent to `(apply + numbers)`.
-Would this be a good idea?
+**練習問題 23.10 [m]** Schemeは `funcall` を定義していない。ふつうの関数呼び出しの構文がfuncallの仕事をするからである。
+ここから2つの問いが浮かぶ。
+(1) Schemeで `funcall` を定義できるか。
+定義を示すか、なぜありえないかを説明せよ。
+Schemeのプログラムで `funcall` を使う理由があるだろうか。
+(2) Schemeは `apply` を定義している。適用のための構文がないからである。
+`(+ . numbers)` を `(apply + numbers)` と同じことにするよう、構文を拡張したくなるかもしれない。
+これは良い考えだろうか。
 
-**Exercise  23.11 [d]** Write a compiler that translates Scheme to Common Lisp.
-This will involve changing the names of some procedures and special forms, figuring out a way to map Scheme's single name space into Common Lisp's distinct function and variable name spaces, and dealing with Scheme's continuations.
-One possibility is to translate a `call/cc` into a `catch` and `throw`, and disallow dynamic continuations.
+**練習問題 23.11 [d]** SchemeをCommon Lispへ訳すコンパイラを書け。
+いくつかの手続きと特殊形式の名前を変え、Schemeの単一の名前空間をCommon Lispの別々の関数と変数の名前空間へ対応づける方法を考え、Schemeの継続を扱うことになる。
+1つの手は、`call/cc` を `catch` と `throw` へ訳し、動的な継続を許さないことである。
 
-## 23.8 Answers
+## 23.8 解答
 
-**Answer 23.2** We can save frames by making a resource for frames, as was done on page 337.
-Unfortunately, we can't just use the `defresource` macro as is, because we need a separate resource for each size frame.
-Thus, a two-dimensional array or a vector of vectors is necessary.
-Furthermore, one must be careful in determining when a frame is no longer needed, and when it has been saved and may be used again.
-Some compilers will generate a special calling sequence for a tail-recursive call where the environment can be used as is, without discarding and then creating a new frame for the arguments.
-Some compilers have varied and advanced representations for environments.
-An environment may never be represented explicitly as a list of frames; instead it may be represented implicitly as a series of values in registers.
+**解答 23.2** 337ページで行ったように、フレームのための資源を作れば、フレームを節約できる。
+あいにく `defresource` マクロをそのままは使えない。フレームの大きさごとに別々の資源が要るからである。
+そのため二次元の配列か、ベクタのベクタが必要になる。
+さらに、フレームがもう不要になるのはいつか、保存されて再び使えるのはいつかを見定めるには注意が要る。
+コンパイラによっては、末尾再帰の呼び出しについて特別な呼び出し手順を生成し、引数のために新しいフレームを捨てて作りなおすことなく環境をそのまま使えるようにする。
+環境について多様で進んだ表現を持つコンパイラもある。
+環境がフレームの並びとして明示的に表されることはまったくなく、代わりにレジスタ上の値の連なりとして暗に表されることもある。
 
-**Answer 23.3** We could read in Scheme expressions as before, and then convert any symbols that looked like complex numbers into numbers.
-The following routines do this without consing.
+**解答 23.3** これまでどおりSchemeの式を読み込んでから、複素数のように見えるシンボルを数へ変換すればよい。
+次のルーチンは、コンスを使わずにこれを行う。
 
 ```lisp
 (defun scheme-read (&optional (stream *standard-input*))
@@ -1943,20 +1943,20 @@ The following routines do this without consing.
 (defun sign-p (char) (find char "+-"))
 ```
 
-Actually, that's not quite good enough, because a Scheme complex number can have multiple signs in it, as in `3.4e-5+6.7e+8i`, and it need not have two numbers, as in `3i` or `4+i` or just `+i`.
-The other problem is that complex numbers can only have a lowercase `i`, but `read` does not distinguish between the symbols `3+4i` and `3+4I`.
+実のところこれでは足りない。Schemeの複素数は `3.4e-5+6.7e+8i` のように符号を複数持ちうるし、`3i` や `4+i`、あるいは単に `+i` のように数が2つあるとはかぎらないからである。
+もう1つの厄介は、複素数が小文字の `i` しか持てないのに、`read` はシンボル `3+4i` と `3+4I` を区別しないことである。
 
-**Answer 23.4** Yes, it is possible to implement `begin` as a macro:
+**解答 23.4** できる。`begin` はマクロとして実装できる。
 
 ```lisp
 (setf (scheme-macro 'begin)
                 #'(lambda (&rest exps) '((lambda () .,exps))))
 ```
 
-With some work we could also eliminate quote.
-Instead of `'x`, we could use `(string->symbol "X" )`, and instead of `'(1 2)`, we could use something like `(list 1 2)`.
-The problem is in knowing when to reuse the same list.
-Consider:
+手をかければ quote も取り除ける。
+`'x` の代わりに `(string->symbol "X" )` を、`'(1 2)` の代わりに `(list 1 2)` のようなものを使えばよい。
+厄介なのは、いつ同じ並びを使い回すかを知ることである。
+次を考えよ。
 
 ```lisp
 => (define (one-two) '(1 2))
@@ -1967,33 +1967,33 @@ T
 NIL
 ```
 
-A clever memoized macro for quote could handle this, but it would be less efficient than having `quote` as a special form.
-In short, what's the point?
+quoteのための気の利いたメモ化のマクロならこれを扱えるだろうが、`quote` を特殊形式にしておくより効率は落ちる。
+要するに、そこまでする意味があるだろうか。
 
-It is also (nearly) possible to replace `if` with alternate code.
-The idea is to replace:
+`if` を別のコードで置き換えることも（ほぼ）できる。
+考え方は、
 
 `(if` *test then-part else-part*)
 
-with
+を次で置き換えることである。
 
 (*test* `(delay` *then-part*) `(delay` *else-part*))
 
-Now if we are assured that any *test* returns either `#t` or `#f`, then we can make the following definitions:
+どの *test* も `#t` か `#f` のいずれかを返すと保証できるなら、次の定義ができる。
 
 ```lisp
 (define #t (lambda (then-part else-part) (force then-part)))
 (define #f (lambda (then-part else-part) (force else-part)))
 ```
 
-The only problem with this is that any value, not just `#t`, counts as true.
+唯一の難点は、`#t` だけでなくどんな値も真と数えられることである。
 
-This seems to be a common phenomenon in Scheme compilers: translating everything into a few very general constructs, and then recognizing special cases of these constructs and compiling them specially.
-This has the disadvantage (compared to explicit use of many special forms) that compilation may be slower, because all macros have to be expanded first, and then special cases have to be recognized.
-It has the advantage that the optimizations will be applied even when the user did not have a special construct in mind.
-Common Lisp attempts to get the advantages of both by allowing implementations to play loose with what they implement as macros and as special forms.
+これはSchemeのコンパイラによくある現象のようだ。すべてをごく一般的な少数の構造へ訳し、それからその構造の特別な場合を見分けて特別にコンパイルするのである。
+これには（多くの特殊形式を明示的に使う場合に比べて）コンパイルが遅くなりうるという難点がある。まずすべてのマクロを展開し、それから特別な場合を見分けねばならないからだ。
+利点は、利用者が特別な構造を念頭に置いていなかったときにも最適化が当てはまることである。
+Common Lispは、何をマクロとして何を特殊形式として実装するかを実装側にゆるく任せることで、両方の利点を得ようとしている。
 
-**Answer 23.6** We define the predicate `always` and install it in two places in `comp-if`:
+**解答 23.6** 述語 `always` を定義し、`comp-if` の2か所に据えつける。
 
 ```lisp
 (defun always (pred env)
@@ -2056,11 +2056,11 @@ Common Lisp attempts to get the advantages of both by allowing implementations t
                     (list L1) ecode (if more? (list L2))))))))))
 ```
 
-Development note: originally, I had coded `always` as a predicate that took a Boolean value as input and returned true if the expression always had that value.
-Thus, you had to ask first if the predicate was always true, and then if it was always false.
-Then I realized this was duplicating much effort, and that the duplication was exponential, not just linear: for a triply-nested conditional I would have to do eight times the work, not twice the work.
-Thus I switched to the above formulation, where `always` is a three-valued function, returning `true`, `false`, or `nil` for none-of-the-above.
-But to demonstrate that the right solution doesn't always appear the first time, I give my original definition as well:
+開発の覚え書き。もともと `always` は、真偽の値を入力に取り、式が常にその値になるなら真を返す述語として書いていた。
+そのため、まず述語が常に真かを尋ね、次に常に偽かを尋ねねばならなかった。
+そのあと、これが手間を大きく重複させており、しかもその重複が線形ではなく指数的であることに気づいた。三重に入れ子になった条件分岐では、2倍ではなく8倍の仕事をせねばならないのだ。
+そこで上の形に切り替えた。`always` は3値の関数で、`true`、`false`、あるいはそのどちらでもない場合の `nil` を返す。
+しかし、正しい解が最初から現れるとはかぎらないことを示すために、もとの定義も挙げておく。
 
 ```lisp
 (defun always (boolean pred env)
@@ -2087,22 +2087,22 @@ But to demonstrate that the right solution doesn't always appear the first time,
 (defun equiv (x y) "Boolean equivalence" (eq (not x) (not y)))
 ```
 
-**Answer 23.7** The original version requires *O*(*n*) stack space for poorly chosen pivots.
-Assuming a properly tail-recursive compiler, the modified version will never require more than *O*(log *n*) space, because at each step at least half of the vector is being sorted tail-recursively.
+**解答 23.7** もとの版は、軸の選び方が悪いと *O*(*n*) のスタックの場所を要する。
+末尾再帰を正しく扱うコンパイラを前提とすれば、変えた版が要する場所は *O*(log *n*) を超えない。各段でベクタの少なくとも半分が末尾再帰で整列されるからである。
 
 
-**Answer 23.10** (1) `(defun (funcall fn . args) (apply fn args))`
-(2) Suppose you changed the piece of code `(+ . numbers)` to `(+ . (map sqrt numbers))`.
-The latter is the same expression as `(+ map sqrt numbers)`, which is not the intended result at all.
-So there would be an arbitrary restriction: the last argument in an apply form would have to be an atom.
-This kind of restriction goes against the grain of Scheme.
+**解答 23.10** (1) `(defun (funcall fn . args) (apply fn args))`
+(2) コードの断片 `(+ . numbers)` を `(+ . (map sqrt numbers))` に変えたとしよう。
+後者は `(+ map sqrt numbers)` と同じ式であり、まったく意図した結果ではない。
+したがって恣意的な制限が要ることになる。applyの形式の最後の引数はアトムでなければならない、というものだ。
+この種の制限はSchemeの性に合わない。
 
 ----------------------
 
 <a id="fn23-1"></a><sup>[1](#tfn23-1)</sup>
-Strictly speaking, this is a read-compile-funcall-write loop.
+厳密に言えば、これは読み込み・コンパイル・funcall・書き出しのループです。
 
 <a id="fn23-2"></a><sup>[2](#tfn23-2)</sup>
-At the time, the MacLisp compiler dealt with something called "lisp assembly code" or LAP.
-The function to input LAP was called `lapin`.
-Those who know French will get the pun.
+当時、MacLispのコンパイラは「lisp assembly code」すなわちLAPと呼ばれるものを扱っていました。
+LAPを入力する関数は `lapin` と呼ばれていました。
+フランス語を知る人なら、この語呂合わせがわかるでしょう。

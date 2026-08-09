@@ -671,6 +671,32 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | macroexpansion | マクロ展開 | |
 | prompt | 入力促し記号 | `>` と `==>` |
 
+### 第23章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| instruction set | 命令セット | |
+| opcode | 命令コード | |
+| stack-based machine | スタックにもとづく機械 | |
+| abstract machine | 抽象機械 | 23.3節の主題 |
+| assembler | アセンブラ | assembly code は「アセンブリコード」 |
+| label | ラベル | 分岐の飛び先 |
+| peephole optimizer | のぞき穴最適化器 | 23.4節 |
+| byte-code assembly | バイトコードのアセンブル | |
+| native code | その計算機本来のコード | 「ネイティブコード」を避け説明的に訳した |
+| microcode | マイクロコード | |
+| return address / point | 戻り先／継続の地点 | continuation point は「継続の地点」 |
+| calling sequence | 呼び出しの手順 | |
+| frame | フレーム | 環境の1段 |
+| inline | その場に埋め込む | inline compile の意 |
+| for value / for effect | 値のために／効果のために | コンパイルの文脈 |
+| side-effect-free | 副作用のない | |
+| data-flow analysis | データフロー分析 | |
+| readtable | 読み取り表 | 第20章と同じ |
+| read macro | 読み取りマクロ | |
+| quasiquote | quasiquote | Schemeでの逆クォートの呼称。原文のまま |
+| unforgeable | 偽造できない | `eof` 定数の性質 |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -752,8 +778,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter22.md` | 完了 |
-| `chapter23.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter23.md` | 完了 |
+| `chapter24.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
