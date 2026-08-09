@@ -1,51 +1,51 @@
-# Chapter 21
-## A Grammar of English
+# 第21章
+## 英語の文法
 
-> Prefer geniality to grammar.
+> 文法より愛想のよさを選べ。
 
-> -Henry Watson Fowler
+> —Henry Watson Fowler
 
-> *The King's English* (1906)
+> *The King's English*（1906）
 
-The previous two chapters outline techniques for writing grammars and parsers based on those grammars.
-It is quite straightforward to apply these techniques to applications like the CD player problem where input is limited to simple sentences like "Play 1 to 8 without 3." But it is a major undertaking to write a grammar for unrestricted English input.
-This chapter develops a grammar that covers all the major syntactic constructions of English.
-It handles sentences of much greater complexity, such as "Kim would not have been persuaded by Lee to look after the dog." The grammar is not comprehensive enough to handle sentences chosen at random from a book, but when augmented by suitable vocabulary it is adequate for a wide variety of applications.
+前の2章では、文法と、それにもとづく構文解析器を書く技法の概略を述べました。
+「Play 1 to 8 without 3」のような単純な文に入力が限られるCD再生機の問題のような応用に、この技法を当てはめるのはごく素直なことです。しかし制限のない英語の入力のための文法を書くのは、大仕事です。
+本章では、英語のおもな統語構造をすべて覆う文法を作り上げます。
+これは「Kim would not have been persuaded by Lee to look after the dog」のような、はるかに込み入った文を扱えます。本から無作為に選んだ文を扱えるほど網羅的ではありませんが、適切な語彙を足せば幅広い応用に十分です。
 
-This chapter is organized as a tour through the English language.
-We first cover noun phrases, then verb phrases, clauses, and sentences.
-For each category we introduce examples, analyze them linguistically, and finally show definite clause grammar rules that correspond to the analysis.
+本章は英語をめぐる案内として組み立ててあります。
+まず名詞句を扱い、次に動詞句、節、文と進みます。
+範疇ごとに例を挙げ、言語学的に分析し、最後にその分析に対応する定節文法の規則を示します。
 
-As the last chapter should have made clear, analysis more often results in complication than in simplification.
-For example, starting with a simple rule like `(S --> NP VP)`, we soon find that we have to add arguments to handle agreement, semantics, and gapping information.
-[Figure 21.1](#f0010) lists the grammatical categories and their arguments.
-Note that the semantic argument, `sem`, is always last, and the gap accumulators, `gap1` and `gap2`, are next-to-last whenever they occur.
-All single-letter arguments denote metavariables; for example, each noun phrase (category NP) will have a semantic interpretation, `sem`, that is a conjunction of relations involving the variable `x`.
-Similarly, the `hin modifiers` is a variable that refers to the head-the thing that is being modified.
-The other arguments and categories will be explained in turn, but it is handy to have this figure to refer back to.
+前章ではっきりしたはずですが、分析はたいてい単純化より複雑化をもたらします。
+たとえば `(S --> NP VP)` のような単純な規則から始めても、一致・意味・空所の情報を扱うために引数を足さねばならないとすぐわかります。
+[図21.1](#f0010)に、文法の範疇とその引数を並べます。
+意味の引数 `sem` が常に最後で、空所の累算子 `gap1` と `gap2` は、現れる場合はその1つ手前であることに注意してください。
+1文字の引数はすべてメタ変数を表します。たとえば各名詞句（範疇NP）は、変数 `x` を含む関係の連言である意味の解釈 `sem` を持ちます。
+同じく `modifiers` の `h` は主要部、すなわち修飾されているものを指す変数です。
+他の引数と範疇は順に説明していきますが、この図を折に触れて見返せると便利です。
 
 | []()                                                    |
 |---------------------------------------------------------|
 | ![f21-01](images/chapter21/f21-01.jpg)                  |
-| Figure 21.1: Grammatical Categories and their Arguments |
+| 図21.1: 文法の範疇とその引数                            |
 
-*(ed: should be a markdown table)*
+*（編注: ここはMarkdownの表にすべき）*
 
-## 21.1 Noun Phrases
+## 21.1 名詞句
 
-The simplest noun phrases are names and pronouns, such as "Kim" and "them." The rules for these cases are simple: we build up a semantic expression from a name or pronoun, and since there can be no gap, the two gap accumulator arguments are the same `(?g1)`.
-Person and number agreement is propagated in the variable `?agr`, and we also keep track of the *case* of the noun phrase.
-English has three cases that are reflected in certain pronouns.
-In the first person singular, "I" is the *nominative* or *subjective* case, "me" is the *accusative* or *objective* case, and "my" is the *genitive* case.
-To distinguish them from the genitive, we refer to the nominative and the objective cases as the *common* cases.
-Accordingly, the three cases will be marked by the expressions `(common nom)`, `(common obj)`, and `gen`, respectively.
-Many languages of the world have suffixes that mark nouns as being one case or another, but English does not.
-Thus, we use the expression `(common ?)` to mark nouns.
+もっとも単純な名詞句は「Kim」や「them」のような固有名と代名詞です。この場合の規則は単純で、固有名や代名詞から意味の式を組み立てます。空所はありえないので、2つの空所の累算子の引数は同じ `(?g1)` になります。
+人称と数の一致は変数 `?agr` で伝えられ、名詞句の*格*も記録します。
+英語には、一部の代名詞に現れる3つの格があります。
+一人称単数では、「I」が*主格*すなわち*主語格*、「me」が*対格*すなわち*目的格*、「my」が*属格*です。
+属格と区別するため、主格と目的格をまとめて*共通格*と呼びます。
+したがって3つの格は、それぞれ `(common nom)`、`(common obj)`、`gen` という式で印を付けます。
+世界の多くの言語には、名詞がどの格かを示す接尾辞がありますが、英語にはありません。
+ですから名詞には `(common ?)` という式で印を付けます。
 
-We also distinguish between noun phrases that can be used in questions, like "who," and those that cannot.
-The `?wh` variable has the value  `+wh` for noun phrases like "who" or "which one" and `-wh` for nonquestion phrases.
-Here, then, are the rules for names and pronouns.
-The predicates name and `pronoun` are used to look up words in the lexicon.
+また、「who」のように疑問文で使える名詞句と、使えない名詞句も区別します。
+変数 `?wh` は、「who」や「which one」のような名詞句では値 `+wh` を、疑問でない句では `-wh` を取ります。
+では、固有名と代名詞の規則を示します。
+述語 name と `pronoun` は、語彙のなかで語を引くのに使います。
 
 ```lisp
 (rule (NP ?agr (common ?) -wh ?x ?g1 ?g1 (the ?x (name ?name ?x))) ==>
@@ -55,7 +55,7 @@ The predicates name and `pronoun` are used to look up words in the lexicon.
   (pronoun ?agr ?case ?wh ?x ?sem))
 ```
 
-Plural nouns can stand alone as noun phrases, as in "dogs," but singular nouns need a determiner, as in "the dog" or "Kim's friend's biggest dog." Plural nouns can also take a determiner, as in "the dogs." The category Det is used for determiners, and NP2 is used for the part of a noun phrase after the determiner:
+複数形の名詞は「dogs」のように単独で名詞句になれますが、単数形の名詞には「the dog」や「Kim's friend's biggest dog」のように限定詞が要ります。複数形の名詞も「the dogs」のように限定詞を取れます。範疇Detを限定詞に、NP2を限定詞より後ろの名詞句の部分に使います。
 
 ```lisp
 (rule (NP (- - - +) ?case -wh ?x ?g1 ?g2 (group ?x ?sem)) ==>
@@ -68,8 +68,8 @@ Plural nouns can stand alone as noun phrases, as in "dogs," but singular nouns n
   (NP2 ?agr (common ?) ?x ?g1 ?g2 ?restriction))
 ```
 
-Finally, a noun phrase may appear externally to a construction, in which case the noun phrase passed in by the first gap argument will be consumed, but no words from the input will be.
-An example is the &blank; in "Whom does Kim like &blank;?"
+最後に、名詞句が構造の外側に現れることもあります。その場合、1つ目の空所の引数で渡された名詞句が消費され、入力からは語が消費されません。
+「Whom does Kim like &blank;?」の &blank; がその例です。
 
 ```lisp
 (rule (NP ?agr ?case ?wh ?x (gap (NP ?agr ?case ?x)) (gap nil) t)
@@ -77,8 +77,8 @@ An example is the &blank; in "Whom does Kim like &blank;?"
   )
 ```
 
-Now we address the heart of the noun phrase, the `NP2` category.
-The lone rule for `NP2` says that it consists of a noun, optionally preceded and followed by modifiers:
+では名詞句の中心である `NP2` の範疇に取りかかります。
+`NP2` の唯一の規則は、それが名詞から成り、その前後に修飾語が任意に付きうる、と述べています。
 
 ```lisp
 (rule (NP2 ?agr (common ?) ?x ?g1 ?g2 :sem) ==>
@@ -87,31 +87,31 @@ The lone rule for `NP2` says that it consists of a noun, optionally preceded and
   (modifiers post noun ?agr ?slots ?x ?g1 ?g2 ?post))
 ```
 
-## 21.2 Modifiers
+## 21.2 修飾語
 
-Modifiers are split into type types: *Complements* are modifiers that are expected by the head category that is being modified; they cannot stand alone.
-*Adjuncts* are modifiers that are not required but bring additional information.
-The distinction is clearest with verb modifiers.
-In "Kim visited Lee yesterday," "visited" is the head verb, "Lee" is a complement, and "yesterday" is an adjunct.
-Returning to nouns, in "the former mayor of Boston," "mayor" is the head noun, "of Boston" is a complement (although an optional one) and "former" is an adjunct.
+修飾語は2種類に分かれます。*補語*は、修飾される主要部の範疇が期待する修飾語で、単独では立てません。
+*付加語*は、必須ではないが追加の情報をもたらす修飾語です。
+この区別は動詞の修飾語でもっともはっきりします。
+「Kim visited Lee yesterday」では、「visited」が主要部の動詞、「Lee」が補語、「yesterday」が付加語です。
+名詞に戻ると、「the former mayor of Boston」では「mayor」が主要部の名詞、「of Boston」が（省略可能ではありますが）補語、「former」が付加語です。
 
-The predicate `modifiers` takes eight arguments, so it can be tricky to understand them all.
-The first two arguments tell if we are before or after the head (`pre` or `post`) and what kind of head we are modifying (`noun`, `verb`, or whatever).
-Next is an argument that passes along any required information-in the case of nouns, it is the agreement feature.
-The fourth argument is a list of expected complements, here called `?slots`.
-Next is the metavariable used to refer to the head.
-The final three arguments are the two gap accumulators and the semantics, which work the same way here as we have seen before.
-Notice that the lexicon entry for each `Noun` can have a list of complements that are considered as postnoun modifiers, but there can be only adjuncts as prenoun modifiers.
-Also note that gaps can appear in the postmodifiers but not in the premodifiers.
-For example, we can have "What is Kevin the former mayor of &blank;?," where the answer might be "Boston."
-But even though we can construct a noun phrase like "the education president," where "education" is a prenoun modifier of "president," we cannot construct "* What is George the &blank; president?," intending that the answer be "education."
+述語 `modifiers` は8つの引数を取るので、すべてを理解するのは骨かもしれません。
+最初の2つは、主要部の前か後か（`pre` か `post`）と、どんな種類の主要部を修飾しているか（`noun`、`verb` など）を伝えます。
+次は必要な情報を引き回す引数で、名詞の場合は一致の素性です。
+4つ目は期待される補語の並びで、ここでは `?slots` と呼びます。
+次は主要部を指すのに使うメタ変数です。
+最後の3つは2つの空所の累算子と意味で、これらはこれまで見てきたのと同じように働きます。
+各 `Noun` の語彙の項目は、名詞の後ろの修飾語と見なされる補語の並びを持てますが、名詞の前の修飾語になれるのは付加語だけであることに注目してください。
+また、空所は後ろの修飾語には現れうるが、前の修飾語には現れないことにも注意してください。
+たとえば「What is Kevin the former mayor of &blank;?」は作れて、答えは「Boston」かもしれません。
+しかし「education」が「president」の前置修飾語である「the education president」のような名詞句は作れても、答えが「education」であることを意図した「* What is George the &blank; president?」は作れません。
 
-There are four cases for modification.
-First, a complement is a kind of modifier.
-Second, if a complement is marked as optional, it can be skipped.
-Third, an adjunct can appear in the input.
-Fourth, if there are no complements expected, then there need not be any modifiers at all.
-The following rules implement these four cases:
+修飾には4つの場合があります。
+第一に、補語は修飾語の一種です。
+第二に、補語が省略可能と印を付けられていれば、飛ばせます。
+第三に、付加語が入力に現れることがあります。
+第四に、期待される補語がなければ、修飾語はまったくなくてもかまいません。
+次の規則がこの4つの場合を実装します。
 
 ```lisp
 (rule (modifiers ?pre/post ?cat ?info (?slot . ?slots) ?h
@@ -130,24 +130,24 @@ The following rules implement these four cases:
 (rule (modifiers ? ? ? () ? ?g1 ?g1 t) ==> )
 ```
 
-We need to say more about the list of complements, or slots, that can be associated with words in the lexicon.
-Each slot is a list of the form (*role number form),* where the role refers to some semantic relation, the number indicates the ordering of the complements, and the form is the type of constituent expected: noun phrase, verb phrase, or whatever.
-The details will be covered in the following section on verb phrases, and `complement` will be covered in the section on XPs.
-For now, we give a single example.
-The complement list for one sense of the verb "visit" is:
+語彙の語に結びつけられる補語の並び、すなわちスロットについて、もう少し述べる必要があります。
+各スロットは (*役割 番号 形式*) の形の並びです。役割は何らかの意味関係を指し、番号は補語の順序を示し、形式は期待される構成素の型（名詞句、動詞句など）です。
+細部は次の動詞句の節で扱い、`complement` はXPの節で扱います。
+いまのところは例を1つ挙げるにとどめます。
+動詞「visit」のある語義の補語の並びは次のとおりです。
 
 ```lisp
 ((agt 1 (NP ?)) (obj 2 (NP ?)))
 ```
 
-This means that the first complement, the subject, is a noun phrase that fills the agent role, and the second complement is also a noun phrase that fills the object role.
+これは、1つ目の補語である主語が行為者の役割を埋める名詞句であり、2つ目の補語も対象の役割を埋める名詞句である、という意味です。
 
-## 21.3 Noun Modifiers
+## 21.3 名詞の修飾語
 
-There are two main types of prenoun adjuncts.
-Most common are adjectives, as in "big slobbery dogs." Nouns can also be adjuncts, as in "water meter" or "desk lamp." Here it is clear that the second noun is the head and the first is the modifier: a desk lamp is a lamp, not a desk.
-These are known as noun-noun compounds.
-In the following rules, note that we do not need to say that more than one adjective is allowed; this is handled by the rules for `modifiers`.
+名詞の前の付加語には、おもに2種類あります。
+もっとも多いのは「big slobbery dogs」のような形容詞です。名詞も「water meter」や「desk lamp」のように付加語になれます。ここでは2つ目の名詞が主要部で1つ目が修飾語であるのは明らかです。desk lampは机ではなくランプなのですから。
+これらは名詞と名詞の複合語として知られています。
+次の規則では、形容詞が2つ以上許されるとは述べる必要がないことに注意してください。それは `modifiers` の規則が扱います。
 
 ```lisp
 (rule (adjunct pre noun ?info ?x ?gap ?gap ?sem) ==>
@@ -158,17 +158,17 @@ In the following rules, note that we do not need to say that more than one adjec
   (noun ?agr () ?x ?sem))
 ```
 
-After the noun there is a wider variety of modifiers.
-Some nouns have complements, which are primarily prepositional phrases, as in "mayor of Boston." These will be covered when we get to the lexical entries for nouns.
-Prepositional phrases can be adjuncts for nouns or verbs, as in "man in the middle" and "slept for an hour." We can write one rule to cover both cases:
+名詞の後ろには、もっと多様な修飾語が来ます。
+名詞のなかには補語を取るものがあり、それはおもに「mayor of Boston」のような前置詞句です。これは名詞の語彙項目のところで扱います。
+前置詞句は、「man in the middle」や「slept for an hour」のように、名詞の付加語にも動詞の付加語にもなれます。両方を覆う規則を1つ書けます。
 
 ```lisp
 (rule (adjunct post ?cat ?info ?x ?g1 ?g2 ?sem) ==>
   (PP ?prep ?prep ?wh ?np ?x ?g1 ?g2 ?sem))
 ```
 
-Here are the rules for prepositional phrases, which can be either a preposition followed by a noun phrase or can be gapped, as in "to whom are you speaking &blank;?"
-The object of a preposition is always in the objective case: "with him" not "*with he."
+前置詞句の規則を示します。前置詞のあとに名詞句が続くか、「to whom are you speaking &blank;?」のように空所になるかのどちらかです。
+前置詞の目的語は常に目的格です。「with him」であって「*with he」ではありません。
 
 ```lisp
 (rule (PP ?prep ?role ?wh ?np ?x ?g1 ?g2 :sem) ==>
@@ -180,10 +180,10 @@ The object of a preposition is always in the objective case: "with him" not "*wi
           (gap (PP ?prep ?role ?np ?x)) (gap nil) t) ==> )
 ```
 
-Nouns can be modified by present participles, past participles, and relative clauses.
-Examples are "the man eating the snack," "the snack eaten by the man," and "the man that ate the snack," respectively.
-We will see that each verb in the lexicon is marked with an inflection, and that the marker `-ing` is used for present participles while `-en` is used for past participles.
-The details of the `clause` will be covered later.
+名詞は現在分詞・過去分詞・関係節によって修飾されえます。
+例はそれぞれ「the man eating the snack」「the snack eaten by the man」「the man that ate the snack」です。
+語彙の各動詞には活用の印が付いており、現在分詞には `-ing`、過去分詞には `-en` の印が使われることを、このあと見ます。
+`clause` の細部はのちほど扱います。
 
 ```lisp
 (rule (adjunct post noun ?agr ?x ?gap ?gap ?sem) ==>
@@ -195,8 +195,8 @@ The details of the `clause` will be covered later.
   (rel-clause ?agr ?x ?sem))
 ```
 
-It is possible to have a relative clause where it is an object, not the subject, that the head refers to: "the snack that the man ate." In this kind of relative clause the relative pronoun is optional: "The snack the man ate was delicious." The following rules say that if the relative pronoun is omitted then the noun that is being modified must be an object, and the relative clause should include a subject internally.
-The constant `int-subj` indicates this.
+主要部が指すのが主語ではなく目的語であるような関係節もありえます。「the snack that the man ate」です。この種の関係節では関係代名詞は省略できます。「The snack the man ate was delicious」のように。次の規則は、関係代名詞が省かれるなら、修飾されている名詞は目的語でなければならず、関係節は内部に主語を含むべきだ、と述べています。
+定数 `int-subj` がこれを示します。
 
 ```lisp
 (rule (rel-clause ?agr ?x :sem) ==>
@@ -213,13 +213,13 @@ The constant `int-subj` indicates this.
 (rule (opt-rel-pronoun (common obj) ?x int-subj t) ==> )
 ```
 
-It should be noted that it is rare but not impossible to have names and pronouns with modifiers: "John the Baptist," "lovely Rita, meter maid," "Lucy in the sky with diamonds," "Sylvia in accounting on the 42nd floor," "she who must be obeyed." Here and throughout this chapter we will raise the possibility of such rare cases, leaving them as exercises for the reader.
+固有名や代名詞が修飾語を伴うのはまれではあるが不可能ではない、と述べておくべきでしょう。「John the Baptist」「lovely Rita, meter maid」「Lucy in the sky with diamonds」「Sylvia in accounting on the 42nd floor」「she who must be obeyed」といった例です。ここでも本章を通じても、そうしたまれな場合の可能性には触れるにとどめ、読者への練習問題として残します。
 
-## 21.4 Determiners
+## 21.4 限定詞
 
-We will cover three kinds of determiners.
-The simplest is the article: "a dog" or "the dogs." We also allow genitive pronouns, as in "her dog," and numbers, as in "three dogs." The semantic interpretation of a determiner-phrase is of the form (*quantifier variable restriction*).
-For example, `(a ?x (dog ?x) )` or `((number 3) ?x (dog ?x))`.
+限定詞を3種類扱います。
+もっとも単純なのは冠詞で、「a dog」や「the dogs」です。「her dog」のような属格の代名詞と、「three dogs」のような数詞も許します。限定詞句の意味の解釈は (*量化子 変数 制限*) の形です。
+たとえば `(a ?x (dog ?x) )` や `((number 3) ?x (dog ?x))` です。
 
 ```lisp
 (rule (Det ?agr ?wh ?x ?restriction (?art ?x ?restriction)) ==>
@@ -237,18 +237,18 @@ For example, `(a ?x (dog ?x) )` or `((number 3) ?x (dog ?x))`.
   (cardinal ?n ?agr))
 ```
 
-These are the most important determiner types, but there are others, and there are pre- and postdeterminers that combine in restricted combinations.
-Predeterminers include all, both, half, double, twice, and such.
-Postdeterminers include every, many, several, and few.
-Thus, we can say "all her many good ideas" or "all the King's men."
-But we can not say "\*all much ideas" or "\*the our children."
-The details are complicated and are omitted from this grammar.
+これらがもっとも重要な限定詞の型ですが、他にもありますし、限られた組み合わせで結びつく前置限定詞と後置限定詞もあります。
+前置限定詞には all、both、half、double、twice、such があります。
+後置限定詞には every、many、several、few があります。
+ですから「all her many good ideas」や「all the King's men」とは言えます。
+しかし「\*all much ideas」や「\*the our children」とは言えません。
+細部は込み入っているので、この文法では省きます。
 
-## 21.5 Verb Phrases
+## 21.5 動詞句
 
-Now that we have defined `modifiers`, verb phrases are easy.
-In fact, we only need two rules.
-The first says a verb phrase consists of a verb optionally preceded and followed by modifiers, and that the meaning of the verb phrase includes the fact that the subject fills some role:
+`modifiers` を定義したので、動詞句は簡単です。
+実のところ規則は2つで済みます。
+1つ目は、動詞句は動詞から成り、その前後に修飾語が任意に付きうること、そして動詞句の意味には主語が何らかの役割を埋めるという事実が含まれること、を述べています。
 
 ```lisp
 (rule (VP ?infl ?x ?subject-slot ?v ?g1 ?g2 :sem) ==>
@@ -259,39 +259,39 @@ The first says a verb phrase consists of a verb optionally preceded and followed
   (modifiers post verb ? ?slots ?v ?g1 ?g2 ?mod-sem))
 ```
 
-The `VP` category takes seven arguments.
-The first is an inflection, which represents the tense of the verb.
-To describe the possibilities for this argument we need a quick review of some basic linguistics.
-A sentence must have a *finite* verb, meaning a verb in the present or past tense.
-Thus, we say "Kim likes Lee," not "\*Kim liking Lee." Subject-predicate agreement takes effect for finite verbs but not for any other tense.
-The other tenses show up as complements to other verbs.
-For example, the complement to "want" is an infinitive: "Kim wants *to like* Lee" and the complement to the modal auxiliary verb "would" is a nonfinite verb: "Kim would *like* Lee." If this were in the present tense, it would be "likes," not "like." The inflection argument takes on one of the forms in the table here:
+範疇 `VP` は7つの引数を取ります。
+1つ目は活用で、動詞の時制を表します。
+この引数の取りうる値を述べるには、基本的な言語学をざっとおさらいする必要があります。
+文には*定形*の動詞、すなわち現在形か過去形の動詞がなければなりません。
+ですから「Kim likes Lee」と言い、「\*Kim liking Lee」とは言いません。主語と述語の一致は定形の動詞に効きますが、他の形には効きません。
+他の形は、別の動詞の補語として現れます。
+たとえば「want」の補語は不定詞で「Kim wants *to like* Lee」となり、法助動詞「would」の補語は非定形の動詞で「Kim would *like* Lee」となります。これが現在形なら「like」ではなく「likes」になるはずです。活用の引数は、次の表のいずれかの形を取ります。
 
-| Expression              | Type               | Example   |
+| 式                      | 型                 | 例        |
 |-------------------------|--------------------|-----------|
-| `(finite ?agr present)` | present tense      | eat, eats |
-| `(finite ?agr past)`    | past tense         | ate       |
-| `nonfinite`             | nonfinite          | eat       |
-| `infinitive`            | infinitive         | to eat    |
-| `-en`                   | past participle    | eaten     |
-| `-ing`                  | present participle | eating    |
+| `(finite ?agr present)` | 現在形             | eat, eats |
+| `(finite ?agr past)`    | 過去形             | ate       |
+| `nonfinite`             | 非定形             | eat       |
+| `infinitive`            | 不定詞             | to eat    |
+| `-en`                   | 過去分詞           | eaten     |
+| `-ing`                  | 現在分詞           | eating    |
 
-The second argument is a metavariable that refers to the subject, and the third is the subject's complement slot.
-We adopt the convention that the subject slot must always be the first among the verb's complements.
-The other slots are handled by the postverb modifiers.
-The fourth argument is a metavariable indicating the verb phrase itself.
-The final three are the familiar gap and semantics arguments.
-As an example, if the verb phrase is the single word "slept," then the semantics of the verb phrase will be `(and (past ?v) (sleep ?v))`.
-Of course, adverbs, complements, and adjuncts will also be handled by this rule.
+2つ目は主語を指すメタ変数、3つ目は主語の補語のスロットです。
+主語のスロットは常に動詞の補語のうち最初でなければならない、という約束を採ります。
+他のスロットは動詞の後ろの修飾語が扱います。
+4つ目は動詞句そのものを示すメタ変数です。
+最後の3つは、おなじみの空所と意味の引数です。
+例として、動詞句が「slept」という1語なら、その意味は `(and (past ?v) (sleep ?v))` になります。
+もちろん副詞・補語・付加語もこの規則が扱います。
 
-The second rule for verb phrases handles auxiliary verbs, such as "have," "is" and "would." Each auxiliary verb (or `aux`) produces a verb phrase with a particular inflection when followed by a verb phrase with the required inflection.
-To repeat an example, "would" produces a finite phrase when followed by a nonfinite verb.
-"Have" produces a nonfinite when followed by a past participle.
-Thus, "would have liked" is a finite verb phrase.
+動詞句の2つ目の規則は、「have」「is」「would」のような助動詞を扱います。各助動詞（`aux`）は、求められる活用の動詞句が後ろに続くと、特定の活用の動詞句を作ります。
+例を繰り返すと、「would」は非定形の動詞が後ろに続くと定形の句を作ります。
+「have」は過去分詞が後ろに続くと非定形を作ります。
+ですから「would have liked」は定形の動詞句です。
 
-We also need to account for negation.
-The word "not" can not modify a bare main verb but can follow an auxiliary verb.
-That is, we can't say "*Kim not like Lee," but we can add an auxiliary to get "Kim does not like Lee."
+否定も織り込む必要があります。
+語「not」は裸の本動詞を修飾できませんが、助動詞の後ろには来られます。
+つまり「*Kim not like Lee」とは言えませんが、助動詞を足して「Kim does not like Lee」とは言えます。
 
 ```lisp
 (rule (VP ?infl ?x ?subject-slot ?v ?g1 ?g2 :sem) ==>
@@ -306,10 +306,10 @@ That is, we can't say "*Kim not like Lee," but we can add an auxiliary to get "K
   (:word not))
 ```
 
-## 21.6 Adverbs
+## 21.6 副詞
 
-Adverbs can serve as adjuncts before or after a verb: "to boldly go," "to go boldly." There are some limitations on where they can occur, but it is difficult to come up with firm rules; here we allow any adverb anywhere.
-We define the category `advp` for adverbial phrase, but currently restrict it to a single adverb.
+副詞は動詞の前にも後ろにも付加語として立てます。「to boldly go」「to go boldly」のように。どこに現れうるかには制限がありますが、確かな規則を立てるのは難しいので、ここではどの副詞もどこにでも許すことにします。
+副詞句のために範疇 `advp` を定義しますが、いまのところ副詞1つに限っておきます。
 
 ```lisp
 (rule (adjunct ?pre/post verb ?info ?v ?g1 ?g2 ?sem) ==>
@@ -321,13 +321,13 @@ We define the category `advp` for adverbial phrase, but currently restrict it to
 (rule (advp ?wh ?v (gap (advp ?v)) (gap nil) t) ==> )
 ```
 
-## 21.7 Clauses
+## 21.7 節
 
-A clause consists of a subject followed by a predicate.
-However, the subject need not be realized immediately before the predicate.
-For example, in "Alice promised Bob to lend him her car" there is an infinitive clause that consists of the predicate "to lend him her car" and the subject "Alice."
-The sentence as a whole is another clause.
-In our analysis, then, a clause is a subject followed by a verb phrase, with the possibility that the subject will be instantiated by something from the gap arguments:
+節は主語とそれに続く述語から成ります。
+しかし主語が述語の直前に現れる必要はありません。
+たとえば「Alice promised Bob to lend him her car」には、述語「to lend him her car」と主語「Alice」から成る不定詞の節があります。
+文全体もまた別の節です。
+ですから私たちの分析では、節は主語とそれに続く動詞句であり、主語が空所の引数から来る何かで具体化される可能性もあります。
 
 ```lisp
 (rule (clause ?infl ?x ?int-subj ?v ?gap1 ?gap3 :sem) ==>
@@ -336,14 +336,14 @@ In our analysis, then, a clause is a subject followed by a verb phrase, with the
   (:test (subj-pred-agree ?agr ?infl)))
 ```
 
-There are now two possibilities for `subject`.
-In the first case it has already been parsed, and we pick it up from the gap list.
-If that is so, then we also need to find the agreement feature of the subject.
-If the subject was a noun phrase, the agreement will be present in the gap list.
-If it was not, then the agreement is third-person singular.
-An example of this is "*That the Red Sox won* surprises me," where the italicized phrase is a non-NP subject.
-The fact that we need to use "surprises" and not "surprise" indicates that it is third-person singular.
-We will see that the code `(- - + -)` is used for this.
+`subject` には2つの可能性があります。
+1つ目の場合はすでに解析済みで、空所の並びから拾い上げます。
+そうであれば、主語の一致の素性も見つける必要があります。
+主語が名詞句だったなら、一致は空所の並びにあります。
+そうでなければ、一致は三人称単数です。
+その例が「*That the Red Sox won* surprises me」で、斜体の句がNPでない主語です。
+「surprise」ではなく「surprises」を使わねばならないという事実が、それが三人称単数であることを示しています。
+これには符号 `(- - + -)` が使われることを、このあと見ます。
 
 ```lisp
 (rule (subject ?agree ?x ?subj-slot ext-subj
@@ -355,10 +355,10 @@ We will see that the code `(- - + -)` is used for this.
              (= ?agree (- - + -))))) ;Non-NP subjects are 3sing
 ```
 
-In the second case we just parse a noun phrase as the subject.
-Note that the fourth argument to `subject` is either `ext-subj` or `int-subj` depending on if the subject is realized internally or externally.
-This will be important when we cover sentences in the next section.
-In case it was not already clear, the second argument to both `clause` and `subject` is the metavariable representing the subject.
+2つ目の場合は、単に名詞句を主語として解析します。
+`subject` の4つ目の引数が、主語が内側に現れるか外側に現れるかに応じて `ext-subj` か `int-subj` になることに注意してください。
+これは次節で文を扱うときに重要になります。
+まだはっきりしていなければ述べておくと、`clause` と `subject` の2つ目の引数はどちらも主語を表すメタ変数です。
 
 ```lisp
 (rule (subject ?agr ?x (?role 1 (NP ?x)) int-subj ?gap ?gap ?sem)
@@ -366,21 +366,21 @@ In case it was not already clear, the second argument to both `clause` and `subj
   (NP ?agr (common nom) ?wh ?x (gap nil) (gap nil) ?sem))
 ```
 
-Finally, the rules for subject-predicate agreement say that only finite predicates need to agree with their subject:
+最後に、主語と述語の一致の規則は、主語と一致する必要があるのは定形の述語だけだ、と述べています。
 
 ```lisp
 (<- (subj-pred-agree ?agr (finite ?agr ?)))
 (<- (subj-pred-agree ? ?infl) (atom ?infl))
 ```
 
-## 21.8 Sentences
+## 21.8 文
 
-In the previous chapter we allowed only simple declarative sentences.
-The current grammar supports commands and four kinds of questions in addition to declarative sentences.
-It also supports *thematic fronting:* placing a nonsubject at the beginning of a sentence to emphasize its importance, as in "*Smith* he says his name is" or *"Murder,* she wrote" or *"In God* we trust."
-In the last example it is a prepositional phrase, not a noun phrase, that occurs first.
-It is also possible to have a subject that is not a noun phrase: *"That the dog didn't bark* puzzled Holmes." To support all these possibilities, we introduce a new category, `XP`, which stands for any kind of phrase.
-A declarative sentence is then just an XP followed by a clause, where the subject of the clause may or may not turn out to be the XP:
+前章では単純な平叙文しか許していませんでした。
+いまの文法は、平叙文に加えて命令文と4種類の疑問文を扱えます。
+また*主題の前置*、すなわち主語でないものを文頭に置いて重要さを際立たせることも扱えます。「*Smith* he says his name is」「*Murder,* she wrote」「*In God* we trust」のように。
+最後の例では、先頭に来るのは名詞句ではなく前置詞句です。
+名詞句でない主語もありえます。「*That the dog didn't bark* puzzled Holmes」のように。こうした可能性をすべて扱うため、どんな種類の句をも表す新しい範疇 `XP` を導入します。
+そうすると平叙文は、XPとそれに続く節にすぎません。その節の主語がXPになることもあれば、ならないこともあります。
 
 ```lisp
 (rule (S ?s :sem) ==>
@@ -390,12 +390,12 @@ A declarative sentence is then just an XP followed by a clause, where the subjec
   (clause (finite ? ?) ?x ? ?s (gap ?constituent) (gap nil) ?sem))
 ```
 
-As it turns out, this rule also serves for two types of questions.
-The simplest kind of question has an interrogative noun phrase as its subject: "Who likes Lee?" or "What man likes Lee?" Another kind is the so-called *echo question*, which can be used only as a reply to another statement: if I tell you Kim likes Jerry Lewis, you could reasonably reply "Kim likes *who*?" Both these question types have the same structure as declarative sentences, and thus are handled by the same rule.
+この規則は、2種類の疑問文にも使えることがわかります。
+もっとも単純な疑問文は、疑問の名詞句を主語に持ちます。「Who likes Lee?」や「What man likes Lee?」です。もう1つはいわゆる*おうむ返しの疑問文*で、他の発言への返事としてしか使えません。KimはJerry Lewisが好きだと私が言えば、「Kim likes *who*?」と返すのはもっともなことです。この2つの型の疑問文はどちらも平叙文と同じ構造なので、同じ規則が扱います。
 
-The following table lists some sentences that can be parsed by this rule, showing the XP and subject of each.
+次の表に、この規則で解析できる文をいくつか挙げ、それぞれのXPと主語を示します。
 
-| Sentence                  | XP                 | Subject            |
+| 文                        | XP                 | 主語               |
 |---------------------------|--------------------|--------------------|
 | Kim likes Lee             | Kim                | Kim                |
 | Lee, Kim likes            | Lee                | Kim                |
@@ -403,9 +403,9 @@ The following table lists some sentences that can be parsed by this rule, showin
 | That Kim likes Lee amazes | That Kim likes Lee | That Kim likes Lee |
 | Who likes Lee?            | Who                | Who                |
 
-The most common type of command has no subject at all: "Be quiet" or "Go to your room." When the subject is missing, the meaning is that the command refers to *you*, the addressee of the command.
-The subject can also be mentioned explicitly, and it can be "you," as in "You be quiet," but it need not be: "Somebody shut the door" or "Everybody sing along." We provide a rule only for commands with subject omitted, since it can be difficult to distinguish a command with a subject from a declarative sentence.
-Note that commands are always nonfinite.
+もっともよくある型の命令文には、主語がまったくありません。「Be quiet」や「Go to your room」です。主語が欠けているとき、その命令は命令の受け手である*あなた*を指す、という意味になります。
+主語を明示することもできますし、「You be quiet」のように「you」でもかまいませんが、そうである必要はありません。「Somebody shut the door」や「Everybody sing along」のように。主語のある命令文と平叙文を見分けるのは難しいことがあるので、主語を省いた命令文の規則だけを用意します。
+命令文は常に非定形であることに注意してください。
 
 ```lisp
 (rule (S ?s :sem) ==>
@@ -417,11 +417,11 @@ Note that commands are always nonfinite.
           (gap (NP ? ? ?x)) (gap nil) ?sem))
 ```
 
-Another form of command starts with "let," as in "Let me see what I can do" and "Let us all pray." The second word is better considered as the object of "let" rather than the subject of the sentence, since the subject would have to be "I" or "we." This kind of command can be handled with a lexical entry for "let" rather than with an additional rule.
+もう1つの形の命令文は「let」で始まります。「Let me see what I can do」や「Let us all pray」のように。2番目の語は文の主語ではなく「let」の目的語と考えるほうがよいでしょう。主語なら「I」か「we」でなければならないからです。この種の命令文は、規則を足すのではなく「let」の語彙項目で扱えます。
 
-We now consider questions.
-Questions that can be answered by yes or no have the subject and auxiliary verb inverted: "Did you see him?" or "Should I have been doing this?" The latter example shows that it is only the first auxiliary verb that comes before the subject.
-The category `aux-inv-S` is used to handle this case:
+では疑問文を考えます。
+はいかいいえで答えられる疑問文は、主語と助動詞が倒置されます。「Did you see him?」や「Should I have been doing this?」です。後者の例は、主語の前に来るのが最初の助動詞だけであることを示しています。
+この場合を扱うのに範疇 `aux-inv-S` を使います。
 
 ```lisp
 (rule (S ?s (yes-no ?s ?sem)) ==>
@@ -429,7 +429,7 @@ The category `aux-inv-S` is used to handle this case:
   (aux-inv-S nil ?s ?sem))
 ```
 
-Questions that begin with a wh-phrase also have the auxiliary verb before the subject, as in "Who did you see?" or "Why should I have been doing this?" The first constituent can also be a prepositional phrase: "For whom am I doing this?" The following rule parses an XP that must have the  `+wh` feature and then parses an `aux-inv-S` to arrive at a question:
+wh句で始まる疑問文も、助動詞が主語の前に来ます。「Who did you see?」や「Why should I have been doing this?」のように。最初の構成素は前置詞句でもかまいません。「For whom am I doing this?」のように。次の規則は、`+wh` の素性を持たねばならないXPを解析し、続いて `aux-inv-S` を解析して疑問文に至ります。
 
 ```lisp
 (rule (S ?s :sem) ==>
@@ -439,10 +439,10 @@ Questions that begin with a wh-phrase also have the auxiliary verb before the su
   (aux-inv-S ?constituent ?s ?sem))
 ```
 
-A question can also be signaled by rising intonation in what would otherwise be a declarative statement: "You want some?" Since we don't have intonation information, we won't include this kind of question.
+そうでなければ平叙文であるものに上昇調の抑揚を付けて疑問文を示すこともできます。「You want some?」のように。抑揚の情報は持っていないので、この種の疑問文は含めません。
 
-The implementation for `aux-inv-S` is straightforward: parse an auxiliary and then a clause, pausing to look for modifiers in between.
-(So far, a "not" is the only modifier allowed in that position.)
+`aux-inv-S` の実装は素直です。助動詞を解析し、次に節を解析し、そのあいだで修飾語を探します。
+（いまのところ、その位置に許される修飾語は「not」だけです。）
 
 ```lisp
 (rule (aux-inv-S ?constituent ?v :sem) ==>
@@ -453,15 +453,15 @@ The implementation for `aux-inv-S` is straightforward: parse an auxiliary and th
           ?clause-sem))
 ```
 
-There is one more case to consider.
-The verb "to be" is the most idiosyncratic in English.
-It is the only verb that has agreement differences for anything besides third-person singular.
-And it is also the only verb that can be used in an `aux-inv-S` without a main verb.
-An example of this is "Is he a doctor?," where "is" clearly is not an auxiliary, because there is no main verb that it could be auxiliary to.
-Other verbs can not be used in this way: "\*Seems he happy?" and "\*Did they it?" are ungrammatical.
-The only possibility is "have," as in "Have you any wool?," but this use is rare.
+考えるべき場合がもう1つあります。
+動詞「to be」は英語でもっとも風変わりなものです。
+三人称単数以外でも一致の違いを持つ唯一の動詞です。
+また、本動詞なしで `aux-inv-S` に使える唯一の動詞でもあります。
+その例が「Is he a doctor?」で、ここでの「is」は明らかに助動詞ではありません。助動詞となる相手の本動詞がないからです。
+他の動詞はこのようには使えません。「\*Seems he happy?」も「\*Did they it?」も非文法的です。
+唯一ありうるのが「Have you any wool?」のような「have」ですが、この用法はまれです。
 
-The following rule parses a verb, checks to see that it is a version of "be," and then parses the subject and the modifiers for the verb.
+次の規則は動詞を解析し、それが「be」の一種であることを確かめてから、主語とその動詞の修飾語を解析します。
 
 ```lisp
 (rule (aux-inv-S ?ext ?v :sem) ==>
@@ -474,31 +474,31 @@ The following rule parses a verb, checks to see that it is a version of "be," an
   (modifiers post verb ? ?slots ?v (gap ?ext) (gap nil) ?mod-sem))
 ```
 
-## 21.9 XPs
+## 21.9 XP
 
-All that remains in our grammar is the XP category.
-XPs are used in two ways: First, a phrase can be extraposed, as in "*In god* we trust," where "in god" will be parsed as an XP and then placed on the gap list until it can be taken off as an adjunct to "trust." Second, a phrase can be a complement, as in "He wants *to be a fireman,"* where the infinitive phrase is a complement of "wants."
+この文法に残っているのはXPの範疇だけです。
+XPは2通りに使われます。第一に、句が外置されうる場合です。「*In god* we trust」では「in god」がXPとして解析され、「trust」の付加語として取り出せるまで空所の並びに置かれます。第二に、句が補語になる場合です。「He wants *to be a fireman*」では、不定詞句が「wants」の補語です。
 
-As it turns out, the amount of information that needs to appear in a gap list is slightly different from the information that appears in a complement slot.
-For example, one sense of the verb "want" has the following complement list:
+実のところ、空所の並びに現れねばならない情報の量は、補語のスロットに現れる情報とは少し違います。
+たとえば動詞「want」のある語義は、次の補語の並びを持ちます。
 
 ```lisp
 ((agt 1 (NP ?x)) (con 3 (VP infinitive ?x)))
 ```
 
-This says that the first complement (the subject) is a noun phrase that serves as the agent of the wanting, and the second is an infinitive verb phrase that is the concept of the wanting.
-The subject of this verb phrase is the same as the subject of the wanting, so in "She wants to go home," it is she who both wants and goes.
-(Contrast this to "He persuaded her to go home," where it is he that persuades, but she that goes.)
+これは、1つ目の補語（主語）が欲する側の行為者となる名詞句であり、2つ目が欲する内容にあたる不定詞の動詞句である、と述べています。
+この動詞句の主語は欲する側の主語と同じなので、「She wants to go home」では、欲するのも行くのも彼女です。
+（これを「He persuaded her to go home」と対比してください。こちらでは説得するのは彼ですが、行くのは彼女です。）
 
-But when we put a noun phrase on a gap list, we need to include its number and case as well as the fact that it is an NP and its metavariable, but we don't need to include the fact that it is an agent.
-This difference means we have two choices: either we can merge the notions of slots and gap lists so that they use a common notation containing all the information that either can use, or we need some way of mapping between them.
-I made the second choice, on the grounds that each notation was complicated enough without bringing in additional information.
+しかし名詞句を空所の並びに置くときは、それがNPであることとそのメタ変数に加えて数と格も含める必要がありますが、それが行為者だという事実は含める必要がありません。
+この違いから選択肢は2つになります。スロットと空所の並びという考えを統合し、どちらでも使える情報をすべて含む共通の記法にするか、両者を対応づける手立てを設けるかです。
+私は2つ目を選びました。どちらの記法も、追加の情報を持ち込まなくても十分込み入っているからです。
 
-The relation `slot-constituent` maps between the slot notation used for complements and the constituent notation used in gap lists.
-There are eight types of complements, five of which can appear in gap lists: noun phrases, clauses, prepositional phrases, the word "it" (as in "it is raining"), and adverbial phrases.
-The three phrases that are allowed only as complements are verb phrases, particles (such as "up" in "look up the number"), and adjectives.
-Here is the mapping between the two notations.
-The `***` indicates no mapping:
+関係 `slot-constituent` が、補語に使うスロットの記法と、空所の並びに使う構成素の記法とを対応づけます。
+補語には8つの型があり、そのうち5つが空所の並びに現れえます。名詞句、節、前置詞句、（「it is raining」のような）語「it」、そして副詞句です。
+補語としてしか許されない3つの句は、動詞句、（「look up the number」の「up」のような）不変化詞、そして形容詞です。
+2つの記法のあいだの対応を示します。
+`***` は対応がないことを示します。
 
 ```lisp
 (<- (slot-constituent (?role ?n (NP ?x))
@@ -514,8 +514,8 @@ The `***` indicates no mapping:
 (<- (slot-constituent (?role ?n (P ?particle)) *** ? ?))
 ```
 
-We are now ready to define `complement`.
-It takes a slot description, maps it into a constituent, and then calls `XP` to parse that constituent:
+これで `complement` を定義する用意ができました。
+これはスロットの記述を取り、構成素に対応づけ、それから `XP` を呼んでその構成素を解析します。
 
 ```lisp
 (rule (complement ?cat ?info (?role ?n ?xp) ?h ?gap1 ?gap2 :sem)
@@ -526,12 +526,12 @@ It takes a slot description, maps it into a constituent, and then calls `XP` to 
   (XP ?xp ?constituent ?wh ?x ?gap1 ?gap2 ?sem))
 ```
 
-The category `XP` takes seven arguments.
-The first two are the slot we are trying to fill and the constituent we need to fill it.
-The third is used for any additional information, and the fourth is the metavariable for the phrase.
-The last three supply gap and semantic information.
+範疇 `XP` は7つの引数を取ります。
+最初の2つは、埋めようとしているスロットと、それを埋めるのに必要な構成素です。
+3つ目は追加の情報に使い、4つ目はその句のメタ変数です。
+最後の3つが空所と意味の情報を与えます。
 
-Here are the first five XP categories:
+最初の5つのXPの範疇を示します。
 
 ```lisp
 (rule (XP (PP ?prep ?np) (PP ?prep ?role ?np ?h) ?wh ?np
@@ -555,9 +555,9 @@ Here are the first five XP categories:
   (advp ?wh ?v ?gap1 ?gap2 ?sem))
 ```
 
-The category `opt-word` parses a word, which may be optional.
-For example, one sense of "know" subcategorizes for a clause with an optional "that": we can say either "I know that he's here" or "I know he's here." The complement list for "know" thus contains the slot `(con 2 (clause (that) (finite ? ?)))`.
-If the "that" had been obligatory, it would not have parentheses around it.
+範疇 `opt-word` は語を解析します。その語は省略可能かもしれません。
+たとえば「know」のある語義は、省略可能な「that」を伴う節を下位範疇化します。「I know that he's here」とも「I know he's here」とも言えるのです。ですから「know」の補語の並びにはスロット `(con 2 (clause (that) (finite ? ?)))` が含まれます。
+「that」が必須なら、括弧では囲まれません。
 
 ```lisp
 (rule (opt-word ?word) ==> (:word ?word))
@@ -565,7 +565,7 @@ If the "that" had been obligatory, it would not have parentheses around it.
 (rule (opt-word (?word)) ==>)
 ```
 
-Finally, here are the three XPs that can not be extraposed:
+最後に、外置できない3つのXPを示します。
 
 ```lisp
 (rule (XP (VP ?infl ?x) *** -wh ?v ?gap1 ?gap2 ?sem) ==>
@@ -579,17 +579,17 @@ Finally, here are the three XPs that can not be extraposed:
   (prep ?particle t))
 ```
 
-## 21.10 Word Categories
+## 21.10 語のカテゴリ
 
-Each word category has a rule that looks words up in the lexicon and assigns the right features.
-The relation `word` is used for all lexicon access.
-We will describe the most complicated word class, `verb`, and just list the others.
+語のカテゴリにはそれぞれ、語彙のなかで語を引き、正しい素性を割り当てる規則があります。
+語彙へのアクセスにはすべて関係 `word` を使います。
+もっとも込み入った語類である `verb` を述べ、他は並べるだけにします。
 
-Verbs are complex because they often are *polysemous-*they have many meanings.
-In addition, each meaning can have several different complement lists.
-Thus, an entry for a verb in the lexicon will consist of the verb form, its inflection, and a list of senses, where each sense is a semantics followed by a list of possible complement lists.
-Here is the entry for the verb "sees," indicating that it is a present-tense verb with three senses.
-The understand sense has two complement lists, which correspond to "He sees" and "He sees that you are right." The `look` sense has one complement list corresponding to "He sees the picture," and the `dating` sense, corresponding to "He sees her (only on Friday nights)," has the same complement list.
+動詞が込み入っているのは、しばしば*多義的*、つまり多くの意味を持つからです。
+加えて、各意味が異なる補語の並びを複数持ちえます。
+ですから語彙の動詞の項目は、動詞の形、その活用、そして語義の並びから成ります。各語義は意味と、それに続くありうる補語の並びの並びです。
+動詞「sees」の項目を示します。これが3つの語義を持つ現在形の動詞であることを表しています。
+understandの語義は補語の並びを2つ持ち、それぞれ「He sees」と「He sees that you are right」に対応します。`look` の語義は「He sees the picture」に対応する補語の並びを1つ持ち、「He sees her (only on Friday nights)」に対応する `dating` の語義も同じ補語の並びを持ちます。
 
 ```lisp
 (?- (word sees verb ?infl ?senses))
@@ -601,8 +601,8 @@ The understand sense has two complement lists, which correspond to "He sees" and
           (DATING ((AGT 1 (NP ?9)) (OBJ 2 (NP ?10)))))
 ```
 
-The category `verb` takes five arguments: the verb itself, its inflection, its complement list, its metavariable, and its semantics.
-The `member` relations are used to pick a sense from the list of senses and a complement list from the list of lists, and the semantics is built from semantic predicate for the chosen sense and the metavariable for the verb:
+範疇 `verb` は5つの引数を取ります。動詞そのもの、その活用、その補語の並び、そのメタ変数、そしてその意味です。
+関係 `member` を使って語義の並びから語義を、並びの並びから補語の並びを選びます。意味は、選んだ語義の意味の述語と動詞のメタ変数から組み立てます。
 
 ```lisp
 (rule (verb ?verb ?infl ?slots ?v :sem) ==>
@@ -615,10 +615,10 @@ The `member` relations are used to pick a sense from the list of senses and a co
   (:sem (?sem ?v)))
 ```
 
-It is difficulty to know how to translate tense information into a semantic interpretation.
-Different applications will have different models of time and thus will want different interpretations.
-The relation `tense-sem` gives semantics for each tense.
-Here is a very simple definition of `tense-sem`:
+時制の情報をどう意味の解釈に訳すかを決めるのは難しいことです。
+応用が違えば時間の模型も違い、したがって望む解釈も違うでしょう。
+関係 `tense-sem` が各時制の意味を与えます。
+`tense-sem` のごく単純な定義を示します。
 
 ```lisp
 (<- (tense-sem (finite ? ?tense) ?v (?tense ?v)))
@@ -629,7 +629,7 @@ Here is a very simple definition of `tense-sem`:
 (<- (tense-sem passive ?v (passive ?v)))
 ```
 
-Auxiliary verbs and modal verbs are listed separately:
+助動詞と法助動詞は別に並べます。
 
 ```lisp
 (rule (aux ?infl ?needs-infl ?v ?tense-sem) ==>
@@ -642,8 +642,8 @@ Auxiliary verbs and modal verbs are listed separately:
   (:test (word ?modal modal ?sem ?tense)))
 ```
 
-Nouns, pronouns, and names are also listed separately, although they have much in common.
-For pronouns we use quantifier `wh` or `pro`, depending on if it is a wh-pronoun or not.
+名詞・代名詞・固有名も、共通点は多いものの別に並べます。
+代名詞には、wh代名詞かどうかに応じて量化子 `wh` か `pro` を使います。
 
 ```lisp
 (rule (noun ?agr ?slots ?x (?sem ?x)) ==>
@@ -660,7 +660,7 @@ For pronouns we use quantifier `wh` or `pro`, depending on if it is a wh-pronoun
   (:test (word ?name name ?agr)))
 ```
 
-Here are the rules for the remaining word classes:
+残りの語類の規則を示します。
 
 ```lisp
 (rule (adj ?x (?sem ?x)) ==>
@@ -703,31 +703,31 @@ Here are the rules for the remaining word classes:
   (:test (word ?num ordinal ?n)))
 ```
 
-## 21.11 The Lexicon
+## 21.11 語彙
 
-The lexicon itself consists of a large number of entries in the `word` relation, and it would certainly be possible to ask the lexicon writer to make a long list of `word` facts.
-But to make the lexicon easier to read and write, we adopt three useful tools.
-First, we introduce a system of abbreviations.
-Common expressions can be abbreviated with a symbol that will be expanded by `word`.
-Second, we provide the macros `verb` and `noun` to cover the two most complex word classes.
-Third, we provide a macro `word` that makes entries into a hash table.
-This is more efficient than compiling a `word` relation consisting of hundreds of Prolog clauses.
+語彙そのものは関係 `word` の項目を大量に集めたもので、語彙を書く人に `word` の事実の長い並びを作ってもらうこともたしかにできるでしょう。
+しかし語彙を読み書きしやすくするため、便利な道具を3つ採り入れます。
+第一に、略記の仕組みを導入します。
+よく出る式は、`word` が展開するシンボルで略記できます。
+第二に、もっとも込み入った2つの語類のために、マクロ `verb` と `noun` を用意します。
+第三に、ハッシュ表に項目を作るマクロ `word` を用意します。
+これは、何百ものPrologの節から成る `word` の関係をコンパイルするより効率的です。
 
-The implementation of these tools is left for the next section; here we show the actual lexicon, starting with the list of abbreviations.
+この道具の実装は次節に譲り、ここでは実際の語彙を、略記の並びから示していきます。
 
-The first set of abbreviations defines the agreement features.
-The obvious way to handle agreement is with two features, one for person and one for number.
-So first-person singular might be represented `(1 sing)`.
-A problem arises when we want to describe verbs.
-Every verb except "be" makes the distinction only between third-person singular and all the others.
-We don't want to make five separate entries in the lexicon to represent all the others.
-One alternative is to have the agreement feature be a set of possible values, so all the others would be a single set of five values rather than five separate values.
-This makes a big difference in cutting down on backtracking.
-The problem with this approach is keeping track of when to intersect sets.
-Another approach is to make the agreement feature be a list of four binary features, one each for first-person singular, first-person plural, third-person singular, and third-person plural.
-Then "all the others" can be represented by the list that is negative in the third feature and unknown in all the others.
-There is no way to distinguish second-person singular from plural in this scheme, but English does not make that distinction.
-Here are the necessary abbreviations:
+最初の略記の組は、一致の素性を定めます。
+一致を扱うすぐ思いつくやり方は、人称と数の2つの素性を使うことです。
+ですから一人称単数は `(1 sing)` と表されるかもしれません。
+動詞を記述しようとすると問題が生じます。
+「be」を除くすべての動詞は、三人称単数とそれ以外のあいだでしか区別しません。
+「それ以外」を表すのに、語彙に5つ別々の項目を作りたくはありません。
+1つの手は、一致の素性をありうる値の集合にすることです。そうすれば「それ以外」は、5つの別々の値ではなく5つの値からなる1つの集合になります。
+これはバックトラックを減らすうえで大きな違いを生みます。
+この方式の難点は、いつ集合の共通部分を取るかを追いかけることです。
+もう1つの方式は、一致の素性を4つの二値の素性の並びにすることです。一人称単数、一人称複数、三人称単数、三人称複数にそれぞれ1つずつ割り当てます。
+そうすれば「それ以外」は、3つ目の素性が否定で、他はすべて未知である並びとして表せます。
+この仕掛けでは二人称の単数と複数を区別できませんが、英語はその区別をしません。
+必要な略記を示します。
 
 ```lisp
 (abbrev 1sing       (+ - - -))
@@ -738,7 +738,7 @@ Here are the necessary abbreviations:
 (abbrev ~3sing      (? ? - ?))
 ```
 
-The next step is to provide abbreviations for some of the common verb complement lists:
+次の段は、動詞のよく使う補語の並びのいくつかに略記を用意することです。
 
 ```lisp
 (abbrev v/intrans   ((agt 1 (NP ?))))
@@ -762,15 +762,15 @@ The next step is to provide abbreviations for some of the common verb complement
 (abbrev v/pp-after  ((agt 1 (NP ?)) (pat 2 (PP after ?))))
 ```
 
-### Verbs
+### 動詞
 
-The macro `verb` allows us to list verbs in the form below, where the spellings of each tense can be omitted if the verb is regular:
+マクロ `verb` を使えば、動詞を下の形で並べられます。動詞が規則的なら、各時制の綴りは省略できます。
 
-(`verb` (*base past-tense past-participle present-participle present-plural* ) (*semantics complement-list*...) ...)
+(`verb` (*原形 過去形 過去分詞 現在分詞 現在複数形*) (*意味 補語の並び*...) ...)
 
-For example, in the following list "ask" is regular, so only its base-form spelling is necessary.
-"Do," on the other hand, is irregular, so each form is spelled out.
-The haphazard list includes verbs that are either useful for examples or illustrate some unusual complement list.
+たとえば次の並びでは「ask」は規則的なので、原形の綴りだけで済みます。
+一方「do」は不規則なので、各形を書き出してあります。
+この行き当たりばったりの並びには、例に使いやすい動詞か、変わった補語の並びを示す動詞が入っています。
 
 ```lisp
 (verb (ask) (query v/ditrans))
@@ -803,11 +803,11 @@ The haphazard list includes verbs that are either useful for examples or illustr
 (verb (want) (desire v/want v/persuade))
 ```
 
-### Auxiliary Verbs
+### 助動詞
 
-Auxiliary verbs are simple enough to be described directly with the word macro.
-Each entry lists the auxiliary itself, the tense it is used to construct, and the tense it must be followed by.
-The auxiliaries "have" and "do" are listed, along with "to," which is used to construct infinitive clauses and thus can be treated as if it were an auxiliary.
+助動詞は単純なので、wordマクロで直に記述できます。
+各項目には、助動詞そのもの、それが作るのに使われる時制、そしてその後ろに続かねばならない時制を並べます。
+助動詞「have」と「do」を並べ、あわせて「to」も並べます。「to」は不定詞の節を作るのに使われるので、助動詞であるかのように扱えます。
 
 ```lisp
 (word have    aux nonfinite -en)
@@ -823,10 +823,10 @@ The auxiliaries "have" and "do" are listed, along with "to," which is used to co
 (word to      aux infinitive nonfinite)
 ```
 
-The auxiliary "be" is special: in addition to its use as both an auxiliary and main verb, it also is used in passives and as the main verb in aux-inverted sentences.
-The function `copula` is used to keep track of all these uses.
-It will be defined in the next section, but you can see it takes two arguments, a list of senses for the main verb, and a list of entries for the auxiliary verb.
-The three senses correspond to the examples "He is a fool," "He is a Republican," and "He is in Indiana," respectively.
+助動詞「be」は特別です。助動詞としても本動詞としても使われるほか、受動態でも、助動詞が倒置された文の本動詞としても使われます。
+関数 `copula` が、この用法をすべて取りまとめます。
+定義は次節ですが、引数を2つ、すなわち本動詞の語義の並びと助動詞の項目の並びを取ることは見て取れます。
+3つの語義は、それぞれ「He is a fool」「He is a Republican」「He is in Indiana」の例に対応します。
 
 ```lisp
 (copula
@@ -843,9 +843,9 @@ The three senses correspond to the examples "He is a fool," "He is a Republican,
     (was      (finite (? - ? -) past) -ing))) ; 1st or 3rd sing
 ```
 
-Following are the modal auxiliary verbs.
-Again, it is difficult to specify semantics for them.
-The word "not" is also listed here; it is not an auxiliary, but it does modify them.
+次に法助動詞を挙げます。
+ここでもまた、その意味を定めるのは難しいところです。
+語「not」もここに並べてあります。これは助動詞ではありませんが、助動詞を修飾します。
 
 ```lisp
 (word can    modal able      past)
@@ -861,11 +861,11 @@ The word "not" is also listed here; it is not an auxiliary, but it does modify t
 (word not not)
 ```
 
-### Nouns
+### 名詞
 
-No attempt has been made to treat nouns seriously.
-We list enough nouns here to make some of the examples work.
-The first noun shows a complement list that is sufficient to parse "the destruction of the city by the enemy."
+名詞を本格的に扱おうとはしていません。
+ここでは、いくつかの例が動く程度の名詞を並べます。
+最初の名詞は、「the destruction of the city by the enemy」を解析するのに足りる補語の並びを示しています。
 
 ```lisp
 (noun destruction * destruction
@@ -888,10 +888,10 @@ The first noun shows a complement list that is sufficient to parse "the destruct
 (noun woman women)
 ```
 
-### Pronouns
+### 代名詞
 
-Here we list the nominative, objective, and genitive pronouns, followed by interrogative and relative pronouns.
-The only thing missing are reflexive pronouns, such as "myself."
+ここでは主格・目的格・属格の代名詞を並べ、続いて疑問代名詞と関係代名詞を並べます。
+欠けているのは「myself」のような再帰代名詞だけです。
 
 ```lisp
 (word I     pronoun 1sing (common nom) -wh speaker)
@@ -928,9 +928,9 @@ The only thing missing are reflexive pronouns, such as "myself."
 (word whom  rel-pro (common obj) person)
 ```
 
-### Names
+### 固有名詞
 
-The following names were convenient for one example or another:
+次の固有名は、何かしらの例に使うのに都合がよかったものです。
 
 ```lisp
 (word God   name 3sing)  (word Lynn  name 3sing)
@@ -940,9 +940,9 @@ The following names were convenient for one example or another:
 (word Lee   name 3sing)  (word SF    name 3sing)
 ```
 
-### Adjectives
+### 形容詞
 
-Here are a few adjectives:
+形容詞をいくつか示します。
 
 ```lisp
 (word big   adj big)    (word bad   adj bad)
@@ -951,9 +951,9 @@ Here are a few adjectives:
 (word tall  adj tall)   (word fun   adj fun)
 ```
 
-### Adverbs
+### 副詞
 
-The adverbs covered here include interrogatives:
+ここで扱う副詞には疑問副詞も含まれます。
 
 ```lisp
 (word quickly adv -wh quickly)
@@ -965,9 +965,9 @@ The adverbs covered here include interrogatives:
 (word how     adv +wh manner)
 ```
 
-### Articles
+### 冠詞
 
-The common articles are listed here:
+よく使う冠詞をここに並べます。
 
 ```lisp
 (word the   art 3sing the)
@@ -988,10 +988,10 @@ The common articles are listed here:
 (word which art ?     wh)
 ```
 
-### Cardinal and Ordinal Numbers
+### 基数と序数
 
-We can take advantage of `format`'s capabilities to fill up the lexicon.
-To go beyond 20, we would need a subgrammar of numbers.
+`format` の機能を使って語彙を埋められます。
+20を超えるには、数のための下位文法が要るでしょう。
 
 ```lisp
 ;; This puts in numbers up to twenty, as if by
@@ -1004,9 +1004,9 @@ To go beyond 20, we would need a subgrammar of numbers.
   (add-word (read-from-string (format nil "~:r" i)) 'ordinal i))
 ```
 
-### Prepositions
+### 前置詞
 
-Here is a fairly complete list of prepositions:
+前置詞のかなり完全な一覧を示します。
 
 ```lisp
 (word above prep)  (word about prep)  (word around prep)
@@ -1023,12 +1023,12 @@ Here is a fairly complete list of prepositions:
 (word without prep)
 ```
 
-## 21.12 Supporting the Lexicon
+## 21.12 語彙を支える
 
-This section describes the implementation of the macros `word`, `verb`, `noun`, and `abbrev`.
-Abbreviations are stored in a hash table.
-The macro `abbrev` and the functions `get-abbrev` and `clear-abbrevs` define the interface.
-We will see how to expand abbreviations later.
+本節では、マクロ `word`、`verb`、`noun`、`abbrev` の実装を述べます。
+略記はハッシュ表に格納します。
+マクロ `abbrev` と関数 `get-abbrev`、`clear-abbrevs` がその窓口を定めます。
+略記の展開のしかたは、のちほど見ます。
 
 ```lisp
 (defvar *abbrevs* (make-hash-table))
@@ -1041,10 +1041,10 @@ We will see how to expand abbreviations later.
 (defun get-abbrev (symbol) (gethash symbol *abbrevs*))
 ```
 
-Words are also stored in a hash table.
-Currently, words are symbols, but it might be a better idea to use strings for words, since then we could maintain capitalization information.
-The macro `word` or the function `add-word` adds a word to the lexicon.
-When used as an index into the hash table, each word returns a list of entries, where the first element of each entry is the word's category, and the other elements depend on the category.
+語もハッシュ表に格納します。
+いまのところ語はシンボルですが、文字列にするほうが良い考えかもしれません。そうすれば大文字小文字の情報を保てるからです。
+マクロ `word` あるいは関数 `add-word` が、語彙に語を加えます。
+ハッシュ表への索引として使うと、各語は項目の並びを返します。各項目の最初の要素はその語のカテゴリで、他の要素はカテゴリによります。
 
 ```lisp
 (defvar *words* (make-hash-table :size 500))
@@ -1062,8 +1062,8 @@ When used as an index into the hash table, each word returns a list of entries, 
 (defun kwote (x) (list 'quote x))
 ```
 
-The function `expand-abbrevs-and-variables` expands abbreviations and substitutes variable structures for symbols beginning with `?`.
-This makes it easier to make a copy of the structure, which will be needed later.
+関数 `expand-abbrevs-and-variables` は略記を展開し、`?` で始まるシンボルを変数の構造体に置き換えます。
+これによって構造体の複製が作りやすくなり、それはのちほど必要になります。
 
 ```lisp
 (defun expand-abbrevs-and-variables (exp)
@@ -1090,12 +1090,12 @@ This makes it easier to make a copy of the structure, which will be needed later
       (expand exp))))
 ```
 
-Now we can store words in the lexicon, but we need some way of getting them out.
-The function `word/n` takes a word (which must be instantiated to a symbol) and a category and optional additional information and finds the entries in the lexicon for that word that unify with the category and additional information.
-For each match, it calls the supplied continuation.
-This means that `word/n` is a replacement for a long list of word facts.
-There are three differences: `word/n` hashes, so it will be faster; it is incremental (you can add a word at a time without needing to recompile); and it can not be used when the word is unbound.
-(It is not difficult to change it to handle an unbound word using `maphash`, but there are better ways of addressing that problem.)
+これで語彙に語を格納できるようになりましたが、取り出す手立ても要ります。
+関数 `word/n` は、語（シンボルに具体化されていなければなりません）と範疇、そして任意の追加情報を取り、その語について範疇と追加情報に単一化する項目を語彙から見つけます。
+一致するたびに、与えられた継続を呼びます。
+つまり `word/n` は、wordの事実の長い並びの代わりになるものです。
+違いは3つあります。`word/n` はハッシュを使うので速いこと、逐次的であること（再コンパイルせずに1語ずつ加えられます）、そして語が未束縛のときには使えないことです。
+（`maphash` を使って未束縛の語を扱えるように変えるのは難しくありませんが、その問題にはもっと良い対処法があります。）
 
 ```lisp
 (defun word/n (word cat cont &rest info)
@@ -1111,8 +1111,8 @@ There are three differences: `word/n` hashes, so it will be faster; it is increm
         (undo-bindings! old-trail)))))
 ```
 
-Note that `word/n` does not follow our convention of putting the continuation last.
-Therefore, we will need the following additional functions:
+`word/n` が、継続を最後に置くという私たちの約束に従っていないことに注意してください。
+ですから、次の関数を追加で用意する必要があります。
 
 ```lisp
 (defun word/2 (w cat cont) (word/n w cat cont))
@@ -1122,10 +1122,10 @@ Therefore, we will need the following additional functions:
 (defun word/6 (w cat a b c d cont) (word/n w cat cont a b c d))
 ```
 
-We could create the whole lexicon with the macro `word`, but it is convenient to create specific macros for some classes.
-The macro `noun` is used to generate two entries, one for the singular and one for the plural.
-The arguments are the base noun, optionally followed by the plural (which defaults to the base plus "s"), the semantics (which defaults to the base), and a list of complements.
-Mass nouns, like "furniture," have only one entry, and are marked by an asterisk where the plural would otherwise be.
+語彙全体をマクロ `word` で作ることもできますが、いくつかの語類には専用のマクロを作るほうが便利です。
+マクロ `noun` は、単数用と複数用の2つの項目を生成するのに使います。
+引数は原形の名詞で、そのあとに複数形（既定は原形に「s」を付けたもの）、意味（既定は原形）、補語の並びが任意で続きます。
+「furniture」のような不可算名詞は項目を1つしか持たず、複数形が入るはずの位置にアスタリスクで印を付けます。
 
 ```lisp
 (defmacro noun (base &rest args)
@@ -1141,13 +1141,13 @@ Mass nouns, like "furniture," have only one entry, and are marked by an asterisk
         (add-word plural 'noun '3plur slots sem))))
 ```
 
-Verbs are more complex.
-Each verb has seven entries: the base or nonfinite, the present tense singular and plural, the past tense, the past-participle, the present-participle, and the passive.
-The macro `verb` automatically generates all seven entries.
-Verbs that do not have all of them can be handled by individual calls to `word`.
-We automatically handle the spelling for the simple cases of adding "s," "ing," and "ed," and perhaps stripping a trailing vowel.
-More irregular spellings have to be specified explicitly.
-Here are three examples of the use of `verb`:
+動詞はもっと込み入っています。
+各動詞は7つの項目を持ちます。原形すなわち非定形、現在形の単数と複数、過去形、過去分詞、現在分詞、そして受動です。
+マクロ `verb` がこの7つの項目をすべて自動で生成します。
+すべては持たない動詞は、`word` を個別に呼んで扱えます。
+「s」「ing」「ed」を付ける単純な場合と、必要なら末尾の母音を落とす場合の綴りは、自動で扱います。
+それより不規則な綴りは、明示的に指定せねばなりません。
+`verb` の使い方の例を3つ示します。
 
 ```lisp
 (verb (do did done doing does) (perform v/trans))
@@ -1155,7 +1155,7 @@ Here are three examples of the use of `verb`:
 (verb (trust) (trust v/trans ((agt 1 (NP ?)) (obj 2 (PP in ?)))))
 ```
 
-And here is the macro definition:
+そしてマクロの定義を示します。
 
 ```lisp
 (defmacro verb ((base &rest forms) &body senses)
@@ -1179,9 +1179,9 @@ And here is the macro definition:
                     (expand-abbrevs-and-variables senses))))
 ```
 
-This uses a few auxiliary functions.
-First, `strip-vowel` removes a vowel if it is the last character of the given argument.
-The idea is that for a verb like "fire," stripping the vowel yields "fir," from which we can get "fired" and "firing" automatically.
+これはいくつかの補助関数を使います。
+まず `strip-vowel` は、与えた引数の最後の文字が母音なら、それを取り除きます。
+考え方は、「fire」のような動詞なら母音を落とせば「fir」になり、そこから「fired」と「firing」を自動的に得られる、というものです。
 
 ```lisp
 (defun strip-vowel (word)
@@ -1195,8 +1195,8 @@ The idea is that for a verb like "fire," stripping the vowel yields "fir," from 
 (defun vowel-p (char) (find char "aeiou" :test #'char-equal))
 ```
 
-We also provide a function to generate automatically the passive sense with the proper complement list(s).
-The idea is that the subject slot of the active verb becomes an optional slot marked by the preposition "by," and any slot that is marked with number 2 can be promoted to become the subject:
+適切な補語の並びを伴う受動の語義を自動生成する関数も用意します。
+考え方は、能動態の動詞の主語のスロットが前置詞「by」で印を付けた省略可能なスロットになり、番号2の印が付いたスロットは主語へ格上げされうる、というものです。
 
 ```lisp
 (defun passivize-sense (sense)
@@ -1219,7 +1219,7 @@ The idea is that the subject slot of the active verb becomes an optional slot ma
 (defun slot-number (slot) (first-or-self (second slot)))
 ```
 
-Finally, we provide a special function just to define the copula, "be."
+最後に、繋辞「be」を定義するためだけの専用の関数を用意します。
 
 ```lisp
 (defun copula (senses entries)
@@ -1232,9 +1232,9 @@ Finally, we provide a special function just to define the copula, "be."
     (add-word (first entry) 'be)))
 ```
 
-The remaining functions are used for testing, debugging, and extending the grammar.
-First, we need functions to clear everything so that we can start over.
-These functions can be placed at the top of the lexicon and grammar files, respectively:
+残りの関数は、文法の試験・デバッグ・拡張に使います。
+まず、やり直せるようにすべてを空にする関数が要ります。
+この関数は、それぞれ語彙のファイルと文法のファイルの先頭に置けます。
 
 ```lisp
 (defun clear-lexicon ()
@@ -1246,12 +1246,12 @@ These functions can be placed at the top of the lexicon and grammar files, respe
   (clear-db))
 ```
 
-Testing could be done with `run-examples`, but it is convenient to provide another interface, the macro `try` (and its corresponding function, `try-dcg`).
-Both macro and function can be invoked three ways.
-With no argument, all the examples stored by `:ex` are run.
-When the name of a category is given, all the examples for that category alone are run.
-Finally, the user can supply both the name of a category and a list of words to test whether those words can be parsed as that category.
-This option is only available for categories that are listed in the definition:
+試験は `run-examples` でもできますが、別の窓口としてマクロ `try`（と対応する関数 `try-dcg`）を用意すると便利です。
+マクロも関数も3通りの呼び方ができます。
+引数なしなら、`:ex` で格納した例をすべて走らせます。
+範疇の名前を与えると、その範疇の例だけをすべて走らせます。
+最後に、範疇の名前と語の並びの両方を与えて、その語がその範疇として解析できるかを試せます。
+この選択肢は、定義に並べてある範疇についてのみ使えます。
 
 ```lisp
 (defmacro try (&optional cat &rest words)
@@ -1285,10 +1285,10 @@ This option is only available for categories that are listed in the definition:
     (warn "~&Unknown word: ~a" word)))
 ```
 
-## 21.13 Other Primitives
+## 21.13 その他の基本要素
 
-To support the `:test` predicates made in various grammar rules we need definitions of the Prolog predicates `if, member, =, numberp`, and `atom`.
-They are repeated here:
+さまざまな文法規則のなかで使う `:test` の述語を支えるには、Prologの述語 `if, member, =, numberp`、`atom` の定義が要ります。
+それらをここに再掲します。
 
 ```lisp
 (<- (if ?test ?then) (if ?then ?else (fail)))
@@ -1311,11 +1311,11 @@ They are repeated here:
             (append (args goal) (list cont))))
 ```
 
-## 21.14 Examples
+## 21.14 例
 
-Here are some examples of what the parser can handle.
-I have edited the output by changing variable names like `?168` to more readable names like `?J`.
-The first two examples show that nested clauses are supported and that we can extract a constituent from a nested clause:
+この構文解析器が扱える例をいくつか示します。
+出力は、`?168` のような変数名を `?J` のような読みやすい名前に変えて手を入れてあります。
+最初の2つの例は、入れ子の節が扱えること、そして入れ子の節から構成素を取り出せることを示しています。
 
 ```lisp
 > (try S John promised Kim to persuade Lee to sleep)
@@ -1333,8 +1333,8 @@ The first two examples show that nested clauses are supported and that we can ex
             (CON ?PER ?S) (SLEEP ?S));
 ```
 
-In the next example, the "when" can be interpreted as asking about the time of any of the three events: the promising, the persuading, or the sleeping.
-The grammar finds all three.
+次の例では、「when」は3つの出来事、すなわち約束すること・説得すること・眠ることのいずれの時刻を尋ねているとも解釈できます。
+この文法は3つとも見つけます。
 
 ```lisp
 >(try S When did John promise Kim to persuade Lee to sleep)
@@ -1361,8 +1361,8 @@ The grammar finds all three.
             (SLEEP ?S)).
 ```
 
-The next example shows auxiliary verbs and negation.
-It is ambiguous between an interpretation where Kim is searching for Lee and one where Kim is looking at something unspecified, on Lee's behalf.
+次の例は助動詞と否定を示しています。
+これは、KimがLeeを探しているという解釈と、KimがLeeの代わりに何か不特定のものを見ているという解釈のあいだで曖昧です。
 
 ```lisp
 >(try S Kim would not have been looking for Lee)
@@ -1376,7 +1376,7 @@ It is ambiguous between an interpretation where Kim is searching for Lee and one
             (THE ?L (NAME LEE ?L)));
 ```
 
-The next two examples are unambiguous:
+次の2つの例は曖昧ではありません。
 
 ```lisp
 > (try s It should not surprise you that Kim does not like Lee)
@@ -1395,10 +1395,10 @@ The next two examples are unambiguous:
             (PRO ?HER (FEMALE ?HER))).
 ```
 
-The final example appears to be unambiguous, but the parser finds four separate parses.
-The first is the obvious interpretation where the looking up is done quickly, and the second has quickly modifying the surprise.
-The last two interpretations are the same as the first two; they are artifacts of the search process.
-A disambiguation procedure should be equipped to weed out such duplicates.
+最後の例は曖昧でないように見えますが、構文解析器は4つの別々の解析を見つけます。
+1つ目は、調べる動作が素早く行われるという分かりやすい解釈で、2つ目はquicklyが驚きのほうを修飾しています。
+後ろの2つの解釈は最初の2つと同じで、探索の過程が生んだ副産物です。
+曖昧さを解く手続きには、こうした重複を取り除く仕組みを備えるべきです。
 
 ```lisp
 >(try s That Kim looked her up quickly surprised me)
@@ -1420,78 +1420,78 @@ A disambiguation procedure should be equipped to weed out such duplicates.
             (EXP ?S ?ME4) (PRO ?ME4 (SPEAKER ?ME4)));
 ```
 
-## 21.15 History and References
+## 21.15 歴史と参考文献
 
-[Chapter 20](chapter20.md) provides some basic references on natural language.
-Here we will concentrate on references that provide:
+[第20章](chapter20.md)に自然言語についての基本的な参考文献を挙げてあります。
+ここでは、次のものを与えてくれる文献に絞って述べます。
 
-1.  A comprehensive grammar of English.
+1.  英語の網羅的な文法。
 
-2.  A complete implementation.
+2.  完全な実装。
 
-There are a few good textbooks that partially address both issues.
-Both [Winograd (1983)](bibliography.md#bb1395) and [Allen (1987)](bibliography.md#bb0030) do a good job of presenting the major grammatical features of English and discuss implementation techniques, but they do not provide actual code.
+この両方に部分的に応える良い教科書がいくつかあります。
+[Winograd（1983）](bibliography.md#bb1395)も[Allen（1987）](bibliography.md#bb0030)も、英語のおもな文法上の特徴をうまく示し、実装の技法も論じていますが、実際のコードは載せていません。
 
-There are also a few textbooks that concentrate on the second issue.
-[Ramsey and Barrett (1987)](bibliography.md#bb0975) and [Walker et al.
-(1990)](bibliography.md#bb1295) provide chapter-length implementations at about the same level of detail as this chapter.
-Both are recommended.
-[Pereira and Shieber 1987](bibliography.md#bb0945) and [Gazdar and Mellish 1989](bibliography.md#bb0445) are book-length treatments, but because they cover a variety of parsing techniques rather than concentrating on one in depth, they are actually less comprehensive.
+2つ目の点に絞った教科書もいくつかあります。
+[Ramsey and Barrett（1987）](bibliography.md#bb0975)と[Walker ほか
+（1990）](bibliography.md#bb1295)は、本章とほぼ同じ詳しさで1章分の実装を示しています。
+どちらも勧められます。
+[Pereira and Shieber 1987](bibliography.md#bb0945)と[Gazdar and Mellish 1989](bibliography.md#bb0445)は1冊まるごとの扱いですが、1つの技法を深く掘るのではなくさまざまな構文解析の技法を扱っているので、実際には網羅度は下がります。
 
-Several linguists have made serious attempts at addressing the first issue.
-The largest is the aptly named A *Comprehensive Grammar of Contemporary English* by Quirk, Greenbaum, Leech and Svartik (1985).
-More manageable (although hardly concise) is their abridged edition, *A Concise Grammar of Contemporary English.* Both editions contain a gold mine of examples and facts about the English langauge, but the authors do not attempt to write rigorous rules.
-[Harris (1982)](bibliography.md#bb0510) and [Huddleston (1984)](bibliography.md#bb0555) offer less complete grammars with greater linguistic rigor.
+1つ目の点には、何人もの言語学者が本格的に取り組んできました。
+もっとも大部なのが、名は体を表す A *Comprehensive Grammar of Contemporary English*（Quirk, Greenbaum, Leech, Svartik、1985）です。
+より扱いやすいのが（とても簡潔とは言えませんが）その簡約版 *A Concise Grammar of Contemporary English* です。どちらの版も英語についての例と事実の宝庫ですが、著者たちは厳密な規則を書こうとはしていません。
+[Harris（1982）](bibliography.md#bb0510)と[Huddleston（1984）](bibliography.md#bb0555)は、網羅度は落ちるものの、言語学的により厳密な文法を示しています。
 
-Naomi [Sager (1981)](bibliography.md#bb1035) presents the most complete computerized grammar ever published.
-The grammar is separated into a simple, neat, context-free component and a rather baroque augmentation that manipulates features.
+Naomi [Sager（1981）](bibliography.md#bb1035)は、これまでに公刊されたなかでもっとも完全な、計算機化された文法を示しています。
+この文法は、単純できれいな文脈自由の部分と、素性を扱うかなり込み入った拡張部分とに分かれています。
 
-## 21.16 Exercises
+## 21.16 練習問題
 
-**Exercise  21.1 [m]** Change the grammar to account better for *mass nouns.* The current grammar treats mass nouns by making them vague between singular and plural, which is incorrect.
-They should be treated separately, since there are determiners such as "much" that work only with mass nouns, and other determiners such as "these" that work only with plural count nouns.
+**練習問題 21.1 [m]** *不可算名詞*をもっとうまく扱えるよう文法を変えよ。いまの文法は不可算名詞を単数と複数のあいだで曖昧にすることで扱っているが、これは正しくない。
+「much」のように不可算名詞にしか働かない限定詞や、「these」のように複数の可算名詞にしか働かない限定詞があるので、別扱いにすべきである。
 
-**Exercise  21.2 [m]** Change the grammar to make a distinction between *attributive* and *predicative* adjectives.
-Most adjectives fall into both classes, but some can be used only attributively, as in "an *utter* fool" but not "\*the fool is *utter."*
-Other adjectives can only be used predicatively, as in "the woman was *loath* to admit it" but not "\*a *loath* (to admit it) woman."
+**練習問題 21.2 [m]** *限定用法*と*叙述用法*の形容詞を区別するよう文法を変えよ。
+ほとんどの形容詞は両方に属するが、なかには限定用法でしか使えないものもある。「an *utter* fool」とは言えるが「\*the fool is *utter*」とは言えない、といった具合である。
+叙述用法でしか使えない形容詞もある。「the woman was *loath* to admit it」とは言えるが「\*a *loath* (to admit it) woman」とは言えない。
 
-**Exercise  21.3 [h]** Implement complement lists for adjectives, so that "loath" would take an obligatory infinitive complement, and "proud" would take an optional `(PP of)` complement.
-In connection to the previous exercise, note that it is rare if not impossible for attributive adjectives to take complements: "he is proud," "he is proud of his country" and "a proud citizen" are all acceptable, but "\*a proud of his country citizen" is not.
+**練習問題 21.3 [h]** 形容詞にも補語の並びを実装し、「loath」は必須の不定詞の補語を、「proud」は省略可能な `(PP of)` の補語を取るようにせよ。
+前問との関わりで、限定用法の形容詞が補語を取るのは、不可能ではないにせよまれであることに注意せよ。「he is proud」「he is proud of his country」「a proud citizen」はいずれも許容されるが、「\*a proud of his country citizen」は許容されない。
 
-**Exercise  21.4 [m]** Add rules to `advp` to allow for adverbs to modify other adverbs, as in "extremely likely" or "very strongly."
+**練習問題 21.4 [m]** 「extremely likely」や「very strongly」のように副詞が他の副詞を修飾できるよう、`advp` に規則を加えよ。
 
-**Exercise  21.5 [h]** Allow adverbs to modify adjectives, as in "very good" or "really delicious." The syntax will be easy, but it is harder to get a reasonable semantics.
-While you're at it, make sure that you can handle adjectives with so-called *non-intersective* semantics.
-Some adjectives can be handled by intersective semantics: a red circle is something that is red and is a circle.
-But for other adjectives, this model does not work: a former senator is not something that is former and is a senator-a former senator is not a senator at all.
-Similarly, a toy elephant is not an elephant.
+**練習問題 21.5 [h]** 「very good」や「really delicious」のように、副詞が形容詞を修飾できるようにせよ。統語は易しいが、まともな意味を得るのはより難しい。
+ついでに、いわゆる*非交差的*な意味を持つ形容詞も扱えるようにせよ。
+交差的な意味で扱える形容詞もある。赤い円とは、赤くてかつ円であるもののことだ。
+しかし他の形容詞では、この模型は働かない。元上院議員とは、元であってかつ上院議員であるもの、ではない。元上院議員はそもそも上院議員ではないのだ。
+同じく、おもちゃの象は象ではありません。
 
-The semantics should be represented by something doser to `((toy elephant) ?x)` rather than `(and (toy ?x) (elephant ?x))`.
+意味は `(and (toy ?x) (elephant ?x))` ではなく、`((toy elephant) ?x)` に近い形で表されるべきです。
 
-**Exercise  21.6 [m]** Write a function that notices punctuation instead of ignoring it.
-It should work something like this:
+**練習問題 21.6 [m]** 句読点を無視するのではなく認識する関数を書け。
+次のように働くようにする。
 
 ```lisp
 (string->words "Who asked Lee, Kim and John?")
 (WHO ASKED LEE |,| KIM AND JOHN |?|)
 ```
 
-**Exercise  21.7 [m]** Change the grammar to allow optional punctuation marks at the end of sentences and before relative clauses.
+**練習問題 21.7 [m]** 文末と関係節の前に、省略可能な句読点を許すよう文法を変えよ。
 
-**Exercise  21.8 [m]** Change the grammar to allow conjunction with more than two elements, using commas.
-Can these rules be generated automatically by `conj-rule?`
+**練習問題 21.8 [m]** カンマを使って3つ以上の要素を接続できるよう文法を変えよ。
+この規則は `conj-rule` で自動生成できるか。
 
-**Exercise  21.9 [h]** Make a distinction between *restrictive* and *nonrestrictive* relative clauses.
-In "The truck *that has 4-wheel drive* costs $5000," the italicized relative clause is restrictive.
-It serves to identify the truck and thus would be part of the quantifier's restriction.
-The complete sentence might be interpreted as:
+**練習問題 21.9 [h]** *制限的*な関係節と*非制限的*な関係節を区別せよ。
+「The truck *that has 4-wheel drive* costs $5000」では、斜体の関係節は制限的である。
+これはそのトラックを特定する働きをするので、量化子の制限の一部になる。
+文全体は次のように解釈されうる。
 
 ```lisp
 (and (the ?x (and (truck ?x) (4-wheel-drive ?x)))
         (costs ?x $5000))
 ```
 
-Contrast this to "The truck, which has 4-wheel drive, costs $5000." Here the relative clause is nonrestrictive and thus belongs outside the quantifier's restriction:
+これを「The truck, which has 4-wheel drive, costs $5000」と対比せよ。ここでの関係節は非制限的なので、量化子の制限の外側に属する。
 
 ```lisp
 (and (the ?x (truck ?x))

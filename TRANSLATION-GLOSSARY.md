@@ -616,6 +616,36 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | compositional semantics | 合成的な意味論 | Montague |
 | readtable | 読み取り表 | 練習問題20.5 |
 
+### 第21章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| complement / adjunct | 補語／付加語 | 主要部が期待するもの／必須でないもの |
+| modifier | 修飾語 | pre/post は「前の／後ろの」修飾語 |
+| nominative / accusative / genitive | 主格／対格／属格 | subjective/objective は主語格／目的格 |
+| common case | 共通格 | 主格と目的格をまとめたもの |
+| inflection | 活用 | 動詞の時制を表す引数 |
+| finite / nonfinite | 定形／非定形 | 現在形・過去形が定形 |
+| infinitive | 不定詞 | |
+| past / present participle | 過去分詞／現在分詞 | `-en` と `-ing` |
+| auxiliary verb / modal | 助動詞／法助動詞 | |
+| copula | 繋辞 | be動詞 |
+| clause | 節 | 主語と述語から成る |
+| relative clause | 関係節 | 制限的／非制限的 |
+| thematic fronting | 主題の前置 | 主語でないものを文頭に置く |
+| echo question | おうむ返しの疑問文 | |
+| extraposed | 外置された | 句を本来の位置から離して置く |
+| polysemous | 多義的 | 動詞が複数の語義を持つ |
+| sense | 語義 | 1語の複数の意味 |
+| slot | スロット | 補語の並びの各要素 |
+| mass noun / count noun | 不可算名詞／可算名詞 | |
+| attributive / predicative | 限定用法／叙述用法 | 形容詞の2つの用法 |
+| non-intersective | 非交差的 | former senator のような形容詞 |
+| particle | 不変化詞 | look **up** the number の up |
+| noun-noun compound | 名詞と名詞の複合語 | desk lamp |
+| lexicon | 語彙 | 語の辞書。lexical entry は「語彙項目」 |
+| abbreviation | 略記 | `abbrev` マクロが展開する |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -697,8 +727,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter20.md` | 完了 |
-| `chapter21.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter21.md` | 完了 |
+| `chapter22.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
