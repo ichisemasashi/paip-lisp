@@ -589,6 +589,33 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | agreement | 一致 | 主語と述語の人称・数の一致 |
 | Catalan Numbers | カタラン数 | 脚注。解析の数の列 |
 
+### 第20章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| unification grammar | 単一化文法 | 章題 |
+| definite clause grammar (DCG) | 定節文法（DCG） | 「論理文法」とも |
+| Horn clause | ホーン節 | |
+| difference list | 差分リスト | 入力の並びと残りの並びの対 |
+| accumulator | 累算子 | 差分リストの一般形 |
+| metavariable | メタ変数 | 表現のなかの変数。Prologの変数とは別 |
+| quantifier | 量化子 | all、exists |
+| scope | スコープ | 量化子の作用域 |
+| head（文法の） | 主要部 | 文の主要部は動詞、名詞句の主要部は名詞 |
+| transitive / intransitive verb | 他動詞／自動詞 | `Verb/tr` `Verb/intr` |
+| subcategory | 下位範疇 | 動詞を他動詞・自動詞に分ける |
+| relative clause | 関係節 | |
+| filler-gap dependency | 充填子と空所の依存 | |
+| long-distance dependency | 長距離依存 | 空所は充填子から任意に離れうる |
+| gap | 空所 | 原文の &blank; 記号が示す位置 |
+| topicalization | 主題化 | |
+| left-recursive | 左再帰 | 第19章と同じ |
+| beta-reduction | ベータ簡約 | ラムダ計算の操作 |
+| metamorphosis grammar | 変形文法 | Colmerauerの初期の形式 |
+| augmented transition network (ATN) | 拡張遷移ネットワーク（ATN） | Woods |
+| compositional semantics | 合成的な意味論 | Montague |
+| readtable | 読み取り表 | 練習問題20.5 |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -670,8 +697,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter19.md` | 完了 |
-| `chapter20.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter20.md` | 完了 |
+| `chapter21.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証

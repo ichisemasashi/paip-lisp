@@ -1,19 +1,19 @@
-# Chapter 20
-## Unification Grammars
+# 第20章
+## 単一化文法
 
-Prolog was invented because Alain Colmerauer wanted a formalism to describe the grammar of French.
-His intuition was that the combination of Horn clauses and unification resulted in a language that was just powerful enough to express the kinds of constraints that show up in natural languages, while not as powerful as, for example, full predicate calculus.
-This lack of power is important, because it enables efficient implementation of Prolog, and hence of the language-analysis programs built on top of it.
+Prologが生まれたのは、Alain Colmerauerがフランス語の文法を記述する形式をほしがったからでした。
+その直観は、ホーン節と単一化を組み合わせれば、自然言語に現れる種類の制約を表すのにちょうど足りる強さを持ちながら、たとえば完全な述語論理ほどには強くない言語になる、というものでした。
+この強すぎないことが重要なのです。おかげでPrologを、そしてその上に築く言語分析のプログラムを効率よく実装できるからです。
 
-Of course, Prolog has evolved and is now used for many applications besides natural language, but Colmerauer's underlying intuition remains a good one.
-This chapter shows how to view a grammar as a set of logic programming clauses.
-The clauses define what is a legal sentence and what isn't, without any explicit reference to the process of parsing or generation.
-The amazing thing is that the clauses can be defined in a way that leads to a very efficient parser.
-Furthermore, the same grammar can be used for both parsing and generation (at least in some cases).
+もちろんPrologは発展し、いまでは自然言語以外の多くの応用に使われていますが、Colmerauerの根底にある直観はいまなお優れたものです。
+本章では、文法を論理プログラミングの節の集まりとして見る方法を示します。
+その節は、構文解析や生成の過程には一切明示的に触れずに、何が正しい文で何がそうでないかを定めます。
+驚くべきは、その節を、非常に効率のよい構文解析器につながる形で定義できることです。
+しかも同じ文法を、構文解析にも生成にも使えます（少なくとも場合によっては）。
 
-## 20.1 Parsing as Deduction
+## 20.1 演繹としての構文解析
 
-Here's how we could express the grammar rule "A sentence can be composed of a noun phrase followed by a verb phrase" in Prolog:
+「文は名詞句のあとに動詞句が続いた形になりうる」という文法規則は、Prologでは次のように表せます。
 
 ```lisp
 (<- (S ?s)
@@ -22,14 +22,14 @@ Here's how we could express the grammar rule "A sentence can be composed of a no
    (concat ?np ?vp ?s))
 ```
 
-The variables represent strings of words.
-As usual, they will be implemented as lists of symbols.
-The rule says that a given string of words `?s` is a sentence if there is a string that is noun phrase and one that is a verb phrase, and if they can be concatenated to form `?s`.
-Logically, this is fine, and it would work as a program to generate random sentences.
-However, it is a very inefficient program for parsing sentences.
-It will consider all possible noun phrases and verb phrases, without regard to the input words.
-Only when it gets to the `concat` goal (defined on [page 411](chapter12.md#p411)) will it test to see if the two constituents can be concatenated together to make up the input string.
-Thus, a better order of evaluation for parsing is:
+変数は語の並びを表します。
+いつもどおり、これはシンボルのリストとして実装されます。
+この規則は、名詞句である並びと動詞句である並びがあり、それらをつないで `?s` になるなら、語の並び `?s` は文である、と述べています。
+論理としてはこれで結構ですし、でたらめな文を生成するプログラムとしては働くでしょう。
+しかし文を構文解析するプログラムとしては、たいそう効率が悪いのです。
+入力の語に構わず、ありうる名詞句と動詞句をすべて考えてしまいます。
+（[411ページ](chapter12.md#p411)で定義した）`concat` の目標に至って初めて、2つの構成素をつないで入力の並びになるかを調べます。
+ですから構文解析には、次の評価の順序のほうが良いのです。
 
 ```lisp
 (<- (S ?s)
@@ -38,20 +38,20 @@ Thus, a better order of evaluation for parsing is:
    (VP ?vp))
 ```
 
-The first version had `NP` and `VP` guessing strings to be verified by `concat`.
-In most grammars, there will be a very large or infinite number of `NPs` and `VPs`.
-This second version has `concat` guessing strings to be verified by `NP` and `VP`.
-If there are *n* words in the sentence, then concat can only make *n* + 1 guesses, quite an improvement.
-However, it would be better still if we could in effect have `concat` and `NP` work together to make a more constrained guess, which would then be verified by `VP`.
+最初の版では、`NP` と `VP` が並びを当て推量し、`concat` がそれを確かめていました。
+たいていの文法では、`NP` と `VP` は非常に多いか無限にあります。
+この2つ目の版では、`concat` が並びを当て推量し、`NP` と `VP` がそれを確かめます。
+文に *n* 語あれば、concatの当て推量は *n* + 1 通りしかありえず、これは大きな改善です。
+とはいえ、`concat` と `NP` が事実上協力して、より絞り込んだ推量をし、それを `VP` が確かめられれば、もっと良いでしょう。
 
-We have seen this type of problem before.
-In Lisp, the answer is to return multiple values.
-`NP` would be a function that takes a string as input and returns two values: an indication of success or failure, and a remainder string of words that have not yet been parsed.
-When the first value indicates success, then `VP` would be called with the remaining string as input.
-In Prolog, return values are just extra arguments.
-So each predicate will have two parameters: an input string and a remainder string.
-Following the usual Prolog convention, the output parameter comes after the input.
-In this approach, no calls to concat are necessary, no wild guesses are made, and Prolog's backtracking takes care of the necessary guessing:
+この種の問題は以前にも見ました。
+Lispでの答えは多値を返すことです。
+`NP` は並びを入力に取り、2つの値、すなわち成功か失敗かの表示と、まだ解析していない残りの語の並びを返す関数になるでしょう。
+1つ目の値が成功を示せば、残りの並びを入力として `VP` が呼ばれます。
+Prologでは、返り値は単なる余分な引数です。
+ですから各述語は、入力の並びと残りの並びという2つの引数を持ちます。
+Prologのいつもの約束に従い、出力の引数は入力の後に来ます。
+この方式ではconcatの呼び出しは要らず、当てずっぽうもなく、必要な推量はPrologのバックトラックが引き受けます。
 
 ```lisp
 (<- (S ?s0 ?s2)
@@ -59,9 +59,9 @@ In this approach, no calls to concat are necessary, no wild guesses are made, an
        (VP ?sl ?s2))
 ```
 
-This rule can be read as "The string from *s*<sub>0</sub> to *s*<sub>2</sub> is a sentence if there is an *s*<sub>1</sub> such that the string from s<sub>0</sub> to *s*<sub>1</sub> is a noun phrase and the string from *s*<sub>1</sub> to *s*<sub>2</sub> is a verb phrase."
+この規則は「*s*<sub>0</sub> から *s*<sub>2</sub> までの並びが文であるのは、s<sub>0</sub> から *s*<sub>1</sub> までが名詞句で、*s*<sub>1</sub> から *s*<sub>2</sub> までが動詞句であるような *s*<sub>1</sub> が存在するときである」と読めます。
 
-A sample query would be `(?- (S (The boy ate the apple) ())).` With suitable definitions of `NP` and `VP`, this would succeed, with the following bindings holding within `S`:
+問い合わせの例は `(?- (S (The boy ate the apple) ()))` です。`NP` と `VP` を適切に定義してあれば、これは成功し、`S` のなかで次の束縛が成り立ちます。
 
 ```lisp
 ?s0 = (The boy ate the apple)
@@ -69,13 +69,13 @@ A sample query would be `(?- (S (The boy ate the apple) ())).` With suitable def
 ?s2 =                      ()
 ```
 
-Another way of reading the goal `(NP ?s0 ?sl)`, for example, is as "`IS` the list `?s0` minus the list `?sl` a noun phrase?" In this case, `?s0` minus `?sl` is the list `(The boy)`.
-The combination of two arguments, an input list and an output list, is often called a *difference list*, to emphasize this interpretation.
-More generally, the combination of an input parameter and output parameter is called an *accumulator.*
-Accumulators, particularly difference lists, are an important technique throughout logic programming and are also used in functional programming, as we saw on [page 63](chapter3.md#p63).
+たとえば目標 `(NP ?s0 ?sl)` のもう1つの読み方は、「並び `?s0` から並び `?sl` を引いたものは名詞句か」というものです。この場合、`?s0` から `?sl` を引いたものは並び `(The boy)` です。
+入力の並びと出力の並びという2つの引数の組を、この解釈を際立たせるために*差分リスト*と呼ぶことがよくあります。
+より一般に、入力の引数と出力の引数の組を*累算子*と呼びます。
+累算子、とりわけ差分リストは論理プログラミング全体で重要な技法であり、[63ページ](chapter3.md#p63)で見たとおり関数型プログラミングでも使われます。
 
-In our rule for `S`, the concatenation of difference lists was implicit.
-If we prefer, we could define a version of `concat` for difference lists and call it explicitly:
+`S` の規則では、差分リストの連結は暗黙のものでした。
+望むなら、差分リスト用の `concat` を定義して明示的に呼ぶこともできます。
 
 ```lisp
 (<- (S ?s-in ?s-rem)
@@ -85,22 +85,22 @@ If we prefer, we could define a version of `concat` for difference lists and cal
 (<- (concat ?a ?b ?b ?c ?a ?c))
 ```
 
-Because this version of `concat` has a different arity than the old version, they can safely coexist.
-It states the difference list equation *(a - b) + (b - c) = (a - c)*.
+この版の `concat` は古い版と項数が違うので、安全に共存できます。
+これは差分リストの等式 *(a - b) + (b - c) = (a - c)* を述べています。
 
-In the last chapter we stated that context-free phrase-structure grammar is inconvenient for expressing things like agreement between the subject and predicate of a sentence.
-With the Horn-clause-based grammar formalism we are developing here, we can add an argument to the predicates NP and VP to represent agreement.
-In English, the agreement rule does not have a big impact.
-For all verbs except *be,* the difference only shows up in the third-person singular of the present tense:
+前章では、文脈自由な句構造文法は、文の主語と述語の一致のようなことを表すのに不便だと述べました。
+ここで作っているホーン節にもとづく文法の形式なら、述語NPとVPに引数を加えて一致を表せます。
+英語では、一致の規則の影響は大きくありません。
+*be* を除くすべての動詞では、違いは現在形の三人称単数にしか現れません。
 
-|               | Singular |        | Plural |       |
+|               | 単数     |        | 複数   |       |
 |---------------|----------|--------|--------|-------|
-| first person  | I        | sleep  | we     | sleep |
-| second person | you      | sleep  | you    | sleep |
-| third person  | he/she   | sleeps | they   | sleep |
+| 一人称        | I        | sleep  | we     | sleep |
+| 二人称        | you      | sleep  | you    | sleep |
+| 三人称        | he/she   | sleeps | they   | sleep |
 
-Thus, the agreement argument will take on one of the two values `3sg` or `~3sg` to indicate third-person-singular or not-third-person-singular.
-We could write:
+ですから一致の引数は、三人称単数か、そうでないかを示す `3sg` か `~3sg` の2つの値のいずれかを取ります。
+次のように書けます。
 
 ```lisp
 (<- (S ?s0 ?s2)
@@ -112,7 +112,7 @@ We could write:
 (<- (VP ~3sg (sleep . ?s) ?s))
 ```
 
-This grammar parses just the right sentences:
+この文法は、ちょうど正しい文だけを解析します。
 
 ```lisp
 > (?- (S (He sleeps) ()))
@@ -121,7 +121,7 @@ Yes.
 No.
 ```
 
-Let's extend the grammar to allow common nouns as well as pronouns:
+代名詞だけでなく普通名詞も許すよう、文法を広げましょう。
 
 ```lisp
 (<- (NP ?agr ?s0 ?s2)
@@ -132,8 +132,8 @@ Let's extend the grammar to allow common nouns as well as pronouns:
 (<- (N 3sg (girl . ?s) ?s))
 ```
 
-The same grammar rules can be used to generate sentences as well as parse.
-Here are all possible sentences in this trivial grammar:
+同じ文法規則を、構文解析だけでなく文の生成にも使えます。
+この他愛のない文法でありうる文をすべて挙げます。
 
 ```lisp
 > (?- (S ?words ()))
@@ -144,9 +144,9 @@ Here are all possible sentences in this trivial grammar:
 No.
 ```
 
-So far all we have is a recognizer: a predicate that can separate sentences from nonsentences.
-But we can add another argument to each predicate to build up the semantics.
-The result is not just a recognizer but a true parser:
+ここまでにあるのは認識器、すなわち文と非文を分けられる述語だけです。
+しかし各述語に引数をもう1つ加えれば、意味を組み立てられます。
+その結果は単なる認識器ではなく、本当の構文解析器になります。
 
 ```lisp
 (<- (S (?pred ?subj) ?s0 ?s2)
@@ -164,22 +164,22 @@ The result is not just a recognizer but a true parser:
 (<- (N 3sg (young female human) (girl . ?s) ?s))
 ```
 
-The semantic translations of individual words is a bit capricious.
-In fact, it is not too important at this point if the translation of `boy` is `(young male human)` or just `boy`.
-There are two properties of a semantic representation that are important.
-First, it should be unambiguous.
-The representation of *orange* the fruit should be different from *orange* the color (although the representation of the fruit might well refer to the color, or vice versa).
-Second, it should express generalities, or allow them to be expressed elsewhere.
-So either *sleep* and *sleeps* should have the same or similar representation, or there should be an inference rule relating them.
-Similarly, if the representation of *boy* does not say so explicitly, there should be some other rule saying that a boy is a male and a human.
+個々の語の意味への訳し方は、少し気まぐれなものです。
+実のところ、いまの段階では `boy` の訳が `(young male human)` であろうと単に `boy` であろうと、たいして重要ではありません。
+意味表現について重要な性質が2つあります。
+第一に、曖昧でないこと。
+果物の *orange* の表現は、色の *orange* の表現と違うべきです（もっとも、果物の表現が色に触れても、その逆でも構いません）。
+第二に、一般性を表すか、どこか他で表せるようにしておくこと。
+ですから *sleep* と *sleeps* は同じか似た表現を持つか、両者を関係づける推論規則があるべきです。
+同じく、*boy* の表現が明示していないなら、boyが男性であり人間であると述べる別の規則があるべきです。
 
-Once the semantics of individual words is decided, the semantics of higher-level categories (sentences and noun phrases) is easy.
-In this grammar, the semantics of a sentence is the application of the predicate (the verb phrase) to the subject (the noun phrase).
-The semantics of a compound noun phrase is the application of the determiner to the noun.
+個々の語の意味が決まれば、より上位の範疇（文や名詞句）の意味は簡単です。
+この文法では、文の意味は述語（動詞句）を主語（名詞句）に適用したものです。
+複合的な名詞句の意味は、限定詞を名詞に適用したものです。
 
-This grammar returns the semantic interpretation but does not build a syntactic tree.
-The syntactic structure is implicit in the sequence of goals: `S` calls `NP` and `VP`, and `NP` can call `Det` and `N`.
-If we want to make this explicit, we can provide yet another argument to each nonterminal:
+この文法は意味の解釈を返しますが、統語的な木は組み立てません。
+統語の構造は目標の並びに暗に含まれています。`S` が `NP` と `VP` を呼び、`NP` が `Det` と `N` を呼びうる、という具合です。
+これを明示したいなら、各非終端にもう1つ引数を与えられます。
 
 ```lisp
 (<- (S (?pred ?subj) (s ?np ?vp) ?s0 ?s2)
@@ -197,7 +197,7 @@ If we want to make this explicit, we can provide yet another argument to each no
 (<- (N 3sg (young female human) (n girl) (girl . ?s) ?s))
 ```
 
-This grammar can still be used to parse or generate sentences, or even to enumerate all syntax/semantics/sentence triplets:
+この文法もなお、文の構文解析や生成に使えますし、統語・意味・文の3つ組をすべて数え上げることさえできます。
 
 ```lisp
 ;; Parsing:
@@ -224,28 +224,28 @@ This grammar can still be used to parse or generate sentences, or even to enumer
 No.
 ```
 
-## 20.2 Definite Clause Grammars
+## 20.2 定節文法
 
-We now have a powerful and efficient tool for parsing sentences.
-However, it is getting to be a very messy tool-there are too many arguments to each goal, and it is hard to tell which arguments represent syntax, which represent semantics, which represent in/out strings, and which represent other features, like agreement.
-So, we will take the usual step when our bare programming language becomes messy: define a new language.
+これで文を構文解析する強力で効率のよい道具ができました。
+しかしこの道具はひどく雑然としてきています。各目標の引数が多すぎ、どれが統語を、どれが意味を、どれが入出力の並びを、どれが一致のような他の素性を表すのかがわかりにくいのです。
+そこで、素のプログラミング言語が雑然としてきたときのいつもの一手を打ちます。新しい言語を定義するのです。
 
-Edinburgh Prolog recognizes assertions called *definite clause grammar* (DCG) rules.
-The term *definite clause* is just another name for a Prolog clause, so DCGs are also called "logic grammars." They could have been called "Horn clause grammars" or "Prolog grammars" as well.
+エジンバラPrologは、*定節文法*（DCG）規則と呼ばれる表明を認めます。
+*定節*という語はPrologの節の別名にすぎないので、DCGは「論理文法」とも呼ばれます。「ホーン節文法」や「Prolog文法」と呼ばれてもおかしくなかったでしょう。
 
-DCG rules are clauses whose main functor is an arrow, usually written `-->`.
-They compile into regular Prolog clauses with extra arguments.
-In normal DCG rules, only the string arguments are automatically added.
-But we will see later how this can be extended to add other arguments automatically as well.
+DCG規則は、主たる関手が矢印、ふつうは `-->` と書かれる節です。
+これは余分な引数を持つふつうのPrologの節にコンパイルされます。
+ふつうのDCG規則では、自動的に加わるのは並びの引数だけです。
+しかしのちに、他の引数も自動的に加わるよう拡張する方法を見ます。
 
-We will implement DCG rules with the macro `rule` and an infix arrow.
-Thus, we want the expression:
+DCG規則は、マクロ `rule` と中置の矢印で実装します。
+つまり、次の式が
 
 ```lisp
 (rule (S) --> (NP) (VP))
 ```
 
-to expand into the clause:
+次の節に展開されるようにしたいのです。
 
 ```lisp
 (<- (S ?s0 ?s2)
@@ -253,8 +253,8 @@ to expand into the clause:
        (VP ?sl ?s2))
 ```
 
-While we're at it, we may as well give `rule` the ability to deal with different types of rules, each one represented by a different type of arrow.
-Here's the `rule` macro:
+ついでに、`rule` に別々の型の矢印で表される、別々の型の規則を扱う能力を持たせてもよいでしょう。
+マクロ `rule` を示します。
 
 ```lisp
 (defmacro rule (head &optional (arrow ':-) &body body)
@@ -263,48 +263,48 @@ Here's the `rule` macro:
   (funcall (get arrow 'rule-function) head body))
 ```
 
-As an example of a rule function, the arrow `:-` will be used to represent normal Prolog clauses.
-That is, the form (`rule` *head* `:-` *body*) will be equivalent to (`<-` *head body*).
+規則の関数の例として、矢印 `:-` はふつうのPrologの節を表すのに使います。
+つまり形式 (`rule` *頭部* `:-` *本体*) は (`<-` *頭部 本体*) と同じことになります。
 
 ```lisp
 (setf (get ':- 'rule-function)
       #'(lambda (head body) `(<- ,head .,body)))
 ```
 
-Before writing the rule function for DCG rules, there are two further features of the DCG formalism to consider.
-First, some goals in the body of a rule may be normal Prolog goals, and thus do not require the extra pair of arguments.
-In Edinburgh Prolog, such goals are surrounded in braces.
-One would write:
+DCG規則のための規則関数を書く前に、DCGの形式についてさらに2つ考えるべき点があります。
+第一に、規則の本体の目標のなかには、ふつうのPrologの目標であって、余分な引数の対を必要としないものがありえます。
+エジンバラPrologでは、そうした目標を波括弧で囲みます。
+次のように書きます。
 
 ```lisp
 s(Sem) --> np(Subj), vp(Pred),
            {combine(Subj,Pred,Sem)}.
 ```
 
-where the idea is that `combine` is not a grammatical constituent, but rather a Prolog predicate that could do some calculations on `Subj` and `Pred` to arrive at the proper semantics, `Sem`.
-We will mark such a test predicate not by brackets but by a list headed by the keyword `:test`, as in:
+ここでの考えは、`combine` は文法上の構成素ではなく、`Subj` と `Pred` に何らかの計算をして正しい意味 `Sem` にたどり着くPrologの述語だ、というものです。
+そうした検査の述語には、括弧ではなくキーワード `:test` を先頭に持つ並びで印を付けます。
 
 ```lisp
 (rule (S ?sem) --> (NP ?subj) (VP ?pred)
    (:test (combine ?subj ?pred ?sem)))
 ```
 
-Second, we need some way of introducing individual words on the right-hand side, as opposed to categories of words.
-In Prolog, brackets are used to represent a word or list of words on the right-hand side:
+第二に、語の範疇ではなく個々の語を右辺に持ち込む手立てが要ります。
+Prologでは、右辺の語や語の並びを表すのに角括弧を使います。
 
 ```lisp
 verb --> [sleeps].
 ```
 
-We will use a list headed by the keyword `:word:`
+ここではキーワード `:word` を先頭に持つ並びを使います。
 
 ```lisp
 (rule (NP (the male) 3sg) --> (:word he))
 (rule (VP sleeps 3sg) --> (:word sleeps))
 ```
 
-The following predicates test for these two special cases.
-Note that the cut is also allowed as a normal goal.
+次の述語が、この2つの特別な場合を調べます。
+カットもふつうの目標として許されることに注意してください。
 
 ```lisp
 (defun dcg-normal-goal-p (x) (or (starts-with x :test) (eq x '!)))
@@ -312,8 +312,8 @@ Note that the cut is also allowed as a normal goal.
 (defun dcg-word-list-p (x) (starts-with x ':word))
 ```
 
-At last we are in a position to present the rule function for DCG rules.
-The function `make-dcg` inserts variables to keep track of the strings that are being parsed.
+これでようやく、DCG規則のための規則関数を示せます。
+関数 `make-dcg` が、解析中の並びを記録する変数を差し込みます。
 
 ```lisp
 (setf (get '--> 'rule-function) 'make-dcg)
@@ -348,13 +348,13 @@ The function `make-dcg` inserts variables to keep track of the strings that are 
                (make-dcg-body (rest body) (+ n 1))))))))
 ```
 
-**Exercise  20.1 [m]** `make-dcg` violates one of the cardinal rules of macros.
-What does it do wrong?
-How would you fix it?
+**練習問題 20.1 [m]** `make-dcg` はマクロの鉄則の1つを破っている。
+どこが誤りか。
+どう直すか。
 
-## 20.3 A Simple Grammar in DCG Format
+## 20.3 DCG形式の単純な文法
 
-Here is the trivial grammar from [page 688](chapter20.xhtml#p688) in DCG format.
+[688ページ](chapter20.xhtml#p688)の他愛のない文法を、DCG形式で示します。
 
 ```lisp
 (rule (S (?pred ?subj)) -->
@@ -372,28 +372,28 @@ Here is the trivial grammar from [page 688](chapter20.xhtml#p688) in DCG format.
 (rule (N 3sg (young female human)) --> (:word girl))
 ```
 
-This grammar is quite limited, generating only four sentences.
-The first way we will extend it is to allow verbs with objects: in addition to "The boy sleeps," we will allow "The boy meets the girl." To avoid generating ungrammatical sentences like "* The boy meets,"<a id="tfn20-1"></a><sup>[1](#fn20-1)</sup> we will separate the category of verb into two *subcategories*: transitive verbs, which take an object, and intransitive verbs, which don't.
+この文法はかなり限られており、4つの文しか生みません。
+最初の拡張は、目的語を取る動詞を許すことです。「The boy sleeps」に加えて「The boy meets the girl」を許します。「* The boy meets」のような非文法的な文<a id="tfn20-1"></a><sup>[1](#fn20-1)</sup>を生まないよう、動詞の範疇を2つの*下位範疇*に分けます。目的語を取る他動詞と、取らない自動詞です。
 
-Transitive verbs complicate the semantic interpretation of sentences.
-We would like the interpretation of "Terry kisses Jean" to be `(kiss Terry Jean)`.
-The interpretation of the noun phrase "Terry" is just `Terry`, but then what should the interpretation of the verb phrase "kisses Jean" be?
-To fit our predicate application model, it must be something equivalent to `(lambda (x) (kiss x Jean))`.
-When applied to the subject, we want to get the simplification:
+他動詞は文の意味の解釈を込み入らせます。
+「Terry kisses Jean」の解釈は `(kiss Terry Jean)` であってほしいところです。
+名詞句「Terry」の解釈は単に `Terry` ですが、では動詞句「kisses Jean」の解釈はどうあるべきでしょうか。
+述語を適用するという私たちの模型に合わせるなら、`(lambda (x) (kiss x Jean))` に相当するものでなければなりません。
+主語に適用したときには、次の簡約が得られてほしいのです。
 
 ```lisp
 ((lambda (x) (kiss x Jean)) Terry) => (kiss Terry Jean)
 ```
 
-Such simplification is not done automatically by Prolog, but we can write a predicate to do it.
-We will call it `funcall`, because it is similar to the Lisp function of that name, although it only handles replacement of the argument, not full evaluation of the body.
-(Technically, this is the lambda-calculus operation known as *beta-reduction.)* The predicate `funcall` is normally used with two input arguments, a function and its argument, and one output argument, the resulting reduction:
+この種の簡約はPrologが自動で行うものではありませんが、それを行う述語を書けます。
+これを `funcall` と呼ぶことにします。同名のLisp関数に似ているからです。ただし扱うのは引数の置き換えだけで、本体の完全な評価はしません。
+（専門的には、これはラムダ計算で*ベータ簡約*として知られる操作です。）述語 `funcall` はふつう、入力の引数2つ、すなわち関数とその引数、そして出力の引数1つ、すなわち簡約の結果とともに使います。
 
 ```lisp
 (<- (funcall (lambda (?x) ?body) ?x ?body))
 ```
 
-With this we could write our rule for sentences as:
+これを使えば、文の規則は次のように書けます。
 
 ```lisp
 (rule (S ?sem) -->
@@ -402,10 +402,10 @@ With this we could write our rule for sentences as:
    (:test (funcall ?pred ?subj ?sem)))
 ```
 
-An alternative is to, in effect, compile away the call to `funcall`.
-Instead of having the semantic representation of `VP` be a single lambda expression, we can represent it as two arguments: an input argument, `?subj`, which acts as a parameter to the output argument, `?pred`, which takes the place of the body of the lambda expression.
-By explicitly manipulating the parameter and body, we can eliminate the call to `funcall`.
-The trick is to make the parameter and the subject one and the same:
+もう1つの道は、事実上 `funcall` の呼び出しをコンパイルして消してしまうことです。
+`VP` の意味表現を1つのラムダ式にするのではなく、2つの引数として表せます。入力の引数 `?subj` はラムダ式の引数の役をし、出力の引数 `?pred` はラムダ式の本体の座を占めます。
+引数と本体を明示的に扱うことで、`funcall` の呼び出しをなくせます。
+仕掛けは、引数と主語を同一のものにすることです。
 
 ```lisp
 (rule (S ?pred) -->
@@ -413,12 +413,12 @@ The trick is to make the parameter and the subject one and the same:
    (VP ?agr ?subj ?pred))
 ```
 
-One way of reading this rule is "To parse a sentence, parse a noun phrase followed by a verb phrase.
-If they have different agreement features then fail, but otherwise insert the interpretation of the noun phrase, `?subj`, into the proper spot in the interpretation of the verb phrase, `?pred`, and return `?pred` as the final interpretation of the sentence."
+この規則の1つの読み方はこうです。「文を解析するには、名詞句とそれに続く動詞句を解析する。
+両者の一致の素性が違えば失敗する。そうでなければ、名詞句の解釈 `?subj` を動詞句の解釈 `?pred` の適切な場所に差し込み、`?pred` を文の最終的な解釈として返す」。
 
-The next step is to write rules for verb phrases and verbs.
-Transitive verbs are listed under the predicate `Verb/tr`, and intransitive verbs are listed as `Verb/intr`.
-The semantics of tenses (past and present) has been ignored.
+次の段は、動詞句と動詞の規則を書くことです。
+他動詞は述語 `Verb/tr` の下に、自動詞は `Verb/intr` として並べます。
+時制（過去と現在）の意味は無視してあります。
 
 ```lisp
 (rule (VP ?agr ?subj ?pred) -->
@@ -434,7 +434,7 @@ The semantics of tenses (past and present) has been ignored.
 (rule (Verb/intr ?any ?x (sleep ?x)) --> (:word slept))
 ```
 
-Here are the rules for noun phrases and nouns:
+名詞句と名詞の規則を示します。
 
 ```lisp
 (rule (NP ?agr ?sem) -->
@@ -452,8 +452,8 @@ Here are the rules for noun phrases and nouns:
 (rule (Det 3sg a) --> (:word a))
 ```
 
-This grammar and lexicon generates more sentences, although it is still rather limited.
-Here are some examples:
+この文法と辞書はより多くの文を生みますが、それでもかなり限られています。
+例をいくつか示します。
 
 ```lisp
 > (?- (S ?sem (The boys kiss a girl) ()))
@@ -472,12 +472,12 @@ No.
 No.
 ```
 
-The first three examples are parsed correctly, while the final three are correctly rejected.
-The inquisitive reader may wonder just what is going on in the interpretation of a sentence like "The girls kissed the girls." Do the subject and object represent the same group of girls, or different groups?
-Does everyone kiss everyone, or are there fewer kissings going on?
-Until we define our representation more carefully, there is no way to tell.
-Indeed, it seems that there is a potential problem in the representation, in that the predicate `kiss` sometimes has individuals as its arguments, and sometimes groups.
-More careful representations of "The girls kissed the girls" include the following candidates, using predicate calculus:
+最初の3つの例は正しく解析され、最後の3つは正しく退けられています。
+詮索好きな読者は、「The girls kissed the girls」のような文の解釈で何が起きているのか気になるかもしれません。主語と目的語は同じ少女の集まりを表すのでしょうか、それとも別の集まりでしょうか。
+全員が全員に口づけするのでしょうか、それとももっと少ない回数なのでしょうか。
+表現をもっと注意深く定義しないかぎり、確かめようがありません。
+実際、この表現には問題の芽がありそうです。述語 `kiss` の引数が、ときには個体で、ときには集まりだからです。
+「The girls kissed the girls」のより注意深い表現には、述語論理を使った次の候補があります。
 
 > &forall;`x`&forall;`y x` &isin; `girls` &and; `y` &isin; `girls => kiss(x,y)`
 
@@ -487,44 +487,44 @@ More careful representations of "The girls kissed the girls" include the followi
 
 > &forall;`x`&exist;`y x`&isin; `girls` &and; `y`&isin; `girls => kiss(x,y)`&or; `kiss(y,x)`
 
-The first of these says that every girl kisses every other girl.
-The second says the same thing, except that a girl need not kiss herself.
-The third says that every girl kisses and is kissed by at least one other girl, but not necessarily all of them, and the fourth says that everybody is in on at least one kissing.
-None of these interpretations says anything about who "the girls" are.
+1つ目は、どの少女も他のすべての少女に口づけすると述べています。
+2つ目は同じことを述べていますが、少女が自分自身に口づけする必要はない点だけが違います。
+3つ目は、どの少女も少なくとも1人の他の少女に口づけし、また口づけされるが、全員にとはかぎらないと述べており、4つ目は、誰もが少なくとも1回の口づけに関わっていると述べています。
+このどの解釈も、「the girls」が誰なのかについては何も述べていません。
 
-Clearly, the predicate calculus representations are less ambiguous than the representation produced by the current system.
-On the other hand, it would be wrong to choose one of the representations arbitrarily, since in different contexts, "The girls kissed the girls" can mean different things.
-Maintaining ambiguity in a concise form is useful, as long as there is some way eventually to recover the proper meaning.
+述語論理の表現のほうが、いまのシステムが作る表現より曖昧でないのは明らかです。
+一方で、表現のどれか1つを勝手に選ぶのは誤りでしょう。文脈が違えば「The girls kissed the girls」は違うことを意味しうるからです。
+曖昧さを簡潔な形で保っておくのは、いずれ正しい意味を取り戻す手立てさえあれば、役に立つのです。
 
-## 20.4 A DCG Grammar with Quantifiers
+## 20.4 量化子を持つDCG文法
 
-The problem in the representation we have been using becomes more acute when we consider other determiners, such as "every." Consider the sentence "Every picture paints a story." The preceding DCG, if given the right vocabulary, would produce the interpretation:
+これまで使ってきた表現の問題は、「every」のような他の限定詞を考えるといっそう際立ちます。「Every picture paints a story」という文を考えてみましょう。先のDCGに正しい語彙を与えれば、次の解釈を出すでしょう。
 
 ```lisp
 (paints (every picture) (a story))
 ```
 
-This can be considered ambiguous between the following two meanings, in predicate calculus form:
+これは述語論理の形で書けば、次の2つの意味のあいだで曖昧だと見なせます。
 
 &forall; x picture(x) => &exist; y story(y) &and; paint(x,y)
 
 &exist; y story (y) &and; &forall; x picture(x) => paint(x,y)
 
-The first says that for each picture, there is a story that it paints.
-The second says that there is a certain special story that every picture paints.
-The second is an unusual interpretation for this sentence, but for "Every U.S.
-citizen has a president," the second interpretation is perhaps the preferred one.
-In the next section, we will see how to produce representations that can be transformed into either interpretation.
-For now, it is a useful exercise to see how we could produce just the first representation above, the interpretation that is usually correct.
-First, we need to transcribe it into Lisp:
+1つ目は、絵のそれぞれについて、それが描く物語がある、と述べています。
+2つ目は、どの絵も描くような特別な物語が1つある、と述べています。
+この文では2つ目は変わった解釈ですが、「Every U.S.
+citizen has a president」なら、2つ目の解釈のほうがおそらく好まれるでしょう。
+次節では、どちらの解釈にも変形できる表現を作る方法を見ます。
+いまのところは、上の1つ目の表現、すなわちたいてい正しいほうの解釈だけを作る方法を見るのが良い練習になります。
+まず、これをLispに書き写す必要があります。
 
 ```lisp
 (all ?x (-> (picture ?x) (exists ?y (and (story ?y) (paint ?x ?y)))))
 ```
 
-The first question is how the `all` and `exists` forms get in there.
-They must come from the determiners, "every" and "a." Also, it seems that `all` is followed by an implication arrow, `->`, while `exists` is followed by a conjunction, `and`.
-So the determiners will have translations looking like this:
+最初の問いは、`all` と `exists` の形式がどうやってそこに入るのかです。
+これらは限定詞「every」と「a」から来るはずです。また `all` のあとには含意の矢印 `->` が、`exists` のあとには連言の `and` が続くようです。
+ですから限定詞の訳は次のような形になります。
 
 ```lisp
 (rule (Det ?any ?x ?p ?q (the ?x (and ?p ?q)))   --> (:word the))
@@ -532,26 +532,26 @@ So the determiners will have translations looking like this:
 (rule (Det 3sg ?x ?p ?q (all ?x (-> ?p ?q)))     --> (:word every))
 ```
 
-Once we have accepted these translations of the determiners, everything else follows.
-The formulas representing the determiners have two holes in them, `?p` and `?q`.
-The first will be filled by a predicate representing the noun, and the latter will be filled by the predicate that is being applied to the noun phrase as a whole.
-Notice that a curious thing is happening.
-Previously, translation to logical form was guided by the sentence's verb.
-Linguisticly, the verb expresses the main predicate, so it makes sense that the verb's logical translation should be the main part of the sentence's translation.
-In linguistic terms, we say that the verb is the *head* of the sentence.
+限定詞のこの訳を受け入れてしまえば、あとはすべてそこから決まります。
+限定詞を表す式には `?p` と `?q` という2つの穴があります。
+1つ目は名詞を表す述語で埋まり、2つ目は名詞句全体に適用される述語で埋まります。
+ここで妙なことが起きていることに注目してください。
+これまで、論理形式への訳は文の動詞が導いていました。
+言語学的には動詞が主たる述語を表すので、動詞の論理への訳が文の訳の主部になるのは筋が通ります。
+言語学の言葉では、動詞は文の*主要部*だと言います。
 
-With the new translations for determiners, we are in effect turning the whole process upside down.
-Now the subject's determiner carries the weight of the whole sentence.
-The determiner's interpretation is a function of two arguments; it is applied to the noun first, yielding a function of one argument, which is in turn applied to the verb phrase's interpretation.
-This primacy of the determiner goes against intuition, but it leads directly to the right interpretation.
+限定詞の新しい訳によって、この過程全体を事実上ひっくり返すことになります。
+いまや主語の限定詞が文全体の重みを担うのです。
+限定詞の解釈は2引数の関数です。まず名詞に適用されて1引数の関数になり、それが今度は動詞句の解釈に適用されます。
+限定詞をこのように第一に置くのは直観に反しますが、正しい解釈へまっすぐつながります。
 
-The variables `?p` and `?q` can be considered holes to be filled in the final interpretation, but the variable `?x` fills a quite different role.
-At the end of the parse, `?x` will not be filled by anything; it will still be a variable.
-But it will be referred to by the expressions filling `?p` and `?q`.
-We say that `?x` is a *metavariable,* because it is a variable in the representation, not a variable in the Prolog implementation.
-It just happens that Prolog variables can be used to implement these metavariables.
+変数 `?p` と `?q` は最終的な解釈で埋められる穴と見なせますが、変数 `?x` はまったく違う役目を果たします。
+解析が終わっても `?x` は何にも埋められず、変数のままです。
+しかし `?p` と `?q` を埋める式から参照されます。
+`?x` は*メタ変数*だと言います。これは表現のなかの変数であって、Prologの実装のなかの変数ではないからです。
+たまたまPrologの変数を、このメタ変数の実装に使えるというだけのことです。
 
-Here are the interpretations for each word in our target sentence and for each intermediate constituent:
+対象の文の各語と、途中の各構成素についての解釈を示します。
 
 ```lisp
 Every          = (all ?x (-> ?pl ?ql))
@@ -564,8 +564,8 @@ a story        = (exists ?y (and (story ?y) ?q2))
 paints a story = (exists ?y (and (story ?y) (paint ?x ?y)))
 ```
 
-The semantics of a noun has to fill the `?p` hole of a determiner, possibly using the metavariable `?x`.
-The three arguments to the Noun predicate are the agreement, the metavariable `?x`, and the assertion that the noun phrase makes about `?x`:
+名詞の意味は、必要ならメタ変数 `?x` を使いながら、限定詞の `?p` の穴を埋めねばなりません。
+Noun述語の3つの引数は、一致、メタ変数 `?x`、そして名詞句が `?x` について述べる表明です。
 
 ```lisp
 (rule (Noun 3sg ?x (picture ?x)) --> (:word picture))
@@ -574,11 +574,11 @@ The three arguments to the Noun predicate are the agreement, the metavariable `?
    (:word boy))
 ```
 
-The NP predicate is changed to take four arguments.
-First is the agreement, then the metavariable `?x`.
-Third is a predicate that will be supplied externally, by the verb phrase.
-The final argument returns the interpretation of the NP as a whole.
-As we have stated, this comes from the determiner:
+NP述語は4つの引数を取るよう変えます。
+1つ目は一致、次がメタ変数 `?x` です。
+3つ目は、動詞句によって外から与えられる述語です。
+最後の引数がNP全体の解釈を返します。
+述べたとおり、これは限定詞から来ます。
 
 ```lisp
 (rule (NP ?agr ?x ?pred ?pred) -->
@@ -588,8 +588,8 @@ As we have stated, this comes from the determiner:
 ; (Noun ?agr ?x ?noun))
 ```
 
-The rule for an NP with determiner is commented out because it is convenient to introduce an extended rule to replace it at this point.
-The new rule accounts for certain relative clauses, such as "the boy that paints a picture":
+限定詞つきのNPの規則をコメントにしてあるのは、ここでそれを置き換える拡張版の規則を導入するのが都合よいからです。
+新しい規則は、「the boy that paints a picture」のような一部の関係節を扱います。
 
 ```lisp
 (rule (NP ?agr ?x ?pred ?np) -->
@@ -602,17 +602,17 @@ The new rule accounts for certain relative clauses, such as "the boy that paints
    (VP ?agr ?x ?rel))
 ```
 
-The new rule does not account for relative clauses where the object is missing, such as "the picture that the boy paints." Nevertheless, the addition of relative clauses means we can now generate an infinite language, since we can always introduce a relative clause, which introduces a new noun phrase, which in turn can introduce yet another relative clause.
+この新しい規則は、「the picture that the boy paints」のように目的語が欠けた関係節は扱いません。それでも関係節を加えたことで、無限の言語を生成できるようになりました。関係節はいつでも導入でき、それが新しい名詞句を導入し、それがまた別の関係節を導入しうるからです。
 
-The rules for relative clauses are not complicated, but they can be difficult to understand.
-Of the four arguments to `rel-clause,` the first two hold the agreement features of the head noun and the metavariable representing the head noun.
-The last two arguments are used together as an accumulator for predications about the metavariable: the third argument holds the predications made so far, and the fourth will hold the predications including the relative clause.
-So, the first rule for `rel-clause` says that if there is no relative clause, then what goes in to the accumulator is the same as what goes out.
-The second rule says that what goes out is the conjunction of what comes in and what is predicated in the relative clause itself.
+関係節の規則は複雑ではありませんが、理解しにくいことがあります。
+`rel-clause` の4つの引数のうち、最初の2つは主要部の名詞の一致の素性と、主要部の名詞を表すメタ変数を保ちます。
+後ろの2つは、メタ変数についての言明の累算子として一緒に使われます。3つ目はここまでの言明を保ち、4つ目は関係節を含めた言明を保ちます。
+ですから `rel-clause` の1つ目の規則は、関係節がなければ累算子に入るものと出るものは同じだ、と述べています。
+2つ目の規則は、出るものは入るものと関係節そのものが述べることとの連言だ、と述べています。
 
-Verbs apply to either one or two metavariables, just as they did before.
-So we can use the definitions of `Verb/tr` and `Verb/intr` unchanged.
-For variety, I've added a few more verbs:
+動詞は、これまでと同じく1つか2つのメタ変数に適用されます。
+ですから `Verb/tr` と `Verb/intr` の定義はそのまま使えます。
+変化をつけるため、動詞をいくつか加えておきました。
 
 ```lisp
 (rule (Verb/tr ~3sg ?x ?y (paint ?x ?y)) --> (:word paint))
@@ -625,8 +625,8 @@ For variety, I've added a few more verbs:
 (rule (Verb/intr 3sg ?x (stinks ?x)) --> (:word stinks))
 ```
 
-Verb phrases and sentences are almost as before.
-The only difference is in the call to `NP`, which now has extra arguments:
+動詞句と文は、ほぼこれまでどおりです。
+違うのは `NP` の呼び出しだけで、いまは余分な引数を持っています。
 
 ```lisp
 (rule (VP ?agr ?x ?vp) -->
@@ -639,7 +639,7 @@ The only difference is in the call to `NP`, which now has extra arguments:
    (VP ?agr ?x ?vp))
 ```
 
-With this grammar, we get the following correspondence between sentences and logical forms:
+この文法では、文と論理形式のあいだに次の対応が得られます。
 
 ```lisp
 Every picture paints a story.
@@ -666,30 +666,30 @@ paints a picture that stinks.
                              (PAINT ?3 ?39)))))
 ```
 
-## 20.5 Preserving Quantifier Scope Ambiguity
+## 20.5 量化子のスコープの曖昧さを保つ
 
-Consider the simple sentence "Every man loves a woman." This sentence is ambiguous between the following two interpretations:
+単純な文「Every man loves a woman」を考えてみましょう。この文は次の2つの解釈のあいだで曖昧です。
 
 &forall;m&exist;w man(m) &and; woman(w) &and; loves(m,w)
 
 &exist;w&forall;m man(m) &and; woman(w) &and; loves(m,w)
 
-The first interpretation is that every man loves some woman-his wife, perhaps.
-The second interpretation is that there is a certain woman whom every man loves-Natassja Kinski, perhaps.
-The meaning of the sentence is ambiguous, but the structure is not; there is only one syntactic parse.
+1つ目の解釈は、どの男もある女性を愛している、たとえば自分の妻を、というものです。
+2つ目の解釈は、どの男も愛するような特定の女性が1人いる、たとえばナスターシャ・キンスキーを、というものです。
+文の意味は曖昧ですが、構造はそうではありません。統語的な解析は1つしかないのです。
 
-In the last section, we presented a parser that would construct one of the two interpretations.
-In this section, we show how to construct a single interpretation that preserves the ambiguity, but can be disambiguated by a postsyntactic process.
-The basic idea is to construct an intermediate logical form that leaves the scope of quantifiers unspecified.
-This intermediate form can then be rearranged to recover the final interpretation.
+前節では、2つの解釈のうち一方を組み立てる構文解析器を示しました。
+本節では、曖昧さを保ちながら、統語のあとの処理で曖昧さを解ける単一の解釈を組み立てる方法を示します。
+基本の考えは、量化子のスコープを定めないままにした中間の論理形式を組み立てることです。
+この中間の形式を並べ替えれば、最終的な解釈を取り出せます。
 
-To recap, here is the interpretation we would get for "Every man loves a woman," given the grammar in the previous section:
+おさらいすると、前節の文法のもとで「Every man loves a woman」に対して得られる解釈は次のとおりです。
 
 ```lisp
 (all ?m (-> (man ?m) (exists ?w) (and (woman ?w) (loves ?m ?w))))
 ```
 
-We will change the grammar to produce instead the intermediate form:
+文法を変えて、代わりに次の中間の形式を作るようにします。
 
 ```lisp
 (and (all ?m (man ?m))
@@ -697,9 +697,9 @@ We will change the grammar to produce instead the intermediate form:
          (loves ?m ?w))
 ```
 
-The difference is that logical components are produced in smaller chunks, with unscoped quantifiers.
-The typical grammar rule will build up an interpretation by conjoining constituents with `and`, rather than by fitting pieces into holes in other pieces.
-Here is the complete grammar and a just-large-enough lexicon in the new format:
+違いは、論理の部品がより小さなかたまりで、スコープの定まらない量化子とともに作られる点です。
+典型的な文法規則は、部品を他の部品の穴にはめ込むのではなく、構成素を `and` で結ぶことで解釈を組み上げます。
+新しい形式による完全な文法と、ちょうど足りるだけの辞書を示します。
 
 ```lisp
 (rule (S (and ?np ?vp)) -->
@@ -730,14 +730,14 @@ Here is the complete grammar and a just-large-enough lexicon in the new format:
 (rule (Noun 3sg ?x (woman ?x))            --> (:word woman))
 ```
 
-This gives us the following parse for "Every man loves a woman":
+これで「Every man loves a woman」について次の解析が得られます。
 
 ```lisp
 (and (all ?4 (and (man ?4) t))
         (and (love ?4 ?12) (exists ?12 (and (woman ?12) t))))
 ```
 
-If we simplified this, eliminating the `t`s and joining `and`s, we would get the desired representation:
+これを簡約して `t` を取り除き `and` をまとめれば、望みの表現が得られます。
 
 ```lisp
 (and (all ?m (man ?m))
@@ -745,23 +745,23 @@ If we simplified this, eliminating the `t`s and joining `and`s, we would get the
         (loves ?m ?w))
 ```
 
-From there, we could use what we know about syntax, in addition to what we know about men, women, and loving, to determine the most likely final interpretation.
-This will be covered in the next chapter.
+そこから、男・女・愛することについて知っていることに加えて統語について知っていることを使い、もっともありそうな最終的な解釈を定められます。
+これは次章で扱います。
 
-## 20.6 Long-Distance Dependencies
+## 20.6 長距離依存
 
-So far, every syntactic phenomena we have considered has been expressible in a rule that imposes constraints only at a single level.
-For example, we had to impose the constraint that a subject agree with its verb, but this constraint involved two immediate constituents of a sentence, the noun phrase and verb phrase.
-We didn't need to express a constraint between, say, the subject and a modifier of the verb's object.
-However, there are linguistic phenomena that require just these kinds of constraints.
+ここまで考えてきた統語現象はすべて、1つの階層でのみ制約を課す規則で表せるものでした。
+たとえば主語が動詞と一致するという制約を課す必要がありましたが、この制約が関わるのは文の直接の構成素2つ、名詞句と動詞句でした。
+たとえば主語と、動詞の目的語の修飾語とのあいだの制約を表す必要はありませんでした。
+しかし、まさにこの種の制約を必要とする言語現象があります。
 
-Our rule for relative clauses was a very simple one: a relative clause consists of the word "that" followed by a sentence that is missing its subject, as in "every man that loves a woman."
-Not all relative clauses follow this pattern.
-It is also possible to form a relative clause by omitting the object of the embedded sentence: "every man that a woman loves &blank;."
-In this sentence, the symbol &blank; indicates a gap, which is understood as being filled by the head of the complete noun phrase, the man.
-This has been called a *filler-gap dependency.*
-It is also known as a *long-distance dependency,* because the gap can occur arbitrarily far from the filler.
-For example, all of the following are valid noun phrases:
+関係節の規則はごく単純なものでした。関係節は語「that」のあとに主語の欠けた文が続いたもの、「every man that loves a woman」のような形です。
+すべての関係節がこの型どおりというわけではありません。
+埋め込まれた文の目的語を落として関係節を作ることもできます。「every man that a woman loves &blank;」のような形です。
+この文で記号 &blank; は空所を表し、それは名詞句全体の主要部である man によって埋められると解されます。
+これは*充填子と空所の依存*と呼ばれてきました。
+また*長距離依存*としても知られています。空所は充填子からいくらでも遠くに現れうるからです。
+たとえば次はいずれも正しい名詞句です。
 
 The person that Lee likes &blank;
 
@@ -769,24 +769,24 @@ The person that Kim thinks Lee likes &blank;
 
 The person that Jan says Kim thinks Lee likes &blank;
 
-In each case, the gap is filled by the head noun, the person.
-But any number of relative clauses can intervene between the head noun and the gap.
+いずれの場合も、空所は主要部の名詞である person によって埋められます。
+しかし主要部の名詞と空所のあいだには、いくつでも関係節が挟まりえます。
 
-The same kind of filler-gap dependency takes place in questions that begin with "who," "what," "where," and other interrogative pronouns.
-For example, we can ask a question about the subject of a sentence, as in "Who likes Lee?", or about the object, as in "Who does Kim like &blank;?"
+同じ種類の充填子と空所の依存は、「who」「what」「where」などの疑問詞で始まる疑問文でも起こります。
+たとえば「Who likes Lee?」のように文の主語について尋ねることも、「Who does Kim like &blank;?」のように目的語について尋ねることもできます。
 
-Here is a grammar that covers relative clauses with gapped subjects or objects.
-The rules for `S, VP,` and `NP` are augmented with a pair of arguments representing an accumulator for gaps.
-Like a difference list, the first argument minus the second represents the presence or absence of a gap.
-For example, in the first two rules for noun phrases, the two arguments are the same, `?g0` and `?g0`.
-This means that the rule as a whole has no gap, since there can be no difference between the two arguments.
-In the third rule for NP, the first argument is of the form `(gap ...),` and the second is `nogap.` This means that the right-hand side of the rule, an empty constituent, can be parsed as a gap.
-(Note that if we had been using true difference lists, the two arguments would be `((gap ...) ?g0)` and `?g0`.
-But since we are only dealing with one gap per rule, we don't need true difference lists.)
+主語または目的語が空所になった関係節を扱う文法を示します。
+`S, VP`、`NP` の規則には、空所の累算子を表す引数の対が加えてあります。
+差分リストと同じく、1つ目の引数から2つ目を引いたものが空所の有無を表します。
+たとえば名詞句の最初の2つの規則では、2つの引数は同じ `?g0` と `?g0` です。
+これは規則全体に空所がないことを意味します。2つの引数のあいだに差がありえないからです。
+NPの3つ目の規則では、1つ目の引数が `(gap ...)` の形で、2つ目が `nogap` です。これは規則の右辺、すなわち空の構成素が、空所として解析されうることを意味します。
+（本当の差分リストを使っていたなら、2つの引数は `((gap ...) ?g0)` と `?g0` になっていたはずであることに注意してください。
+しかし1つの規則につき空所は1つしか扱わないので、本当の差分リストは要りません。）
 
-The rule for `S` says that a noun phrase with gap `?g0` minus `?gl` followed by a verb phrase with gap `?gl` minus `?g2` comprise a sentence with gap `?g0` minus `?g2`.
-The rule for relative clauses finds a sentence with a gap anywhere; either in the subject position or embedded somewhere in the verb phrase.
-Here's the complete grammar:
+`S` の規則は、空所が `?g0` から `?gl` の名詞句のあとに、空所が `?gl` から `?g2` の動詞句が続けば、空所が `?g0` から `?g2` の文になる、と述べています。
+関係節の規則は、どこかに空所のある文を見つけます。主語の位置でも、動詞句のどこかに埋め込まれていてもかまいません。
+完全な文法を示します。
 
 ```lisp
 (rule (S ?g0 ?g2 (and ?np ?vp)) -->
@@ -810,7 +810,7 @@ Here's the complete grammar:
    (S (gap NP ?agr ?x) nogap ?rel))
 ```
 
-Here are some sentence/parse pairs covered by this grammar:
+この文法が扱う文と解析の対をいくつか示します。
 
 `Every man that` &blank; `loves a woman likes a person.`
 
@@ -842,21 +842,21 @@ Here are some sentence/parse pairs covered by this grammar:
    (AND (EXISTS ?60 (AND (PERSON ?60) T)) (LIKE ?28 ?60)))
 ```
 
-Actually, there are limitations on the situations in which gaps can appear.
-In particular, it is rare to have a gap in the subject of a sentence, except in the case of a relative clause.
-In the next chapter, we will see how to impose additional constraints on gaps.
+実のところ、空所が現れうる場面には制限があります。
+とりわけ、関係節の場合を除けば、文の主語に空所があるのはまれです。
+次章では、空所にさらに制約を課す方法を見ます。
 
-## 20.7 Augmenting DCG Rules
+## 20.7 DCG規則を拡張する
 
-In the previous section, we saw how to build up a semantic representation of a sentence by conjoining the semantics of the components.
-One problem with this approach is that the semantic interpretation is often something of the form `(and (and t` *a) b),* when we would prefer `(and` *a b)*.
-There are two ways to correct this problem: either we add a step that takes the final semantic interpretation and simplifies it, or we complicate each individual rule, making it generate the simplified form.
-The second choice would be slightly more efficient, but would be very ugly and error prone.
-We should be doing all we can to make the rules simpler, not more complicated; that is the whole point of the DCG formalism.
-This suggests a third approach: change the rule interpreter so that it automatically generates the semantic interpretation as a conjunction of the constituents, unless the rule explicitly says otherwise.
-This section shows how to augment the DCG rules to handle common cases like this automatically.
+前節では、部品の意味を連言で結ぶことで文の意味表現を組み上げる方法を見ました。
+この方式の問題の1つは、意味の解釈がしばしば `(and (and t` *a) b)* の形になることです。`(and` *a b)* のほうが望ましいのに、です。
+この問題を正す道は2つあります。最終的な意味の解釈を受け取って簡約する段を加えるか、個々の規則を込み入らせて簡約された形を生ませるかです。
+2つ目のほうがわずかに効率はよいでしょうが、たいそう醜く、誤りを招きやすいものになります。
+規則は複雑にするのではなく、できるかぎり単純にすべきです。それこそがDCGという形式の眼目なのですから。
+ここから3つ目の道が浮かびます。規則が明示的に別のことを述べていないかぎり、構成素の連言として意味の解釈を自動的に生成するよう、規則の解釈器を変えるのです。
+本節では、こうしたよくある場合を自動で扱えるようDCG規則を拡張する方法を示します。
 
-Consider again a rule from [section 20.4](#s0025):
+[20.4節](#s0025)の規則をもう一度考えてみましょう。
 
 ```lisp
 (rule (S (and ?np ?vp)) -->
@@ -864,7 +864,7 @@ Consider again a rule from [section 20.4](#s0025):
    (VP ?agr ?x ?vp))
 ```
 
-If we were to alter this rule to produce a simplified semantic interpretation, it would look like the following, where the predicate `and*` simplifies a list of conjunctions into a single conjunction:
+簡約された意味の解釈を作るようこの規則を変えるなら、次のようになるでしょう。述語 `and*` は連言の並びを1つの連言に簡約するものです。
 
 ```lisp
 (rule (S ?sem) -->
@@ -873,8 +873,8 @@ If we were to alter this rule to produce a simplified semantic interpretation, i
    (:test (and*(?np ?vp) ?sem)))
 ```
 
-Many rules will have this form, so we adopt a simple convention: if the last argument of the constituent on the left-hand side of a rule is the keyword `:sem`, then we will build the semantics by replacing `:sem` with a conjunction formed by combining all the last arguments of the constituents on the right-hand side of the rule.
-A `==>` arrow will be used for rules that follow this convention, so the following rule is equivalent to the one above:
+多くの規則がこの形になるので、簡単な約束を採ります。規則の左辺の構成素の最後の引数がキーワード `:sem` なら、`:sem` を、右辺の構成素の最後の引数をすべて組み合わせて作った連言で置き換えることで意味を組み立てる、というものです。
+この約束に従う規則には矢印 `==>` を使うので、次の規則は上のものと同じことになります。
 
 ```lisp
 (rule (S :sem) ==>
@@ -882,9 +882,9 @@ A `==>` arrow will be used for rules that follow this convention, so the followi
    (VP ?agr ?x ?vp))
 ```
 
-It is sometimes useful to introduce additional semantics that does not come from one of the constituents.
-This can be indicated with an element of the right-hand side that is a list starting with `:sem`.
-For example, the following rule adds to the semantics the fact that `?x` is the topic of the sentence:
+構成素から来るのではない追加の意味を持ち込めると、便利なことがあります。
+これは、右辺の要素として `:sem` で始まる並びを置くことで示せます。
+たとえば次の規則は、`?x` が文の主題であるという事実を意味に加えます。
 
 ```lisp
 (rule (S :sem) ==>
@@ -893,10 +893,10 @@ For example, the following rule adds to the semantics the fact that `?x` is the 
    (:sem (topic ?x)))
 ```
 
-Before implementing the rule function for the `==>` arrow, it is worth considering if there are other ways we could make things easier for the rule writer.
-One possibility is to provide a notation for describing examples.
-Examples make it easier to understand what a rule is designed for.
-For the `S` rule, we could add examples like this:
+矢印 `==>` のための規則関数を実装する前に、規則を書く人にとって楽になる道が他にないかを考えてみる値打ちがあります。
+1つの手は、例を記述する記法を用意することです。
+例があれば、その規則が何のために作られたのかを理解しやすくなります。
+`S` の規則には、次のように例を加えられます。
 
 ```lisp
 (rule (S :sem) ==>
@@ -905,10 +905,10 @@ For the `S` rule, we could add examples like this:
    (VP ?agr ?x ?vp))
 ```
 
-These examples not only serve as documentation for the rule but also can be stored under `S` and subsequently run when we want to test if `S` is in fact implemented properly.
+この例は規則の説明になるだけでなく、`S` のもとに格納しておいて、`S` が実際に正しく実装されているかを試したいときに走らせることもできます。
 
-Another area where the rule writer could use help is in handling left-recursive rules.
-Consider the rule that says that a sentence can consist of two sentences joined by a conjunction:
+規則を書く人が助けを必要とするもう1つの場面が、左再帰の規則の扱いです。
+文は接続詞で結ばれた2つの文から成りうる、と述べる規則を考えてみましょう。
 
 ```lisp
 (rule (S (?conj ?sl ?s2)) ==>
@@ -918,12 +918,12 @@ Consider the rule that says that a sentence can consist of two sentences joined 
    (S ?s2))
 ```
 
-While this rule is correct as a declarative statement, it will run into difficulty when run by the standard top-down depth-first DCG interpretation process.
-The top-level goal of parsing an `S` will lead immediately to the subgoal of parsing an `S`, and the result will be an infinite loop.
+この規則は宣言的な文としては正しいのですが、標準的な下向き深さ優先のDCGの解釈の過程で走らせると行き詰まります。
+`S` を解析するという最上位の目標が、ただちに `S` を解析するという下位目標につながり、結果は無限ループになります。
 
-Fortunately, we know how to avoid this kind of infinite loop: split the offending predicate, `S`, into two predicates: one that supports the recursion, and one that is at a lower level.
-We will call the lower-level predicate `S_`.
-Thus, the following rule says that a sentence can consist of two sentences, where the first one is not conjoined and the second is possibly conjoined:
+さいわい、この種の無限ループを避ける方法は知っています。差し障りのある述語 `S` を2つの述語に分けるのです。再帰を支えるものと、より低い階層のものです。
+低い階層の述語を `S_` と呼ぶことにします。
+つまり次の規則は、文は2つの文から成りうる、ただし1つ目は接続されておらず、2つ目は接続されているかもしれない、と述べています。
 
 ```lisp
 (rule (S (?conj ?sl ?s2)) ==>
@@ -932,29 +932,29 @@ Thus, the following rule says that a sentence can consist of two sentences, wher
    (S ?s2))
 ```
 
-We also need a rule that says that a possibly conjoined sentence can consist of a nonconjoined sentence:
+接続されているかもしれない文は、接続されていない文から成りうる、と述べる規則も要ります。
 
 ```lisp
 (rule (S ?sem) ==> (S_ ?sem))
 ```
 
-To make this work, we need to replace any mention of `S` in the left-hand side of a rule with `S_`.
-References to `S` in the right-hand side of rules remain unchanged.
+これを働かせるには、規則の左辺に現れる `S` をすべて `S_` に置き換える必要があります。
+規則の右辺での `S` への参照はそのままです。
 
 ```lisp
 (rule (S_ ?sem) ==>...)
 ```
 
-To make this all automatic, we will provide a macro, `conj-rule`, that declares a category to be one that can be conjoined.
-Such a declaration will automatically generate the recursive and nonrecursive rules for the category, and will insure that future references to the category on the left-hand side of a rule will be replaced with the corresponding lower-level predicate.
+これをすべて自動にするため、ある範疇が接続されうるものだと宣言するマクロ `conj-rule` を用意します。
+この宣言は、その範疇について再帰的な規則と非再帰的な規則を自動的に生成し、以後その範疇が規則の左辺に現れたら、対応する低い階層の述語に置き換わるようにします。
 
-One problem with this approach is that it imposes a right-branching parse on multiple conjoined phrases.
-That is, we will get parses like "spaghetti and (meatballs and salad)" not "(spaghetti and meatballs) and salad." Clearly, that is the wrong interpretation for this sentence.
-Still, it can be argued that it is best to produce a single canonical parse, and then let the semantic interpretation functions worry about rearranging the parse in the right order.
-We will not attempt to resolve this debate but will provide the automatic conjunction mechanism as a tool that can be convenient but has no cost for the user who prefers a different solution.
+この方式の問題の1つは、複数の接続された句に右分岐の解析を強いることです。
+つまり「(spaghetti and meatballs) and salad」ではなく「spaghetti and (meatballs and salad)」のような解析になります。この文にとってそれが誤った解釈なのは明らかです。
+それでも、標準形の解析を1つ作り、それを正しい順に並べ替えることは意味解釈の関数に任せるのが最善だ、と論じることはできます。
+この論争に決着をつけようとはしません。自動の接続の仕組みは、便利ではあるが別の解を好む利用者には何の負担もない道具として用意します。
 
-We are now ready to implement the extended DCG rule formalism that handles `:sem, :ex,` and automatic conjunctions.
-The function `make-augmented-dcg,` stored under the arrow `==>`, will be used to implement the formalism:
+これで `:sem, :ex`、そして自動の接続を扱う拡張DCG規則の形式を実装する用意ができました。
+矢印 `==>` のもとに格納する関数 `make-augmented-dcg` が、この形式を実装します。
 
 ```lisp
 (setf (get '==> 'rule-function) 'make-augmented-dcg)
@@ -980,9 +980,9 @@ The function `make-augmented-dcg,` stored under the arrow `==>`, will be used to
                       ,rule))))))
 ```
 
-First we show the code that collects together the semantics of each constituent and conjoins them when `:sem` is specified.
-The function `collect-sems` picks out the semantics and handles the trivial cases where there are zero or one constituents on the right-hand side.
-If there are more than one, it inserts a call to the predicate `and*`.
+まず、各構成素の意味を集め、`:sem` が指定されていればそれらを連言で結ぶコードを示します。
+関数 `collect-sems` が意味を取り出し、右辺の構成素が0個か1個という自明な場合を処理します。
+2つ以上あれば、述語 `and*` の呼び出しを差し込みます。
 
 ```lisp
 (defun collect-sems (body ?sem)
@@ -1000,8 +1000,8 @@ If there are more than one, it inserts a call to the predicate `and*`.
       (t `(and* ,sems ,?sem)))))
 ```
 
-We could have implemented `and*` with Prolog clauses, but it is slightly more efficient to do it directly in Lisp.
-A call to `conjuncts` collects all the conjuncts, and we then add an `and` if necessary:
+`and*` はPrologの節で実装することもできましたが、Lispで直に書くほうがわずかに効率がよいのです。
+`conjuncts` の呼び出しが連言の項をすべて集め、必要なら `and` を加えます。
 
 ```lisp
 (defun and*/2 (in out cont)
@@ -1022,14 +1022,14 @@ A call to `conjuncts` collects all the conjuncts, and we then add an `and` if ne
         (t (list exp))))
 ```
 
-The next step is handling example phrases.
-The code in `make-augmented-dcg` turns examples into expressions of the form:
+次の段は、例となる句の扱いです。
+`make-augmented-dcg` のなかのコードが、例を次の形の式に変えます。
 
 ```lisp
 (:ex (S ?sem) "John likes Mary" "He sleeps")
 ```
 
-To make this work, `:ex` will have to be a macro:
+これを働かせるには、`:ex` はマクロでなければなりません。
 
 ```lisp
 (defmacro :ex ((category . args) &body examples)
@@ -1037,11 +1037,11 @@ To make this work, `:ex` will have to be a macro:
   `(add-examples ',category ',args ',examples))
 ```
 
-`:ex` calls `add-examples` to do all the work.
-Each example is stored in a hash table indexed under the the category.
-Each example is transformed into a two-element list: the example phrase string itself and a call to the proper predicate with all arguments supplied.
-The function `add-examples` does this transformation and indexing, and `run-examples` retrieves the examples stored under a category, prints each phrase, and calls each goal.
-The auxiliary functions `get-examples` and `clear-examples` are provided to manipulate the example table, and `remove-punction, punctuation-p` and `string->list` are used to map from a string to a list of words.
+`:ex` は `add-examples` を呼んで、仕事をすべて任せます。
+各例は、範疇のもとに索引付けされたハッシュ表に格納されます。
+各例は2要素の並びに変えられます。例の句の文字列そのものと、引数をすべて与えた適切な述語の呼び出しです。
+関数 `add-examples` がこの変換と索引付けを行い、`run-examples` が範疇のもとに格納された例を取り出し、各句を表示して各目標を呼びます。
+補助関数 `get-examples` と `clear-examples` は例の表を操作するために用意し、`remove-punction, punctuation-p`、`string->list` は文字列から語の並びへの対応づけに使います。
 
 ```lisp
 (defvar *examples* (make-hash-table :test #'eq))
@@ -1087,9 +1087,9 @@ The auxiliary functions `get-examples` and `clear-examples` are provided to mani
 (defun punctuation-p (char) (find char "*_.,;:`!?#-()\\\""))
 ```
 
-The final part of our augmented DCG formalism is handling conjunctive constituents automatically.
-We already arranged to translate category symbols on the left-hand side of rules into the corresponding conjunctive category, as specified by the function `handle-conj`.
-We also want to generate automatically (or as easily as possible) rules of the following form:
+拡張DCG形式の最後の部分は、接続された構成素を自動で扱うことです。
+規則の左辺の範疇のシンボルを、関数 `handle-conj` が定めるとおり、対応する接続の範疇に変換する手はずはすでに整えました。
+次の形の規則も自動的に（あるいはできるかぎり楽に）生成したいところです。
 
 ```lisp
 (rule (S (?conj ?sl ?s2)) ==>
@@ -1099,15 +1099,15 @@ We also want to generate automatically (or as easily as possible) rules of the f
 (rule (S ?sem) ==> (S_ ?sem))
 ```
 
-But before we generate these rules, let's make sure they are exactly what we want.
-Consider parsing a nonconjoined sentence with these two rules in place.
-The first rule would parse the entire sentence as a `S_`, and would then fail to see a `Conj`, and thus fail.
-The second rule would then duplicate the entire parsing process, thus doubling the amount of time taken.
-If we changed the order of the two rules we would be able to parse nonconjoined sentences quickly, but would have to backtrack on conjoined sentences.
+しかしこの規則を生成する前に、それが本当に望みのものかを確かめておきましょう。
+この2つの規則があるところで、接続されていない文を解析することを考えてみてください。
+1つ目の規則は文全体を `S_` として解析し、それから `Conj` を見つけられずに失敗します。
+すると2つ目の規則が解析の過程をまるごと繰り返すので、かかる時間は倍になります。
+2つの規則の順序を入れ替えれば、接続されていない文は速く解析できますが、接続された文ではバックトラックが要ります。
 
-The following shows a better approach.
-A single rule for `S` parses a sentence with `S_`, and then calls `Conj_S`, which can be read as "either a conjunction followed by a sentence, or nothing." If the first sentence is followed by nothing, then we just use the semantics of the first sentence; if there is a conjunction, we have to form a combined semantics.
-I have added ... to show where arguments to the predicate other than the semantic argument fit in.
+次に、より良い方式を示します。
+`S` の規則1つが `S_` で文を解析し、それから `Conj_S` を呼びます。これは「接続詞のあとに文が続くか、あるいは何もないか」と読めます。1つ目の文のあとに何もなければ、その文の意味をそのまま使います。接続詞があれば、組み合わせた意味を作らねばなりません。
+意味の引数以外の述語の引数がどこに入るかを示すために ... を加えてあります。
 
 ```lisp
 (rule (S ... ?s-combined) ==>
@@ -1119,10 +1119,10 @@ I have added ... to show where arguments to the predicate other than the semanti
 (rule (Conj_S ?seml ?seml) ==>)
 ```
 
-Now all we need is a way for the user to specify that these three rules are desired.
-Since the exact method of building up the combined semantics and perhaps even the call to `Conj` may vary depending on the specifics of the grammar being defined, the rules cannot be generated entirely automatically.
-We will settle for a macro, `conj-rule`, that looks very much like the second of the three rules above but expands into all three, plus code to relate `S_` to `S`.
-So the user will type:
+あとは、この3つの規則がほしいと利用者が指定する手立てがあればよいだけです。
+組み合わせた意味を組み上げる正確な方法や、おそらく `Conj` の呼び出しさえ、定義する文法の細部によって変わりうるので、規則を完全に自動生成することはできません。
+そこでマクロ `conj-rule` で手を打ちます。これは上の3つの規則のうち2つ目によく似た見た目でありながら、3つすべてと、`S_` を `S` に関係づけるコードに展開されます。
+ですから利用者は次のように書きます。
 
 ```lisp
 (conj-rule (Conj_S ?seml (?conj ?seml ?sem2)) ==>
@@ -1130,7 +1130,7 @@ So the user will type:
    (S ?a ?b ?c ?sem2))
 ```
 
-Here is the macro definition:
+マクロの定義を示します。
 
 ```lisp
 (defmacro conj-rule ((conj-cat sem1 combined-sem) ==>
@@ -1148,7 +1148,7 @@ Here is the macro definition:
      (rule (,conj-cat ?sem1 ?sem1) ==>)))
 ```
 
-and here we define `handle-conj` to substitute `S_` for `S` in the left-hand side of rules:
+そしてここでは、規則の左辺で `S` を `S_` に置き換える `handle-conj` を定義します。
 
 ```lisp
 (defun handle-conj (head)
@@ -1163,80 +1163,80 @@ and here we define `handle-conj` to substitute `S_` for `S` in the left-hand sid
   (get predicate 'conj-category))
 ```
 
-## 20.8 History and References
+## 20.8 歴史と参考文献
 
-As we have mentioned, Alain Colmerauer invented Prolog to use in his grammar of French (1973).
-His *metamorphosis grammar* formalism was more expressive but much less efficient than the standard DCG formalism.
+述べたとおり、Alain Colmerauerはフランス語の文法（1973）に使うためにPrologを考案しました。
+その*変形文法*という形式は、標準のDCG形式より表現力はありましたが、効率ははるかに劣りました。
 
-The grammar in [section 20.4](#s0025) is essentially the same as the one presented in Fernando Pereira and David H.
+[20.4節](#s0025)の文法は、Fernando Pereira と David H.
 D.
-Warren's 1980 paper, which introduced the Definite Clause Grammar formalism as it is known today.
-The two developed a much more substantial grammar and used it in a very influential question-answering system called Chat-80 ([Warren and Pereira, 1982](bibliography.md#bb1340)).
-Pereira later teamed with Stuart Shieber on an excellent book covering logic grammars in more depth: *Prolog and Natural-Language Analysis* (1987).
-The book has many strong points, but unfortunately it does not present a grammar anywhere near as complete as the Chat-80 grammar.
+Warren の1980年の論文で示されたものと本質的に同じで、その論文が今日知られる定節文法の形式を導入しました。
+2人ははるかに本格的な文法を作り、それをChat-80というきわめて影響力のある質問応答システムに使いました（[Warren and Pereira, 1982](bibliography.md#bb1340)）。
+Pereiraはのちに Stuart Shieber と組んで、論理文法をより深く扱う優れた本 *Prolog and Natural-Language Analysis*（1987）を書きました。
+この本には長所が多くありますが、あいにくChat-80の文法ほど完全な文法は示されていません。
 
-The idea of a compositional semantics based on mathematical logic owes much to the work of the late linguist Richard Montague.
-The introduction by [Dowty, Wall, and Peters (1981)](bibliography.md#bb0335) and the collection by [Rich Thomason (1974)](bibliography.md#bb1235) cover Montague's approach.
+数理論理学にもとづく合成的な意味論という考えは、故・言語学者 Richard Montague の仕事に多くを負っています。
+[Dowty, Wall, and Peters（1981）](bibliography.md#bb0335)の入門書と[Rich Thomason（1974）](bibliography.md#bb1235)の論文集が、Montagueの方式を扱っています。
 
-The grammar in [section 20.5](#s0030) is based loosely on Michael McCord's modular logic grammar, as presented in [Walker et al.
-1990](bibliography.md#bb1295).
+[20.5節](#s0030)の文法は、[Walker ほか
+1990](bibliography.md#bb1295)で示された Michael McCord のモジュール論理文法をゆるやかに下敷きにしています。
 
-It should be noted that logic grammars are by no means the only approach to natural language processing.
-[Woods (1970)](bibliography.md#bb1425) presents an approach based on the *augmented transition network*, or ATN.
-A transition network is like a context-free grammar.
-The *augmentation* is a way of manipulating features and semantic values.
-This is just like the extra arguments in DCGs, except that the basic operations are setting and testing variables rather than unification.
-So the choice between ATNs and DCGs is largely a matter of what programming approach you are most comfortable with: procedural for ATNs and declarative for DCGs.
-My feeling is that unification is a more suitable primitive than assignment, so I chose to present DCGs, even though this required bringing in Prolog's backtracking and unification mechanisms.
+論理文法が自然言語処理への唯一の方式では決してないことは、述べておくべきでしょう。
+[Woods（1970）](bibliography.md#bb1425)は、*拡張遷移ネットワーク*すなわちATNにもとづく方式を示しています。
+遷移ネットワークは文脈自由文法のようなものです。
+*拡張*とは、素性と意味の値を扱う手立てのことです。
+これはDCGの余分な引数とちょうど同じですが、基本の操作が単一化ではなく変数の設定と検査である点だけが違います。
+ですからATNとDCGの選択は、どのプログラミングの方式がしっくりくるかという問題が大半です。ATNなら手続き的、DCGなら宣言的です。
+私の感じでは、単一化のほうが代入より基本要素としてふさわしいので、Prologのバックトラックと単一化の仕組みを持ち込む必要があったにもかかわらず、DCGを示すことにしました。
 
-In either approach, the same linguistic problems must be addressed-agreement, long-distance dependencies, topicalization, quantifier-scope ambiguity, and so on.
-Comparing [Woods's (1970)](bibliography.md#bb1425) ATN grammar to [Pereira and Warren's (1980)](bibliography.md#bb0950) DCG grammar, the careful reader will see that the solutions have much in common.
-The analysis is more important than the notation, as it should be.
+どちらの方式でも、取り組むべき言語上の問題は同じです。一致、長距離依存、主題化、量化子のスコープの曖昧さ、などです。
+[Woods（1970）](bibliography.md#bb1425)のATN文法と[Pereira and Warren（1980）](bibliography.md#bb0950)のDCG文法を比べれば、注意深い読者は解決に多くの共通点があると気づくでしょう。
+記法より分析のほうが重要なのです。そうあるべきなのですから。
 
-## 20.9 Exercises
+## 20.9 練習問題
 
-**Exercise  20.2 [m]** Modify the grammar (from [section 20.4](#s0025), [20.5](#s0030), [or 20.6](#s0035)) to allow for adjectives before a noun.
+**練習問題 20.2 [m]** 名詞の前に形容詞を許すよう、文法（[20.4節](#s0025)、[20.5節](#s0030)、[20.6節](#s0035)のいずれか）を変えよ。
 
-**Exercise  20.3 [m]** Modify the grammar to allow for prepositional phrase modifiers on verb and noun phrases.
+**練習問題 20.3 [m]** 動詞句と名詞句に前置詞句の修飾語を許すよう文法を変えよ。
 
-**Exercise  20.4 [m]** Modify the grammar to allow for ditransitive verbs-verbs that take two objects, as in "give the dog a bone."
+**練習問題 20.4 [m]** 二重目的語をとる動詞、すなわち「give the dog a bone」のように目的語を2つ取る動詞を許すよう文法を変えよ。
 
-**Exercise  20.5** Suppose we wanted to adopt the Prolog convention of writing DCG tests and words in brackets and braces, respectively.
-Write a function that will alter the readtable to work this way.
+**練習問題 20.5** DCGの検査と語を、それぞれ波括弧と角括弧で書くというPrologの約束を採りたいとしよう。
+そう働くよう読み取り表を変える関数を書け。
 
-**Exercise  20.6 [m]** Define a rule function for a new type of DCG rule that automatically builds up a syntactic parse of the input.
-For example, the two rules:
+**練習問題 20.6 [m]** 入力の統語的な解析を自動的に組み上げる、新しい型のDCG規則のための規則関数を定義せよ。
+たとえば次の2つの規則が、
 
 ```lisp
 (rule (s) => (np) (vp))
 (rule (np) => (:word he))
 ```
 
-should be equivalent to:
+次と同じことになるようにする。
 
 ```lisp
 (rule (s (s ?1 ?2)) --> (np ?1) (vp ?2))
 (rule (np (np he)) --> (:word he))
 ```
 
-**Exercise  20.7 [m]** There are advantages and disadvantages to the approach that Prolog takes in dividing predicates into clauses.
-The advantage is that it is easy to add a new clause.
-The disadvantage is that it is hard to alter an existing clause.
-If you edit a clause and then evaluate it, the new clause will be added to the end of the clause list, when what you really wanted was for the new clause to take the place of the old one.
-To achieve that effect, you have to call `clear-predicate`, and then reload all the clauses, not just the one that has been changed.
+**練習問題 20.7 [m]** 述語を節に分けるというPrologの方式には、利点と難点がある。
+利点は、新しい節を加えるのが簡単なことである。
+難点は、既存の節を変えるのが難しいことである。
+節を書き換えて評価すると、新しい節は節の並びの末尾に加わってしまう。本当に望んでいたのは、新しい節が古い節に取って代わることなのに。
+それを実現するには `clear-predicate` を呼び、変えた節だけでなくすべての節を読み込みなおさねばならない。
 
-Write a macro `named-rule` that is just like `rule`, except that it attaches names to clauses.
-When a named rule is reloaded, it replaces the old clause rather than adding a new one.
+`rule` とちょうど同じでありながら、節に名前を付けるマクロ `named-rule` を書け。
+名前の付いた規則を読み込みなおしたときは、新しい節を加えるのではなく古い節を置き換えるようにする。
 
-**Exercise 20.8 [h]** Extend the DCG rule function to allow or goals in the right-hand side.
-To make this more useful, also allow `and` goals.
-For example:
+**練習問題 20.8 [h]** 右辺に or の目標を許すよう、DCGの規則関数を拡張せよ。
+より役立つよう、`and` の目標も許すこと。
+たとえば次のものが、
 
 ```lisp
 (rule (A) --> (B) (or (C) (and (D) (E))) (F))
 ```
 
-should compile into the equivalent of :
+次と同等のものにコンパイルされるようにする。
 
 ```lisp
 (<- (A ?S0 ?S4)
@@ -1246,13 +1246,13 @@ should compile into the equivalent of :
    (F ?S3 ?S4))
 ```
 
-## 20.10 Answers
+## 20.10 解答
 
-**Answer 20.1** It uses local variables `(?s0, ?sl ...)` that are not guaranteed to be unique.
-This is a problem if the grammar writer wants to use these symbols anywhere in his or her rules.
-The fix is to `gensym` symbols that are guaranteed to be unique.
+**解答 20.1** 一意であることが保証されていない局所変数 `(?s0, ?sl ...)` を使っている。
+文法を書く人が、自分の規則のどこかでこのシンボルを使いたい場合に問題になる。
+直し方は、一意であることが保証されたシンボルを `gensym` で作ることである。
 
-### Answer 20.5
+### 解答 20.5
 
 ```lisp
 (defun setup-braces Uoptional (on? t) (readtable *readtable*))
@@ -1281,4 +1281,4 @@ The fix is to `gensym` symbols that are guaranteed to be unique.
 ----------------------
 
 <a id="fn20-1"></a><sup>[1](#tfn20-1)</sup>
-The asterisk at the start of a sentence is the standard linguistic notation for an utterance that is ungrammatical or otherwise ill-formed.
+文頭のアスタリスクは、非文法的あるいは何らかの形で不適格な発話を表す、言語学の標準的な記法です。
