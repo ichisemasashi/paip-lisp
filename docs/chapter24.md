@@ -1,79 +1,79 @@
-# Chapter 24
+# 第24章
 ## ANSI Common Lisp
 
-This chapter briefly covers some advanced features of Common Lisp that were not used in the rest of the book.
-The first topic, packages, is crucial in building large systems but was not covered in this book, since the programs are concise.
-The next four topics-error handling, pretty printing, series, and the loop macro-are covered in *Common Lisp the Language,* 2d edition, but not in the first edition of the book.
-Thus, they may not be applicable to your Lisp compiler.
-The final topic, sequence functions, shows how to write efficient functions that work for either lists or vectors.
+本章では、本書の他の部分で使わなかったCommon Lispの進んだ機能をいくつか手短に扱います。
+最初の話題であるパッケージは、大きなシステムを築くうえで欠かせませんが、本書のプログラムは簡潔なので扱ってきませんでした。
+続く4つの話題、すなわちエラー処理・整形出力・series・loopマクロは、*Common Lisp the Language* 第2版では扱われていますが、第1版では扱われていません。
+ですから、お使いのLispコンパイラでは使えないかもしれません。
+最後の話題である列を扱う関数では、リストにもベクタにも働く効率のよい関数の書き方を示します。
 
-## 24.1 Packages
+## 24.1 パッケージ
 
-A *package* is a symbol table that maps from strings to symbols named by those strings.
-When read is confronted with a sequence of characters like `list`, it uses the symbol table to determine that this refers to the symbol `list`.
-The important point is that every use of the symbol name `list` refers to the same symbol.
-That makes it easy to refer to predefined symbols, but it also makes it easy to introduce unintended name conflicts.
-For example, if I wanted to hook up the `emycin` expert system from [chapter 16](chapter16.md) with the parser from [chapter 19](chapter19.md), there would be a conflict because both programs use the symbol `defrule` to mean different things.
+*パッケージ*とは、文字列から、その文字列を名前とするシンボルへの対応を与えるシンボル表です。
+readが `list` のような文字の並びに出くわすと、シンボル表を使ってそれがシンボル `list` を指すと見定めます。
+重要なのは、シンボル名 `list` のどの使用も同じシンボルを指すという点です。
+おかげであらかじめ定義されたシンボルを参照しやすくなりますが、意図しない名前の衝突も起こりやすくなります。
+たとえば[第16章](chapter16.md)のエキスパートシステム `emycin` を[第19章](chapter19.md)の構文解析器とつなごうとすると、衝突が起きます。どちらのプログラムもシンボル `defrule` を違う意味で使っているからです。
 
-Common Lisp uses the package system to help resolve such conflicts.
-Instead of a single symbol table, Common Lisp allows any number of packages.
-The function `read` always uses the current package, which is defined to be the value of the special variable `*package*`.
-By default, Lisp starts out in the `common-lisp-user` package.<a id="tfn24-1"></a><sup>[1](#fn24-1)</sup>
-That means that if we type a new symbol, like `zxv@!?+qw`, it will be entered into that package.
-Converting a string to a symbol and placing it in a package is called *interning.* It is done automatically by `read`, and can be done by the function `intern` if necessary.
-Name conflicts arise when there is contention for names within the `common-lisp-user` package.
+Common Lispは、こうした衝突を解くのを助けるためにパッケージの仕組みを使います。
+Common Lispは、シンボル表を1つに限らず、いくつでもパッケージを持てるようにしています。
+関数 `read` は常に現在のパッケージを使います。これは特殊変数 `*package*` の値として定められています。
+既定では、Lispは `common-lisp-user` のパッケージで始まります。<a id="tfn24-1"></a><sup>[1](#fn24-1)</sup>
+つまり `zxv@!?+qw` のような新しいシンボルを打ち込むと、それはそのパッケージに入ります。
+文字列をシンボルへ変換してパッケージに置くことを*インターン*と呼びます。これは `read` が自動で行いますし、必要なら関数 `intern` でも行えます。
+名前の衝突は、`common-lisp-user` のパッケージのなかで名前の取り合いが起きたときに生じます。
 
-To avoid name conflicts, simply create your new symbols in another package, one that is specific to your program.
-The easiest way to implement this is to split each system into at least two files-one to define the package that the system resides in, and the others for the system itself.
-For example, the `emycin` system should start with a file that defines the `emycin` package.
-The following form defines the `emycin` package to use the `lisp` package.
-That means that when the current package is `emycin`, you can still refer to all the built-in Lisp symbols.
+名前の衝突を避けるには、新しいシンボルを別のパッケージ、すなわち自分のプログラム専用のパッケージに作ればよいのです。
+これを実現するもっとも楽なやり方は、各システムを少なくとも2つのファイルに分けることです。1つはそのシステムが住むパッケージを定義するもの、他はシステムそのもののためのものです。
+たとえば `emycin` のシステムは、`emycin` パッケージを定義するファイルから始めるべきです。
+次の形式は、`lisp` パッケージを使うものとして `emycin` パッケージを定義します。
+つまり現在のパッケージが `emycin` のときでも、Lispの組み込みのシンボルをすべて参照できるということです。
 
 ```lisp
 (make-package "EMYCIN" :use '("LISP"))
 ```
 
-The file containing the package definition should always be loaded before the rest of the system.
-Those files should start with the following call, which insures that all new symbols will be interned in the `emycin` package:
+パッケージの定義を含むファイルは、常にシステムの残りより先に読み込むべきです。
+それらのファイルは次の呼び出しから始めるべきです。これによって、新しいシンボルはすべて `emycin` パッケージにインターンされます。
 
 ```lisp
 (in-package "EMYCIN")
 ```
 
-Packages are used for information-hiding purposes as well as for avoiding name clashes.
-A distinction is made between *internal* and *external* symbols.
-External symbols are those that a user of a system would want to refer to, while internal symbols are those that help implement the system but are not needed by a user of the system.
-The symbol `rule` would probably be internal to both the `emycin` and `parser` package, but `defrule` would be external, because a user of the `emycin` system uses `defrule` to define new rules.
-The designer of a system is responsible for advertising which symbols are external.
-The proper call is:
+パッケージは、名前の衝突を避けるためだけでなく、情報隠蔽のためにも使われます。
+*内部*のシンボルと*外部*のシンボルが区別されます。
+外部のシンボルはシステムの利用者が参照したいもので、内部のシンボルはシステムの実装を助けるが利用者には要らないものです。
+シンボル `rule` はおそらく `emycin` と `parser` の両方のパッケージで内部でしょうが、`defrule` は外部になります。`emycin` システムの利用者は `defrule` を使って新しい規則を定義するからです。
+どのシンボルが外部かを知らせるのは、システムの設計者の役目です。
+そのための呼び出しは次のとおりです。
 
 ```lisp
 (export '(emycin defrule defcontext defparm yes/no yes no is))
 ```
 
-Now the user who wants to refer to symbols in the `emycin` package has four choices.
-First, he or she can use the *package prefix* notation.
-To refer to the symbol `defrule` in the emycin package, type `emycin:defrule`.
-Second, the user can make `emycin` be the current package with `(in-package "EMYCIN").` Then, of course, we need only type `defrule`.
-Third, if we only need part of the functionality of a system, we can import specific symbols into the current package.
-For example, we could call `(import 'emycin:defrule)`.
-From then on, typing `defrule` (in the current package) will refer to `emycin:defrule`.
-Fourth, if we want the full functionality of the system, we call `(use-package "EMYCIN")`.
-This makes all the external symbols of the `emycin` package accessible in the current package.
+これで、`emycin` パッケージのシンボルを参照したい利用者には4つの選択肢があります。
+第一に、*パッケージ接頭辞*の記法を使えます。
+emycinパッケージのシンボル `defrule` を参照するには、`emycin:defrule` と書きます。
+第二に、`(in-package "EMYCIN")` で `emycin` を現在のパッケージにできます。そうすればもちろん `defrule` と書くだけで済みます。
+第三に、システムの機能の一部だけが必要なら、特定のシンボルを現在のパッケージへ取り込めます。
+たとえば `(import 'emycin:defrule)` を呼べます。
+以後、（現在のパッケージで）`defrule` と書けば `emycin:defrule` を指します。
+第四に、システムの機能をまるごと使いたいなら `(use-package "EMYCIN")` を呼びます。
+これで `emycin` パッケージの外部のシンボルがすべて、現在のパッケージから使えるようになります。
 
-While packages help eliminate name conflicts, `import` and `use-package` allow them to reappear.
-The advantage is that there will only be conflicts between external symbols.
-Since a carefully designed package should have far fewer external than internal symbols, the problem has at least been reduced.
-But if two packages both have an external `defrule` symbol, then we cannot `use-package` both these packages, nor `import` both symbols without producing a genuine name conflict.
-Such conflicts can be resolved by *shadowing* one symbol or the other; see *Common Lisp the Language* for details.
+パッケージは名前の衝突をなくすのに役立ちますが、`import` と `use-package` はそれを再び招き入れます。
+利点は、衝突が外部のシンボルどうしでしか起きないことです。
+注意深く設計されたパッケージなら外部のシンボルは内部よりずっと少ないはずなので、問題は少なくとも小さくなっています。
+しかし2つのパッケージがどちらも外部の `defrule` シンボルを持てば、その両方を `use-package` することも、両方のシンボルを `import` することも、本物の名前の衝突なしにはできません。
+この衝突は、どちらかのシンボルを*覆い隠す*ことで解けます。詳しくは *Common Lisp the Language* を参照してください。
 
-The careful reader may be confused by the distinction between `"EMYCIN"` and `emycin`.
-In *Common Lisp the Language*, it was not made clear what the argument to package functions must be.
-Thus, some implementations signal an error when given a symbol whose print name is a package.
-In ANSI Common Lisp, all package functions are specified to take either a package, a package name (a string), or a symbol whose print name is a package name.
-In addition, ANSI Common Lisp adds the convenient `defpackage` macro.
-It can be used as a replacement for separate calls to `make-package, use-package, import`, and `export`.
-Also note that ANSI renames the `lisp package` as `common-lisp`.
+注意深い読者は、`"EMYCIN"` と `emycin` の違いに戸惑うかもしれません。
+*Common Lisp the Language* では、パッケージの関数の引数が何でなければならないかがはっきりしていませんでした。
+そのため実装によっては、表示名がパッケージであるシンボルを与えると誤りを通知します。
+ANSI Common Lispでは、パッケージの関数はすべて、パッケージ、パッケージ名（文字列）、あるいは表示名がパッケージ名であるシンボルのいずれかを取ると定められています。
+加えてANSI Common Lispは、便利な `defpackage` マクロを足しています。
+これは `make-package, use-package, import`、`export` を別々に呼ぶ代わりに使えます。
+また、ANSIが `lisp` パッケージを `common-lisp` に改名したことにも注意してください。
 
 ```lisp
 (defpackage emycin
@@ -81,31 +81,31 @@ Also note that ANSI renames the `lisp package` as `common-lisp`.
  (:export emycin defrule defcontext defparm yes/no yes no is))
 ```
 
-For more on packages and building systems, see [section 25.16](chapter25.md#s0110) or *Common Lisp the Language.*
+パッケージとシステムの構築についてさらに詳しくは、[25.16節](chapter25.md#s0110)か *Common Lisp the Language* を参照してください。
 
-### The Seven Name Spaces
+### 7つの名前空間
 
-One important fact to remember about packages is that they deal with symbols, and only indirectly deal with the uses those symbols might have.
-For example, you may think of `(export 'parse)` as exporting the function `parse`, but really it is exporting the symbol `parse`, which may happen to have a function definition associated with it.
-However, if the symbol is put to another use-perhaps as a variable or a data type-then those uses are made accessible by the `export` statement as well.
+パッケージについて覚えておくべき重要な事実は、それが扱うのはシンボルであって、そのシンボルの用途は間接的にしか扱わないということです。
+たとえば `(export 'parse)` は関数 `parse` を書き出すものだと思うかもしれませんが、実際に書き出しているのはシンボル `parse` であり、それにたまたま関数の定義が結びついているだけです。
+しかしそのシンボルが別の用途、たとえば変数やデータ型に使われていれば、その用途も `export` の文によって使えるようになります。
 
-Common Lisp has at least seven name spaces.
-The two we think of most often are (1) for functions and macros and (2) for variables.
-We have seen that Scheme conflates these two name spaces, but Common Lisp keeps them separate, so that in a function application like `(f)` the function/macro name space is consulted for the value of `f`, but in `(+ f)`, f is treated as a variable name.
-Those who understand the scope and extent rules of Common Lisp know that (3) special variables form a distinct name space from lexical variables.
-So the `f` in `(+ f)` is treated as either a special or lexical variable, depending on if there is an applicable `special` declaration.
-There is also a name space (4) for data types.
-Even if `f` is defined as a function and/or a variable, it can also be defined as a data type with `defstruct`, `deftype`, or `defclass`.
-It can also be defined as (5) a label for `go` statements within a `tagbody` or (6) a block name for `return-from` statements within a `block`.
-Finally, symbols inside a quoted expression are treated as constants, and thus form name space (7).
-These symbols are often used as keys in user-defined tables, and in a sense each such table defines a new name space.
-One example is the *tag* name space, used by catch and `throw`.
-Another is the package name space.
+Common Lispには少なくとも7つの名前空間があります。
+まっさきに思い浮かぶのは、(1) 関数とマクロのためのものと (2) 変数のためのものです。
+Schemeがこの2つの名前空間を1つにまとめていることは見てきましたが、Common Lispは分けたままにします。ですから `(f)` のような関数の適用では `f` の値を関数／マクロの名前空間から引きますが、`(+ f)` では f は変数名として扱われます。
+Common Lispのスコープと範囲の規則を理解している人なら、(3) 特殊変数がレキシカル変数とは別の名前空間をなすことを知っているでしょう。
+ですから `(+ f)` の `f` は、当てはまる `special` の宣言があるかどうかに応じて、特殊変数かレキシカル変数のいずれかとして扱われます。
+(4) データ型のための名前空間もあります。
+`f` が関数として、あるいは変数として定義されていても、`defstruct`、`deftype`、`defclass` でデータ型としても定義できます。
+さらに (5) `tagbody` のなかの `go` 文のためのラベルとしても、(6) `block` のなかの `return-from` 文のためのブロック名としても定義できます。
+最後に、クォートされた式のなかのシンボルは定数として扱われ、これが (7) の名前空間をなします。
+このシンボルは、利用者が定義する表のキーとしてよく使われ、ある意味でそうした表のそれぞれが新しい名前空間を定めています。
+その一例が、catchと `throw` が使う*タグ*の名前空間です。
+もう1つがパッケージの名前空間です。
 
-It is a good idea to limit each symbol to only one name space.
-Common Lisp will not be confused if a symbol is used in multiple ways, but the poor human reader probably will be.
+各シンボルを1つの名前空間だけに限っておくのは良い考えです。
+シンボルが複数のやり方で使われてもCommon Lispは混乱しませんが、気の毒な人間の読み手はおそらく混乱します。
 
-In the following example `f`, can you identify which of the twelve uses of `f` refer to which name spaces?
+次の例 `f` で、12回出てくる `f` のどれがどの名前空間を指すか、見分けられるでしょうか。
 
 ```lisp
 (defun f (f)
@@ -117,31 +117,31 @@ In the following example `f`, can you identify which of the twelve uses of `f` r
     (funcall #'f (get (symbol-value 'f) 'f))))))
 ```
 
-## 24.2 Conditions and Error Handling
+## 24.2 コンディションとエラー処理
 
-An extraordinary feature of ANSI Common Lisp is the facility for handling errors.
-In most languages it is very difficult for the programmer to arrange to recover from an error.
-Although Ada and some implementations of C provide functions for error recovery, they are not generally part of the repertoire of most programmers.
-Thus, we find C programs that exit with the ungraceful message `Segmentation violation: core dumped`.
+ANSI Common Lispの並外れた機能の1つが、誤りを扱う仕掛けです。
+たいていの言語では、プログラマが誤りから立ち直る手はずを整えるのは非常に難しいことです。
+AdaやCの一部の実装は誤りからの回復のための関数を備えていますが、たいていのプログラマの持ち札には入っていません。
+そのため、`Segmentation violation: core dumped` という無粋なメッセージを残して終わるCのプログラムを目にすることになります。
 
-Common Lisp provides one of the most comprehensive and easy-to-use error-handling mechanism of any programming language, which leads to more robust programs.
-The process of error handling is divided into two parts: signaling an error, and handling it.
+Common Lispは、あらゆるプログラミング言語のなかでもっとも網羅的で使いやすい誤り処理の仕組みの1つを備えており、それがより頑健なプログラムにつながります。
+誤りの処理の過程は2つに分かれます。誤りを通知することと、それを処理することです。
 
-### Signaling Errors
+### エラーを通知する
 
-An *error* is a condition that the program does not know how to handle.
-Since the program does not know what to do, its only recourse is to announce the occurrence of the error, with the hope that some other program or user will know what to do.
-This announcement is called *signaling* an error.
-An error can be signaled by a Common Lisp built-in function, as when `( / 3 0 )` signals a divide-by-zero error.
-Errors can also be signaled explicitly by the programmer, as in a call to `(error "Illegal value.")`.
+*エラー*とは、プログラムが扱い方を知らないコンディションのことです。
+プログラムは何をすべきかわからないので、他のプログラムか利用者が何をすべきかを知っていることを期待して、その誤りが起きたと知らせるほかありません。
+この知らせを、誤りを*通知する*と言います。
+誤りはCommon Lispの組み込み関数から通知されることもあります。`( / 3 0 )` が0除算の誤りを通知するのがその例です。
+誤りは `(error "Illegal value.")` の呼び出しのように、プログラマが明示的に通知することもできます。
 
-Actually, it is a bit of a simplification to talk only of *signaling errors.* The precise term is *signaling a condition.* Some conditions, like end-of-file, are not considered errors, but nevertheless they are unusual conditions that must be dealt with.
-The condition system in Common Lisp allows for the definition of all kinds of conditions, but we will continue to talk about errors in this brief discussion, since most conditions are in fact error conditions.
+実のところ、*エラーを通知する*とだけ言うのは少し話を単純にしすぎています。正確な用語は*コンディションを通知する*です。ファイルの終わりのように、誤りとは見なされないコンディションもありますが、それでも対処せねばならない通常でない状態ではあります。
+Common Lispのコンディションの仕組みはあらゆる種類のコンディションを定義できますが、この短い議論では引き続き誤りについて話します。コンディションのほとんどは実際に誤りのコンディションだからです。
 
-### Handling Errors
+### エラーを処理する
 
-By default, signaling an error invokes the debugger.
-In the following example, the >> prompt means that the user is in the debugger rather than at the top level.
+既定では、誤りを通知するとデバッガが呼び出されます。
+次の例で、>> という入力促し記号は、利用者が最上位ではなくデバッガのなかにいることを表しています。
 
 ```lisp
 > (/ 3 0)
@@ -149,35 +149,35 @@ Error: An attempt was made to divide by zero.
 >>
 ```
 
-ANSI Common Lisp provides ways of changing this default behavior.
-Conceptually, this is done by setting up an *error handler* which handles the error in some way.
-Error handlers are bound dynamically and are used to process signaled errors.
-An error handler is much like a `catch`, and signaling an error is like a `throw`.
-In fact, in many systems `catch` and `throw` are implemented with the error-condition system.
+ANSI Common Lispは、この既定のふるまいを変える手立てを備えています。
+考え方としては、誤りを何らかの形で処理する*誤りの処理器*を設けることで行います。
+誤りの処理器は動的に束縛され、通知された誤りを処理するのに使われます。
+誤りの処理器は `catch` によく似ており、誤りを通知することは `throw` に似ています。
+実際、多くのシステムでは `catch` と `throw` が誤りのコンディションの仕組みで実装されています。
 
-The simplest way of handling an error is with the macro `ignore-errors`.
-If no error occurs, `ignore-errors` is just like `progn`.
-But if an error does occur, `ignore-errors` will return `nil` as its first value and `t` as its second, to indicate that an error has occurred but without doing anything else:
+誤りを処理するもっとも単純なやり方が、マクロ `ignore-errors` です。
+誤りが起きなければ、`ignore-errors` は `progn` とまったく同じです。
+しかし誤りが起きれば、`ignore-errors` は1つ目の値として `nil`、2つ目として `t` を返し、誤りが起きたことを示します。それ以外は何もしません。
 
 ```lisp
 > (ignore-errors (/ 3 1)) => 3 NIL
 > (ignore-errors (/ 3 0)) => NIL T
 ```
 
-`ignore-errors` is a very coarse-grain tool.
-In an interactive interpreter, `ignore-errors` can be used to recover from any and all errors in the response to one input and get back to the read-process-print loop for the next input.
-If the errors that are ignored are not serious ones, this can be a very effective way of transforming a buggy program into a useful one.
+`ignore-errors` はきわめて粗い道具です。
+対話的なインタプリタでは、`ignore-errors` を使って、1つの入力への応答で起きたあらゆる誤りから立ち直り、次の入力のために読み込み・処理・表示のループへ戻れます。
+無視される誤りが深刻でないものなら、これは不具合の多いプログラムを役に立つものへ変える、たいそう効き目のあるやり方になりえます。
 
-But some errors are too important to ignore.
-If the error is running out of memory, then ignoring it will not help.
-Instead, we need to find some way of freeing up memory and continuing.
+しかし、無視するには重すぎる誤りもあります。
+記憶が尽きたという誤りなら、無視しても助けになりません。
+代わりに、記憶を空けて続ける手立てを見つける必要があります。
 
-The condition-handling system can be used to handle only certain errors.
-The macro `handler-case`, is a convenient way to do this.
-Like `case`, its first argument is evaluated and used to determine what to do next.
-If no error is signaled, then the value of the expression is returned.
-But if an error does occur, the following clauses are searched for one that matches the type of the error.
-In the following example, `handler-case` is used to handle division by zero and other arithmetic errors (perhaps floating-point underflow), but it allows all other errors to pass unhandled.
+コンディション処理の仕組みを使えば、特定の誤りだけを扱えます。
+マクロ `handler-case` が、そのための便利な手立てです。
+`case` と同じく、第1引数が評価され、次に何をするかを決めるのに使われます。
+誤りが通知されなければ、その式の値が返ります。
+しかし誤りが起きれば、続く節のなかからその誤りの型に合うものが探されます。
+次の例では、`handler-case` を使って0除算とその他の算術の誤り（おそらく浮動小数点のけた不足）を扱い、他の誤りはすべて処理せずに素通りさせています。
 
 ```lisp
 (defun div (x y)
@@ -190,28 +190,28 @@ In the following example, `handler-case` is used to handle division by zero and 
 Error: The value of NUMBER, XYZZY, should be a number
 ```
 
-Through judicious use of `handler-case`, the programmer can create robust code that reacts well to unexpected situations.
-For more details, see chapter 29 of *Common Lisp the Language,* 2d edition.
+`handler-case` を適切に使えば、思いがけない状況にうまく応じる頑健なコードを書けます。
+さらに詳しくは *Common Lisp the Language* 第2版の第29章を参照してください。
 
-## 24.3 Pretty Printing
+## 24.3 整形出力
 
-ANSI Common Lisp adds a facility for user-controlled pretty printing.
-In general, *pretty printing* refers to the process of printing complex expressions in a format that uses indentation to improve readability.
-The function `pprint` was always available, but before ANSI Common Lisp it was left unspecified, and it could not be extended by the user.
-Chapter 27 of *Common Lisp the Language,* 2d edition presents a pretty-printing facility that gives the user fine-grained control over the printing of all types of objects.
-In addition, the facility is integrated with the `format` function.
+ANSI Common Lispは、利用者が制御できる整形出力の仕掛けを足しています。
+一般に*整形出力*とは、込み入った式を、字下げを使って読みやすくした形で表示することを指します。
+関数 `pprint` は以前から使えましたが、ANSI Common Lisp以前は仕様が定められておらず、利用者が拡張することもできませんでした。
+*Common Lisp the Language* 第2版の第27章は、あらゆる型の対象の表示を利用者が細かく制御できる整形出力の仕掛けを示しています。
+加えて、この仕掛けは関数 `format` と統合されています。
 
-## 24.4 Series
+## 24.4 series
 
-The functional style of programming with higher-order functions is one of the attractions of Lisp.
-The following expression to sum the square roots of the positive numbers in the list `nums` is clear and concise:
+高階関数を使う関数型の流儀は、Lispの魅力の1つです。
+並び `nums` のなかの正の数の平方根を足し合わせる次の式は、明快で簡潔です。
 
 ```lisp
 (reduce #'+ (mapcar #'sqrt (find-all-if #'plusp nums)))
 ```
 
-Unfortunately, it is inefficient: both `find-all-if` and `mapcar` cons up intermediate lists that are not needed in the final sum.
-The following two versions using `loop` and `dolist` are efficient but not as pretty:
+あいにく効率は悪いのです。`find-all-if` も `mapcar` も、最終的な和には要らない途中の並びをコンスで作ってしまいます。
+`loop` と `dolist` を使う次の2つの版は効率がよいものの、見た目はそれほど美しくありません。
 
 ```lisp
 ;; Using Loop
@@ -226,33 +226,33 @@ The following two versions using `loop` and `dolist` are efficient but not as pr
        (incf sum num))))
 ```
 
-A compromise between the two approaches is provided by the *series* facility, defined in appendix A of *Common Lisp the Language*, 2d edition.
-The example using series would look like:
+この2つの方式のあいだの折衷案が、*Common Lisp the Language* 第2版の付録Aで定義された*series*の仕掛けです。
+seriesを使った例は次のようになります。
 
 ```lisp
 (collect-sum (#Msqrt (choose-if #'plusp nums)))
 ```
 
-This looks very much like the functional version: only the names have been changed.
-However, it compiles into efficient iterative code very much like the `dolist` version.
+これは関数型の版によく似ています。変わったのは名前だけです。
+それでいて、`dolist` の版によく似た効率のよい繰り返しのコードへコンパイルされます。
 
-Like pipes (see [section 9.3](chapter9.md#s0015)), elements of a series are only evaluated when they are needed.
-So we can write `(scan-range :from 0)` to indicate the infinite series of integers starting from 0, but if we only use, say, the first five elements of this series, then only the first five elements will be generated.
+パイプ（[9.3節](chapter9.md#s0015)を参照）と同じく、seriesの要素は必要になったときにだけ評価されます。
+ですから `(scan-range :from 0)` と書けば0から始まる無限の整数のseriesを表せますが、たとえばその最初の5要素しか使わなければ、生成されるのも最初の5要素だけです。
 
-The series facility offers a convenient and efficient alternative to iterative loops and sequence functions.
-Although the series proposal has not yet been adopted as an official part of ANSI Common Lisp, its inclusion in the reference manual has made it increasingly popular.
+seriesの仕掛けは、繰り返しのループや列を扱う関数に代わる、便利で効率のよい選択肢を与えてくれます。
+seriesの提案はまだANSI Common Lispの公式な一部としては採り入れられていませんが、参照マニュアルに載ったことで人気が高まってきています。
 
-## 24.5 The Loop Macro
+## 24.5 loopマクロ
 
-The original specification of Common Lisp included a simple `loop` macro.
-The body of the loop was executed repeatedly, until a `return` was encountered.
-ANSI Common Lisp officially introduces a far more complex `loop` macro, one that had been used in ZetaLisp and its predecessors for some time.
-This book has occasionally used the complex `loop` in place of alternatives such as `do, dotimes, dolist`, and the mapping functions.
+Common Lispのもとの仕様には、単純な `loop` マクロが含まれていました。
+ループの本体は `return` に出くわすまで繰り返し実行されました。
+ANSI Common Lispは、はるかに込み入った `loop` マクロを公式に導入しました。これはZetaLispとその先祖でしばらく使われてきたものです。
+本書では、`do, dotimes, dolist` や写像の関数といった代替の代わりに、この込み入った `loop` をときおり使ってきました。
 
-If your Lisp does not include the complex `loop` macro, this chapter gives a definition that will run all the examples in this book, although it does not support all the features of `loop`.
-This chapter also serves as an example of a complex macro.
-As with any macro, the first thing to do is to look at some macro calls and what they might expand into.
-Here are two examples:
+お使いのLispに込み入った `loop` マクロが含まれていなければ、本章に本書の例をすべて動かせる定義があります。ただし `loop` の機能すべてを備えてはいません。
+本章は、込み入ったマクロの例にもなっています。
+どんなマクロでもそうですが、最初にすべきは、マクロの呼び出しをいくつか見て、それが何に展開されうるかを考えることです。
+例を2つ示します。
 
 ```lisp
 (loop for i from 1 to n do (print (sqrt i))) =
@@ -280,8 +280,8 @@ Here are two examples:
    END))
 ```
 
-Each loop initializes some variables, then enters a loop with some exit tests and a body.
-So the template is something like:
+どのループも、まず変数をいくつか初期化し、それから終了の判定と本体を持つループに入ります。
+ですから雛形は次のようなものになります。
 
 ```lisp
 (let* (*variables...*)
@@ -294,10 +294,10 @@ So the template is something like:
   end))
 ```
 
-Actually, there's more we might need in the general case.
-There may be a prologue that appears before the loop but after the variable initialization, and similarly there may be an epilogue after the loop.
-This epilogue may involve returning a value, and since we want to be able to return from the loop in any case, we need to wrap a `block` around it.
-So the complete template is:
+実のところ、一般の場合にはもっと必要なものがあります。
+変数の初期化のあと、ループの前に現れる前口上があるかもしれませんし、同じくループのあとに後口上があるかもしれません。
+この後口上は値を返すことを含みうるので、そしてどの場合でもループから戻れるようにしたいので、全体を `block` で包む必要があります。
+完全な雛形は次のとおりです。
 
 ```lisp
 (let* (*variables...*)
@@ -312,7 +312,7 @@ So the complete template is:
     (return *result*))))
 ```
 
-To generate this template from the body of a `loop` form, we will employ a structure with fields for each of the parts of the template:
+`loop` 形式の本体からこの雛形を生成するために、雛形の各部分に対応する欄を持つ構造体を使います。
 
 ```lisp
 (defstruct loop
@@ -321,9 +321,9 @@ To generate this template from the body of a `loop` form, we will employ a struc
   (epilogue nil) (result nil) (name nil))
 ```
 
-Now the `loop` macro needs to do four things: (1) decide if this is a use of the simple, non-keyword `loop` or the complex ANSI `loop`.
-If it is the latter, then (2) make an instance of the `loop` structure, (3) process the body of the loop, filling in apprpriate fields of the structure, and (4) place the filled fields into the template.
-Here is the `loop` macro:
+さて `loop` マクロは4つのことをせねばなりません。(1) これが単純でキーワードを使わない `loop` の使用か、込み入ったANSIの `loop` かを判断する。
+後者なら、(2) `loop` 構造体の実例を作り、(3) ループの本体を処理して構造体の適切な欄を埋め、(4) 埋めた欄を雛形に流し込む。
+`loop` マクロを示します。
 
 ```lisp
 (defmacro loop (&rest exps)
@@ -351,8 +351,8 @@ Here is the `loop` macro:
         (return ,(loop-result l))))))
 ```
 
-Most of the work is in writing `parse-loop-body`, which takes a list of expressions and parses them into the proper fields of a loop structure.
-It will use the following auxiliary functions:
+仕事の大半は `parse-loop-body` を書くことにあります。これは式の並びを取り、loop構造体の適切な欄へ解析して入れます。
+次の補助関数を使います。
 
 ```lisp
 (defun add-body (l exp) (push exp (loop-body l)))
@@ -367,10 +367,10 @@ It will use the following auxiliary functions:
     (push '(setq ,var ,update) (loop-steps l))))
 ```
 
-There are a number of alternative ways of implementing this kind of processing.
-One would be to use special variables: `*prologue*, *body*, *epilogue*`, and so on.
-This would mean we wouldn't have to pass around the loop structure `l`, but there would be significant clutter in having seven new special variables.
-Another possibility is to use local variables and close the definitions of `loop`, along with the `add-` functions in that local environment:
+この種の処理を実装するやり方は、ほかにもいくつかあります。
+1つは特殊変数 `*prologue*, *body*, *epilogue*` などを使うことでしょう。
+そうすればloop構造体 `l` を引き回さずに済みますが、新しい特殊変数が7つもできて相当に散らかります。
+もう1つの手は、局所変数を使い、`loop` の定義を `add-` の関数とともにその局所環境で閉じることです。
 
 ```lisp
 (let (body prologue epilogue steps vars name result)
@@ -380,28 +380,28 @@ Another possibility is to use local variables and close the definitions of `loop
   (defun add-var ...))
 ```
 
-This is somewhat cleaner style, but some early Common Lisp compilers do not support embedded `defuns`, so I chose to write in a style that I knew would work in all implementations.
-Another design choice would be to return multiple values for each of the components and have `parse-loop-body` put them all together.
-This is in fact done in one of the Lisp Machine implementations of `loop`, but I think it is a poor decision: seven components are too many to keep track of by positional notation.
+こちらのほうがいくらかきれいな流儀ですが、初期のCommon Lispのコンパイラには入れ子の `defun` を支えないものがあるので、どの実装でも動くとわかっている流儀で書くことにしました。
+もう1つの設計上の選択は、各部分について多値を返し、`parse-loop-body` にそれらをまとめさせることです。
+これは実際、Lispマシンの `loop` の実装の1つで行われていますが、まずい判断だと私は思います。7つの部分を位置で追いかけるのは多すぎます。
 
-### Anatomy of a Loop
+### loopの解剖
 
-All this has just been to set up for the real work: parsing the expressions that make up the loop with the function `parse-loop-body`.
-Every loop consists of a sequence of clauses, where the syntax of each clause is determined by the first expression of the clause, which should be a known symbol.
-These symbols are called *loop keywords,* although they are not in the keyword package.
+ここまではすべて、本当の仕事、すなわち関数 `parse-loop-body` でループを構成する式を解析するための下ごしらえでした。
+どのループも節の連なりから成り、各節の構文はその節の最初の式によって決まります。この式は既知のシンボルであるはずです。
+このシンボルを*loopキーワード*と呼びます。もっともkeywordパッケージには入っていませんが。
 
-The loop keywords will be defined in a data-driven fashion.
-Every keyword has a function on its property list under the `loop-fn` indicator.
-The function takes three arguments: the `loop` structure being built, the very next expression in the loop body, and a list of the remaining expressions after that.
-The function is responsible for updating the `loop` structure (usually by making appropriate calls to the `add-` functions) and then returning the unparsed expressions.
-The three-argument calling convention is used because many of the keywords only look at one more expression.
-So those functions see that expression as their first argument, and they can conveniently return their second argument as the unparsed remainder.
-Other functions will want to look more carefully at the second argument, parsing some of it and returning the rest.
+loopキーワードはデータ駆動の流儀で定義します。
+どのキーワードも、属性リストに `loop-fn` という指標で関数を持ちます。
+この関数は3つの引数を取ります。組み立て中の `loop` 構造体、ループ本体のすぐ次の式、そしてそのあとの残りの式の並びです。
+この関数は（たいていは `add-` の関数を適切に呼ぶことで）`loop` 構造体を更新し、それから未解析の式を返す役目を負います。
+3引数の呼び出しの約束を使うのは、多くのキーワードが式をあと1つしか見ないからです。
+ですからその関数は、その式を第1引数として受け取り、第2引数をそのまま未解析の残りとして返せて具合がよいのです。
+他の関数は第2引数をもっと注意深く見て、その一部を解析し、残りを返したくなるでしょう。
 
-The macro `defloop` is provided to add new loop keywords.
-This macro enforces the three-argument calling convention.
-If the user supplies only two arguments, then a third argument is automatically added and returned as the remainder.
-Also, if the user specifies another symbol rather than a list of arguments, this is taken as an alias, and a function is constructed that calls the function for that keyword:
+新しいloopキーワードを加えるために、マクロ `defloop` を用意します。
+このマクロが3引数の呼び出しの約束を徹底させます。
+利用者が引数を2つしか与えなければ、3つ目の引数が自動的に加えられ、残りとして返されます。
+また、利用者が引数の並びではなく別のシンボルを指定すれば、それは別名と見なされ、そのキーワードの関数を呼ぶ関数が組み立てられます。
 
 ```lisp
 (defun parse-loop-body (l exps)
@@ -428,13 +428,13 @@ Also, if the user specifies another symbol rather than a list of arguments, this
        (t '#'(lambda .args ,@body)))))
 ```
 
-Now we are ready to define some `loop` keywords.
-Each of the following sections refers to (and implements the loop keywords in) a section of chapter 26 of *Common Lisp the Language*, 2d edition.
+これで `loop` のキーワードをいくつか定義する用意ができました。
+以下の各節は、*Common Lisp the Language* 第2版の第26章の節に対応しており（そしてその節のloopキーワードを実装しており）ます。
 
-### Iteration Control (26.6)
+### 繰り返しの制御 (26.6)
 
-Here we define keywords for iterating over elements of a sequence and for stopping the iteration.
-The following cases are covered, where uppercase words represent loop keywords:
+ここでは、列の要素をたどるキーワードと、繰り返しを止めるキーワードを定義します。
+次の場合を扱います。大文字の語がloopキーワードを表します。
 
 ```lisp
 (LOOP REPEAT n ...)
@@ -444,12 +444,12 @@ The following cases are covered, where uppercase words represent loop keywords:
 (LOOP FOR v = expr [THEN step] ...)
 ```
 
-The implementation is straightforward, although somewhat tedious for complex keywords like `for`.
-Take the simpler keyword, `repeat`.
-To handle it, we generate a new variable that will count down the number of times to repeat.
-We call `add-var` to add that variable, with its initial value, to the loop structure.
-We also give this variable an update expression, which decrements the variable by one each time through the loop.
-Then all we need to do is call `add-test` to insert code that will exit the loop when the variable reaches zero:
+実装は素直ですが、`for` のような込み入ったキーワードではいささか退屈な作業になります。
+より単純なキーワード `repeat` を取り上げましょう。
+これを扱うには、繰り返す回数を数え下げる新しい変数を作ります。
+`add-var` を呼んで、その変数を初期値とともにloop構造体へ加えます。
+この変数には更新の式も与え、ループを回るたびに1ずつ減らします。
+あとは `add-test` を呼んで、変数が0に達したらループから抜けるコードを差し込むだけです。
 
 ```lisp
 (defloop repeat (l times)
@@ -459,7 +459,7 @@ Then all we need to do is call `add-test` to insert code that will exit the loop
     (add-test l '(<= ,i 0))))
 ```
 
-The loop keyword `for` is more complicated, but each case can be analyzed in the same way as `repeat`:
+loopキーワード `for` はもっと込み入っていますが、どの場合も `repeat` と同じように分析できます。
 
 ```lisp
 (defloop as for) ;; AS is the same as FOR
@@ -530,9 +530,9 @@ The loop keyword `for` is more complicated, but each case can be analyzed in the
       temp)))
 ```
 
-### End-Test Control (26.7)
+### 終了判定の制御 (26.7)
 
-In this section we cover the following clauses:
+本節では次の節を扱います。
 
 ```lisp
 (LOOP UNTIL test ...)
@@ -543,7 +543,7 @@ In this section we cover the following clauses:
 (LOOP ... (LOOP-FINISH) ...)
 ```
 
-Each keyword is quite simple:
+どのキーワードもごく単純です。
 
 ```lisp
 (defloop until (l test) (add-test l test))
@@ -562,19 +562,19 @@ Each keyword is quite simple:
 (defmacro loop-finish () '(go end))
 ```
 
-### Value Accumulation (26.8)
+### 値の蓄積 (26.8)
 
-The `collect` keyword poses another challenge.
-How do you collect a list of expressions presented one at a time?
-The answer is to view the expressions as a queue, one where we add items to the rear but never remove them from the front of the queue.
-Then we can use the queue functions defined in [section 10.5](chapter10.md#s0025).
+キーワード `collect` は、また別の難題を投げかけます。
+1つずつ渡される式を、どうやって並びに集めるのでしょうか。
+答えは、その式を待ち行列と見ることです。後ろに項目を加えはするが、先頭から取り除くことは決してない待ち行列です。
+そうすれば[10.5節](chapter10.md#s0025)で定義した待ち行列の関数が使えます。
 
-Unlike the other clauses, value accumulation clauses can communicate with each other.
-There can be, say, two `collect` and an append clause in the same loop, and they all build onto the same list.
-Because of this, I use the same variable name for the accumulator, rather than gensyming a new variable for each use.
-The name chosen is stored in the global variable `*acc*`.
-In the official `loop` standard it is possible for the user to specify the variable with an `into` modifier, but I have not implemented that option.
-The clauses covered are:
+他の節と違い、値を蓄積する節はたがいにやりとりできます。
+たとえば同じループのなかに `collect` が2つとappendの節が1つあってもよく、それらはすべて同じ並びを組み上げていきます。
+そのため、蓄積のための変数には、使うたびにgensymで新しい変数を作るのではなく、同じ変数名を使います。
+選んだ名前は大域変数 `*acc*` に格納されています。
+公式の `loop` の標準では、利用者が `into` の修飾で変数を指定できますが、その選択肢は実装していません。
+扱う節は次のとおりです。
 
 ```lisp
 (LOOP COLLECT item ...)
@@ -586,7 +586,7 @@ The clauses covered are:
 (LOOP MINIMIZE item ...)
 ```
 
-The implementation is:
+実装は次のとおりです。
 
 ```lisp
 (defconstant *acc* (gensym "ACC")
@@ -633,11 +633,11 @@ The implementation is:
 (defloop minimizing minimize)
 ```
 
-**Exercise  24.1** `loop` lets us build aggregates (lists, maximums, sums, etc.) over the body of the loop.
-Sometimes it is inconvenient to be restricted to a single-loop body.
-For example, we might want a list of all the nonzero elements of a two-dimensional array.
-One way to implement this is with a macro, `with-collection`, that sets up and returns a queue structure that is built by calls to the function `collect`.
-For example:
+**練習問題 24.1** `loop` は、ループの本体にわたって集約（並び・最大値・和など）を組み上げさせてくれる。
+1つのループの本体に限られるのが不便なこともある。
+たとえば、二次元配列の0でない要素をすべて並べたものがほしいかもしれない。
+これを実装する1つのやり方は、関数 `collect` の呼び出しによって組み上げられる待ち行列の構造体を用意して返すマクロ `with-collection` を使うことである。
+たとえば次のようになる。
 
 ```lisp
 > (let ((A '#2a((l 0 0) (0 2 4) (0 0 3))))
@@ -649,12 +649,12 @@ For example:
 (1 2 4 3)
 ```
 
-Implement `with-collection` and `collect`.
+`with-collection` と `collect` を実装せよ。
 
-### Variable Initialization (26.9)
+### 変数の初期化 (26.9)
 
-The `with` clause allows local variables-I have included it, but recommend using a `let` instead.
-I have not included the `and` preposition, which allows the variables to nest at different levels.
+`with` の節は局所変数を許します。これは含めましたが、代わりに `let` を使うことを勧めます。
+変数を別々の段で入れ子にできる `and` の前置詞は含めていません。
 
 ```lisp
 ;;;; 26.9. Variable Initializations ("and" omitted)
@@ -667,20 +667,20 @@ I have not included the `and` preposition, which allows the variables to nest at
     exps))
 ```
 
-### Conditional Execution (26.10)
+### 条件つき実行 (26.10)
 
-`loop` also provides forms for conditional execution.
-These should be avoided whenever possible, as Lisp already has a set of perfectly good conditional macros.
-However, sometimes you want to make, say, a `collect` conditional on some test.
-In that case, loop conditionals are acceptable.
-The clauses covered here are:
+`loop` は条件つき実行のための形式も備えています。
+Lispにはすでに申し分のない条件分岐のマクロが一式あるので、これはできるかぎり避けるべきです。
+とはいえ、たとえば `collect` を何らかの検査に応じて行いたいこともあります。
+その場合なら、loopの条件分岐も差し支えありません。
+ここで扱う節は次のとおりです。
 
 ```lisp
 (LOOP WHEN test ... [ELSE ...])   ; IF is a synonym for WHEN
 (LOOP UNLESS test ... [ELSE ...])
 ```
 
-Here is an example of `when`:
+`when` の例を示します。
 
 ```lisp
 > (loop for x from 1 to 10
@@ -690,9 +690,9 @@ Here is an example of `when`:
 (1 -2 3 -4 5 -6 7 -8 9 -10)
 ```
 
-Of course, we could have said `collect (if (oddp x ) x (- x ))` and done without the conditional.
-There is one extra feature in loop's conditionals: the value of the test is stored in the variable `it` for subsequent use in the THEN or ELSE parts.
-(This is just the kind of feature that makes some people love `loop` and others throw up their hands in despair.) Here is an example:
+もちろん `collect (if (oddp x ) x (- x ))` と書けば、条件分岐なしで済ませられたはずです。
+loopの条件分岐にはもう1つ機能があります。検査の値が変数 `it` に格納され、THENやELSEの部分でそのまま使えるのです。
+（これこそ、ある人には `loop` を愛させ、ある人には匙を投げさせる類の機能です。）例を示します。
 
 ```lisp
 > (loop for x from 1 to 10
@@ -701,11 +701,11 @@ There is one extra feature in loop's conditionals: the value of the test is stor
 (ONE THREE FIVE)
 ```
 
-The conditional clauses are a little tricky to implement, since they involve parsing other clauses.
-The idea is that `call-loop-fn` parses the THEN and ELSE parts, adding whatever is necessary to the body and to other parts of the loop structure.
-Then `add-body` is used to add labels and go statements that branch to the labels as needed.
-This is the same technique that is used to compile conditionals in [chapter 23](chapter23.md); see the function `comp-if` on [page 787](chapter23.md#p787).
-Here is the code:
+条件の節は、他の節の解析を伴うので実装が少し厄介です。
+考え方は、`call-loop-fn` がTHENとELSEの部分を解析し、必要なものを本体やloop構造体の他の部分へ加える、というものです。
+それから `add-body` を使って、ラベルと、必要に応じてそのラベルへ分岐するgo文を加えます。
+これは[第23章](chapter23.md)で条件分岐をコンパイルするのに使ったのと同じ技法です。[787ページ](chapter23.md#p787)の関数 `comp-if` を参照してください。
+コードを示します。
 
 ```lisp
 (defloop when (l test exps)
@@ -737,9 +737,9 @@ Here is the code:
   exps)
 ```
 
-### Unconditional Execution (26.11)
+### 無条件の実行 (26.11)
 
-The unconditional execution keywords are `do` and `return`:
+無条件の実行のキーワードは `do` と `return` です。
 
 ```lisp
 (defloop do (l exp exps)
@@ -749,10 +749,10 @@ The unconditional execution keywords are `do` and `return`:
 (defloop return (l exp) (add-body l '(return ,exp)))
 ```
 
-### Miscellaneous Features (26.12)
+### その他の機能 (26.12)
 
-Finally, the miscellaneous features include the keywords `initially` and `finally`, which define the loop prologue and epilogue, and the keyword named, which gives a name to the loop for use by a `return-from` form.
-I have omitted the data-type declarations and destructuring capabilities.
+最後に、その他の機能には、ループの前口上と後口上を定めるキーワード `initially` と `finally`、そして `return-from` の形式で使うためにループへ名前を与えるキーワード named が含まれます。
+データ型の宣言と分配束縛の機能は省きました。
 
 ```lisp
 (defloop initially (l exp exps)
@@ -766,56 +766,56 @@ I have omitted the data-type declarations and destructuring capabilities.
 (defloop named (l exp) (setf (loop-name l) exp))
 ```
 
-## 24.6 Sequence Functions
+## 24.6 列を扱う関数
 
-Common Lisp provides sequence functions to make the programmer's life easier: the same function can be used for lists, vectors, and strings.
-However, this ease of use comes at a cost.
-Sequence functions must be written very carefully to make sure they are efficient.
-There are three main sources of indeterminacy that can lead to inefficiency: (1) the sequences can be of different types; (2) some functions have keyword arguments; (3) some functions have a `&rest` argument.
-Careful coding can limit or eliminate these sources of inefficiency, by making as many choices as possible at compile time and making the remaining choices outside of the main loop.
+Common Lispは、プログラマの暮らしを楽にするために列を扱う関数を備えています。同じ関数をリストにもベクタにも文字列にも使えるのです。
+しかしこの使いやすさには代償があります。
+列を扱う関数は、効率よくするために非常に注意深く書かねばなりません。
+非効率につながりうる不確定さの元は、おもに3つあります。(1) 列の型が違いうること、(2) キーワード引数を持つ関数があること、(3) `&rest` 引数を持つ関数があることです。
+注意深く書けば、できるかぎり多くの選択をコンパイル時に済ませ、残りの選択を主たるループの外で行うことで、この非効率の元を抑えたりなくしたりできます。
 
-In this section we see how to implement the new ANSI sequence function `map-into` and the updated function reduce efficiently.
-This is essential for those without an ANSI compiler.
-Even those who do have access to an ANSI compiler will benefit from seeing the efficiency techniques used here.
+本節では、新しいANSIの列を扱う関数 `map-into` と、改められた関数 reduce を効率よく実装する方法を見ます。
+ANSIのコンパイラを持たない人には欠かせません。
+ANSIのコンパイラが使える人にとっても、ここで使う効率化の技法を見ておくのは役に立ちます。
 
-Before defining the sequence functions, the macro `once-only` is introduced.
+列を扱う関数を定義する前に、マクロ `once-only` を導入します。
 
-### Once-only: A Lesson in Macrology
+### once-only: マクロ学の一課
 
-The macro `once-only` has been around for a long time on various systems, although it didn't make it into the Common Lisp standard.
-I include it here for two reasons: first, it is used in the following `funcall-if` macro, and second, if you can understand how to write and when to use `once-only`, then you truly understand macro.
+マクロ `once-only` はさまざまなシステムで長らく使われてきましたが、Common Lispの標準には入りませんでした。
+ここに含めた理由は2つあります。第一に、このあとの `funcall-if` マクロで使うから。第二に、`once-only` の書き方といつ使うかを理解できたなら、マクロを本当に理解したことになるからです。
 
-First, you have to understand the problem that `once-only` addresses.
-Suppose we wanted to have a macro that multiplies its input by itself:<a id="tfn24-2"></a><sup>[2](#fn24-2)</sup>
+まず、`once-only` が取り組む問題を理解せねばなりません。
+入力を自分自身に掛けるマクロがほしいとしましょう。<a id="tfn24-2"></a><sup>[2](#fn24-2)</sup>
 
 ```lisp
 (defmacro square (x) '(* ,x ,x))
 ```
 
-This definition works fine in the following case:
+この定義は次の場合にはうまく働きます。
 
 ```lisp
 > (macroexpand '(square z)) => (* Z Z)
 ```
 
-But it doesn't work as well here:
+しかしこちらではうまく働きません。
 
 ```lisp
 > (macroexpand '(square (print (incf i))))
 (* (PRINT (INCF I)) (PRINT (INCF I)))
 ```
 
-The problem is that `i` will get incremented twice, not once, and two different values will get printed, not one.
-We need to bind `(print (incf i))` to a local variable before doing the multiplication.
-On the other hand, it would be superfluous to bind `z` to a local variable in the previous example.
-This is where `once-only` comes in.
-It allows us to write macro definitions like this:
+厄介なのは、`i` が1度ではなく2度増やされ、値が1つではなく2つ表示されることです。
+掛け算をする前に `(print (incf i))` を局所変数へ束縛する必要があります。
+一方、先の例で `z` を局所変数へ束縛するのは余計なことでしょう。
+ここで `once-only` の出番です。
+これによって、次のようなマクロの定義が書けます。
 
 ```lisp
 (defmacro square (x) (once-only (x) '(* ,x ,x)))
 ```
 
-and have the generated code be just what we want:
+そして生成されるコードはまさに望みどおりのものになります。
 
 ```lisp
 > (macroexpand '(square z))
@@ -825,11 +825,11 @@ and have the generated code be just what we want:
   (* G3811 G3811))
 ```
 
-You have now learned lesson number one of `once-only`: you know how macros differ from functions when it comes to arguments with side effects, and you now know how to handle this.
-Lesson number two comes when you try to write (or even understand) a definition of `once-only` – only when you truly understand the nature of macros will you be able to write a correct version.
-As always, the first thing to determine is what a call to `once-only` should expand into.
-The generated code should test the variable to see if it is free of side effects, and if so, generate the body as is; otherwise it should generate code to bind a new variable, and use that variable in the body of the code.
-Here's roughly what we want:
+これで `once-only` の第1課を学びました。副作用のある引数について、マクロが関数とどう違うかを知り、その扱い方も知ったわけです。
+第2課は、`once-only` の定義を書こう（あるいは理解しよう）としたときに訪れます。マクロの本質を本当に理解して初めて、正しい版を書けるのです。
+いつもどおり、まず決めるべきは `once-only` の呼び出しが何に展開されるべきかです。
+生成されるコードは、その変数に副作用がないかを調べ、なければ本体をそのまま生成し、そうでなければ新しい変数を束縛するコードを生成して、コードの本体でその変数を使うべきです。
+おおよそ望みのものは次のとおりです。
 
 ```lisp
 > (macroexpand '(once-only (x) '(* ,x ,x)))
@@ -840,10 +840,10 @@ Here's roughly what we want:
       '(* x ,x))))
 ```
 
-where `g001` is a new symbol, to avoid conflicts with the `x` or with symbols in the body.
-Normally, we generate macro bodies using backquotes, but if the macro body itself has a backquote, then what?
-It is possible to nest backquotes (and appendix C of *Common Lisp the Language*, 2d edition has a nice discussion of doubly and triply nested backquotes), but it certainly is not trivial to understand.
-I recommend replacing the inner backquote with its equivalent using `list` and `quote`:
+ここで `g001` は新しいシンボルで、`x` や本体のシンボルとの衝突を避けるためのものです。
+ふつうマクロの本体は逆クォートを使って生成しますが、マクロの本体そのものに逆クォートがある場合はどうすればよいのでしょうか。
+逆クォートは入れ子にできますし（*Common Lisp the Language* 第2版の付録Cに、二重・三重に入れ子になった逆クォートについての良い議論があります）、理解するのはたしかに簡単ではありません。
+内側の逆クォートを、`list` と `quote` を使った同等のもので置き換えることを勧めます。
 
 ```lisp
 (if (side-effect-free-p x)
@@ -853,8 +853,8 @@ I recommend replacing the inner backquote with its equivalent using `list` and `
       '(* ,x ,x))))
 ```
 
-Now we can write `once-only`.
-Note that we have to account for the case where there is more than one variable and where there is more than one expression in the body.
+これで `once-only` を書けます。
+変数が複数ある場合と、本体に式が複数ある場合を織り込まねばならないことに注意してください。
 
 ```lisp
 (defmacro once-only (variables &rest body)
@@ -880,7 +880,7 @@ Note that we have to account for the case where there is more than one variable 
       (side-effect-free-p (third exp)))))
 ```
 
-Here we see the expansion of the call to `once-only` and a repeat of the expansions of two calls to `square`:
+ここでは `once-only` の呼び出しの展開と、`square` の2つの呼び出しの展開の再掲を示します。
 
 ```lisp
 > (macroexpand '(once-only (x) '(* ,x ,x)))
@@ -897,35 +897,35 @@ Here we see the expansion of the call to `once-only` and a repeat of the expansi
   (* G3811 G3811))
 ```
 
-This output was produced with `*print-gensym*` set to `nil`.
-When this variable is non-nil, uninterned symbols are printed with a prefix `#:`, as in `#:G3811`.
-This insures that the symbol will not be interned by a subsequent read.
+この出力は `*print-gensym*` を `nil` にして得たものです。
+この変数がnil以外のとき、インターンされていないシンボルは `#:G3811` のように接頭辞 `#:` を付けて表示されます。
+これによって、そのシンボルが後の読み込みでインターンされないことが保証されます。
 
-It is worth noting that Common Lisp automatically handles problems related to multiple evaluation of subforms in setf methods.
-See [page 884](chapter25.md#p884) for an example.
+Common Lispが、setfメソッドでの部分形式の多重評価に関わる問題を自動で扱ってくれることは、述べておく値打ちがあります。
+例は[884ページ](chapter25.md#p884)を参照してください。
 
-### Avoid Overusing Macros
+### マクロを使いすぎない
 
-A word to the wise: don't get carried away with macros.
-Use macros freely to represent your *problem*, but shy away from new macros in the implementation of your *solution,* unless absolutely necessary.
-So, it is good style to introduce a macro, say, `defrule`, which defines rules for your application, but adding macros to the code itself may just make things harder for others to use.
+賢明な読者へ一言。マクロに夢中になりすぎないことです。
+*問題*を表すためにはマクロを自由に使ってよいのですが、*解決*の実装では、どうしても必要でないかぎり新しいマクロは控えましょう。
+ですから、応用のための規則を定義する `defrule` のようなマクロを導入するのは良い流儀ですが、コードそのものにマクロを足すのは、他の人にとって使いにくくするだけかもしれません。
 
-Here is a story.
-Before `if` was a standard part of Lisp, I defined my own version of `if`.
-Unlike the simple `if`, my version took any number of test/result pairs, followed by an optional else result.
-In general, the expansion was:
+ここで1つ昔話を。
+`if` がLispの標準の一部になる前、私は自分の版の `if` を定義していました。
+単純な `if` と違い、私の版は検査と結果の対をいくつでも取り、そのあとに省略可能なelseの結果が続くものでした。
+一般に、展開は次のようになります。
 
 `(if` *a b c d ... x*) => (`cond` *(a b) (c d)* ... (`T` *x*))
 
-My `if` also had one more feature: the symbol `'that'` could be used to refer to the value of the most recent test.
-For example, I could write:
+私の `if` にはもう1つ機能がありました。シンボル `'that'` で、直近の検査の値を参照できたのです。
+たとえば次のように書けました。
 
 ```lisp
 (if (assoc item a-list)
   (process (cdr that)))
 ```
 
-which would expand into:
+これは次に展開されます。
 
 ```lisp
 (LET (THAT)
@@ -934,9 +934,9 @@ which would expand into:
 ```
 ### remove extra line
 
-This was a convenient feature (compare it to the `=>` feature of Scheme's `cond`, as discussed on [page 778](chapter22.md#p778)), but it backfired often enough that I eventually gave up on my version of `if`.
-Here's why.
-I would write code like this:
+これは便利な機能でした（[778ページ](chapter22.md#p778)で論じたSchemeの `cond` の `=>` の機能と比べてみてください）が、あまりに裏目に出るので、私は結局自分の版の `if` をあきらめました。
+その理由はこうです。
+こんなコードを書いていたとします。
 
 ```lisp
 (if (total-score x)
@@ -944,7 +944,7 @@ I would write code like this:
   (error "No scores"))
 ```
 
-and then make a small change:
+そこに小さな変更を加えます。
 
 ```lisp
 (if (total-score x)
@@ -952,17 +952,17 @@ and then make a small change:
   (error "No scores"))
 ```
 
-The problem is that the variable `that` now refers to `*print-scores*`, not `(total-score x),` as it did before.
-My macro violates referential transparency.
-In general, that's the whole point of macros, and it is why macros are sometimes convenient.
-But in this case, violating referential transparency can lead to confusion.
+厄介なのは、変数 `that` が指すのが、以前のように `(total-score x)` ではなく `*print-scores*` になってしまうことです。
+私のマクロは参照透明性を破っています。
+一般にはそれこそがマクロの眼目であり、マクロがときに便利な理由でもあります。
+しかしこの場合、参照透明性を破ることは混乱につながりかねません。
 
 ### MAP-INTO
 
-The function `map-into` is used on [page 632](chapter18.md#p632).
-This function, added for the ANSI version of Common Lisp, is like `map`, except that instead of building a new sequence, the first argument is changed to hold the results.
-This section describes how to write a fairly efficient version of `map-into`, using techniques that are applicable to any sequence function.
-We'll start with a simple version:
+関数 `map-into` は[632ページ](chapter18.md#p632)で使っています。
+ANSI版のCommon Lispで加わったこの関数は `map` に似ていますが、新しい列を組み立てるのではなく、第1引数を書き換えて結果を保たせる点が違います。
+本節では、どんな列を扱う関数にも当てはまる技法を使って、かなり効率のよい `map-into` を書く方法を述べます。
+単純な版から始めます。
 
 ```lisp
 (defun map-into (result-sequence function &rest sequences)
@@ -971,8 +971,8 @@ We'll start with a simple version:
   (replace result-sequence (apply #'map 'list function sequences)))
 ```
 
-This does the job, but it defeats the purpose of `map-into`, which is to avoid generating garbage.
-Here's a version that generates less garbage:
+これは仕事をこなしますが、ごみを出さないという `map-into` の目的を損ねています。
+ごみをより少なくする版を示します。
 
 ```lisp
 (defun map-into (result-sequence function &rest sequences)
@@ -987,11 +987,11 @@ Here's a version that generates less garbage:
             sequences))))))
 ```
 
-There are three problems with this definition.
-First, it wastes space: `mapcar` creates a new argument list each time, only to have the list be discarded.
-Second, it wastes time: doing a `setf` of the *i*th element of a list makes the algorithm *O*(*n<sup>2</sup>*) instead of *O*(*n*), where *n* is the length of the list.
-Third, it is subtly wrong: if `result-sequence` is a vector with a fill pointer, then `map-into` is supposed to ignore `result-sequence`'s current length and extend the fill pointer as needed.
-The following version fixes those problems:
+この定義には問題が3つあります。
+第一に、場所を無駄にします。`mapcar` が毎回新しい引数の並びを作り、その並びは捨てられるだけです。
+第二に、時間を無駄にします。並びの *i* 番目の要素を `setf` すると、アルゴリズムは *O*(*n*) ではなく *O*(*n<sup>2</sup>*) になります。ここで *n* は並びの長さです。
+第三に、微妙に誤っています。`result-sequence` がフィルポインタつきのベクタなら、`map-into` は `result-sequence` の現在の長さを無視し、必要に応じてフィルポインタを伸ばすはずなのです。
+次の版はこの問題を直します。
 
 ```lisp
 (defun map-into (result-sequence function &rest sequences)
@@ -1037,19 +1037,19 @@ The following version fixes those problems:
    result-sequence))
 ```
 
-There are several things worth noticing here.
-First, I split the main loop into two versions, one where the result is a list, and the other where it is a vector.
-Rather than duplicate code, the local functions `do-one-call` and `do-result` are defined.
-The former is declared inline because it it called often, while the latter is not.
-The arguments are computed by looking at each sequence in turn, taking the *i*th element if it is a vector, and popping the sequence if it is a list.
-The arguments are stored into the list `arglist`, which has been preallocated to the correct size.
-All in all, we compute the answer fairly efficiently, without generating unnecessary garbage.
+ここには注目に値する点がいくつかあります。
+第一に、主たるループを2つの版に分けました。結果がリストの場合と、ベクタの場合です。
+コードを重複させる代わりに、局所関数 `do-one-call` と `do-result` を定義しています。
+前者はよく呼ばれるのでinlineと宣言し、後者はそうしていません。
+引数は、各列を順に見て、ベクタなら *i* 番目の要素を取り、リストならその並びから降ろすことで計算します。
+引数は並び `arglist` に格納されます。これは正しい大きさであらかじめ割り当ててあります。
+総じて、不要なごみを出さずにかなり効率よく答えを計算できています。
 
-The application could be done more efficiently, however.
-Think what `apply` must do: scan down the argument list, and put each argument into the location expected by the function-calling conventions, and then branch to the function.
-Some implementations provide a better way of doing this.
-For example, the TI Lisp Machine provides two low-level primitive functions, `%push` and `%call`, that compile into single instructions to put the arguments into the right locations and branch to the function.
-With these primitives, the body of `do-one-call` would be:
+とはいえ、適用そのものはもっと効率よくできます。
+`apply` が何をせねばならないかを考えてみてください。引数の並びをたどり、各引数を関数呼び出しの約束が期待する場所へ置き、それから関数へ分岐するのです。
+実装によっては、これをもっとうまく行う手立てを備えています。
+たとえばTIのLispマシンは、低水準の基本関数 `%push` と `%call` を備えています。これらは、引数を正しい場所へ置き関数へ分岐する単一の命令へコンパイルされます。
+この基本要素を使えば、`do-one-call` の本体は次のようになるでしょう。
 
 ```lisp
 (loop for seq on sequences
@@ -1059,13 +1059,13 @@ With these primitives, the body of `do-one-call` would be:
 (%call function length-sequences)
 ```
 
-There is a remaining inefficiency, though.
-Each sequence is type-checked each time through the loop, even though the type remains constant once it is determined the first time.
-Theoretically, we could code separate loops for each combination of types, just as we coded two loops depending on the type of the result sequence.
-But that would mean 2*<sup>n</sup>* loops for *n* sequences, and there is no limit on how large *n* can be.
+とはいえ、まだ残っている非効率があります。
+各列は、最初に型が決まればそのあと変わらないのに、ループを回るたびに型が検査されます。
+理屈のうえでは、結果の列の型に応じて2つのループを書いたのと同じく、型の組み合わせごとに別々のループを書けます。
+しかしそれは *n* 個の列に対して 2*<sup>n</sup>* 個のループを書くことになりますし、*n* の大きさに上限はありません。
 
-It might be worth it to provide specialized functions for small values of *n*, and dispatch to the appropriate function.
-Here's a start at that approach:
+*n* が小さい場合に専用の関数を用意し、適切な関数へ振り分けるのは、値打ちがあるかもしれません。
+その方式の出だしを示します。
 
 ```lisp
 (defun map-into (result function &rest sequences)
@@ -1087,18 +1087,18 @@ Here's a start at that approach:
    result function sequences))
 ```
 
-The individual functions are not shown.
-This approach is efficient in execution time, but it takes up a lot of space, considering that `map-into` is a relatively obscure function.
-If `map-into` is declared `inline` and the compiler is reasonably good, then it will produce code that just calls the appropriate function.
+個々の関数は示していません。
+この方式は実行時間の点では効率がよいのですが、`map-into` が比較的目立たない関数であることを思えば、場所を取りすぎます。
+`map-into` を `inline` と宣言し、コンパイラがそれなりに優れていれば、適切な関数を呼ぶだけのコードが生成されます。
 
-### REDUCE with :key
+### :key付きのREDUCE
 
-Another change in the ANSI proposal is to add a `:key` keyword to `reduce`.
-This is a useful addition-in fact, for years I had been using a `reduce-by` function that provided just this functionality.
-In this section we see how to add the `:key` keyword.
+ANSIの提案でのもう1つの変更が、`reduce` に `:key` のキーワードを加えることです。
+これは役に立つ追加です。実のところ私は何年も、まさにこの機能を与える `reduce-by` という関数を使っていました。
+本節では `:key` のキーワードを加える方法を見ます。
 
-At the top level, I define reduce as an interface to the keywordless function `reduce*`.
-They are both proclaimed inline, so there will be no overhead for the keywords in normal uses of reduce.
+最上位では、reduceを、キーワードなしの関数 `reduce*` への窓口として定義します。
+どちらも inline と宣言してあるので、reduceのふつうの使い方ではキーワードの手間はかかりません。
 
 ```lisp
 (proclaim '(inline reduce reduce*))
@@ -1111,7 +1111,7 @@ They are both proclaimed inline, so there will be no overhead for the keywords i
                   key initial-value initial-value-p))
 ```
 
-The easier case is when the sequence is a vector:
+易しいのは、列がベクタである場合です。
 
 ```lisp
 (defun reduce-vect (fn seq from-end start end key init init-p)
@@ -1159,25 +1159,25 @@ The easier case is when the sequence is a vector:
 result)))))
 ```
 
-When the sequence is a list, we go to some trouble to avoid computing the length, since that is an *O(n)* operation on lists.
-The hardest decision is what to do when the list is to be traversed from the end.
-There are four choices:
+列がリストのときは、長さの計算を避けるために少し手間をかけます。リストでは長さの計算が *O(n)* の操作だからです。
+もっとも難しい判断は、リストを末尾からたどる場合にどうするかです。
+選択肢は4つあります。
 
-*   **recurse.** We could recursively walk the list until we hit the end, and then compute the results on the way back up from the recursions.
-However, some implementations may have fairly small bounds on the depths of recursive calls, and a system function like reduce should never run afoul of such limitations.
-In any event, the amount of stack space consumed by this approach would normally be more than the amount of heap space consumed in the next approach.
+*   **再帰する。** 末尾に達するまで列を再帰的にたどり、再帰から戻る道すがら結果を計算できます。
+しかし実装によっては再帰呼び出しの深さにかなり小さな上限があるかもしれず、reduceのようなシステムの関数がそうした制限に引っかかるのは避けねばなりません。
+いずれにせよ、この方式が使うスタックの場所は、次の方式が使うヒープの場所よりふつう多くなります。
 
-*   **reverse.** We could reverse the list and then consider `from-end` true.
-The only drawback is the time and space needed to construct the reversed list.
+*   **reverse する。** 列を逆順にしてから `from-end` を真と見なせます。
+唯一の難点は、逆順の列を組み立てるのに要る時間と場所です。
 
-*   **nreverse.** We could destructively reverse the list in place, do the reduce computation, and then destructively reverse the list back to its original state (perhaps with an unwind-protect added).
-Unfortunately, this is just incorrect.
-The list may be bound to some variable that is accessible to the function used in the reduction.
-If that is so, the function will see the reversed list, not the original list.
+*   **nreverse する。** 列をその場で破壊的に逆順にし、reduceの計算をしてから、破壊的に元の状態へ戻せます（おそらくunwind-protectを添えて）。
+あいにく、これは単に誤りです。
+その列は、reduceで使う関数から手の届く変数に束縛されているかもしれません。
+そうであれば、その関数は元の列ではなく逆順の列を見ることになります。
 
-*   **coerce.** We could convert the list to a vector, and then use `reduce-vect`.
-This has an advantage over the reverse approach in that vectors generally take only half as much storage as lists.
-Therefore, this is the approach I adopt.
+*   **coerce する。** 列をベクタへ変換し、`reduce-vect` を使えます。
+これはreverseの方式より有利です。ベクタが使う記憶は、ふつうリストの半分で済むからです。
+ですから、私はこの方式を採ります。
 
 ```lisp
 (defmacro funcall-if (fn arg)
@@ -1224,33 +1224,33 @@ Therefore, this is the approach I adopt.
              result)))))
 ```
 
-## 24.7 Exercises
+## 24.7 練習問題
 
-**Exercise  24.2 [m]** The function `reduce` is a very useful one, especially with the `key` keyword.
-Write nonrecursive definitions for `append` and `length` using `reduce`.
-What other common functions can be written with `reduce`?
+**練習問題 24.2 [m]** 関数 `reduce` はたいそう役に立つもので、とりわけ `key` のキーワードを伴うときはそうである。
+`reduce` を使って `append` と `length` の非再帰の定義を書け。
+他にどんなよく使う関数が `reduce` で書けるか。
 
-**Exercise  24.3** The so-called loop keywords are not symbols in the keyword package.
-The preceding code assumes they are all in the current package, but this is not quite right.
-Change the definition of `loop` so that any symbol with the same name as a loop keyword acts as a keyword, regardless of the symbol's package.
+**練習問題 24.3** いわゆるloopキーワードは、keywordパッケージのシンボルではない。
+先のコードは、それらがすべて現在のパッケージにあると仮定しているが、これは正確ではない。
+loopキーワードと同じ名前のシンボルなら、そのシンボルのパッケージによらずキーワードとして働くよう、`loop` の定義を変えよ。
 
-**Exercise  24.4** Can there be a value for *exp* for which the following expressions are not equivalent?
-Either demonstrate such an *exp* or argue why none can exist.
+**練習問題 24.4** 次の式が同等でなくなるような *exp* の値はありうるか。
+そうした *exp* を示すか、なぜ存在しえないかを論じよ。
 
 ```lisp
 (loop for x in list collect *exp*)
 (mapcar #'(lambda (x) *exp)* list))
 ```
 
-**Exercise  24.5** The object-oriented language Eiffel provides two interesting `loop` keywords: `invariant` and `variant`.
-The former takes a Boolean-valued expression that must remain true on every iteration of the loop, and the latter takes a integer-valued expression that must decrease on every iteration, but never becomes negative.
-Errors are signaled if these conditions are violated.
-Use `defloop` to implement these two keywords.
-Make them generate code conditionally, based on a global flag.
+**練習問題 24.5** オブジェクト指向言語Eiffelは、興味深い2つの `loop` のキーワード `invariant` と `variant` を備えている。
+前者は、ループの各繰り返しで真であり続けねばならない真偽値の式を取り、後者は、繰り返しのたびに減るが決して負にならない整数値の式を取る。
+この条件が破られると誤りが通知される。
+`defloop` を使ってこの2つのキーワードを実装せよ。
+大域的なフラグにもとづいて、条件つきでコードを生成するようにせよ。
 
-## 24.8 Answers
+## 24.8 解答
 
-**Answer 24.1**
+**解答 24.1**
 
 ```lisp
 (defvar *queue*)
@@ -1261,8 +1261,8 @@ Make them generate code conditionally, based on a global flag.
            (queue-contents *queue*)))
 ```
 
-Here's another version that allows the collection variable to be named.
-That way, more than one collection can be going on at the same time.
+集めるための変数に名前を付けられる版も示す。
+そうすれば、同時に2つ以上の集めを進められる。
 
 ```lisp
 (defun collect (item &optional (queue *queue*))
@@ -1274,7 +1274,7 @@ That way, more than one collection can be going on at the same time.
       (queue-contents .queue)))
 ```
 
-**Answer 24.2**
+**解答 24.2**
 
 ```lisp
 (defun append-r (x y)
@@ -1283,10 +1283,10 @@ That way, more than one collection can be going on at the same time.
       (reduce #'+ list :key #'(lambda (x) 1)))
 ```
 
-**Answer 24.4** The difference between `loop` and `mapcar` is that the former uses only one variable `x`, while the latter uses a different `x` each time.
-If `x`'s extent is no bigger than its scope (as it is in most expressions) then this makes no difference.
-But if any `x` is captured, giving it a longer extent, then a difference shows up.
-Consider *exp =* `#'(lambda () x).`
+**解答 24.4** `loop` と `mapcar` の違いは、前者が変数 `x` を1つしか使わないのに対し、後者は毎回違う `x` を使うことである。
+`x` の範囲がそのスコープを超えないなら（たいていの式ではそうである）、これは違いを生まない。
+しかしどれかの `x` が捕まえられて範囲が長くなると、違いが現れる。
+*exp =* `#'(lambda () x)` を考えよ。
 
 ```lisp
 > (mapcar #'funcall (loop for x in '(1 2 3) collect
@@ -1297,7 +1297,7 @@ Consider *exp =* `#'(lambda () x).`
 (1 2 3)
 ```
 
-**Answer 24.5**
+**解答 24.5**
 
 ```lisp
 (defvar *check-invariants* t
@@ -1317,7 +1317,7 @@ Consider *exp =* `#'(lambda () x).`
      new)
 ```
 
-Here's an example:
+例を示す。
 
 ```lisp
 (defun gcd2 (a b)
@@ -1332,15 +1332,15 @@ Here's an example:
                 finally (return x)))
 ```
 
-Here the invariant is written semi-informally.
-We could include the calls to `gcd`, but that seems to be defeating the purpose of `gcd2`, so that part is left as a comment.
-The idea is that the comment should help the reader prove the correctness of the code, and the executable part serves to notify the lazy reader when something is demonstrably wrong at run time.
+ここでは不変条件を半ば非形式的に書いている。
+`gcd` の呼び出しを含めることもできるが、それでは `gcd2` の目的を損ねるように思えるので、その部分はコメントのままにしてある。
+考え方としては、コメントは読み手がコードの正しさを証明するのを助け、実行される部分は、実行時に明らかにおかしいことが起きたときに、無精な読み手に知らせる役目を果たす。
 
 ----------------------
 
 
 <a id="fn24-1"></a><sup>[1](#tfn24-1)</sup>
-Or in the user package in non-ANSI systems.
+あるいはANSIでないシステムではuserパッケージで。
 
 <a id="fn24-2"></a><sup>[2](#tfn24-2)</sup>
-As was noted before, the proper way to do this is to proclaim `square` as an inline function, not a macro, but please bear with the example.
+先に述べたとおり、これを行う正しいやり方は `square` をマクロではなくインライン関数と宣言することですが、例としてご容赦ください。

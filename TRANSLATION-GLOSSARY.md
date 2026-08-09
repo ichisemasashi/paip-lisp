@@ -697,6 +697,31 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | quasiquote | quasiquote | Schemeでの逆クォートの呼称。原文のまま |
 | unforgeable | 偽造できない | `eof` 定数の性質 |
 
+### 第24章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| package | パッケージ | |
+| intern | インターンする | 文字列をシンボルにしてパッケージへ置く |
+| internal / external symbol | 内部／外部のシンボル | |
+| shadowing | 覆い隠すこと | 名前の衝突の解消 |
+| name space | 名前空間 | Common Lispには7つある |
+| condition | コンディション | 誤りを含む、対処すべき状態 |
+| signal an error | 誤りを通知する | |
+| error handler | 誤りの処理器 | |
+| pretty printing | 整形出力 | |
+| series | series | 提案名なので原文のまま |
+| loop keyword | loopキーワード | keywordパッケージのシンボルではない |
+| prologue / epilogue | 前口上／後口上 | ループの前後に置く部分 |
+| accumulation | 蓄積 | `collect` などの値の集め方 |
+| queue | 待ち行列 | 第10章と同じ |
+| destructuring | 分配束縛 | |
+| sequence | 列 | 第3章に合わせた。リストを指す「並び」とは区別 |
+| fill pointer | フィルポインタ | |
+| referential transparency | 参照透明性 | マクロが破りうる性質 |
+| inline | inline | 宣言名なので原文のまま |
+| once-only | once-only | マクロ名。副作用のある引数を一度だけ評価させる |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -778,8 +803,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter23.md` | 完了 |
-| `chapter24.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter24.md` | 完了 |
+| `chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
