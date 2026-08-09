@@ -1,34 +1,34 @@
-# Chapter 25
-## Troubleshooting
+# 第25章
+## 不具合の切り分け
 
-> Perhaps if we wrote programs from childhood on, as adults we'd be able to read them.
+> 子どもの頃からプログラムを書いていたなら、大人になった我々はそれを読めるようになっていたかもしれない。
 
-> -Alan Perlis
+> —Alan Perlis
 
-When you buy a new appliance such as a television, it comes with an instruction booklet that lists troubleshooting hints in the following form:
+テレビのような新しい電化製品を買うと、次のような形で不具合の切り分けの手がかりを並べた説明書が付いてきます。
 
-**PROBLEM**: Nothing works.
+**症状**: 何も動かない。
 
-**Diagnosis**: Power is off.
+**診断**: 電源が入っていない。
 
-**Remedy:** Plug in outlet and turn on power switch.
+**処置:** コンセントに差し込み、電源スイッチを入れる。
 
-If your Lisp compiler came without such a handy instruction booklet, this chapter may be of some help.
-It lists some of the most common difficulties that Lisp programmers encounter.
+お使いのLispコンパイラにそんな重宝な説明書が付いていなかったなら、本章がいくらか助けになるかもしれません。
+Lispプログラマが出くわす、もっともよくある困りごとをいくつか挙げます。
 
-## 25.1 Nothing Happens
+## 25.1 何も起こらない
 
-**PROBLEM:** You type an expression to Lisp's read-eval-print loop and get no response-no result, no prompt.
+**症状:** Lispの読み込み・評価・表示のループに式を打ち込んでも、何も返ってこない。結果も入力促し記号も出ない。
 
-**Diagnosis:** There are two likely reasons why output wasn't printed: either Lisp is still doing read or it is still doing `eval`.
-These possibilities can be broken down further into four cases:
+**診断:** 出力が表示されない理由は、おそらく2つです。Lispがまだreadをしているか、まだ `eval` をしているかです。
+この可能性は、さらに4つの場合に分けられます。
 
-**Diagnosis:** If the expression you type is incomplete, Lisp will wait for more input to complete it.
-An expression can be incomplete because you have left off a right parenthesis (or inserted an extra left parenthesis).
-Or you may have started a string, atom, or comment without finishing it.
-This is particularly hard to spot when the error spans multiple lines.
-A string begins and ends with double-quotes: `"string"`; an atom containing unusual characters can be delimited by vertical bars: `| AN ATOM |`; and a comment can be of the form `# | a comment | #`.
-Here are four incomplete expressions:
+**診断:** 打ち込んだ式が不完全なら、Lispはそれを完成させる入力を待ちます。
+式が不完全になるのは、閉じ括弧を落とした（あるいは開き括弧を余分に入れた）せいかもしれません。
+あるいは文字列・アトム・コメントを始めたまま終えていないのかもしれません。
+誤りが複数行にまたがっていると、これはとりわけ見つけにくいものです。
+文字列は二重引用符で始まり終わります（`"string"`）。変わった文字を含むアトムは縦棒で区切れます（`| AN ATOM |`）。コメントは `# | a comment | #` の形にできます。
+不完全な式を4つ示します。
 
 ```lisp
 (+ (* 3 (sqrt 5) 1)
@@ -39,16 +39,16 @@ Here are four incomplete expressions:
     x)
 ```
 
-**Remedy:** Add a `)`, `"`, `|`, and `|#`, respectively.
-Or hit the interrupt key and type the input again.
+**処置:** それぞれ `)`、`"`、`|`、`|#` を足します。
+あるいは割り込みのキーを押して、入力し直します。
 
-**Diagnosis:** Your program may be waiting for input.
+**診断:** プログラムが入力を待っているのかもしれません。
 
-**Remedy:** Never do a `(read)` without first printing a prompt of some kind.
-If the prompt does not end with a newline, a call to `finish-output` is also in order.
-In fact, it is a good idea to call a function that is at a higher level than `read`.
-Several systems define the function `prompt-and-read`.
-Here is one version:
+**処置:** 何らかの入力促しを先に表示せずに `(read)` をしてはいけません。
+入力促しが改行で終わらないなら、`finish-output` の呼び出しも必要です。
+実のところ、`read` より上の階層の関数を呼ぶのが良い考えです。
+いくつかのシステムは関数 `prompt-and-read` を定義しています。
+その一例を示します。
 
 ```lisp
 (defun prompt-and-read (ctl-string &rest args)
@@ -58,30 +58,30 @@ Here is one version:
   (read))
 ```
 
-**Diagnosis:** The program may be caught in an infinite loop, either in an explicit `loop` or in a recursive function.
+**診断:** プログラムが無限ループに捕まっているのかもしれません。明示的な `loop` のなかか、再帰関数のなかかです。
 
-**Remedy:** Interrupt the computation, get a back trace, and see what functions are active.
-Check the base case and loop variant on active functions and loops.
+**処置:** 計算に割り込み、バックトレースを取って、どの関数が動いているかを見ます。
+動いている関数とループについて、基底の場合とループの変化量を確かめます。
 
-**Diagnosis:** Even a simple expression like (`mapc #'sqrt list`) or (`length list`) will cause an infinite loop if `list` is an infinite list-that is, a list that has some tail that points back to itself.
+**診断:** (`mapc #'sqrt list`) や (`length list`) のような単純な式でも、`list` が無限のリスト、つまりどこかの末尾が自分自身を指すリストなら無限ループになります。
 
-**Remedy:** Be very careful any time you modify a structure with `nconc`, `delete`, `setf`, and so forth.
+**処置:** `nconc`、`delete`、`setf` などで構造を書き換えるときは、いつでも十分に気をつけてください。
 
-**PROBLEM:** You get a new prompt from the read-eval-print loop, but no output was printed.
+**症状:** 読み込み・評価・表示のループから新しい入力促しは出るが、出力は何も表示されない。
 
-**Diagnosis:** The expression you evaluated must have returned no values at all, that is, the result `(values)`.
+**診断:** 評価した式が値をまったく返さなかった、つまり結果が `(values)` だったに違いありません。
 
-## 25.2 Change to Variable Has No Effect
+## 25.2 変数を変えても効かない
 
-**PROBLEM:** You redefined a variable, but the new value was ignored.
+**症状:** 変数を定義し直したのに、新しい値が無視される。
 
-**Diagnosis:** Altering a variable by editing and re-evaluating a `defvar` form will not change the variable's value.
-`defvar` only assigns an initial value when the variable is unbound.
+**診断:** `defvar` の形式を書き換えて評価し直しても、変数の値は変わりません。
+`defvar` が初期値を代入するのは、その変数が未束縛のときだけです。
 
-**Remedy:** Use setf to update the variable, or change the `defvar` to a `defparameter`.
+**処置:** setfを使って変数を更新するか、`defvar` を `defparameter` に変えます。
 
-**Diagnosis:** Updating a locally bound variable will not affect a like-named variable outside that binding.
-For example, consider:
+**診断:** 局所的に束縛された変数を更新しても、その束縛の外にある同名の変数には影響しません。
+たとえば次を考えてみましょう。
 
 ```lisp
 (defun check-ops (*ops*)
@@ -90,14 +90,14 @@ For example, consider:
   (mapcar #'check-op *ops*))
 ```
 
-If `check-ops` is called with a null argument, the `*ops*` that is a parameter of `check-ops` will be updated, but the global `*ops*` will not be, even if it is declared special.
+`check-ops` をnullの引数で呼ぶと、`check-ops` の引数である `*ops*` は更新されますが、大域の `*ops*` は、スペシャルと宣言されていても更新されません。
 
-**Remedy:** Don't shadow variables you want to update.
-Use a different name for the local variable.
-It is important to distinguish special and local variables.
-Stick to the naming convention for special variables: they should begin and end with asterisks.
-Don't forget to introduce a binding for all local variables.
-The following excerpt from a recent textbook is an example of this error:
+**処置:** 更新したい変数を覆い隠さないことです。
+局所変数には別の名前を使いましょう。
+スペシャル変数と局所変数を区別するのは重要です。
+スペシャル変数の命名の約束を守ってください。前後をアスタリスクで挟むべきです。
+局所変数にはすべて束縛を導入するのを忘れないでください。
+最近のある教科書からの次の抜粋は、この誤りの例です。
 
 ```lisp
 (defun test ()
@@ -105,7 +105,7 @@ The following excerpt from a recent textbook is an example of this error:
   (solve-problem x))        ; Don't do this.
 ```
 
-This function should have been written:
+この関数は次のように書かれるべきでした。
 
 ```lisp
 (defun test ()
@@ -113,19 +113,19 @@ This function should have been written:
       (solve-problem x)))
 ```
 
-## 25.3 Change to Function Has No Effect
+## 25.3 関数を変えても効かない
 
-**PROBLEM:** You redefined a function, but the change was ignored.
+**症状:** 関数を定義し直したのに、その変更が無視される。
 
-**Diagnosis:** When you change a macro, or a function that has been declared inline, the change will not necessarily be seen by users of the changed function.
-(It depends on the implementation.)
+**診断:** マクロや、inlineと宣言した関数を変えても、その変更が使う側から必ず見えるとはかぎりません。
+（実装によります。）
 
-**Remedy:** Recompile after changing a macro.
-Don't use inline functions until everything is debugged.
-(`Use (declare (notinline f)`) to cancel an inline declaration).
+**処置:** マクロを変えたら再コンパイルします。
+すべてのデバッグが済むまで、inline関数は使わないことです。
+（inlineの宣言を取り消すには (`declare (notinline f)`) を使います。）
 
-**Diagnosis:** If you change a normal (non-inline) function, that change *will* be seen by code that refers to the function by *name*, but not by code that refers to the old value of the function itself.
-Consider:
+**診断:** ふつうの（inlineでない）関数を変えれば、その関数を*名前*で参照するコードからはその変更が見えますが、関数そのものの古い値を参照するコードからは見えません。
+次を考えてみましょう。
 
 ```lisp
 (defparameter *scorer* #'score-fn)
@@ -136,31 +136,31 @@ Consider:
       (reduce #'better values)))
 ```
 
-Now suppose that the definitions of `score-fn`, `print-fn`, and `better` are all changed.
-Does any of the prior code have to be recompiled?
-The variable `*printer*` can stay as is.
-When it is funcalled, the symbol `print-fn` will be consulted for the current functional value.
-Within `show`, the expression `#'better` is compiled into code that will get the current version of `better`, so it too is safe.
-However, the variable `*scorer*` must be changed.
-Its value is the old definition of `score-fn`.
+ここで `score-fn`、`print-fn`、`better` の定義がすべて変わったとしましょう。
+先のコードのどれかを再コンパイルする必要があるでしょうか。
+変数 `*printer*` はそのままで構いません。
+funcallされるとき、シンボル `print-fn` が引かれて現在の関数の値が得られるからです。
+`show` のなかの式 `#'better` は、現在の版の `better` を取ってくるコードにコンパイルされるので、これも安全です。
+しかし変数 `*scorer*` は変えねばなりません。
+その値は `score-fn` の古い定義だからです。
 
-**Remedy:** Re-evaluate the definition of `*scorer*`.
-It is unfortunate, but this problem encourages many programmers to use symbols where they really mean functions.
-Symbols will be coerced to the global function they name when passed to `funcall` or `apply`, but this can be the source of another error.
-In the following example, the symbol `local-fn` will not refer to the locally bound function.
-One needs to use `#'local-fn` to refer to it.
+**処置:** `*scorer*` の定義を評価し直します。
+残念なことに、この問題のせいで多くのプログラマが、本当は関数を意味するところでシンボルを使うようになっています。
+シンボルは `funcall` や `apply` に渡されると、それが名指す大域の関数へ変換されますが、これが別の誤りの元になりえます。
+次の例では、シンボル `local-fn` は局所的に束縛された関数を指しません。
+それを指すには `#'local-fn` を使う必要があります。
 
 ```lisp
 (flet ((local-fn (x) ...))
   (mapcar 'local-fn list))
 ```
 
-**Diagnosis:** If you changed the name of a function, did you change the name everywhere?
-For example, if you decide to change the name of `print-fn` to `print-function` but forget to change the value of `*printer*`, then the old function will be called.
+**診断:** 関数の名前を変えたなら、その名前をすべての箇所で変えたでしょうか。
+たとえば `print-fn` を `print-function` に改名すると決めたのに `*printer*` の値を変え忘れれば、古い関数が呼ばれます。
 
-**Remedy:** Use your editor's global replace command.
-To be even safer, redefine obsolete functions to call `error`.
-The following function is handy for this purpose:
+**処置:** エディタの全体置換の命令を使いましょう。
+さらに安全を期すなら、古くなった関数を `error` を呼ぶよう定義し直します。
+次の関数がこの目的に重宝します。
 
 ```lisp
 (defun make-obsolete (fn-name)
@@ -171,8 +171,8 @@ The following function is handy for this purpose:
               (error "Obsolete function."))))
 ```
 
-**Diagnosis:** Are you using `labels` and `flet` properly?
-Consider again the function `replace-?-vars`, which was defined in [section 11.3](chapter11.md#s0025) to replace an anonymous logic variable with a unique new variable.
+**診断:** `labels` と `flet` を正しく使っているでしょうか。
+[11.3節](chapter11.md#s0025)で定義した、無名の論理変数を一意な新しい変数へ置き換える関数 `replace-?-vars` を、もう一度考えてみましょう。
 
 ```lisp
 (defun replace-?-vars (exp)
@@ -183,10 +183,10 @@ Consider again the function `replace-?-vars`, which was defined in [section 11.3
           (replace-?-vars (rest exp))))))
 ```
 
-It might occur to the reader that gensyming a different variable each time is wasteful.
-The variables must be unique in each clause, but they can be shared across clauses.
-So we could generate variables in the sequence `?1, ?2, ...`, intern them, and thus reuse these variables in the next clause (provided we warn the user never to use such variable names).
-One way to do that is to introduce a local variable to hold the variable number, and then a local function to do the computation:
+毎回gensymで別の変数を作るのは無駄だ、と読者は思うかもしれません。
+変数は各節のなかで一意でなければなりませんが、節をまたいで共有できます。
+ですから `?1, ?2, ...` の順に変数を作ってインターンし、次の節でその変数を使い回せます（そうした変数名を決して使わないよう利用者に警告しておくならば）。
+その1つのやり方は、変数の番号を保つ局所変数を導入し、それから計算を行う局所関数を導入することです。
 
 ```lisp
 (defun replace-?-vars (exp)
@@ -202,10 +202,10 @@ One way to do that is to introduce a local variable to hold the variable number,
    (replace-?-vars exp))))
 ```
 
-This version doesn't work.
-The problem is that `flet`, like `let`, defines a new function within the body of the `flet` but not within the new function's definition.
-So two lessons are learned here: use `labels` instead of `flet` to define recursive functions, and don't shadow a function definition with a local definition of the same name (this second lesson holds for variables as well).
-Let's fix the problem by changing `labels` to `flet` and naming the local function `recurse`:
+この版は動きません。
+厄介なのは、`flet` が `let` と同じく、新しい関数を `flet` の本体のなかでは定義するが、その新しい関数自身の定義のなかでは定義しないことです。
+ここから2つの教訓が得られます。再帰関数の定義には `flet` ではなく `labels` を使うこと。そして、関数の定義を同名の局所定義で覆い隠さないこと（2つ目の教訓は変数にも当てはまります）。
+`labels` を `flet` に変え、局所関数を `recurse` と名づけて、この問題を直しましょう。
 
 ```lisp
 (defun replace-?-vars (exp)
@@ -221,17 +221,17 @@ Let's fix the problem by changing `labels` to `flet` and naming the local functi
     (recurse exp))))
 ```
 
-Annoyingly, this version still doesn't work!
-This time, the problem is carelessness; we changed the `replace-?-vars` to `recurse` in two places, but not in the two calls in the body of `recurse`.
+腹立たしいことに、この版もまだ動きません。
+今度の厄介は不注意です。`replace-?-vars` を `recurse` に2か所で変えましたが、`recurse` の本体にある2つの呼び出しは変えていなかったのです。
 
-**Remedy:** In general, the lesson is to make sure you call the right function.
-If there are two functions with similar effects and you call the wrong one, it can be hard to see.
-This is especially true if they have similar names.
+**処置:** 一般に、教訓は正しい関数を呼んでいることを確かめよ、ということです。
+似た働きをする関数が2つあって誤ったほうを呼んでしまうと、それは見つけにくいものです。
+名前が似ていればなおさらです。
 
-**PROBLEM:** Your closures don't seem to be working.
+**症状:** クロージャがうまく働いていないようだ。
 
-**Diagnosis:** You may be erroneously creating a lambda expression by consing up code.
-Here's an example from a recent textbook:
+**診断:** コードをコンスで組み立ててラムダ式を作ろうとして、誤っているのかもしれません。
+最近のある教科書からの例を示します。
 
 ```lisp
 (defun make-specialization (c)
@@ -244,15 +244,15 @@ Here's an example from a recent textbook:
     ...))
 ```
 
-Strictly speaking, this is legal according to *Common Lisp the Language*, although in ANSI Common Lisp it will *not* be legal to use a list beginning with `lambda` as a function.
-But in either version, it is a bad idea to do so.
-A list beginning with `lambda` is just that: a list, not a closure.
-Therefore, it cannot capture lexical variables the way a closure does.
+厳密に言えば、*Common Lisp the Language* に照らせばこれは正当です。ただしANSI Common Lispでは、`lambda` で始まる並びを関数として使うのは正当では*なくなり*ます。
+しかしどちらの版でも、そうするのはまずい考えです。
+`lambda` で始まる並びは、まさにそれ、すなわち並びであってクロージャではありません。
+ですからクロージャのようにレキシカル変数を捕まえることはできません。
 
-**Remedy:** The correct way to create a closure is to evaluate a call to the special form `function`, or its abbreviation, `#'`.
-Here is a replacement for the code beginning with '(`lambda ...`. Note that it is a closure, closed over `pred` and `c`.
-Also note that it gets the `predicate` each time it is called; thus, it is safe to use even when predicates are being changed dynamically.
-The previous version would not work when a predicate is changed.
+**処置:** クロージャを作る正しいやり方は、特殊形式 `function`、あるいはその略記 `#'` の呼び出しを評価することです。
+'(`lambda ...` で始まるコードの代わりを示します。これがクロージャであり、`pred` と `c` を包み込んでいることに注意してください。
+また、呼ばれるたびに `predicate` を取ってくることにも注意してください。ですから述語が動的に変えられるときでも安全に使えます。
+先の版は、述語が変えられると働きませんでした。
 
 ```lisp
 #'(lambda (obj)            ; Do this instead.
@@ -260,30 +260,30 @@ The previous version would not work when a predicate is changed.
           (funcall (get c 'predicate) obj)))
 ```
 
-It is important to remember that `function` (and thus `#'`) is a special form, and thus only returns the right value when it is evaluated.
-A common error is to use `#'` notation in positions that are not evaluated:
+`function`（したがって `#'`）が特殊形式であり、評価されたときにだけ正しい値を返すことを覚えておくのは重要です。
+よくある誤りが、評価されない位置で `#'` の記法を使うことです。
 
 ```lisp
 (defvar *obscure-fns* '(#'cis #'cosh #'ash #'bit-orc2)) ; wrong
 ```
 
-This does not create a list of four functions.
-Rather, it creates a list of four sublists; the first sublist is (`function cis`).
-It is an error to funcall or apply such an object.
-The two correct ways to create a list of functions are shown below.
-The first assures that each function special form is evaluated, and the second uses function names instead of functions, thus relying on `funcall` or `apply` to coerce the names to the actual functions.
+これは4つの関数の並びを作りません。
+作られるのは4つの部分並びの並びで、最初の部分並びは (`function cis`) です。
+そうした対象をfuncallしたりapplyしたりするのは誤りです。
+関数の並びを作る正しいやり方を2つ、下に示します。
+1つ目は各functionの特殊形式が評価されることを保証し、2つ目は関数ではなく関数名を使って、名前から実際の関数への変換を `funcall` や `apply` に任せます。
 
 ```lisp
 (defvar *obscure-fns* (list #'cis #'cosh #'ash #'bit-orc2))
 (defvar *obscure-fns* '(cis cosh ash bit-orc2))
 ```
 
-Another common `error` is to expect `#'if` or `#'or` to return a function.
-This is an error because special forms are just syntactic markers.
-There is no function named `if` or `or`; they should be thought of as directives that tell the compiler what to do with a piece of code.
+よくあるもう1つの誤りが、`#'if` や `#'or` が関数を返すと期待することです。
+これが誤りなのは、特殊形式が単なる構文上の印にすぎないからです。
+`if` や `or` という名の関数はありません。これらは、コードの断片をどう扱うかをコンパイラに伝える指示だと考えるべきです。
 
-By the way, the function `make-specialization` above is bad not only for its lack of `function` but also for its use of backquote.
-The following is a better use of backquote:
+ところで、上の関数 `make-specialization` がまずいのは、`function` を欠いていることだけでなく、逆クォートの使い方にもあります。
+逆クォートの、より良い使い方を示します。
 
 ```lisp
 '(lambda (obj)
@@ -291,10 +291,10 @@ The following is a better use of backquote:
         (,(get c 'predicate) obj)))
 ```
 
-## 25.4 Values Change "by Themselves"
+## 25.4 値が「ひとりでに」変わる
 
-**PROBLEM:** You deleted/removed something, but it didn't take effect.
-For example:
+**症状:** deleteやremoveをしたのに、効かなかった。
+たとえば次のようになります。
 
 ```lisp
 > (setf numbers '(1 2 3 4 5)) => (1 2 3 4 5)
@@ -304,16 +304,16 @@ For example:
 > numbers => (1 2 3 4 5)
 ```
 
-**Remedy:** Use (`setf numbers` (`delete 1 numbers`)).
-Note that `remove` is a non-destructive function, so it will never alter its arguments, `delete` is destructive, but when asked to delete the first element of a list, it returns the rest of the list, and thus does not alter the list itself.
-That is why `setf` is necessary.
-Similar remarks hold for `nconc`, `sort`, and other destructive operations.
+**処置:** (`setf numbers` (`delete 1 numbers`)) とします。
+`remove` は非破壊的な関数なので引数を決して書き換えないことに注意してください。`delete` は破壊的ですが、並びの最初の要素を削除せよと言われたときは残りの並びを返すので、並びそのものは書き換えません。
+だから `setf` が要るのです。
+同じことが `nconc`、`sort` など他の破壊的な操作にも当てはまります。
 
-**PROBLEM:** You created a hundred different structures and changed a field in one of them.
-Suddenly, all the other ones magically changed!
+**症状:** 別々の構造体を100個作り、そのうち1つの欄を変えた。
+すると突然、他のすべてが魔法のように変わってしまった。
 
-**Diagnosis:** Different structures may share identical subfields.
-For example, suppose you had:
+**診断:** 別々の構造体が、同一の下位の欄を共有していることがあります。
+たとえば次のようにしていたとします。
 
 ```lisp
 (defstruct block
@@ -325,11 +325,11 @@ For example, suppose you had:
   (delete 'green (block-possible-colors bl))
 ```
 
-Both `b1` and `b2` share the initial list of possible colors.
-The `delete` function modifies this shared list, so `green` is deleted from `b2`'s possible colors list just as surely as it is deleted from `b1`'s.
+`b1` も `b2` も、ありうる色の初期の並びを共有しています。
+関数 `delete` はこの共有された並びを書き換えるので、`green` は `b1` のありうる色の並びからと同じく、`b2` の並びからも確実に削除されます。
 
-**Remedy:** Don't share pieces of data that you want to alter individually.
-In this case, either use `remove` instead of `delete`, or allocate a different copy of the list to each instance:
+**処置:** 個別に書き換えたいデータの断片は共有しないことです。
+この場合、`delete` の代わりに `remove` を使うか、各インスタンスに並びの別々の複製を割り当てます。
 
 ```lisp
 (defstruct block
@@ -337,28 +337,28 @@ In this case, either use `remove` instead of `delete`, or allocate a different c
   ...)
 ```
 
-Remember that the initial value field of a defstruct is an expression that is evaluated anew each time `make-block` is called.
-It is incorrect to think that the initial form is evaluated once when the `defstruct` is defined.
+defstructの初期値の欄が、`make-block` を呼ぶたびに新しく評価される式であることを忘れないでください。
+初期値の形式が `defstruct` の定義時に一度だけ評価される、と考えるのは誤りです。
 
-## 25.5 Built-In Functions Don't Find Elements
+## 25.5 組み込み関数が要素を見つけてくれない
 
-**PROBLEM:** You tried (`find item list`), and you know it is there, but it wasn't found.
+**症状:** (`find item list`) を試し、そこにあるとわかっているのに見つからなかった。
 
-**Diagnosis:** By default, many built-in functions use `eql` as an equality test, `find` is one of them.
-If `item` is, say, a list that is `equal` but not `eql` to one of the elements of `list`, it will not be found.
+**診断:** 既定では、多くの組み込み関数が等価性の検査に `eql` を使います。`find` もその1つです。
+`item` が、たとえば `list` の要素の1つと `equal` ではあるが `eql` ではない並びなら、見つかりません。
 
-**Remedy:** Use (`find item list :test #'equal`)
+**処置:** (`find item list :test #'equal`) とします。
 
-**Diagnosis:** If the `item` is nil, then nil will be returned whether it is found or not.
+**診断:** `item` がnilなら、見つかっても見つからなくてもnilが返ります。
 
-**Remedy:** Use `member` or `position` instead of `find` whenever the item can be nil.
+**処置:** 探すものがnilでありうるときは、`find` ではなく `member` か `position` を使います。
 
-## 25.6 Multiple Values Are Lost
+## 25.6 多値が失われる
 
-**PROBLEM:** You only get one of the multiple values you were expecting.
+**症状:** 期待していた多値のうち1つしか得られない。
 
-**Diagnosis:** In certain contexts where a value must be tested by Lisp, multiple values are discarded.
-For example, consider:
+**診断:** Lispが値を検査せねばならない特定の文脈では、多値は捨てられます。
+たとえば次を考えてみましょう。
 
 ```lisp
 (or (mv-1 x) (mv-2 x))
@@ -367,13 +367,13 @@ For example, consider:
   (t (mv-2 x)))
 ```
 
-In each case, if `mv-2` returns multiple values, they will all be passed on.
-But if `mv-1` returns multiple values, only the first value will be passed on.
-This is true even in the last clause of a cond.
-So, while the final clause (`t (mv-2 x)`) passes on multiple values, the final clause (`(mv-2 x )`) would not.
+どの場合も、`mv-2` が多値を返せば、それはすべて先へ渡されます。
+しかし `mv-1` が多値を返しても、渡されるのは最初の値だけです。
+これはcondの最後の節でも同じです。
+ですから最後の節 (`t (mv-2 x)`) は多値を渡しますが、最後の節 (`(mv-2 x )`) は渡しません。
 
-**Diagnosis:** Multiple values can be inadvertently lost in debugging as well.
-Suppose I had:
+**診断:** 多値は、デバッグ中にうっかり失われることもあります。
+次のようにしていたとしましょう。
 
 ```lisp
 (multiple-value-bind (a b c)
@@ -381,7 +381,7 @@ Suppose I had:
     ...)
 ```
 
-Now, if I become curious as to what `mv-1` returns, I might change this code to:
+ここで `mv-1` が何を返すのか気になって、このコードを次のように変えたとします。
 
 ```lisp
 (multiple-value-bind (a b c)
@@ -389,15 +389,15 @@ Now, if I become curious as to what `mv-1` returns, I might change this code to:
   ...)
 ```
 
-Unfortunately, `print` will see only the first value returned by `mv-1`, and will return only that one value to be bound to the variable a.
-The other values will be discarded, and `b` and `c` will be bound to `nil`.
+あいにく `print` は `mv-1` が返す最初の値しか見ず、変数 a に束縛されるのもその1つだけになります。
+他の値は捨てられ、`b` と `c` は `nil` に束縛されます。
 
-## 25.7 Declarations Are Ignored
+## 25.7 宣言が無視される
 
-**PROBLEM:** Your program uses 1024 x 1024 arrays of floating-point numbers.
-But you find that it takes 15 seconds just to initialize such an array to zeros!
-Imagine how inefficient it is to actually do any computation!
-Here is your function that zeroes an array:
+**症状:** プログラムが1024×1024の浮動小数点数の配列を使っている。
+ところが、その配列を0で初期化するだけで15秒もかかる。
+実際に計算をしたらどれほど効率が悪いか、想像してみてください。
+配列を0にする関数は次のとおりです。
 
 ```lisp
 (defun zero-array (arr)
@@ -408,14 +408,14 @@ Here is your function that zeroes an array:
       (setf (aref arr i j) 0.0))))
 ```
 
-**Diagnosis:** The main problem here is an ineffective declaration.
-The type (`array float`) does not help the compiler, because the array could be displaced to an array of another type, and because `float` encompasses both single- and double-precision floating-point numbers.
-Thus, the compiler is forced to allocate storage for a new copy of the number 0.0 for each of the million elements of the array.
-The function is slow mainly because it generates so much garbage.
+**診断:** ここでのおもな問題は、効き目のない宣言です。
+型 (`array float`) はコンパイラの助けになりません。その配列が別の型の配列へずらされている可能性があり、また `float` が単精度と倍精度の両方の浮動小数点数を含むからです。
+そのためコンパイラは、配列の百万個の要素それぞれについて、数 0.0 の新しい複製のための記憶を割り当てざるをえません。
+この関数が遅いのは、おもに大量のごみを出すからです。
 
-**Remedy:** The following version uses a much more effective type declaration: a simple array of single-precision numbers.
-It also declares the size of the array and turns safety checks off.
-It runs in under a second on a SPARCstation, which is slower than optimized C, but faster than unoptimized C.
+**処置:** 次の版は、はるかに効き目のある型の宣言、すなわち単精度の数の単純な配列を使っています。
+配列の大きさも宣言し、安全のための検査を切っています。
+SPARCstationでは1秒未満で走ります。最適化したCより遅いものの、最適化していないCより速いのです。
 
 ```lisp
 (defun zero-array (arr)
@@ -427,60 +427,60 @@ It runs in under a second on a SPARCstation, which is slower than optimized C, b
       (setf (aref arr i j) 0.0))))
 ```
 
-Another common error is to use something like `(simple-vector fixnum)` as a type specifier.
-It is a quirk of Common Lisp that the `simple-vector` type specifier only accepts a size, not a type, while the `array, vector` and `simple-array` specifiers all accept an optional type followed by an optional size or list of sizes.
-To specify a simple vector of fixnums, use (`simple-array fixnum (*)`).
+よくあるもう1つの誤りが、型の指定に `(simple-vector fixnum)` のようなものを使うことです。
+型指定子 `simple-vector` が型ではなく大きさしか受け付けないのは、Common Lispの妙な癖です。`array, vector`、`simple-array` の指定子はいずれも、省略可能な型と、それに続く省略可能な大きさか大きさの並びを受け付けるというのに。
+fixnumの単純なベクタを指定するには (`simple-array fixnum (*)`) を使います。
 
-To be precise, `simple-vector` means (`simple-array t (*)`).
-This means that `simple-vector` cannot be used in conjunction with any other type specifier.
-A common mistake is to think that the type (`and simple-vector (vector fixnum)`) is equivalent to (`simple-array fixnum (*)`), a simple, one-dimensional vector of fixnums.
-Actually, it is equivalent to (`simple-array t (*)`), a simple one-dimensional array of any type elements.
-To eliminate this problem, avoid `simple-vector` altogether.
+正確に言えば、`simple-vector` は (`simple-array t (*)`) を意味します。
+つまり `simple-vector` は、他のどの型指定子とも組み合わせて使えないということです。
+よくある思い違いが、型 (`and simple-vector (vector fixnum)`) を、fixnumの単純な一次元ベクタである (`simple-array fixnum (*)`) と同じだと考えることです。
+実際にはこれは、どんな型の要素でも持てる単純な一次元配列 (`simple-array t (*)`) と同じです。
+この問題をなくすには、`simple-vector` をいっさい使わないことです。
 
-## 25.8 My Lisp Does the Wrong Thing
+## 25.8 自分のLispが間違ったことをする
 
-When all else fails, it is tempting to shift the blame for an error away from your own code and onto the Common Lisp implementation.
-It is certainly true that errors are found in existing implementations.
-But it is also true that most of the time, Common Lisp is merely doing something the user did not expect rather than something that is in error.
+他に打つ手がなくなると、誤りの責めを自分のコードからCommon Lispの実装へ転嫁したくなるものです。
+既存の実装に誤りが見つかるのは、たしかに事実です。
+しかしたいていの場合、Common Lispは誤ったことをしているのではなく、単に利用者が予期しなかったことをしているだけだ、というのも事実です。
 
-For example, a common "bug report" is to complain about `read-from-string`.
-A user might write:
+たとえばよくある「不具合の報告」が、`read-from-string` への苦情です。
+利用者はこう書くかもしれません。
 
 ```lisp
 (read-from-string "a b c" :start 2)
 ```
 
-expecting the expression to start reading at position `2` and thus return `b`.
-In fact, this expression returns `a`.
-The angry user thinks the implementation has erroneously ignored the `:start` argument and files a bug report,<a id="tfn25-1"></a><sup>[1](#fn25-1)</sup> only to get back the following explanation:
+位置 `2` から読み始めて `b` が返ることを期待して、です。
+実際には、この式は `a` を返します。
+腹を立てた利用者は、実装が誤って `:start` の引数を無視したと考えて不具合を報告し<a id="tfn25-1"></a><sup>[1](#fn25-1)</sup>、次の説明を返されることになります。
 
-The function `read-from-string` takes two optional arguments, `eof-errorp` and `eof-value`, in addition to the keyword arguments.
-Thus, in the expression above, `:start` is taken as the value of `eof-errorp`, with `2` as the value of `eof-value`.
-The correct answer is in fact to read from the start of the string and return the very first form, `a`.
+関数 `read-from-string` は、キーワード引数のほかに `eof-errorp` と `eof-value` という2つの省略可能引数を取ります。
+ですから上の式では、`:start` が `eof-errorp` の値、`2` が `eof-value` の値と受け取られます。
+実のところ正しい答えは、文字列の先頭から読んでいちばん最初の形式 `a` を返すことなのです。
 
-The functions `read-from-string` and `parse-namestring` are the only built-in functions that have this problem, because they are the only ones that have both optional and keyword arguments, with an even number of optional arguments.
-The functions `write-line` and `write-string` have keyword arguments and a single optional argument (the stream), so if the stream is accidently omitted, an error will be signaled.
-(If you type (`write-line str :start 4`), the system will complain either that `:start` is not a stream or that 4 is not a keyword.)
+この問題を抱える組み込み関数は `read-from-string` と `parse-namestring` だけです。省略可能引数とキーワード引数の両方を持ち、しかも省略可能引数の数が偶数なのはこの2つだけだからです。
+関数 `write-line` と `write-string` はキーワード引数と、省略可能引数を1つ（ストリーム）持つので、うっかりストリームを落とせば誤りが通知されます。
+（(`write-line str :start 4`) と打てば、システムは `:start` がストリームでないか、4がキーワードでないかのどちらかを訴えます。）
 
-The moral is this: functions that have both optional and keyword arguments are confusing.
-Take care when using existing functions that have this problem, and abstain from using both in your own functions.
+教訓はこうです。省略可能引数とキーワード引数の両方を持つ関数は紛らわしい。
+この問題を抱える既存の関数を使うときは気をつけ、自分の関数では両方を使うのは控えましょう。
 
-## 25.9 How to Find the Function You Want
+## 25.9 目当ての関数の探し方
 
-Veteran Common Lisp programmers often experience a kind of software *d&eacute;j&agrave; vu:* they believe that the code they are writing could be done by a built-in Common Lisp function, but they can't remember the name of the function.
+熟練のCommon Lispプログラマは、しばしばソフトウェア版の*既視感*を味わいます。いま書いているコードはCommon Lispの組み込み関数でできるはずだと思うのに、その関数の名前が思い出せないのです。
 
-Here's an example: while coding up a problem I realized I needed a function that, given the lists (`a b c d`) and (`c d`), would return (`a b`), that is, the part of the first list without the second list.
-I thought that this was the kind of function that might be in the standard, but I didn't know what it would be called.
-The desired function is similar to `set-difference`, so I looked that up in the index of *Common Lisp the Language* and was directed to page 429.
-I browsed through the section on "using lists as sets" but found nothing appropriate.
-However, I was reminded of the function `butlast`, which is also similar to the desired function.
-The index directed me to page 422 for `butlast`, and on the same page I found `ldiff`, which was exactly the desired function.
-It might have been easier to find (and remember) if it were called `list-difference`, but the methodology of browsing near similar functions paid off.
+例を挙げましょう。ある問題を書いているとき、並び (`a b c d`) と (`c d`) を与えると (`a b`)、すなわち1つ目の並びから2つ目の並びを除いた部分を返す関数が要ると気づきました。
+これは標準にありそうな類の関数だと思いましたが、何という名前かはわかりませんでした。
+目当ての関数は `set-difference` に似ているので、*Common Lisp the Language* の索引でそれを引き、429ページへ導かれました。
+「リストを集合として使う」の節を眺めましたが、適当なものは見つかりませんでした。
+しかしそこで、これも目当ての関数に似た `butlast` を思い出しました。
+索引は `butlast` について422ページへ導き、同じページで `ldiff` を見つけました。まさに目当ての関数でした。
+`list-difference` という名前だったら見つけやすく（そして覚えやすく）あったでしょうが、似た関数の近くを眺めるというやり方が功を奏したわけです。
 
-If you think you know part of the name of the desired function, then you can use `apropos` to find it.
-For example, suppose I thought there was a function to push a new element onto the front of an array.
-Looking under `array`, `push-array`, and `array-push` in the index yields nothing.
-But I can turn to Lisp itself and ask:
+目当ての関数の名前の一部がわかっていると思うなら、`apropos` で探せます。
+たとえば、配列の先頭に新しい要素を積む関数があるはずだと思ったとしましょう。
+索引で `array`、`push-array`、`array-push` を引いても何も出てきません。
+しかしLisp自身に尋ねることはできます。
 
 ```lisp
 > (apropos "push")
@@ -490,8 +490,8 @@ VECTOR-PUSH        function  (NEW-ELEMENT VECTOR), plist
 VECTOR-PUSH-EXTEND function  (DATA VECTOR &OPTIONAL ...), plist
 ```
 
-This should be enough to remind me that `vector-push` is the answer.
-If not, I can get more information from the manual or from the online functions `documentation` or `describe`:
+これで `vector-push` が答えだと思い出すには十分でしょう。
+それでも足りなければ、マニュアルか、その場で使える関数 `documentation` や `describe` からもっと情報を得られます。
 
 ```lisp
 > (documentation 'vector-push 'function)
@@ -502,24 +502,24 @@ NIL and the array is unaffected; use VECTOR-PUSH-EXTEND instead
 if you want the array to grow automatically."
 ```
 
-Another possibility is to browse through existing code that performs a similar purpose.
-That way, you may find the exact function you want, and you may get additional ideas on how to do things differently.
+もう1つの手は、似た目的を果たす既存のコードを眺めることです。
+そうすれば、まさに目当ての関数が見つかるかもしれませんし、別のやり方についての着想も得られるかもしれません。
 
-## 25.10 Syntax of LOOP
+## 25.10 LOOPの構文
 
-`loop` by itself is a powerful programming language, one with a syntax quite different from the rest of Lisp.
-It is therefore important to exercise restraint in using `loop`, lest the reader of your program become lost.
-One simple rule for limiting the complexity of `loops` is to avoid the `with` and `and` keywords.
-This eliminates most problems dealing with binding and scope.
+`loop` はそれ自体で強力なプログラミング言語であり、その構文はLispの他の部分とはかなり違います。
+ですから `loop` を使うときは自制が肝心です。さもないとプログラムの読み手が迷ってしまいます。
+`loop` の複雑さを抑える単純な決まりごとの1つが、キーワード `with` と `and` を避けることです。
+これで束縛とスコープに関わる問題のほとんどがなくなります。
 
-When in doubt, macro-expand the loop to see what it actually does.
-But if you need to macro-expand, then perhaps it would be clearer to rewrite the loop with more primitive constructs.
+迷ったら、loopをマクロ展開して実際に何をするかを見ましょう。
+しかしマクロ展開が必要になるようなら、もっと基本的な構造でループを書き直すほうが明快かもしれません。
 
-## 25.11 Syntax of COND
+## 25.11 CONDの構文
 
-For many programmers, the special form cond is responsible for more syntax errors than any other, with the possible exception of `loop`.
-Because most cond-clause start with two left parentheses, beginners often come to the conclusion that every clause must.
-This leads to errors like the following:
+多くのプログラマにとって、特殊形式condは、おそらく `loop` を除けば他のどれよりも多くの構文の誤りを生む元です。
+condの節はたいてい開き括弧2つで始まるので、初心者はどの節もそうでなければならないと思い込みがちです。
+そこから次のような誤りが生まれます。
 
 ```lisp
 (let ((entry (assoc item list)))
@@ -527,26 +527,26 @@ This leads to errors like the following:
           ...))
 ```
 
-Here entry is a variable, but the urge to put in an extra parenthesis means that the cond-clause attempts to call entry as a function rather than testing its value as a variable.
+ここでentryは変数ですが、括弧を1つ余計に入れたくなったせいで、condの節はentryの値を変数として調べるのではなく、関数として呼ぼうとしてしまいます。
 
-The opposite problem, leaving out a parenthesis, is also a source of error:
+逆に括弧を落とすという問題も、誤りの元です。
 
 ```lisp
 (cond (lookup item list)
   (t nil))
 ```
 
-In this case, `lookup` is accessed as a variable, when the intent was to call it as a function.
-In Common Lisp this will usually lead to an unbound variable error, but in Scheme this bug can be very difficult to pin down: the value of `lookup` is the function itself, and since this is not null, the test will succeed, and the expression will return `list` without complaining.
+この場合、関数として呼ぶつもりだった `lookup` が、変数として参照されています。
+Common Lispならたいてい未束縛の変数の誤りになりますが、Schemeではこの不具合を突き止めるのが非常に難しくなります。`lookup` の値は関数そのものであり、それはnullではないので検査は成功し、式は文句も言わずに `list` を返してしまうのです。
 
-The moral is to be careful with cond, especially when using Scheme.
-Note that `if` is much less error prone and looks just as nice when there are no more than two branches.
+教訓は、condには気をつけよ、とりわけSchemeを使うときは、ということです。
+枝が2つ以下なら、`if` のほうがずっと誤りにくく、見た目も同じくらい良いことに注意してください。
 
-## 25.12 Syntax of CASE
+## 25.12 CASEの構文
 
-In a `case` special form, each clause consists of a key or list of keys, followed by the value of that case.
-The thing to watch out for is when the key is `t`, `otherwise`, or `nil`.
-For example:
+`case` の特殊形式では、各節はキーかキーの並びと、それに続くその場合の値から成ります。
+気をつけるべきは、キーが `t`、`otherwise`、`nil` のときです。
+たとえば次のようになります。
 
 ```lisp
 (case letter
@@ -555,11 +555,11 @@ For example:
   (u ...))
 ```
 
-Here the `t` is taken as the default clause; it will always succeed, and all subsequent clauses will be ignored.
-Similarly, using a `()` or `nil` as a key will not have the desired effect: it will be interpreted as an empty key list.
-If you want to be completely safe, you can use a list of keys for every clause.<a id="tfn25-2"></a><sup>[2](#fn25-2)</sup>
-This is a particularly good idea when you write a macro that expands into a `case`.
-The following code correctly tests for `t` and `nil` keys:
+ここでは `t` が既定の節と受け取られます。これは常に成功するので、以降の節はすべて無視されます。
+同じく `()` や `nil` をキーに使っても望みの効果は得られません。空のキーの並びと解釈されるからです。
+完全に安全を期したいなら、どの節にもキーの並びを使えます。<a id="tfn25-2"></a><sup>[2](#fn25-2)</sup>
+これは `case` に展開されるマクロを書くときには、とりわけ良い考えです。
+次のコードは `t` と `nil` のキーを正しく調べます。
 
 ```lisp
 (case letter
@@ -569,41 +569,41 @@ The following code correctly tests for `t` and `nil` keys:
   ((nil) ...))
 ```
 
-## 25.13 Syntax of LET and LET*
+## 25.13 LETとLET*の構文
 
-A common error is leaving off a layer of parentheses in `let`, just like in cond.
-Another error is to refer to a variable that has not yet been bound in a `let`.
-To avoid this problem, use `let*` whenever a variable's initial binding refers to a previous variable.
+よくある誤りが、condと同じく `let` で括弧を1段落とすことです。
+もう1つの誤りが、`let` のなかでまだ束縛されていない変数を参照することです。
+この問題を避けるには、変数の初期の束縛が先の変数を参照するときは常に `let*` を使いましょう。
 
-## 25.14 Problems with Macros
+## 25.14 マクロにまつわる問題
 
-In [section 3.2](chapter3.md#s0015) we described a four-part approach to the design of macros:
+[3.2節](chapter3.md#s0015)では、マクロの設計を4つの段に分ける方式を述べました。
 
-*   Decide if the macro is really necessary.
+*   そのマクロが本当に必要かを決める。
 
-*   Write down the syntax of the macro.
+*   マクロの構文を書き下ろす。
 
-*   Figure out what the macro should expand into.
+*   マクロが何に展開されるべきかを見定める。
 
-*   Use `defmacro` to implement the syntax/expansion correspondence.
+*   `defmacro` を使って構文と展開の対応を実装する。
 
-This section shows the problems that can arise in each part, starting with the first:
+本節では、各段で起こりうる問題を、最初のものから順に示します。
 
-*   Decide if the macro is really necessary.
+*   そのマクロが本当に必要かを決める。
 
-Macros extend the rules for evaluating an expression, while function calls obey the rules.
-Therefore, it can be a mistake to define too many macros, since they can make it more difficult to understand a program.
-A common mistake is to define macros that *do not* violate the usual evaluation rules.
-One recent book on AI programming suggests the following:
+マクロは式を評価する規則を拡張しますが、関数呼び出しはその規則に従います。
+ですからマクロを定義しすぎるのは誤りになりえます。プログラムを理解しにくくしかねないからです。
+よくある思い違いが、ふつうの評価規則を破ら*ない*マクロを定義することです。
+AIプログラミングについての最近のある本は、次のようなものを勧めています。
 
 ```lisp
 (defmacro binding-of (binding)      ; Warning!
     '(cadr .binding))               ; Don't do this.
 ```
 
-The only possible reason for this macro is an unfounded desire for efficiency.
-Always use an `inline` function instead of a macro for such cases.
-That way you get the efficiency gain, you have not introduced a spurious macro, and you gain the ability to `apply` or `map` the function `#'binding-of`, something you could not do with a macro:
+このマクロの理由としてありうるのは、効率への根拠のない願望だけです。
+そうした場合は常に、マクロではなく `inline` 関数を使いましょう。
+そうすれば効率の得も得られ、いんちきなマクロを持ち込まずに済み、しかも関数 `#'binding-of` を `apply` したり `map` したりできるようになります。マクロではできないことです。
 
 ```lisp
 (proclaim '(inline binding-of))
@@ -611,15 +611,15 @@ That way you get the efficiency gain, you have not introduced a spurious macro, 
   (second binding))
 ```
 
-*   Write down the syntax of the macro.
+*   マクロの構文を書き下ろす。
 
-Try to make your macro follow conventions laid down by similar macros.
-For example, if your macro defines something, it should obey the conventions of `defvar, defstruct, defmacro,` and the rest: start with the letters `def`, take the name of the thing to be defined as the first argument, then a lambda-list if appropriate, then a value or body.
-It would be nice to allow for optional declarations and documentation strings.
+自分のマクロが、似たマクロの定めた約束に従うようにしましょう。
+たとえば何かを定義するマクロなら、`defvar, defstruct, defmacro` などの約束に従うべきです。文字 `def` で始め、定義するものの名前を第1引数に取り、適切ならラムダの引数の並び、そして値か本体を続けます。
+省略可能な宣言と説明文字列も許せると良いでしょう。
 
-If your macro binds some variables or variablelike objects, use the conventions laid down by `let, let*,` and `labels`: allow for a list of variable or ( *variable init-val)* pairs.
-If you are iterating over some kind of sequence, follow `dotimes` and `dolist`.
-For example, here is the syntax of a macro to iterate over the leaves of a tree of conses:
+変数や変数めいた対象を束縛するマクロなら、`let, let*`、`labels` が定めた約束を使いましょう。変数の並び、あるいは（*変数 初期値*）の対の並びを許すのです。
+何らかの列をたどるなら、`dotimes` と `dolist` に倣いましょう。
+たとえば、コンスの木の葉をたどるマクロの構文を示します。
 
 ```lisp
 (defmacro dotree ((var tree &optional result) &body body)
@@ -628,14 +628,14 @@ For example, here is the syntax of a macro to iterate over the leaves of a tree 
  ...)
 ```
 
-*  Figure out what the macro should expand into.
+*  マクロが何に展開されるべきかを見定める。
 
-*  Use defmacro to implement the syntax/expansion correspondence.
+*  defmacroを使って構文と展開の対応を実装する。
 
-There are a number of things to watch out for in figuring out how to expand a macro.
-First, make sure you don't shadow local variables.
-Consider the following definition for `pop-end`, a function to pop off and return the last element of a list, while updating the list to no longer contain the last element.
-The definition uses `last1`, which was defined on page 305 to return the last element of a list, and the built-in function `nbutlast` returns all but the last element of a list, destructively altering the list.
+マクロをどう展開するかを見定めるにあたっては、気をつけるべき点がいくつもあります。
+第一に、局所変数を覆い隠さないようにしましょう。
+並びの最後の要素を取り出して返し、同時にその並びが最後の要素を含まなくなるよう更新する関数 `pop-end` の、次の定義を考えてみましょう。
+この定義は、並びの最後の要素を返すために305ページで定義した `last1` と、並びを破壊的に書き換えて最後以外のすべての要素を返す組み込み関数 `nbutlast` を使っています。
 
 ```lisp
 (defmacro pop-end (place)    ; Warning! Buggy!
@@ -645,8 +645,8 @@ The definition uses `last1`, which was defined on page 305 to return the last el
       result))
 ```
 
-This will do the wrong thing for (`pop-end result`), or for other expressions that mention the variable `result`.
-The solution is to use a brand new local variable that could not possibly be used elsewhere:
+これは (`pop-end result`) や、変数 `result` に触れる他の式に対して誤った動きをします。
+解決は、他で使われようのない真新しい局所変数を使うことです。
 
 ```lisp
 (defmacro pop-end (place)    ; Less buggy
@@ -657,7 +657,7 @@ The solution is to use a brand new local variable that could not possibly be use
       ,result)))
 ```
 
-There is still the problem of shadowing local *functions.* For example, a user who writes:
+それでも局所*関数*を覆い隠す問題は残ります。たとえば次のように書く利用者は、
 
 ```lisp
 (flet ((last1 (x) (sqrt x)))
@@ -665,9 +665,9 @@ There is still the problem of shadowing local *functions.* For example, a user w
   ...)
 ```
 
-will be in for a surprise, `pop-end` will expand into code that calls `last1`, but since `last1` has been locally defined to be something else, the code won't work.
-Thus, the expansion of the macro violates referential transparency.
-To be perfectly safe, we could try:
+驚くことになります。`pop-end` は `last1` を呼ぶコードへ展開されますが、`last1` は局所的に別のものとして定義されているので、そのコードは働きません。
+つまりこのマクロの展開は、参照透明性を破っているのです。
+完全に安全を期すなら、次のようにできます。
 
 ```lisp
 (defmacro pop-end (place)    ; Less buggy
@@ -678,13 +678,13 @@ To be perfectly safe, we could try:
         ,result)))
 ```
 
-This approach is sometimes used by Scheme programmers, but Common Lisp programmers usually do not bother, since it is rarer to define local functions in Common Lisp.
-Indeed, in *Common Lisp the Language*, 2d edition, it was explicitly stated (page 260) that a user function cannot redefine or even bind any built-in function, variable, or macro.
-Even if it is not prohibited in your implementation, redefining or binding a built-in function is confusing and should be avoided.
+この方式はSchemeのプログラマがときおり使いますが、Common Lispのプログラマはたいてい気にしません。Common Lispでは局所関数を定義することがより稀だからです。
+実際 *Common Lisp the Language* 第2版では、利用者の関数が組み込みの関数・変数・マクロを定義し直すことも、束縛することさえもできないと明記されています（260ページ）。
+お使いの実装で禁じられていなくても、組み込み関数を定義し直したり束縛したりするのは紛らわしいので避けるべきです。
 
-Common Lisp programmers expect that arguments will be evaluated in left-to-right order, and that no argument is evaluated more than once.
-Our definition of `pop-end` violates the second of these expectations.
-Consider:
+Common Lispのプログラマは、引数が左から右の順に評価され、どの引数も2度以上は評価されないと期待します。
+私たちの `pop-end` の定義は、この2つ目の期待を破っています。
+次を考えてみましょう。
 
 ```lisp
 (pop-end (aref lists (incf i))) =
@@ -693,8 +693,8 @@ Consider:
   #:G3096)
 ```
 
-This increments `i` three times, when it should increment it only once.
-We could fix this by introducing more local variables into the expansion:
+これは `i` を1度だけ増やすべきところ、3度増やしてしまいます。
+これは、展開に局所変数をもっと持ち込むことで直せます。
 
 ```lisp
 (let* ((templ (incf i))
@@ -704,9 +704,9 @@ We could fix this by introducing more local variables into the expansion:
   temp3)
 ```
 
-This kind of left-to-right argument processing via local variables is done automatically by the Common Lisp setf mechanism.
-Fortunately, the mechanism is easy to use.
-We can redefine `pop-end` to call `pop` directly:
+この種の、局所変数を介した左から右への引数の処理は、Common Lispのsetfの仕組みが自動で行ってくれます。
+さいわい、この仕組みは使いやすいものです。
+`pop-end` を、`pop` を直に呼ぶよう定義し直せます。
 
 ```lisp
 (defmacro pop-end (place)
@@ -714,10 +714,10 @@ We can redefine `pop-end` to call `pop` directly:
   '(pop (last ,place)))
 ```
 
-Now all we need to do is define the `setf` method for `last`.
-Here is a simple definition.
-It makes use of the function `last2`, which returns the last two elements of a list.
-In ANSI Common Lisp we could use (`last list 2`), but with a pre-ANSI compiler we need to define `last2`:
+あとは `last` の `setf` メソッドを定義するだけです。
+単純な定義を示します。
+これは、並びの最後の2要素を返す関数 `last2` を使っています。
+ANSI Common Lispなら (`last list 2`) を使えますが、ANSI以前のコンパイラでは `last2` を定義する必要があります。
 
 ```lisp
 (defsetf last (place) (value)
@@ -729,8 +729,8 @@ In ANSI Common Lisp we could use (`last list 2`), but with a pre-ANSI compiler w
       (last2 (rest list))))
 ```
 
-Here are some macro-expansions of calls to `pop-end` and to the `setf` method for `last`.
-Different compilers will produce different code, but they will always respect the left-to-right, one-evaluation-only semantics:
+`pop-end` の呼び出しと、`last` の `setf` メソッドのマクロ展開をいくつか示します。
+コンパイラが違えば生成されるコードも違いますが、左から右へ、一度だけ評価するという意味論は常に守られます。
 
 ```lisp
 > (pop-end (aref (foo lists) (incf i))) =
@@ -742,23 +742,23 @@ Different compilers will produce different code, but they will always respect th
 (SYS:SETCDR (LAST2 (APPEND X Y)) 'END)
 ```
 
-Unfortunately, there is an error in the `setf` method for `last`.
-It assumes that the list will have at least two elements.
-If the list is empty, it is probably an error, but if a list has exactly one element, then (`setf` (`last` *list) val)* should have the same effect as (`setf` *list val).*
-But there is no way to do that with `defsetf`, because the `setf` method defined by `defsetf` never sees *list* itself.
-Instead, it sees a local variable that is automatically bound to the value of *list.* In other words, `defsetf` evaluates the *list* and *val* for you, so that you needn't worry about evaluating the arguments out of order, or more than once.
+あいにく、`last` の `setf` メソッドには誤りがあります。
+並びに少なくとも2つの要素があると仮定しているのです。
+並びが空なら、それはおそらく誤りですが、要素がちょうど1つなら、(`setf` (`last` *list) val)* は (`setf` *list val)* と同じ効果を持つべきです。
+しかし `defsetf` ではそれができません。`defsetf` が定義する `setf` メソッドは、*list* そのものを決して見ないからです。
+代わりに見るのは、*list* の値へ自動的に束縛された局所変数です。言い換えれば、`defsetf` が *list* と *val* を評価してくれるので、引数を誤った順に評価したり2度以上評価したりする心配は要らないのです。
 
-To solve the problem we need to go beyond the simple `defsetf` macro and delve into the complexities of `define-setf-method`, one of the trickiest macros in all of Common Lisp.
-`define-setf-method` defines a setf method not by writing code directly but by specifying five values that will be used by Common Lisp to write the code for a call to `setf`.
-The five values give more control over the exact order in which expressions are evaluated, variables are bound, and results are returned.
-The five values are: (1) a list of temporary, local variables used in the code; (2) a list of values these variables should be bound to; (3) a list of one variable to hold the value specified in the call to `setf`; (4) code that will store the value in the proper place; (5) code that will access the value of the place.
-This is necessary for variations of `setf` like `inef` and `pop`, which need to both access and store.
+この問題を解くには、単純な `defsetf` マクロを越えて、Common Lisp全体でもっとも扱いの難しいマクロの1つである `define-setf-method` の込み入ったところへ踏み込む必要があります。
+`define-setf-method` は、コードを直に書くのではなく、`setf` の呼び出しのコードをCommon Lispが書くのに使う5つの値を指定することで、setfメソッドを定義します。
+この5つの値によって、式が評価され、変数が束縛され、結果が返される正確な順序を、より細かく制御できます。
+5つの値とは、(1) コードで使う一時的な局所変数の並び、(2) その変数が束縛されるべき値の並び、(3) `setf` の呼び出しで指定された値を保つ変数1つの並び、(4) その値をしかるべき場所へ格納するコード、(5) その場所の値を参照するコード、です。
+これは、参照と格納の両方が必要な `inef` や `pop` のような `setf` の変種のために欠かせません。
 
-In the following `setf` method for `last`, then, we are defining the meaning of `(setf (last place) value)`.
-We keep track of all the variables and values needed to evaluate `place`, and add to that three more local variables: `last2-var` will hold the last two elements of the list, `last2-p` will be true only if there are two or more elements in the list, and `last-var` will hold the form to access the last element of the list.
-We also make up a new variable, `result`, to hold the `value`.
-The code to store the value either modifies the `cdr` of `last2-var`, if the list is long enough, or it stores directly into `place`.
-The code to access the value just retrieves `last-var`.
+ですから次の `last` の `setf` メソッドでは、`(setf (last place) value)` の意味を定めていることになります。
+`place` の評価に必要な変数と値をすべて記録し、そこへさらに3つの局所変数を加えます。`last2-var` は並びの最後の2要素を保ち、`last2-p` は並びに2つ以上の要素があるときにだけ真になり、`last-var` は並びの最後の要素を参照する形式を保ちます。
+また `value` を保つ新しい変数 `result` もこしらえます。
+値を格納するコードは、並びが十分に長ければ `last2-var` の `cdr` を書き換え、そうでなければ `place` へ直に格納します。
+値を参照するコードは、`last-var` を取ってくるだけです。
 
 ```lisp
 (define-setf-method last (place)
@@ -782,13 +782,13 @@ The code to access the value just retrieves `last-var`.
           last-var))))
 ```
 
-It should be mentioned that `setf` methods are very useful and powerful things.
-It is often better to provide a `setf` method for an arbitrary function, `f`, than to define a special setting function, say, `set-f`.
-The advantage of the `setf` method is that it can be used in idioms like `incf` and `pop`, in addition to `setf` itself.
-Also, in ANSI Common Lisp, it is permissible to name a function with `#'(setf f)`, so you can also use map or apply the `setf` method.
-Most `setf` methods are for functions that just access data, but it is permissible to define `setf` methods for functions that do any computation whatsoever.
-As a rather fanciful example, here is a `setf` method for the square-root function.
-It makes (`setf (sqrt x) 5`) be almost equivalent to (`setf x (* 5 5)`) ; the difference is that the first returns 5 while the second returns 25.
+`setf` メソッドがたいそう役立つ強力なものであることは、述べておくべきでしょう。
+任意の関数 `f` に `setf` メソッドを用意するほうが、たとえば `set-f` のような専用の設定関数を定義するより良いことがよくあります。
+`setf` メソッドの利点は、`setf` そのものに加えて `incf` や `pop` のような慣用句でも使えることです。
+また、ANSI Common Lispでは関数を `#'(setf f)` で名指すことが許されるので、`setf` メソッドをmapしたりapplyしたりもできます。
+`setf` メソッドのほとんどはデータを参照するだけの関数のためのものですが、どんな計算をする関数にも `setf` メソッドを定義してかまいません。
+やや突飛な例として、平方根の関数の `setf` メソッドを示します。
+これによって (`setf (sqrt x) 5`) は (`setf x (* 5 5)`) とほぼ同じことになります。違いは、前者が5を返し後者が25を返すことです。
 
 ```lisp
 (define-setf-method sqrt (num)
@@ -804,9 +804,9 @@ It makes (`setf (sqrt x) 5`) be almost equivalent to (`setf x (* 5 5)`) ; the di
           '(sqrt .access-form)))))
 ```
 
-Turning from `setf` methods back to macros, another hard part about writing portable macros is anticipating what compilers might warn about.
-Let's go back to the `dotree` macro.
-Its definition might look in part like this:
+`setf` メソッドからマクロの話に戻ると、移植性のあるマクロを書くうえで難しいもう1つの点が、コンパイラが何を警告しうるかを見越すことです。
+マクロ `dotree` に戻りましょう。
+その定義の一部は、次のような形になるかもしれません。
 
 ```lisp
 (defmacro dotree ((var tree &optional result) &body body)
@@ -817,7 +817,7 @@ Its definition might look in part like this:
    ,@body))
 ```
 
-Now suppose a user decides to count the leaves of a tree with:
+ここで利用者が、次のようにして木の葉を数えることにしたとしましょう。
 
 ```lisp
 (let ((count 0))
@@ -825,8 +825,8 @@ Now suppose a user decides to count the leaves of a tree with:
         (incf count)))
 ```
 
-The problem is that the variable `leaf` is not used in the body of the macro, and a compiler may well issue a warning to that effect.
-To make matters worse, a conscientious user might write:
+厄介なのは、変数 `leaf` がマクロの本体で使われていないことで、コンパイラがその旨の警告を出すのも無理はありません。
+さらに悪いことに、几帳面な利用者は次のように書くかもしれません。
 
 ```lisp
 (let ((count 0))
@@ -835,10 +835,10 @@ To make matters worse, a conscientious user might write:
       (incf count)))
 ```
 
-The designer of a new macro must decide if declarations are allowed and must make sure that compiler warnings will not be generated unless they are warranted.
+新しいマクロの設計者は、宣言を許すかどうかを決め、正当な理由がないかぎりコンパイラの警告が出ないようにせねばなりません。
 
-Macros have the full power of Lisp at their disposal, but the macro designer must remember the purpose of a macro is to translate macro code into primitive code, and not to do any computations.
-Consider the following macro, which assumes that `translate-rule-body` is defined elsewhere:
+マクロはLispの力をすべて自由に使えますが、マクロの設計者は、マクロの目的がマクロのコードを基本的なコードへ訳すことであって、何かを計算することではないと肝に銘じねばなりません。
+`translate-rule-body` が他所で定義されていると仮定した、次のマクロを考えてみましょう。
 
 ```lisp
 (defmacro defrule (name &body body)  ; Warning! buggy!
@@ -847,9 +847,9 @@ Consider the following macro, which assumes that `translate-rule-body` is define
     '#'(lambda O ,(translate-rule-body body))))
 ```
 
-The idea is to store a function under the `rule` property of the rule's name.
-But this definition is incorrect because the function is stored as a side effect of expanding the macro, rather than as an effect of executing the expanded macro code.
-The correct definition is:
+考えとしては、規則の名前の `rule` 属性のもとに関数を格納するというものです。
+しかしこの定義は誤りです。関数が、展開されたマクロのコードを実行した結果としてではなく、マクロを展開する副作用として格納されてしまうからです。
+正しい定義は次のとおりです。
 
 ```lisp
 (defmacro defrule (name &body body)
@@ -858,26 +858,26 @@ The correct definition is:
   #'(lambda () .(translate-rule-body body))))
 ```
 
-Beginners sometimes fail to see the difference between these two approaches, because they both have the same result when interpreting a file that makes use of `defrule`.
-But when the file is compiled and later loaded into a different Lisp image, the difference becomes clear: the first definition erroneously stores the function in the compiler's image, while the second produces code that correctly stores the function when the code is loaded.
+初心者はときにこの2つの方式の違いを見落とします。`defrule` を使うファイルを解釈するときには、どちらも同じ結果になるからです。
+しかしそのファイルをコンパイルし、あとで別のLispのイメージへ読み込むと違いがはっきりします。最初の定義は誤ってコンパイラのイメージに関数を格納し、2つ目はコードが読み込まれたときに正しく関数を格納するコードを生みます。
 
-Beginning macro users have asked, "How can I have a macro that expands into code that does more than one thing?
-Can I splice in the results of a macro?"
+マクロを使い始めた人はこう尋ねます。「2つ以上のことをするコードへ展開されるマクロは、どうすれば書けますか。
+マクロの結果を差し込めますか」。
 
-If by this the beginner wants a macro that just *does* two things, the answer is simply to use a progn.
-There will be no efficiency problem, even if the progn forms are nested.
-That is, if macro-expansion results in code like:
+これが、2つのことを*する*だけのマクロがほしいという意味なら、答えは単にprognを使うことです。
+prognの形式が入れ子になっても、効率の問題は起きません。
+つまり、マクロ展開の結果が次のようなコードになっても、
 
 > `(progn (progn (progn` *a b) c*) `(progn` *d e*))
 
-the compiler will treat it the same as `(progn` *a b c d e).*
+コンパイラはそれを `(progn` *a b c d e)* と同じに扱います。
 
-On the other hand, if the beginner wants a macro that *returns* two values, the proper form is `values`, but it must be understood that the calling function needs to arrange specially to see both values.
-There is no way around this limitation.
-That is, there is no way to write a macro-or a function for that matter-that will "splice in" its results to an arbitrary call.
-For example, the function `floor` returns two values (the quotient and remainder), as does `intern` (the symbol and whether or not the symbol already existed).
-But we need a special form to capture these values.
-For example, compare:
+一方、2つの値を*返す*マクロがほしいのなら、しかるべき形式は `values` です。ただし、呼び手の関数が両方の値を見るには特別な手はずが要ることを理解せねばなりません。
+この制約を回避する道はありません。
+つまり、任意の呼び出しへ結果を「差し込む」マクロは、いや関数でさえも、書きようがないのです。
+たとえば関数 `floor` は2つの値（商と余り）を返しますし、`intern` も同じです（シンボルと、そのシンボルがすでに存在したかどうか）。
+しかしその値を捕まえるには特殊形式が要ります。
+たとえば次を比べてみてください。
 
 ```lisp
 > (list (floor 11 5) (intern 'x))=M2 X)
@@ -885,118 +885,118 @@ For example, compare:
   (floor 11 5) (intern 'x))=>(2 1 X :INTERNAL)
 ```
 
-## 25.15 A Style Guide to Lisp
+## 25.15 Lispの作法の手引き
 
-In a sense, this whole book is a style guide to writing quality Lisp programs.
-But this section attempts to distill some of the lessons into a set of guidelines.
+ある意味で、本書全体が質の高いLispプログラムを書くための作法の手引きです。
+しかし本節では、その教訓のいくつかを一組の指針へ煮詰めてみます。
 
-### When to Define a Function
+### どんなときに関数を定義するか
 
-Lisp programs tend to consist of many short functions, in contrast to some languages that prefer a style using fewer, longer functions.
-New functions should be introduced for any of the following reasons:
+Lispのプログラムは短い関数を数多く並べる形になりがちです。より少なく長い関数を使う流儀を好む言語とは対照的です。
+新しい関数を導入すべき理由は、次のいずれかです。
 
-1.  For a specific, easily stated purpose.
+1.  はっきりした、簡単に述べられる目的のため。
 
-2.  To break up a function that is too long.
+2.  長すぎる関数を分けるため。
 
-3.  When the name would be useful documentation.
+3.  その名前が説明として役に立つとき。
 
-4.  When it is used in several places.
+4.  複数の箇所で使われるとき。
 
-In (2), it is interesting to consider what "too long" means.
-[Charniak et al.
-(1987)](bibliography.md#bb0180) suggested that 20 lines is the limit.
-But now that large bit-map displays have replaced 24-line terminals, function definitions have become longer.
-So perhaps one screenful is a better limit than 20 lines.
-The addition of `flet` and `labels` also contributes to longer function definitions.
+(2) では、「長すぎる」が何を意味するかを考えてみると面白いところです。
+[Charniak ほか
+（1987）](bibliography.md#bb0180)は、20行が限度だと述べていました。
+しかし24行の端末に代わって大きなビットマップの表示装置が使われるようになったいま、関数の定義は長くなりました。
+ですからおそらく、20行より画面1杯ぶんのほうが良い目安でしょう。
+`flet` と `labels` が加わったことも、関数の定義が長くなる一因です。
 
-### When to Define a Special Variable
+### どんなときにスペシャル変数を定義するか
 
-In general, it is a good idea to minimize the use of special variables.
-Lexical variables are easier to understand, precisely because their scope is limited.
-Try to limit special variables to one of the following uses:
+一般に、スペシャル変数の使用は最小限にとどめるのが良い考えです。
+レキシカル変数のほうが理解しやすいのは、まさにそのスコープが限られているからです。
+スペシャル変数の用途は、次のいずれかに限るようにしましょう。
 
-1.  For parameters that are used in many functions spread throughout a program.
+1.  プログラム全体に散らばる多くの関数で使われる引数のため。
 
-2.  For global, persistant, mutable data, such as a data base of facts.
+2.  事実のデータベースのような、大域的で持続し書き換わるデータのため。
 
-3.  For infrequent but deeply nested use.
+3.  頻度は低いが深く入れ子になった用途のため。
 
-An example of (3) might be a variable like `*standard-output*`, which is used by low-level printing functions.
-It would be confusing to have to pass this variable around among all your high-level functions just to make it available to `print`.
+(3) の例が `*standard-output*` のような変数で、低水準の表示の関数が使います。
+`print` から使えるようにするためだけに、この変数を高水準の関数すべてのあいだで引き回さねばならないとしたら、紛らわしいことでしょう。
 
-### When to Bind a Lexical Variable
+### どんなときにレキシカル変数を束縛するか
 
-In contrast to special variables, lexical variables are encouraged.
-You should feel free to introduce a lexical variable (with `a let, lambda` or `defun`) for any of the following reasons:
+スペシャル変数とは対照的に、レキシカル変数は勧められます。
+次のいずれかの理由があれば、（`let`、`lambda`、`defun` で）レキシカル変数を気兼ねなく導入してよいのです。
 
-1.  To avoid typing in the same expression twice.
+1.  同じ式を2度打ち込まずに済ませるため。
 
-2.  To avoid computing the same expression twice.
+2.  同じ式を2度計算せずに済ませるため。
 
-3.  When the name would be useful documentation.
+3.  その名前が説明として役に立つとき。
 
-4.  To keep the indentation manageable.
+4.  字下げを手に負える範囲に保つため。
 
-### How to Choose a Name
+### 名前の選び方
 
-Your choice of names for functions, variables, and other objects should be clear, meaningful, and consistent.
-Some of the conventions are listed here:
+関数・変数・その他の対象の名前は、明快で、意味があり、一貫したものであるべきです。
+約束のいくつかをここに挙げます。
 
-1.  Use mostly letters and hyphens, and use full words: `delete-file`.
+1.  おもに英字とハイフンを使い、語を略さずに書く。`delete-file` のように。
 
-2.  You can introduce an abbreviation if you are consistent: `get-dtree`, `dtree-fetch`.
-For example, this book uses `fn` consistently as the abbreviation for "function."
+2.  一貫していれば略記を持ち込んでよい。`get-dtree`、`dtree-fetch` のように。
+たとえば本書は「function」の略として `fn` を一貫して使っています。
 
-3.  Predicates end in `-p` (or `?` in Scheme), unless the name is already a predicate: `variable-p`, `occurs-in`.
+3.  述語は `-p`（Schemeでは `?`）で終える。ただし名前がすでに述語になっている場合は除く。`variable-p`、`occurs-in` のように。
 
-4.  Destructive functions start with `n` (or end in `!` in Scheme): `nreverse`.
+4.  破壊的な関数は `n` で始める（Schemeでは `!` で終える）。`nreverse` のように。
 
-5.  Generalized variable-setting macros end in `f`: `setf`, `incf`.
-(`Push` is an exception.)
+5.  一般化された変数を設定するマクロは `f` で終える。`setf`、`incf` のように。
+（`Push` は例外です。）
 
-6.  Slot selectors created by `defstruct` are of the form *type-slot.* Use this for `non-defstruct` selectors as well: `char-bits`.
+6.  `defstruct` が作るスロットの選択関数は *型-スロット* の形になる。`defstruct` によらない選択関数にもこれを使う。`char-bits` のように。
 
-7.  Many functions have the form *action-object:* `copy-list, delete-file`.
+7.  多くの関数は *動作-対象* の形をとる。`copy-list, delete-file` のように。
 
-8.  Other functions have the form *object-modifier:* `list-length, char-lessp`.
-Be consistent in your choice between these two forms.
-Don't have `print-edge` and `vertex-print` in the same system.
+8.  他の関数は *対象-修飾* の形をとる。`list-length, char-lessp` のように。
+この2つの形のどちらを選ぶかは、一貫させましょう。
+同じシステムに `print-edge` と `vertex-print` を混在させてはいけません。
 
-9.  A function of the form *modulename-functionname* is an indication that packages are needed.
-Use parser: `print-tree` instead of `parser-print-tree`.
+9.  *モジュール名-関数名* の形の関数は、パッケージが必要だという徴候である。
+`parser-print-tree` ではなく parser: `print-tree` を使いましょう。
 
-10.  Special variables have asterisks: `*db*, *print-length*`.
+10.  スペシャル変数はアスタリスクで挟む。`*db*, *print-length*` のように。
 
-11.  Constants do not have asterisks: `pi, most-positive-fixnum`.
+11.  定数はアスタリスクで挟まない。`pi, most-positive-fixnum` のように。
 
-12.  Parameters are named by type: (`defun length (sequence) ...)` or by purpose: (`defun subsetp(subset superset) ...`) or both: (`defun / (number &rest denominator-numbers) ...`)
+12.  引数は型で名づける（(`defun length (sequence) ...)`）か、目的で名づける（(`defun subsetp(subset superset) ...`)）か、その両方（(`defun / (number &rest denominator-numbers) ...`)）で名づける。
 
-13.  Avoid ambiguity.
-A variable named `last-node` could have two meanings; use `previous-node` or `final-node` instead.
+13.  曖昧さを避ける。
+`last-node` という名の変数は2通りの意味を持ちえます。代わりに `previous-node` か `final-node` を使いましょう。
 
-14.  A name like `propagate-constraints-to-neighboring-vertexes` is too long, while `prp-con` is too short.
-In deciding on length, consider how the name will be used: `propagate-constraints` is just right, because a typical call will be `(propagate-constraints vertex)`, so it will be obvious what the constraints are propagating to.
+14.  `propagate-constraints-to-neighboring-vertexes` のような名前は長すぎ、`prp-con` は短すぎる。
+長さを決めるときは、その名前がどう使われるかを考えましょう。`propagate-constraints` がちょうどよいのは、典型的な呼び出しが `(propagate-constraints vertex)` になるので、制約が何へ伝わるかが自明になるからです。
 
-### Deciding on the Order of Parameters
+### 引数の順序を決める
 
-Once you have decided to define a function, you must decide what parameters it will take, and in what order.
-In general,
+関数を定義すると決めたら、どんな引数をどの順で取るかを決めねばなりません。
+一般に、
 
-1.  Put important parameters first (and optional ones last).
+1.  重要な引数を先に置く（省略可能なものは最後に）。
 
-2.  Make it read like prose if possible: (`push element stack`).
+2.  できれば文章のように読めるようにする。(`push element stack`) のように。
 
-3.  Group similar parameters together.
+3.  似た引数はまとめて置く。
 
-Interestingly, the choice of a parameter list for top-level functions (those that the user is expected to call) depends on the environment in which the user will function.
-In many systems the user can type a keystroke to get back the previous input to the top level, and can then edit that input and re-execute it.
-In these systems it is preferable to have the parameters that are likely to change be at the end of the parameter list, so that they can be easily edited.
-On systems that do not offer this kind of editing, it is better to either use keyword parameters or make the highly variable parameters first in the list (with the others optional), so that the user will not have to type as much.
+面白いことに、最上位の関数（利用者が呼ぶと想定される関数）の引数の並びの選び方は、利用者が働く環境によります。
+多くのシステムでは、キーを押せば最上位への前回の入力を呼び戻せて、それを編集して実行し直せます。
+そうしたシステムでは、変わりそうな引数を並びの末尾に置くほうが望ましいのです。編集しやすくなるからです。
+この種の編集ができないシステムでは、キーワード引数を使うか、よく変わる引数を並びの先頭に置く（他は省略可能にする）ほうがよいでしょう。利用者の打ち込む量が減るからです。
 
-Many users want to have *required* keyword parameters.
-It turns out that all keyword parameters are optional, but the following trick is equivalent to a required keyword parameter.
-First we define the function `required` to signal an error, and then we use a call to `required` as the default value for any keyword that we want to make required:
+多くの利用者は*必須の*キーワード引数がほしいと思っています。
+キーワード引数はすべて省略可能なのですが、次の工夫は必須のキーワード引数と同じことになります。
+まず誤りを通知する関数 `required` を定義し、必須にしたいキーワードの既定値として `required` の呼び出しを使うのです。
 
 ```lisp
 (defun required ()
@@ -1005,45 +1005,45 @@ First we define the function `required` to signal an error, and then we use a ca
   ...)
 ```
 
-## 25.16 Dealing with Files, Packages, and Systems
+## 25.16 ファイル、パッケージ、システムを扱う
 
-While this book has covered topics that are more advanced than any other Lisp text available, it is still concerned only with programming in the small: a single project at a time, capable of being implemented by a single programmer.
-More challenging is the problem of programming in the large: building multiproject, multiprogrammer systems that interact well.
+本書は、入手できる他のどのLispの教科書より進んだ話題を扱ってきましたが、それでも関心は小規模なプログラミングにとどまっています。一度に1つの企てで、1人のプログラマが実装できる規模です。
+より手強いのが大規模なプログラミングの問題、すなわち複数の企て・複数のプログラマからなり、うまく噛み合うシステムを築くことです。
 
-This section briefly outlines an approach to organizing a larger project into manageable components, and how to place those components in files.
+本節では、大きな企てを手に負える部品へ組み立てる方式と、その部品をファイルへどう置くかを手短に述べます。
 
-Every system should have a separate file that defines the other files that comprise the system.
-I recommend defining any packages in that file, although others put package definitions in separate files.
+どのシステムにも、そのシステムを構成する他のファイルを定義する独立したファイルがあるべきです。
+パッケージもそのファイルで定義することを勧めます。パッケージの定義を別のファイルに置く人もいますが。
 
-The following is a sample file for the mythical system Project-X.
-Each entry in the file is discussed in turn.
+次に示すのは、架空のシステムProject-Xのためのファイルの例です。
+ファイルの各項目を順に見ていきます。
 
-1.  The first line is a comment known as the *mode line.*
-The text editor emacs will parse the characters between `-*-` delimiters to discover that the file contains Lisp code, and thus the Lisp editing commands should be made available.
-The dialect of Lisp and the package are also specified.
-This notation is becoming widespread as other text editors emulate emacs's conventions.
+1.  最初の行は*モード行*として知られるコメントです。
+テキストエディタemacsは `-*-` の区切りのあいだの文字を解析して、そのファイルがLispのコードを含むこと、したがってLispの編集命令を使えるようにすべきことを知ります。
+Lispの方言とパッケージも指定されます。
+他のテキストエディタがemacsの約束をまねるようになり、この記法は広まりつつあります。
 
-2.  Each file should have a description of its contents, along with information on the authors and what revisions have taken place.
+2.  どのファイルにも、その中身の説明と、著者や改訂の情報を添えるべきです。
 
-3.  Comments with four semicolons (`;;;;`) denote header lines.
-Many text editors supply a command to print all such lines, thus achieving an outline of the major parts of a file.
+3.  セミコロン4つ（`;;;;`）のコメントは見出しの行を表します。
+多くのテキストエディタは、そうした行をすべて表示する命令を備えており、ファイルのおもな部分の概略が得られます。
 
-4.  The first executable form in every file should be an `in-package`.
-Here we use the user package.
-We will soon create the `project-x package`, and it will be used in all subsequent files.
+4.  どのファイルでも、最初に実行される形式は `in-package` であるべきです。
+ここでは user パッケージを使います。
+じきに `project-x package` を作り、以降のファイルではすべてそれを使います。
 
-5.  We want to define the Project-X system as a collection of files.
-Unfortunately, Common Lisp provides no way to do that, so we have to load our own system-definition functions explicitly with a call to `load`.
+5.  Project-Xのシステムを、ファイルの集まりとして定義したいところです。
+あいにくCommon Lispにはそのための手立てがないので、自前のシステム定義関数を `load` の呼び出しで明示的に読み込まねばなりません。
 
-6.  The call to `define-system` specifies the files that make up Project-X.
-We provide a name for the system, a directory for the source and object files, and a list of *modules* that make up the system.
-Each module is a list consisting of the module name (a symbol) followed by a one or more files (strings or pathnames).
-We have used keywords as the module names to eliminate any possible name conflicts, but any symbol could be used.
+6.  `define-system` の呼び出しが、Project-Xを構成するファイルを指定します。
+システムの名前、原始ファイルと目的ファイルのディレクトリ、そしてシステムを構成する*モジュール*の並びを与えます。
+各モジュールは、モジュール名（シンボル）に続けて1つ以上のファイル（文字列またはパス名）を並べた並びです。
+名前の衝突が起こりえないよう、モジュール名にはキーワードを使いましたが、どんなシンボルでもかまいません。
 
-7.  The call to `defpackage` defines the package `project-x`.
-For more on packages, see section 24.1.
+7.  `defpackage` の呼び出しが、パッケージ `project-x` を定義します。
+パッケージについて詳しくは、24.1節を見てください。
 
-8.  The final form prints instructions on how to load and run the system.
+8.  最後の形式が、システムの読み込み方と走らせ方の手引きを表示します。
 
 ```lisp
 ;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: User -*-
@@ -1065,28 +1065,28 @@ For more on packages, see section 24.1.
   (:use common-lisp))
 (format *debug-io* To load the Project-X system, type
   (make-system marne :project-x)
-To run the system, type
+このシステムを走らせるには、次のように打ちます。
   (project-x:run-x)")
 ```
 
-Each of the files that make up the system will start like this:
+システムを構成する各ファイルは、次のように始まります。
 
 ```lisp
 ;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: Project-X -*-
 (in-package "PROJECT-X")
 ```
 
-Now we need to provide the system-definition functions, `define-system` and `make-system`.
-The idea is that `define-system` is used to define the files that make up a system, the modules that the system is comprised of, and the files that make up each module.
-It is necessary to group files into modules because some files may depend on others.
-For example, all macros, special variables, constants, and inline functions need to be both compiled and loaded before any other files that reference them are compiled.
-In Project-X, all `defvar, defparameter, defconstant,` and `defstruct`<a id="tfn25-3"></a><sup>[3](#fn25-3)</sup> forms are put in the file header, and all `defmacro` forms are put in the file `macros`.
-Together these two files form the first module, named `:macros`, which will be loaded before the other two modules (`:main` and `:windows`) are compiled and loaded.
+次に、システムを定義する関数 `define-system` と `make-system` を用意する必要があります。
+考えとしては、`define-system` を使って、システムを構成するファイル、システムが成り立っているモジュール、そして各モジュールを構成するファイルを定義します。
+ファイルをモジュールにまとめる必要があるのは、あるファイルが他のファイルに依存しうるからです。
+たとえばマクロ・スペシャル変数・定数・inline関数はすべて、それらを参照する他のファイルがコンパイルされる前に、コンパイルも読み込みも済ませておく必要があります。
+Project-Xでは、`defvar, defparameter, defconstant`、`defstruct`<a id="tfn25-3"></a><sup>[3](#fn25-3)</sup> の形式をすべてファイル header に置き、`defmacro` の形式をすべてファイル `macros` に置いています。
+この2つのファイルが合わさって `:macros` という最初のモジュールをなし、他の2つのモジュール（`:main` と `:windows`）がコンパイルされ読み込まれる前に読み込まれます。
 
-`define-system` also provides a place to specify a directory where the source and object files will reside.
-For larger systems spread across multiple directories, `define-system` will not be adequate.
+`define-system` は、ソースファイルと目的ファイルを置くディレクトリを指定する場所も用意します。
+複数のディレクトリにまたがる大きなシステムには、`define-system` では足りません。
 
-Here is the first part of the file `defsys.lisp`, showing the definition of `define-system` and the structure `sys`.
+ファイル `defsys.lisp` の最初の部分を示します。`define-system` と構造体 `sys` の定義です。
 
 ```lisp
 ;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: User -*-
@@ -1110,11 +1110,11 @@ Here is the first part of the file `defsys.lisp`, showing the definition of `def
 name)
 ```
 
-The function `make-system` is used to compile and/or load a previously defined system.
-The name supplied is used to look up the definition of a system, and one of three actions is taken on the system.
-The keyword `:cload` means to compile and then load files.
-`:load` means to load files; if there is an object (compiled) file and it is newer than the source file, then it will be loaded, otherwise the source file will be loaded.
-Finally, `:update` means to compile just those source files that have been changed since their corresponding source files were last altered, and to load the new compiled version.
+関数 `make-system` は、あらかじめ定義したシステムをコンパイルしたり読み込んだりするのに使います。
+与えた名前でシステムの定義を引き、そのシステムに対して3つの動作のいずれかを行います。
+キーワード `:cload` は、ファイルをコンパイルしてから読み込むという意味です。
+`:load` はファイルを読み込むという意味です。目的（コンパイル済み）ファイルがあってソースファイルより新しければそれを読み込み、そうでなければソースファイルを読み込みます。
+最後に `:update` は、対応するソースファイルが最後に書き換えられて以降に変わったソースファイルだけをコンパイルし、新しくコンパイルした版を読み込むという意味です。
 
 ```lisp
 (defun make-system (&key (module : al 1 ) (action :cload)
@@ -1153,8 +1153,8 @@ Finally, `:update` means to compile just those source files that have been chang
   action x system))))
 ```
 
-To support this, we need to be able to compare the write dates on files.
-This is not hard to do, since Common Lisp provides the function `file-write-date`.
+これを支えるには、ファイルの書き込み日時を比べられる必要があります。
+Common Lispが関数 `file-write-date` を備えているので、これは難しくありません。
 
 ```lisp
 (defun newer-file-p (file1 file2)
@@ -1166,65 +1166,65 @@ This is not hard to do, since Common Lisp provides the function `file-write-date
   (and (numberp x) (numberp y) (> x y)))
 ```
 
-## 25.17 Portability Problems
+## 25.17 移植性の問題
 
-Programming is difficult.
-All programmers know the frustration of trying to get a program to work according to the specification.
-But one thing that really defines the professional programmer is the ability to write portable programs that will work on a variety of systems.
-A portable program not only must work on the computer it was tested on but also must anticipate the difference between your computer and other ones.
-To do this, you must understand the Common Lisp specification in the abstract, not just how it is implemented on your particular machine.
+プログラミングは難しいものです。
+仕様どおりにプログラムを動かそうとするもどかしさは、どのプログラマも知っています。
+しかし玄人のプログラマを本当に特徴づけるものの1つが、さまざまなシステムで動く移植性のあるプログラムを書く力です。
+移植性のあるプログラムは、試した計算機で動くだけでなく、自分の計算機と他の計算機との違いも見越していなければなりません。
+そのためには、Common Lispの仕様を抽象として理解せねばなりません。自分の特定の機械でどう実装されているかを知るだけでは足りないのです。
 
-There are three ways in which Common Lisp systems can vary: in the treatment of "is an error" situations, in the treatment of unspecified results, and in extensions to the language.
+Common Lispのシステムが食い違いうる点は3つあります。「誤りである」とされた状況の扱い、仕様の定まっていない結果の扱い、そして言語への拡張です。
 
-*Common Lisp the Language* specifies that it "is an error" to pass a non-number to an arithmetic function.
-For example, it is an error to evaluate (`+ nil 1`).
-However, it is not specified what should be done in this situation.
-Some implementations may signal an error, but others may not.
-An implementation would be within its right to return 1, or any other number or non-number as the result.
+*Common Lisp the Language* は、算術の関数に数でないものを渡すのは「誤りである」と定めています。
+たとえば (`+ nil 1`) を評価するのは誤りです。
+しかし、その状況で何をすべきかは定められていません。
+誤りを通知する実装もあれば、しない実装もあるでしょう。
+実装が結果として1を返しても、他のどんな数や数でないものを返しても、その権利の範囲内です。
 
-An unsuspecting programmer may code an expression that is an error but still computes reasonable results in his or her implementation.
-A common example is applying `get` to a non-symbol.
-This is an error, but many implementations will just return nil, so the programmer may write (`get x ' prop`) when `(if ( symbol p x) (get x 'prop) nil`) is actually needed for portable code.
-Another common problem is with `subseq` and the sequence functions that take `:end` keywords.
-It is an error if the `:end` parameter is not an integer less than the length of the sequence, but many implementations will not complain if `:end` is nil or is an integer greater than the length of the sequence.
+疑いを持たないプログラマは、誤りではあるが自分の実装ではそれなりの結果を計算してしまう式を書きかねません。
+よくある例が、シンボルでないものに `get` を適用することです。
+これは誤りですが、多くの実装は単にnilを返すので、移植性のあるコードには本当は `(if ( symbol p x) (get x 'prop) nil`) が必要なところを、プログラマは (`get x ' prop`) と書いてしまうかもしれません。
+よくあるもう1つの問題が、`subseq` と `:end` のキーワードを取る列の関数です。
+`:end` の引数が列の長さより小さい整数でなければ誤りですが、多くの実装は `:end` がnilでも、列の長さより大きい整数でも文句を言いません。
 
-The Common Lisp specification often places constraints on the result that a function must compute, without fully specifying the result.
-For example, both of the following are valid results:
+Common Lispの仕様は、関数が計算せねばならない結果に制約を課しながら、その結果を完全には定めないことがよくあります。
+たとえば次のどちらも正当な結果です。
 
 ```lisp
 > (union '(a b c) '(b c d)) => (A B C D)
 > (union '(a b c) '(b c d)) => (D A B C)
 ```
 
-A program that relies on one order or the other will not be portable.
-The same warning applies to `intersection` and `set-difference`.
-Many functions do not specify how much the result shares with the input.
-The following computation has only one possible printed result:
+どちらか一方の順序に頼るプログラムは、移植性を持ちません。
+同じ注意が `intersection` と `set-difference` にも当てはまります。
+多くの関数は、結果が入力とどれだけを共有するかを定めていません。
+次の計算では、表示されうる結果は1つだけです。
 
 ```lisp
 > (remove 'x'(a b c d)) (A B C D)
 ```
 
-However, it is not specified whether the output is `eq` or only `equal` to the second input.
+しかし、その出力が2つ目の入力と `eq` なのか、`equal` であるだけなのかは定められていません。
 
-Input/output is particularly prone to variation, as different operating systems can have very different conceptions of how I/O and the file system works.
-Things to watch out for are whether `read-char` echoes its input or not, the need to include `finish-output`, and variationin where newlines are needed, particularly with respect to the top level.
+入出力はとりわけ食い違いやすいところです。基本ソフトが違えば、入出力とファイルシステムの働き方についての考え方も大きく違いうるからです。
+気をつけるべきは、`read-char` が入力を反響表示するかどうか、`finish-output` を入れる必要があるかどうか、そして改行がどこで必要かの食い違い、とりわけ最上位に関わるものです。
 
-Finally, many implementations provide extensions to Common Lisp, either by adding entirely new functions or by modifying existing functions.
-The programmer must be careful not to use such extensions in portable code.
+最後に、多くの実装がCommon Lispへの拡張を備えています。まったく新しい関数を加えるか、既存の関数を変えるかによってです。
+プログラマは、移植性のあるコードでそうした拡張を使わないよう気をつけねばなりません。
 
-## 25.18 Exercises
+## 25.18 練習問題
 
-**Exercise 25.1 [h]** On your next programming project, keep a log of each bug you detect and its eventual cause and remedy.
-Classify each one according to the taxonomy given in this chapter.
-What kind of mistakes do you make most often?
-How could you correct that?
+**練習問題 25.1 [h]** 次のプログラミングの企てでは、見つけた不具合と、その最終的な原因と処置を記録に取れ。
+それぞれを本章で示した分類に従って分けよ。
+自分がもっともよく犯す誤りはどんな種類か。
+それをどう正せるか。
 
-**Exercise  25.2 [s-d]** Take a Common Lisp program and get it to work with a different compiler on a different computer.
-Make sure you use conditional compilation read macros (`#+` and `#-`) so that the program will work on both systems.
-What did you have to change?
+**練習問題 25.2 [s-d]** Common Lispのプログラムを1つ取り、別の計算機の別のコンパイラで動かせ。
+両方のシステムで動くよう、条件つきコンパイルの読み取りマクロ（`#+` と `#-`）を必ず使うこと。
+何を変える必要があったか。
 
-**Exercise  25.3 [m]** Write a `setf` method for `if` that works like this:
+**練習問題 25.3 [m]** 次のように働く `if` の `setf` メソッドを書け。
 
 ```lisp
 (setf (if test (first x) y) (+ 2 3))=
@@ -1234,10 +1234,10 @@ What did you have to change?
       (setf y temp)))
 ```
 
-You will need to use `define-setf-method`, not `defsetf`.
-(Why?) Make sure you handle the case where there is no else part to the `if`.
+`defsetf` ではなく `define-setf-method` を使う必要がある。
+（なぜか。）`if` にelse部がない場合も扱えるようにせよ。
 
-**Exercise  25.4 [h]** Write a `setf` method for `lookup`, a function to get the value for a key in an association list.
+**練習問題 25.4 [h]** 連想リストのなかでキーに対する値を得る関数 `lookup` の `setf` メソッドを書け。
 
 ```lisp
 (defun lookup (key alist)
@@ -1245,10 +1245,10 @@ You will need to use `define-setf-method`, not `defsetf`.
   (cdr (assoc key alist)))
 ```
 
-## 25.19 Answers
+## 25.19 解答
 
-**Answer 25.4** Here is the setf method for `lookup`.
-It looks for the key in the a-list, and if the key is there, it modifies the cdr of the pair containing the key; otherwise it adds a new key/value pair to the front of the a-list.
+**解答 25.4** `lookup` のsetfメソッドを示す。
+連想リストのなかでキーを探し、キーがあればそのキーを含む対のcdrを書き換える。なければ新しいキーと値の対を連想リストの先頭に加える。
 
 ```lisp
 (define-setf-method lookup (key alist-place)
@@ -1273,11 +1273,11 @@ It looks for the key in the a-list, and if the key is there, it modifies the cdr
 ----------------------
 
 <a id="fn25-1"></a><sup>[1](#tfn25-1)</sup>
-This misunderstanding has shown up even in published articles, such as [Baker 1991](bibliography.md#bb0060).
+この思い違いは、[Baker 1991](bibliography.md#bb0060)のような公刊された論文にさえ現れています。
 
 <a id="fn25-2"></a><sup>[2](#tfn25-2)</sup>
-Scheme requires a list of keys in each clause.
-Now you know why.
+Schemeでは各節にキーの並びを求めます。
+その理由がこれでわかったでしょう。
 
 <a id="fn25-3"></a><sup>[3](#tfn25-3)</sup>
-def struct forms are put here because they may create inline functions.
+def struct形式がここに置かれるのは、インライン関数を作ることがあるからです。

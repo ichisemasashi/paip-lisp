@@ -790,6 +790,29 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 
 （現時点で修正した箇所はない。見つかりしだいここに追記する。）
 
+### 第25章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| troubleshooting | 不具合の切り分け | 章題。「困った時は」より原因追及の作業を指す |
+| symptom / remedy | 症状／処置 | 各項の定型見出し |
+| closure | クロージャ | 第22章と同じ |
+| special form | 特殊形式 | 第1章と同じ |
+| inline function | インライン関数 | |
+| declaration | 宣言 | `declare` / `proclaim` |
+| macroexpansion | マクロ展開 | |
+| setf method | setfメソッド | `define-setf-method` で定める |
+| generalized variable | 一般化変数 | `setf` の第一引数になれる場所 |
+| place | 場所 | 一般化変数が指す位置 |
+| clause | 節 | `cond` / `case` / `loop` の各項 |
+| portable | 移植性のある | 処理系をまたいで動く |
+| implementation | 実装 | 処理系そのものを指す場合も同じ語 |
+| system | システム | 複数ファイルからなるまとまり |
+| module | モジュール | システムを構成するファイル群 |
+| source / object file | 原始ファイル／目的ファイル | |
+| style guide | 作法の手引き | 25.15節。規範ではなく指針 |
+| a-list | 連想リスト | 第3章と同じ |
+
 ## 進捗
 
 | ファイル | 状態 |
@@ -803,8 +826,7 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter24.md` | 完了 |
-| `chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter25.md` | 完了 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
