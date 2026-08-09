@@ -558,6 +558,37 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | genetic algorithm / neural net | 遺伝的アルゴリズム／ニューラルネット | |
 | precycling | プリサイクル | 18.10節。ごみを出さない工夫の比喩 |
 
+### 第19章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| natural language | 自然言語 | 人工言語（artificial language）と対 |
+| syntax / semantics | 統語論／意味論 | 「文法」「意味」と言い換える箇所もある |
+| parse / parser | 構文解析（する）／構文解析器 | |
+| phrase-structure grammar | 句構造文法 | |
+| context-free grammar | 文脈自由文法 | |
+| constituent | 構成素 | 木を構成する部分 |
+| category | 範疇 | S、NP、VPなどの文法範疇 |
+| lexical rule | 語彙規則 | 右辺が語である規則 |
+| terminal / nonterminal | 終端／非終端 | |
+| ambiguous / ambiguity | 曖昧な／曖昧さ | |
+| noun phrase (NP) / verb phrase (VP) | 名詞句／動詞句 | 略号は原文のまま |
+| prepositional phrase (PP) | 前置詞句 | |
+| determiner | 限定詞 | the、a |
+| proper name | 固有名 | |
+| open-class / closed-class | 開いた類／閉じた類 | 未知語がなりうるのは開いた類だけ |
+| morphology | 形態論 | 語末の -y、-s、-ed など |
+| semantic representation | 意味表現 | |
+| preference | 選好 | 解釈に点を与えて選ぶ |
+| scorer / score | 採点関数／点 | |
+| left recursive | 左再帰 | `(X -> (X ...))` の形の規則 |
+| top-down / bottom-up | 下向き／上向き | 構文解析の方向 |
+| chart parser | チャート構文解析器 | Earley、Kay |
+| Backus-Naur Form (BNF) | バッカス・ナウア記法（BNF） | |
+| unification grammar | 単一化文法 | 第20章の主題 |
+| agreement | 一致 | 主語と述語の人称・数の一致 |
+| Catalan Numbers | カタラン数 | 脚注。解析の数の列 |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -639,8 +670,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter18.md` | 完了 |
-| `chapter19.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter19.md` | 完了 |
+| `chapter20.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
