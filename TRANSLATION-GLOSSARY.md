@@ -410,6 +410,42 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | correctness / robustness | 正しさ／頑健さ | Meyerの5つの品質 |
 | extendability / reusability / compatibility | 拡張しやすさ／再利用しやすさ／つながりやすさ | 同上 |
 
+### 第14章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| knowledge representation | 知識表現 | |
+| reasoning | 推論 | inference も同じ「推論」。文脈で使い分ける |
+| theorem proving / theorem prover | 定理証明／定理証明器 | |
+| expert system | エキスパートシステム | |
+| expressiveness | 表現力 | |
+| intractable | 手に負えない | 最悪の場合に指数時間かかること |
+| decidability / tractability | 決定可能性／扱いやすさ | 述語論理の限界の一覧 |
+| monotonicity / consistency / omniscience | 単調性／無矛盾性／全知性 | 同上 |
+| predicate calculus | 述語論理 | |
+| first-order predicate calculus (FOPC) | 一階述語論理 | 高階は「高階述語論理」 |
+| conjunction / disjunction / negation | 連言／選言／否定 | |
+| closed world assumption | 閉世界仮定 | |
+| unique name assumption | 一意名仮定 | |
+| Skolem constant / Skolem function | スコーレム定数／スコーレム関数 | 論理学者Thoralf Skolemにちなむ |
+| sound / complete | 健全／完全 | 否定形は「不健全」 |
+| occurs check | 出現検査 | 第11章と同じ |
+| semantic net / conceptual graph | 意味ネットワーク／概念グラフ | |
+| script / frame / slot | スクリプト／フレーム／スロット | |
+| production system | プロダクションシステム | |
+| procedural attachment | 手続き付加 | フレーム言語の技法 |
+| discrimination tree | 判別木 | 第10章の discrimination net（判別ネット）と揃えた |
+| index / fetch / retrieve | 索引付け／取ってくる／取り出す | dtreeの3操作 |
+| iterative deepening | 反復深化 | 第6章と同じ |
+| category / relation / individual | 区分／関係／個体 | 14.10節の制限言語の3種の対象 |
+| supercategory / subcategory | 上位区分／下位区分 | |
+| forward-chaining / backward-chaining | 前向き連鎖／後ろ向き連鎖 | 第11章と同じ |
+| possible world | 可能世界 | |
+| truth maintenance system (TMS) | 真理維持システム | ATMSは「仮定にもとづく真理維持システム」 |
+| term-subsumption language | 項包摂言語 | KL-ONE、KRYPTON |
+| vivid / vividness | 鮮明な／鮮明さ | Levesqueの用語。絵に直に描ける命題 |
+| prototype | 原型 | 区分の典型例。「試作」ではない |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -491,8 +527,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter13.md` | 完了 |
-| `chapter14.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter14.md` | 完了 |
+| `chapter15.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
