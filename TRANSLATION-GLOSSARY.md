@@ -646,6 +646,31 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | lexicon | 語彙 | 語の辞書。lexical entry は「語彙項目」 |
 | abbreviation | 略記 | `abbrev` マクロが展開する |
 
+### 第22章で確定した訳語
+
+| 原語 | 訳語 | 備考 |
+|---|---|---|
+| dialect | 方言 | SchemeとCommon Lisp |
+| procedure | 手続き | Schemeは function でなく procedure と呼ぶ |
+| special form / syntax | 特殊形式／構文 | Schemeは「構文」と呼ぶ |
+| derived expression | 派生式 | 5つの基本要素から定義される構文 |
+| lexical / dynamic scoping | レキシカル／動的スコープ | |
+| tail-recursive | 末尾再帰的 | 「末尾再帰を正しく扱う」= properly tail-recursive |
+| continuation | 継続 | `call/cc` = 現在の継続を伴う呼び出し |
+| continuation-passing | 継続渡し | |
+| escape procedure | 脱出の手続き | `call/cc` が計算に渡すもの |
+| nonlocal exit | 非局所的な脱出 | throw/catch |
+| dynamic / indefinite extent | 動的範囲／無期限の範囲 | 継続がいつまで有効か |
+| environment / frame | 環境／フレーム | 変数と値の対応 |
+| garbage collection | ごみ集め | |
+| nondeterminism | 非決定性 | `amb` 演算子 |
+| chronological backtracking | 時間順のバックトラック | Prologと同じ方式 |
+| mutator | 変更を伴う操作 | Schemeでは `!` で終わる |
+| rest parameter | 残余引数 | `&rest` にあたるもの |
+| named-let | 名前つきlet | 練習問題22.8 |
+| macroexpansion | マクロ展開 | |
+| prompt | 入力促し記号 | `>` と `==>` |
+
 ### 一般的なプログラミング用語
 
 | 原語 | 訳語 | 備考 |
@@ -727,8 +752,8 @@ MITライセンスは改変と再配布を明示的に許諾しているため�
 | `code.md` | 完了（説明文のみ。Lispコードは原文のまま） |
 | `preface.md` | 完了 |
 | `README.md`（docs） | 完了（全25章の節見出しまで） |
-| `chapter1.md`〜`chapter21.md` | 完了 |
-| `chapter22.md`〜`chapter25.md` | 未着手 |
+| `chapter1.md`〜`chapter22.md` | 完了 |
+| `chapter23.md`〜`chapter25.md` | 未着手 |
 | `bibliography.md` | 未着手 |
 
 ## 構造の検証
